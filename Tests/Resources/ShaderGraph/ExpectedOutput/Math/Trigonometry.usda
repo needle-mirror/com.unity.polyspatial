@@ -1,0 +1,66 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_Trigonometry"
+        {
+
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Trigonometry/UsdPreviewSurface.outputs:surface>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Trigonometry/GeometryModifier.outputs:vertex>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Trigonometry/CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor.outputs:out>
+                float inputs:metallic = 0
+                color3f inputs:emissiveColor = (0, 0, 0)
+                float inputs:occlusion = 1
+                int inputs:useSpecularWorkflow = 0
+                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:roughness.connect = </MaterialX/Materials/USD_Trigonometry/SR_Trigonometry_roughness_OnesComplement.outputs:out>
+                float inputs:clearcoat = 0
+                float inputs:clearcoatRoughness = 0.01
+                float inputs:opacity = 1
+                float inputs:opacityThreshold = 0
+                float inputs:ior = 1.4
+                token outputs:surface
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:vertex
+            }
+
+            def Shader "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor"
+            {
+                uniform token info:id = "ND_swizzle_float_color3"
+                float inputs:in.connect = </MaterialX/Materials/USD_Trigonometry/ArctangentNode_db95fe01a76b4cb795da70aa723a8ed7.outputs:out>
+                string inputs:channels = "xxx"
+                color3f outputs:out
+            }
+
+            def Shader "ArctangentNode_db95fe01a76b4cb795da70aa723a8ed7"
+            {
+                uniform token info:id = "ND_atan2_float"
+                float inputs:iny = 1
+                float inputs:inx = 1
+                float outputs:out
+            }
+
+            def Shader "SR_Trigonometry_roughness_OnesComplement"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2 = 0.5
+                float outputs:out
+            }
+        }
+    }
+}

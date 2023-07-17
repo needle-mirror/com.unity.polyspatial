@@ -1,4 +1,5 @@
-using System;
+using System.Collections.Generic;
+using Unity.PolySpatial;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -13,73 +14,50 @@ namespace UnityEditor.ShaderGraph.MaterialX
 #endif
         }
 
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
+        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
-            NodeDef matrix22 = new(MtlxNodeTypes.RealityKitCombine2, MtlxDataTypes.Matrix22, new()
+            var output44 = NodeUtils.GetOutputByName(node, "4x4");
+            if (output44.isConnected)
             {
-                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
-                {
-                    ["in"] = new ExternalInputDef("M0"),
-                    ["channels"] = new StringInputDef("xy"),
-                }),
-                ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
-                {
-                    ["in"] = new ExternalInputDef("M1"),
-                    ["channels"] = new StringInputDef("xy"),
-                }),
-            });
-            NodeDef matrix33 = new(MtlxNodeTypes.RealityKitCombine3, MtlxDataTypes.Matrix33, new()
+                var nodeData = graph.AddNode(NodeUtils.GetNodeName(node, "Construction4x4"),
+                    MtlxNodeTypes.RealityKitCombine4, MtlxDataTypes.Matrix44);
+                AddPortsAndEdges(node, graph, externals, output44, nodeData, 4, MtlxDataTypes.Vector4);
+            }
+
+            var output33 = NodeUtils.GetOutputByName(node, "3x3");
+            if (output33.isConnected)
             {
-                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector3, new()
-                {
-                    ["in"] = new ExternalInputDef("M0"),
-                    ["channels"] = new StringInputDef("xyz"),
-                }),
-                ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector3, new()
-                {
-                    ["in"] = new ExternalInputDef("M1"),
-                    ["channels"] = new StringInputDef("xyz"),
-                }),
-                ["in3"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector3, new()
-                {
-                    ["in"] = new ExternalInputDef("M2"),
-                    ["channels"] = new StringInputDef("xyz"),
-                }),
-            });
-            NodeDef matrix44 = new(MtlxNodeTypes.RealityKitCombine4, MtlxDataTypes.Matrix44, new()
+                var nodeData = graph.AddNode(NodeUtils.GetNodeName(node, "Construction3x3"),
+                    MtlxNodeTypes.RealityKitCombine3, MtlxDataTypes.Matrix33);
+                AddPortsAndEdges(node, graph, externals, output33, nodeData, 3, MtlxDataTypes.Vector3);
+            }
+
+            var output22 = NodeUtils.GetOutputByName(node, "2x2");
+            if (output22.isConnected)
             {
-                ["in1"] = new ExternalInputDef("M0"),
-                ["in2"] = new ExternalInputDef("M1"),
-                ["in3"] = new ExternalInputDef("M2"),
-                ["in4"] = new ExternalInputDef("M3"),
-            });
-            QuickNode.CompoundOp(
-                node, graph, externals, sgContext, "MatrixConstruction", MatrixSplitAdapter.GetAxis(node) switch
+                var nodeData = graph.AddNode(NodeUtils.GetNodeName(node, "Construction2x2"),
+                    MtlxNodeTypes.RealityKitCombine2, MtlxDataTypes.Matrix22);
+                AddPortsAndEdges(node, graph, externals, output22, nodeData, 2, MtlxDataTypes.Vector2);
+            }
+        }
+
+        void AddPortsAndEdges(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
+            MaterialSlot outputSlot, MtlxNodeData nodeData, int inputCount, string portType)
+        {
+            var transposeNode = graph.AddNode(
+                NodeUtils.GetNodeName(node, "Transpose"), MtlxNodeTypes.Transpose, nodeData.datatype);
+            graph.AddPortAndEdge(nodeData.name, transposeNode.name, "in", nodeData.datatype);
+
+            externals.AddExternalPort(outputSlot.slotReference, transposeNode.name);
+
+            for (var i = 0; i < inputCount; ++i)
             {
-                MatrixAxis.Row => new()
-                {
-                    ["2x2"] = new(MtlxNodeTypes.Transpose, MtlxDataTypes.Matrix22, new()
-                    {
-                        ["in"] = new InlineInputDef(matrix22),
-                    }),
-                    ["3x3"] = new(MtlxNodeTypes.Transpose, MtlxDataTypes.Matrix33, new()
-                    {
-                        ["in"] = new InlineInputDef(matrix33),
-                    }),
-                    ["4x4"] = new(MtlxNodeTypes.Transpose, MtlxDataTypes.Matrix44, new()
-                    {
-                        ["in"] = new InlineInputDef(matrix44),
-                    }),
-                },
-                MatrixAxis.Column => new()
-                {
-                    ["2x2"] = matrix22,
-                    ["3x3"] = matrix33,
-                    ["4x4"] = matrix44,
-                },
-                var axis => throw new NotSupportedException($"Unknown axis {axis}"),
-            });
+                var portName = $"in{i + 1}";
+                var inputSlot = NodeUtils.GetInputByName(node, $"M{i}");
+                nodeData.AddPortValue(portName, portType, SlotUtils.GetDefaultValue(inputSlot));
+                externals.AddExternalPortAndEdge(inputSlot, nodeData.name, portName);
+            }
         }
     }
 }

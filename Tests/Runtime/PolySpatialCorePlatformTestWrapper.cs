@@ -1,8 +1,10 @@
 using System;
-using FlatSharp.Runtime.Extensions;
+using System.Collections.Generic;
 using Tests.Runtime.Functional.Components;
 using Unity.Collections;
+using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
+using UnityEngine;
 
 namespace Tests.Runtime.Functional
 {
@@ -44,6 +46,20 @@ namespace Tests.Runtime.Functional
                 NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
                 OnAfterAssetsDeletedCalled?.Invoke(buf);
             }
+            else if (cmd == PolySpatialCommand.SetVolumeCameraData)
+            {
+                PolySpatialArgs.ExtractArgs(argCount, argValues, argSizes, out PolySpatialInstanceID* id, out PolySpatialVolumeCameraData* cameraData);
+                OnBeforeVolumeCameraChangedCalled?.Invoke(*id, *cameraData);
+                NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
+                OnAfterVolumeCameraChangedCalled?.Invoke(*id, *cameraData);
+            }
+            else if (cmd == PolySpatialCommand.SetParticleSystemData)
+            {
+                var changeList = PolySpatialArgs.ExtractChangeListSerializedFromArgs<PolySpatialParticleSystemData>(argCount, argValues, argSizes);
+                OnBeforeParticleSystemChangedCalled?.Invoke(changeList);
+                NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
+                OnAfterParticleSystemChangedCalled?.Invoke(changeList);
+            }
             else
             {
                 NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
@@ -52,6 +68,12 @@ namespace Tests.Runtime.Functional
 
         public Action<NativeArray<PolySpatialAssetID>> OnBeforeAssetsDeletedCalled;
         public Action<NativeArray<PolySpatialAssetID>> OnAfterAssetsDeletedCalled;
+
+        public Action<PolySpatialInstanceID, PolySpatialVolumeCameraData> OnBeforeVolumeCameraChangedCalled;
+        public Action<PolySpatialInstanceID, PolySpatialVolumeCameraData> OnAfterVolumeCameraChangedCalled;
+
+        public Action<IChangeList<PolySpatialParticleSystemData>> OnBeforeParticleSystemChangedCalled;
+        public Action<IChangeList<PolySpatialParticleSystemData>> OnAfterParticleSystemChangedCalled;
 
         public PolySpatialCorePlatformTestWrapper(IPolySpatialCommandHandler backendHandler)
         {

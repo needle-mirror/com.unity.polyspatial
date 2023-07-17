@@ -1,0 +1,108 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <absval name = "Distance_OutNode_a8dd24a2374443c5be12903490b163fa" type = "float">
+        <input name = "in" type = "float" nodename = "Distance_Out_inNode_a8dd24a2374443c5be12903490b163fa" />
+    </absval>
+    <subtract name = "Distance_Out_inNode_a8dd24a2374443c5be12903490b163fa" type = "float">
+        <input name = "in1" type = "float" nodename = "Distance_ANode_a8dd24a2374443c5be12903490b163fa" />
+        <input name = "in2" type = "float" nodename = "Distance_BNode_a8dd24a2374443c5be12903490b163fa" />
+    </subtract>
+    <dot name = "Distance_ANode_a8dd24a2374443c5be12903490b163fa" type = "float">
+        <input name = "in" type = "float" nodename = "Vector1Node_d168998b7bff466cb1a90ed120c96fee" />
+    </dot>
+    <dot name = "Distance_BNode_a8dd24a2374443c5be12903490b163fa" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <constant name = "Vector1Node_d168998b7bff466cb1a90ed120c96fee" type = "float">
+        <input name = "value" type = "float" value = "1" />
+    </constant>
+    <magnitude name = "Distance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5" type = "float">
+        <input name = "in" type = "vector3" nodename = "Distance_Out_inNode_ddb3c15bf45c46ab92e58786dcc187e5" />
+    </magnitude>
+    <subtract name = "Distance_Out_inNode_ddb3c15bf45c46ab92e58786dcc187e5" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Distance_ANode_ddb3c15bf45c46ab92e58786dcc187e5" />
+        <input name = "in2" type = "vector3" nodename = "Distance_BNode_ddb3c15bf45c46ab92e58786dcc187e5" />
+    </subtract>
+    <dot name = "Distance_ANode_ddb3c15bf45c46ab92e58786dcc187e5" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_2cd1538b938a49e4bdc51fd66d66e086" />
+    </dot>
+    <dot name = "Distance_BNode_ddb3c15bf45c46ab92e58786dcc187e5" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "ReflectionNode_b2353c5a0ecd419281113a88cce9dd01" />
+    </dot>
+    <combine3 name = "Vector3Node_2cd1538b938a49e4bdc51fd66d66e086" type = "vector3">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "1" />
+    </combine3>
+    <power name = "FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238" type = "float">
+        <input name = "in1" type = "float" nodename = "FresnelEffect_Out_in1Node_752d003d78d94e6cb3a31fbf94058238" />
+        <input name = "in2" type = "float" nodename = "FresnelEffect_PowerNode_752d003d78d94e6cb3a31fbf94058238" />
+    </power>
+    <subtract name = "FresnelEffect_Out_in1Node_752d003d78d94e6cb3a31fbf94058238" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "FresnelEffect_Out_in1_in2Node_752d003d78d94e6cb3a31fbf94058238" />
+    </subtract>
+    <clamp name = "FresnelEffect_Out_in1_in2Node_752d003d78d94e6cb3a31fbf94058238" type = "float">
+        <input name = "in" type = "float" nodename = "FresnelEffect_Out_in1_in2_inNode_752d003d78d94e6cb3a31fbf94058238" />
+    </clamp>
+    <dotproduct name = "FresnelEffect_Out_in1_in2_inNode_752d003d78d94e6cb3a31fbf94058238" type = "float">
+        <input name = "in1" type = "vector3" nodename = "FresnelEffect_Out_in1_in2_in_in1Node_752d003d78d94e6cb3a31fbf94058238" />
+        <input name = "in2" type = "vector3" nodename = "FresnelEffect_Out_in1_in2_in_in2Node_752d003d78d94e6cb3a31fbf94058238" />
+    </dotproduct>
+    <normalize name = "FresnelEffect_Out_in1_in2_in_in1Node_752d003d78d94e6cb3a31fbf94058238" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "FresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238" />
+    </normalize>
+    <dot name = "FresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "CastSwizzleFromDistance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5ToFresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238in" />
+    </dot>
+    <normalize name = "FresnelEffect_Out_in1_in2_in_in2Node_752d003d78d94e6cb3a31fbf94058238" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238" />
+    </normalize>
+    <dot name = "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238" type = "vector3">
+        <input name = "in" type = "vector3" value = "0,0,0" />
+    </dot>
+    <dot name = "FresnelEffect_PowerNode_752d003d78d94e6cb3a31fbf94058238" type = "float">
+        <input name = "in" type = "float" nodename = "Distance_OutNode_a8dd24a2374443c5be12903490b163fa" />
+    </dot>
+    <realitykit_reflect name = "ReflectionNode_b2353c5a0ecd419281113a88cce9dd01" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_ed4eebc8e3504810ac1f2fab59328cc2" />
+        <input name = "normal" type = "vector3" value = "0,1,0" />
+    </realitykit_reflect>
+    <combine3 name = "Vector3Node_ed4eebc8e3504810ac1f2fab59328cc2" type = "vector3">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <GeometryModification name = "SR_VectorVertex" type = "vertexshader">
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Vector" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Vector_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Vector" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_VectorVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Vector" />
+    </surfacematerial>
+    <subtract name = "SR_Vector_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromDistance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5ToFresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238in" type = "vector3">
+        <input name = "in" type = "float" nodename = "Distance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor" type = "color3">
+        <input name = "in" type = "float" nodename = "FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+</materialx>

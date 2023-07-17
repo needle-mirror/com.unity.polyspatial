@@ -129,14 +129,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     // abstract the source node, so we are only dealing in floating point.
                     srcType = MtlxDataTypes.Float;
                     srcNodeName = convertNodeName;
-
-                    // Avoid the (illegal) float-to-float swizzle if float is our final destination.
-                    if (srcType == dstType)
-                    {
-                        newEdgeSet.Add((dstNodeName, dstPortName), srcNodeName);
-                        continue;
-                    }
                 }
+
 
                 // previous steps will have abstracted int/bool to float, so we know we're just dealing with
                 // float, color, and vector-- which `Swizzle` should cover.

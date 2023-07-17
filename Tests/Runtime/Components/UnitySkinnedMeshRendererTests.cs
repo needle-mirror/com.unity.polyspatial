@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Linq;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -213,7 +211,7 @@ namespace Tests.Runtime.Functional.Components
 
             var data1 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data1.ValidateTrackingFlags());
-            var materialIds1 = data1.customData.meshRendererTrackingData.materials.materialIds;
+            var materialIds1 = data1.customData.meshRendererTrackingData.materialIds;
             Assert.AreEqual(1, materialIds1.Length);
             Assert.IsTrue(materialIds1[0].IsValid(), "Expected first material to be valid.");
             Assert.AreEqual(materialIds1[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
@@ -234,7 +232,7 @@ namespace Tests.Runtime.Functional.Components
             // The AssetID shouldn't change
             var data2 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data2.ValidateTrackingFlags());
-            var materialIds2 = data1.customData.meshRendererTrackingData.materials.materialIds;
+            var materialIds2 = data1.customData.meshRendererTrackingData.materialIds;
             Assert.AreEqual(materialIds1[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
             Assert.AreEqual(materialIds1[0], materialIds2[0]);
 
@@ -244,8 +242,9 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_CheckSkinnedMeshRendererBones()
+        public IEnumerator Test_UnitySkinnedMeshRenderer_CreateAndDeletePolySpatialAnimationRig()
         {
+            // Create rig.
             CreateTestObjects();
             m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
 
@@ -254,92 +253,140 @@ namespace Tests.Runtime.Functional.Components
             var data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data.ValidateTrackingFlags());
             var cachedData = data.customData;
+            var rig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(cachedData.rigId);
 
-            Assert.AreEqual(m_SkinnedMeshRenderer.rootBone.gameObject.GetInstanceID(), cachedData.rootBoneId);
-            Assert.AreEqual(m_SkinnedMeshRenderer.bones.Length, cachedData.boneIds.Length);
-            for (var i = 0; i < cachedData.boneIds.Length; ++i)
-            {
-                Assert.AreEqual(m_SkinnedMeshRenderer.bones[i].gameObject.GetInstanceID(), cachedData.boneIds[i]);
-            }
-            
+            Assert.IsNotNull(rig, "Rig was null.");
+
             // Test to see if it's got the correct data.
-            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
-            if (backingGO != null)
+            Assert.AreEqual(m_SkinnedMeshRenderer.rootBone.gameObject.GetInstanceID(), rig.m_SkeletonHierarchy.RootBone.id);
+            Assert.AreEqual(m_SkinnedMeshRenderer.quality.ToPlatform(), rig.m_SkinWeight);
+
+            for (int i = 0; i < rig.m_SkeletonHierarchy.AsPolySpatialIDs.Length; i++)
             {
-                var backingSkinnedMeshRenderer = backingGO.GetComponent<SkinnedMeshRenderer>();
-
-                for (var i = 0; i < m_SkinnedMeshRenderer.bones.Length; i++)
-                {
-                    var simulationId = PolySpatialInstanceID.For(m_SkinnedMeshRenderer.bones[i].gameObject);
-                    var backingBoneGO = backingSkinnedMeshRenderer.bones[i].gameObject;
-                    Assert.AreEqual(BackingComponentUtils.GetBackingGameObjectFor(simulationId), backingBoneGO,
-                        $"Backing bone game object {backingBoneGO} does not match original bone {m_SkinnedMeshRenderer.bones[i].gameObject}");
-                }
-
-                var simulatorRootBoneId = PolySpatialInstanceID.For(m_SkinnedMeshRenderer.rootBone.gameObject);
-                var backingRootBone = backingSkinnedMeshRenderer.rootBone.gameObject;
-                Assert.AreEqual(BackingComponentUtils.GetBackingGameObjectFor(simulatorRootBoneId), backingRootBone,
-                    $"Backing root bone {backingRootBone} does not match original root {m_SkinnedMeshRenderer.rootBone.gameObject}.");
-
-                Assert.AreEqual(m_SkinnedMeshRenderer.quality, backingSkinnedMeshRenderer.quality, "Skinned mesh quality are not equivalent.");
-
-                yield return null;
-
-                data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-                Assert.IsTrue(data.ValidateTrackingFlags());
-                cachedData = data.customData;
-
-                // Destroy the skinned mesh renderer and ensure proper cleanup happens. Cache the ids so we can attempt to access them later for testing.
-                var smriid = m_SkinnedMeshRenderer.GetInstanceID();
-                var mesh = m_SkinnedMeshRenderer.sharedMesh;
-                var material = m_SkinnedMeshRenderer.material;
-                m_SkinnedMeshRenderer.DestroyAppropriately();
-
-                yield return null;
-
-    #if UNITY_EDITOR
-                data = PolySpatialComponentUtils.GetSkinnedMeshRendererTrackingData(smriid);
-                Assert.IsTrue(data.ValidateTrackingFlags());
-                Assert.IsFalse(data.customData.meshRendererTrackingData.meshId.IsValid());
-                foreach (var materialId in data.customData.meshRendererTrackingData.materials.materialIds)
-                    Assert.IsFalse(materialId.IsValid());
-    #endif
-
-                mesh.DestroyAppropriately();
-                material.DestroyAppropriately();
-
-                yield return null;
-
-                void ClearIfDeleted(IAssetManager mgr, ref PolySpatialAssetID aid) {
-                    if (aid != PolySpatialAssetID.InvalidAssetID && mgr.GetRegisteredResource(aid) == null)
-                    {
-                        aid = PolySpatialAssetID.InvalidAssetID;
-                    }
-                }
-
-                Assert.AreEqual(1, cachedData.meshRendererTrackingData.materials.materialIds.Length);
-
-                var cachedDataBackend = cachedData;
-
-                m_TestPlatformWrapper.OnAfterAssetsDeletedCalled = (assetIds) =>
-                {
-                    ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.meshId);
-                    ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.materials.materialIds.ElementAt(0));
-
-                    // Assert that meshes and materials have been properly removed from the Platform Asset Manager.
-                    ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.meshId);
-                    ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.materials.materialIds.ElementAt(0));
-                };
-
-                yield return null;
-
-                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.meshId);
-                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.materials.materialIds[0]);
-                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.meshId);
-                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.materials.materialIds[0]);
+                Assert.IsTrue(rig.m_SkeletonHierarchy.AsPolySpatialIDs[i].Equals(PolySpatialInstanceID.For(m_TestSkeleton[i].gameObject)));
             }
+
+            // Change the skinning quality to one bone and check again.
+            m_SkinnedMeshRenderer.quality = SkinQuality.Bone1;
 
             yield return null;
+
+            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            cachedData = data.customData;
+            rig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(cachedData.rigId);
+            Assert.AreEqual(1, rig.m_SkinWeight);
+
+            // Destroy the skinned mesh renderer and ensure proper cleanup happens. Cache the ids so we can attempt to access them later for testing.
+            var smriid = m_SkinnedMeshRenderer.GetInstanceID();
+            var mesh = m_SkinnedMeshRenderer.sharedMesh;
+            var material = m_SkinnedMeshRenderer.material;
+            m_SkinnedMeshRenderer.DestroyAppropriately();
+
+            yield return null;
+
+#if UNITY_EDITOR
+            data = PolySpatialComponentUtils.GetSkinnedMeshRendererTrackingData(smriid);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            Assert.IsFalse(data.customData.rigId.IsValid());
+            Assert.IsFalse(data.customData.meshRendererTrackingData.meshId.IsValid());
+            foreach (var materialId in data.customData.meshRendererTrackingData.materialIds)
+                Assert.IsFalse(materialId.IsValid());
+#endif
+
+            mesh.DestroyAppropriately();
+            material.DestroyAppropriately();
+
+            void ClearIfDeleted(IAssetManager mgr, ref PolySpatialAssetID aid) {
+                if (aid != PolySpatialAssetID.InvalidAssetID && mgr.GetRegisteredResource(aid) == null)
+                {
+                    aid = PolySpatialAssetID.InvalidAssetID;
+                }
+            }
+
+            Assert.AreEqual(1, cachedData.meshRendererTrackingData.materialIds.Length);
+
+            var cachedDataBackend = cachedData;
+
+            m_TestPlatformWrapper.OnAfterAssetsDeletedCalled = (assetIds) =>
+            {
+                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.meshId);
+                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.rigId);
+                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.materialIds.ElementAt(0));
+
+                // Assert that meshes, materials, and rigs have been properly removed from the Platform Asset Manager.
+                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.meshId);
+                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.rigId);
+                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.materialIds.ElementAt(0));
+            };
+
+            yield return null;
+
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.meshId);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.rigId);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.materialIds[0]);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.meshId);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.rigId);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.materialIds[0]);
+        }
+
+        [UnityTest]
+#if UNITY_IOS
+        [Ignore("Disabling as it currently crashes/fails on iOS.")]
+#endif
+        public IEnumerator Test_AnimationRig_Equality()
+        {
+            CreateTestObjects();
+
+            yield return null;
+
+            var data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            var firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
+
+            // Create another animation rig.
+            var secondRig = PolySpatialAnimationRig.CreateAnimationRig(m_SkinnedMeshRenderer);
+
+            bool isHierarchyEqual;
+            Assert.IsTrue(firstRig.Compare(m_SkinnedMeshRenderer, out isHierarchyEqual));
+            Assert.IsTrue(firstRig.Compare(secondRig, out isHierarchyEqual));
+
+            // Modify the skeleton transforms for the first rig.
+            var newBone = new GameObject("New Bone");
+            m_TestSkeleton[^1] = newBone.transform;
+            m_SkinnedMeshRenderer.bones = m_TestSkeleton;
+
+            yield return null;
+
+            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
+
+            // First rig will have a new skeleton, but second rig should still have original skeleton transforms.
+            Assert.IsFalse(firstRig.Compare(secondRig, out isHierarchyEqual));
+            Assert.IsFalse(isHierarchyEqual);
+
+            secondRig.UpdateFrom(m_SkinnedMeshRenderer);
+            Assert.IsTrue(firstRig.Compare(secondRig, out isHierarchyEqual));
+            Assert.IsTrue(isHierarchyEqual);
+
+            m_SkinnedMeshRenderer.quality = SkinQuality.Bone2;
+
+            yield return null;
+
+            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
+
+            // Shouldn't need to update the skeleton here.
+            Assert.IsFalse(firstRig.Compare(secondRig, out isHierarchyEqual));
+            Assert.IsTrue(isHierarchyEqual);
+
+            // Cleanup locally created resources.
+            if (secondRig != null)
+            {
+                Object.Destroy(secondRig);
+            }
         }
 
         [UnityTest]
@@ -353,10 +400,10 @@ namespace Tests.Runtime.Functional.Components
 
             var data1 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data1.ValidateTrackingFlags());
-            Assert.AreEqual(0, data1.customData.meshRendererTrackingData.materials.materialIds.Length);
-            Assert.IsFalse(data1.customData.meshRendererTrackingData.materials.hasExternalMaterials);
+            Assert.AreEqual(0, data1.customData.meshRendererTrackingData.materialIds.Length);
+            Assert.IsFalse(data1.customData.meshRendererTrackingData.hasExternalMaterials);
 
-            int maxMaterialsInFixedBuffer = data1.customData.meshRendererTrackingData.materials.materialIds.Capacity;
+            int maxMaterialsInFixedBuffer = data1.customData.meshRendererTrackingData.materialIds.Capacity;
             var materials = new Material[maxMaterialsInFixedBuffer + 1];
             for (int i=0; i<maxMaterialsInFixedBuffer + 1; i++)
                 materials[i] = PolySpatialComponentUtils.CreateUnlitMaterial(Color.red);
@@ -367,8 +414,8 @@ namespace Tests.Runtime.Functional.Components
 
             var data2 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data2.ValidateTrackingFlags());
-            Assert.AreEqual(1, data2.customData.meshRendererTrackingData.materials.materialIds.Length);
-            Assert.IsFalse(data2.customData.meshRendererTrackingData.materials.hasExternalMaterials);
+            Assert.AreEqual(1, data2.customData.meshRendererTrackingData.materialIds.Length);
+            Assert.IsFalse(data2.customData.meshRendererTrackingData.hasExternalMaterials);
 
             m_SkinnedMeshRenderer.sharedMaterials = materials;
 
@@ -376,13 +423,13 @@ namespace Tests.Runtime.Functional.Components
 
             var data3 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data3.ValidateTrackingFlags());
-            Assert.AreEqual(0, data3.customData.meshRendererTrackingData.materials.materialIds.Length);
+            Assert.AreEqual(0, data3.customData.meshRendererTrackingData.materialIds.Length);
 
             var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
             if (backingGO != null)
                 Assert.AreEqual(materials.Length, backingGO.GetComponent<SkinnedMeshRenderer>().sharedMaterials.Length);
 
-            Assert.IsTrue(data3.customData.meshRendererTrackingData.materials.hasExternalMaterials);
+            Assert.IsTrue(data3.customData.meshRendererTrackingData.hasExternalMaterials);
 
             m_SkinnedMeshRenderer.sharedMaterials = new[] {materials[0]};
 
@@ -390,238 +437,8 @@ namespace Tests.Runtime.Functional.Components
 
             var data4 = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data4.ValidateTrackingFlags());
-            Assert.AreEqual(1, data4.customData.meshRendererTrackingData.materials.materialIds.Length);
-            Assert.IsFalse(data4.customData.meshRendererTrackingData.materials.hasExternalMaterials);
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenEnableDisable()
-        {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-
-            bool shouldUpdateSkeleton = true;
-
-            void AssertUpdateSkeleton(bool actualValue)
-            {
-                UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
-                // shouldUpdateSkeleton should be true the first time a valid change is detected,
-                // then false from then on.
-                shouldUpdateSkeleton = false;
-            }
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
-
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            yield return null;
-
-            m_SkinnedMeshRenderer.gameObject.SetActive(false);
-            shouldUpdateSkeleton = false;
-            yield return null;
-
-            m_SkinnedMeshRenderer.gameObject.SetActive(true);
-            shouldUpdateSkeleton = true;
-            yield return null;
-
-            // Should ignore the fact that a mesh was changed since
-            // skinned mesh is still inactive.
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            m_SkinnedMeshRenderer.gameObject.SetActive(false);
-            shouldUpdateSkeleton = false;
-            yield return null;
-
-            m_SkinnedMeshRenderer.gameObject.SetActive(true);
-            shouldUpdateSkeleton = true;
-            yield return null;
-
-            // With the renderer only casting shadows, shouldUpdateSkeleton should be false.
-            m_SkinnedMeshRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-            shouldUpdateSkeleton = false;
-            yield return null;
-
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
-#endif
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenChangeMesh()
-        {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-
-            bool shouldUpdateSkeleton = false;
-
-            void AssertUpdateSkeleton(bool actualValue)
-            {
-                UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
-                // shouldUpdateSkeleton should be true the first time a valid change is detected,
-                // then false from then on.
-                shouldUpdateSkeleton = false;
-            }
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
-
-            // Attempt to start off with a disabled skinned mesh renderer, before enabling it.
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            m_SkinnedMeshRenderer.enabled = false;
-            yield return null;
-
-            m_SkinnedMeshRenderer.enabled = true;
-            shouldUpdateSkeleton = true;
-            yield return null;
-
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            shouldUpdateSkeleton = true;
-            yield return null;
-
-            // With no mesh, shouldUpdateSkeleton should be false.
-            m_SkinnedMeshRenderer.sharedMesh = null;
-            shouldUpdateSkeleton = false;
-            yield return null;
-
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
-#endif
-        }
-
-#if UNITY_EDITOR
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenProceduralMesh()
-        {
-            bool shouldUpdateSkeleton = true;
-            int numberOfTimesUpdated = 0;
-
-            void AssertUpdateSkeleton(bool actualValue)
-            {
-                UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
-                // shouldUpdateSkeleton should be true the first time a valid change is detected,
-                // then false from then on.
-
-                if (shouldUpdateSkeleton)
-                {
-                    numberOfTimesUpdated++;
-                }
-
-                shouldUpdateSkeleton = false;
-            }
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
-
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-
-            yield return null;
-
-            // Prompt a change in the mesh.
-            BoneWeight[] weights = new BoneWeight[3];
-            weights[0].boneIndex0 = 0;
-            weights[0].weight0 = 0.2f;
-            weights[1].boneIndex0 = 0;
-            weights[1].weight0 = 0.5f;
-            weights[2].boneIndex0 = 1;
-            weights[2].weight0 = 0.75f;
-            m_SkinnedMeshRenderer.sharedMesh.boneWeights = weights;
-            shouldUpdateSkeleton = true;
-
-            yield return null;
-
-            // Ensure that the update cycle has been called at least twice.
-            Assert.IsFalse(shouldUpdateSkeleton, "Skeleton should have already finished updating by this point, and shouldUpdateSkeleton should be false.");
-            Assert.AreEqual(2, numberOfTimesUpdated, "Skeleton should have been updated twice after procedural mesh changes.");
-
-            // Test if we get skeletal update when skinned mesh renderer is disabled.
-            m_SkinnedMeshRenderer.enabled = false;
-
-            // Prompt a change in the mesh.
-            weights[0].boneIndex0 = 0;
-            weights[0].weight0 = 0.3f;
-            weights[1].boneIndex0 = 0;
-            weights[1].weight0 = 0.6f;
-            weights[2].boneIndex0 = 1;
-            weights[2].weight0 = 0.85f;
-            m_SkinnedMeshRenderer.sharedMesh.boneWeights = weights;
-
-            yield return null;
-
-            Assert.AreEqual(2, numberOfTimesUpdated, "Skeleton should not have been updated since it is disabled, numberOfTimesUpdated should remain 2.");
-
-            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
-        }
-#endif
-
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_IsRegisteredForMeshNotifications()
-        {
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-
-            var skinnedMeshTracker = PolySpatialCore.UnitySimulation?.Tracker.FindTrackerFor(typeof(SkinnedMeshRenderer)) as SkinnedMeshRendererTracker;
-            Assert.IsNotNull(skinnedMeshTracker, "Tracker for skinned mesh renderer not found, aborting test.");
-
-            yield return null;
-
-            var data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            var assetId = data.customData.meshRendererTrackingData.meshId;
-
-            yield return null;
-
-            Assert.IsTrue(skinnedMeshTracker.m_MeshIdToSkinnedMeshRenderers.ContainsKey(assetId), "Skinned mesh renderer was not registered for mesh notifications, even though it should be.");
-            Object.Destroy(m_SkinnedMeshRenderer);
-
-            yield return null;
-
-            Assert.IsFalse(skinnedMeshTracker.m_MeshIdToSkinnedMeshRenderers.ContainsKey(assetId), "Skinned mesh renderer was destroyed and should not have been registered for notifications.");
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_NullMesh()
-        {
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = null;
-
-            yield return null;
-
-            AssertNullSkinnedMeshRenderer();
-        }
-
-#if UNITY_EDITOR
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_NullRootBoneAndZeroBones()
-        {
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            m_SkinnedMeshRenderer.rootBone = null;
-            m_SkinnedMeshRenderer.bones = new Transform[] {};
-            m_TestSkeleton = m_SkinnedMeshRenderer.bones;
-            m_SkinnedMeshRenderer.sharedMesh.bindposes = new Matrix4x4[] {};
-
-            yield return null;
-
-            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
-            Assert.NotNull(backingGameObject);
-            var skinnedMeshRenderer = backingGameObject.GetComponent<SkinnedMeshRenderer>();
-            Assert.NotNull(skinnedMeshRenderer);
-            yield return null;
-        }
-#endif
-
-        [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_ShadowsOnly()
-        {
-            CreateTestObjects();
-            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
-            m_SkinnedMeshRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-
-            yield return null;
-
-            AssertNullSkinnedMeshRenderer();
-        }
-
-        void AssertNullSkinnedMeshRenderer()
-        {
-#if UNITY_EDITOR
-            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
-            Assert.NotNull(backingGameObject);
-            var skinnedMeshRenderer = backingGameObject.GetComponent<SkinnedMeshRenderer>();
-            Assert.Null(skinnedMeshRenderer);
-#endif
+            Assert.AreEqual(1, data4.customData.meshRendererTrackingData.materialIds.Length);
+            Assert.IsFalse(data4.customData.meshRendererTrackingData.hasExternalMaterials);
         }
     }
 }

@@ -1,16 +1,23 @@
+
+using System;
+using System.Collections.Generic;
+
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     class SaturationAdapter : ANodeAdapter<SaturationNode>
     {
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
+        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
-            // Reference implementation:
-            // https://docs.unity3d.com/Packages/com.unity.shadergraph@16.0/manual/Saturation-Node.html
-            QuickNode.CompoundOp(
-                node, graph, externals, sgContext, "Saturation", @"
-float luma = dot(In, float3(0.2126729, 0.7151522, 0.0721750));
-Out = luma.xxx + Saturation.xxx * (In - luma.xxx);");
+            var portMap = new Dictionary<string, string>();
+            portMap.Add("In", "in");
+            portMap.Add("Saturation", "amount");
+
+            var typeMap = new Dictionary<string, string>();
+            typeMap.Add("In", MtlxDataTypes.Color3);
+            typeMap.Add("Saturation", MtlxDataTypes.Float);
+
+            var nodeData = QuickNode.NaryOp(MtlxNodeTypes.Saturate, node, graph, externals, "Saturation", portMap, typeMap, MtlxDataTypes.Color3);
+            nodeData.AddPortValue("lumacoeffs", MtlxDataTypes.Color3, new float[] { 0.2126729f, 0.7151522f, 0.0721750f });
         }
     }
 }

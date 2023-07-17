@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
-using UnityEditor.PolySpatial.Internals.InternalBridge;
+using UnityEditor.PolySpatial.Capabilities;
+using UnityEditor.PolySpatial.InternalBridge;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -78,7 +78,7 @@ namespace UnityEditor.PolySpatial.Validation
         static InspectorValidationUI()
         {
             Editor.finishedDefaultHeaderGUI += OnHeaderGUI;
-            PolySpatialSceneValidator.OnValidateRules += OnRulesValidated;
+            PolySpatialSceneValidator.onValidateRules += OnRulesValidated;
             EditorElementBridge.AddDecorator(new InspectorValidationDecorator());
         }
 
@@ -120,7 +120,7 @@ namespace UnityEditor.PolySpatial.Validation
                 {
                     var buttonContent = hasAutoFixIssues ? styles.FixObjectButtonContent : styles.DisabledFixObjectButtonContent;
                     if (GUILayout.Button(buttonContent))
-                        EditorApplication.delayCall += () => PolySpatialSceneValidator.AutoFixGameObject(instanceID);
+                        PolySpatialSceneValidator.AutoFixGameObject(instanceID);
                 }
             }
         }
@@ -192,7 +192,12 @@ namespace UnityEditor.PolySpatial.Validation
             foreach (var message in messages)
             {
                 EditorGUILayout.Space(2f);
-                PolySpatialEditorGUIUtils.DrawMessageBox(message.Message, message.MessageType, message.Link.LinkTitle, message.Link.LinkUrl);
+
+                if (string.IsNullOrEmpty(message.Link.LinkUrl))
+                    PolySpatialEditorGUIUtils.DrawMessageBox(message.Message, message.MessageType);
+                else
+                    PolySpatialEditorGUIUtils.DrawMessageBoxWithLink(message.Message, message.MessageType, message.Link.LinkTitle, message.Link.LinkUrl);
+
             }
         }
 
@@ -224,12 +229,12 @@ namespace UnityEditor.PolySpatial.Validation
             var messageType = issue.Error ? MessageType.Error : MessageType.Warning;
             if (issue.FixIt == null)
             {
-                PolySpatialEditorGUIUtils.DrawMessageBox(issue.Message, messageType, issue.HelpText, issue.HelpLink);
+                PolySpatialEditorGUIUtils.DrawMessageBox(issue.Message, messageType);
             }
             else
             {
                 var fixButtonLabel = issue.FixItAutomatic ? k_FixButtonLabel : k_EditButtonLabel;
-                if (PolySpatialEditorGUIUtils.DrawFixMeBox(issue.Message, messageType, fixButtonLabel, issue.FixItMessage, issue.HelpText, issue.HelpLink))
+                if (PolySpatialEditorGUIUtils.DrawFixMeBox(issue.Message, messageType, fixButtonLabel, issue.FixItMessage))
                 {
                     s_FixAllList.Clear();
                     s_FixAllList.Add(issue);

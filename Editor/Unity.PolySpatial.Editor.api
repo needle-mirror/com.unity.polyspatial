@@ -1,0 +1,75 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.PolySpatial.Internals
+{
+    public class EditorPolySpatialAssetProvider
+    {
+        public EditorPolySpatialAssetProvider() {}
+        public static string[] GetPathsForAsset(string guid);
+        public string[] GetPathsForAsset(UnityEngine.Object asset);
+    }
+
+    public interface IPolySpatialAssetImporter
+    {
+        public bool IsInterestedInAsset(string path);
+        public void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx);
+    }
+}
+
+namespace UnityEditor.PolySpatial.BuildingBlocks
+{
+    public class VolumeCameraBuildingBlock : Unity.XR.CoreUtils.Editor.BuildingBlocks.IBuildingBlock
+    {
+        public string IconPath { get; }
+        public string Id { get; }
+        public VolumeCameraBuildingBlock() {}
+        public void ExecuteBuildingBlock();
+        [MenuItem(@"GameObject/XR/Setup/Volume Camera", false, 10)] public static void ExecuteMenuItem(MenuCommand command);
+    }
+}
+
+namespace UnityEditor.PolySpatial.Capabilities
+{
+    public class PolySpatialCapabilityProfile : Unity.XR.CoreUtils.Capabilities.CapabilityProfile, Unity.XR.CoreUtils.Capabilities.ICapabilityModifier
+    {
+        public PolySpatialCapabilityProfile() {}
+        public bool TryGetCapabilityValue(string capabilityKey, out bool capabilityValue);
+    }
+}
+
+namespace UnityEditor.PolySpatial.Internals
+{
+    public class AssetManifestBuildProcessor : UnityEditor.Build.BuildPlayerProcessor
+    {
+        public AssetManifestBuildProcessor() {}
+        public override void PrepareForBuild(UnityEditor.Build.BuildPlayerContext buildPlayerContext);
+    }
+
+    public class PolySpatialBuildProvider : UnityEditor.Build.IOrderedCallback, UnityEditor.Build.IPostprocessBuildWithReport, UnityEditor.Build.IPreprocessBuildWithReport
+    {
+        public int callbackOrder { get; }
+        public PolySpatialBuildProvider() {}
+        public void OnPostprocessBuild(UnityEditor.Build.Reporting.BuildReport report);
+        public void OnPreprocessBuild(UnityEditor.Build.Reporting.BuildReport report);
+    }
+}
+
+namespace UnityEditor.PolySpatial.Validation
+{
+    public sealed class HasCapabilityRuleCreator : IComponentRuleCreator
+    {
+        public HasCapabilityRuleCreator(string capabilityKey) {}
+        public void CreateRules(UnityEngine.Component component, System.Collections.Generic.List<Unity.XR.CoreUtils.Editor.BuildValidationRule> createdRules);
+    }
+
+    public interface IComponentRuleCreator
+    {
+        public void CreateRules(UnityEngine.Component component, System.Collections.Generic.List<Unity.XR.CoreUtils.Editor.BuildValidationRule> createdRules);
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Method)] public class RuleCreatorAttribute : System.Attribute
+    {
+        public RuleCreatorAttribute(int priority = 0) {}
+    }
+}

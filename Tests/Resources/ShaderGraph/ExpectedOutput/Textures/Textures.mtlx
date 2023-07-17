@@ -1,0 +1,192 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <image name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_Texture2DAsset_8f14bfbef458429a8aa3c2828046fc2b_Out_0_Texture2D" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2_UV_fwd" />
+    </image>
+    <swizzle name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <texcoord name = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <constant name = "_Texture2DAsset_8f14bfbef458429a8aa3c2828046fc2b_Out_0_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "ERR" />
+    </constant>
+    <constant name = "_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "../../../Samples/MaterialTest/Materials/Textures/AlbedoSmoothness.png" />
+    </constant>
+    <image name = "Node_44adcc54f3fe425e9e8ddbc1565c6973" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_Texture2D" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973_UV_fwd" />
+    </image>
+    <swizzle name = "Node_44adcc54f3fe425e9e8ddbc1565c6973R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_44adcc54f3fe425e9e8ddbc1565c6973G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_44adcc54f3fe425e9e8ddbc1565c6973B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_44adcc54f3fe425e9e8ddbc1565c6973A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <texcoord name = "Node_44adcc54f3fe425e9e8ddbc1565c6973_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <overlay name = "BlendNode_5a12138b6fb14f2795a91bfd9c10b35a" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastSwizzleFromNode_913bc5769ebb4d31a2bf4f95b1ea6bf2ToBlendNode_5a12138b6fb14f2795a91bfd9c10b35abg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromNode_44adcc54f3fe425e9e8ddbc1565c6973ToBlendNode_5a12138b6fb14f2795a91bfd9c10b35afg" />
+        <input name = "mix" type = "float" value = "1" />
+    </overlay>
+    <image name = "Node_1474f2d5073b4ac29398add84bb23240" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_SampleTexture2D_1474f2d5073b4ac29398add84bb23240_Texture_1_Texture2D" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_1474f2d5073b4ac29398add84bb23240_UV_fwd" />
+    </image>
+    <swizzle name = "Node_1474f2d5073b4ac29398add84bb23240R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_1474f2d5073b4ac29398add84bb23240" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_1474f2d5073b4ac29398add84bb23240G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_1474f2d5073b4ac29398add84bb23240" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_1474f2d5073b4ac29398add84bb23240B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_1474f2d5073b4ac29398add84bb23240" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_1474f2d5073b4ac29398add84bb23240A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_1474f2d5073b4ac29398add84bb23240" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <constant name = "_SampleTexture2D_1474f2d5073b4ac29398add84bb23240_Texture_1_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "ERR" />
+    </constant>
+    <texcoord name = "Node_1474f2d5073b4ac29398add84bb23240_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <difference name = "BlendNode_aebf78d88d9f466bad9eec41c5f64ab9" type = "color3">
+        <input name = "bg" type = "color3" nodename = "BlendNode_5a12138b6fb14f2795a91bfd9c10b35a" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromNode_1474f2d5073b4ac29398add84bb23240ToBlendNode_aebf78d88d9f466bad9eec41c5f64ab9fg" />
+        <input name = "mix" type = "float" value = "1" />
+    </difference>
+    <triplanarprojection name = "TriplanarNode_866a5c0c75f84e4c9b25421f3988b9a3" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "filtertype" type = "string" value = "cubic" />
+        <input name = "position" type = "vector3" nodename = "TriplanarTilePositionNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "normal" type = "vector3" nodename = "TriplanarNormalNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "filex" type = "filename" nodename = "TriplanarTextureNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "filey" type = "filename" nodename = "TriplanarTextureNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "filez" type = "filename" nodename = "TriplanarTextureNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+    </triplanarprojection>
+    <multiply name = "TriplanarTilePositionNode_866a5c0c75f84e4c9b25421f3988b9a3" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "TriplanarPositionNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "in2" type = "float" value = "1" />
+    </multiply>
+    <position name = "TriplanarPositionNode_866a5c0c75f84e4c9b25421f3988b9a3" type = "vector3">
+        <input name = "space" type = "string" value = "world" />
+    </position>
+    <normal name = "TriplanarNormalNode_866a5c0c75f84e4c9b25421f3988b9a3" type = "vector3">
+        <input name = "space" type = "string" value = "world" />
+    </normal>
+    <constant name = "TriplanarTextureNode_866a5c0c75f84e4c9b25421f3988b9a3" type = "filename">
+        <input name = "value" type = "filename" nodename = "_Triplanar_866a5c0c75f84e4c9b25421f3988b9a3_Texture_1_Texture2D" />
+    </constant>
+    <constant name = "_Triplanar_866a5c0c75f84e4c9b25421f3988b9a3_Texture_1_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "ERR" />
+    </constant>
+    <overlay name = "BlendNode_88dc1a7af1074cbdb585537afd42e0a4" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastSwizzleFromTriplanarNode_866a5c0c75f84e4c9b25421f3988b9a3ToBlendNode_88dc1a7af1074cbdb585537afd42e0a4bg" />
+        <input name = "fg" type = "color3" nodename = "BlendNode_aebf78d88d9f466bad9eec41c5f64ab9" />
+        <input name = "mix" type = "float" value = "1" />
+    </overlay>
+    <image name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_Texture2DAsset_67eda6922a484f11826572a12c4ea406_Out_0_Texture2D" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045_UV_fwd" />
+    </image>
+    <swizzle name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <texcoord name = "Node_7c3e82d91e7d41c78f46c07eb5bd7045_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <constant name = "_Texture2DAsset_67eda6922a484f11826572a12c4ea406_Out_0_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "ERR" />
+    </constant>
+    <GeometryModification name = "SR_TexturesVertex" type = "vertexshader">
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Textures" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" nodename = "BlendNode_88dc1a7af1074cbdb585537afd42e0a4" />
+        <input name = "normal" type = "vector3" nodename = "CastSwizzleFromNode_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "roughness" type = "float" value = "0.5" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+        <input name = "occlusion" type = "float" value = "1" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Textures" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_TexturesVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Textures" />
+    </surfacematerial>
+    <swizzle name = "CastSwizzleFromNode_913bc5769ebb4d31a2bf4f95b1ea6bf2ToBlendNode_5a12138b6fb14f2795a91bfd9c10b35abg" type = "color3">
+        <input name = "in" type = "color4" nodename = "Node_913bc5769ebb4d31a2bf4f95b1ea6bf2" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromNode_44adcc54f3fe425e9e8ddbc1565c6973ToBlendNode_5a12138b6fb14f2795a91bfd9c10b35afg" type = "color3">
+        <input name = "in" type = "color4" nodename = "Node_44adcc54f3fe425e9e8ddbc1565c6973" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromNode_1474f2d5073b4ac29398add84bb23240ToBlendNode_aebf78d88d9f466bad9eec41c5f64ab9fg" type = "color3">
+        <input name = "in" type = "color4" nodename = "Node_1474f2d5073b4ac29398add84bb23240" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromTriplanarNode_866a5c0c75f84e4c9b25421f3988b9a3ToBlendNode_88dc1a7af1074cbdb585537afd42e0a4bg" type = "color3">
+        <input name = "in" type = "color4" nodename = "TriplanarNode_866a5c0c75f84e4c9b25421f3988b9a3" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromNode_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal" type = "vector3">
+        <input name = "in" type = "color4" nodename = "Node_7c3e82d91e7d41c78f46c07eb5bd7045" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+</materialx>

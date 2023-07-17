@@ -1,0 +1,192 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <combine3 name = "NormalStrength_OutNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "vector3">
+        <input name = "in1" type = "float" nodename = "NormalStrength_Out_in1Node_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "in2" type = "float" nodename = "NormalStrength_Out_in2Node_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "in3" type = "float" nodename = "NormalStrength_Out_in3Node_17a6fb112d3145278b53cdeacbbdd8f8" />
+    </combine3>
+    <swizzle name = "NormalStrength_Out_in1Node_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "in" type = "vector3" nodename = "NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <multiply name = "NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "in2" type = "vector3" nodename = "NormalStrength_ScaledIn_in2Node_17a6fb112d3145278b53cdeacbbdd8f8" />
+    </multiply>
+    <dot name = "NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "vector3">
+        <input name = "in" type = "vector3" value = "0,0,1" />
+    </dot>
+    <swizzle name = "NormalStrength_ScaledIn_in2Node_17a6fb112d3145278b53cdeacbbdd8f8" type = "vector3">
+        <input name = "in" type = "float" nodename = "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+    <dot name = "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "in" type = "float" value = "5" />
+    </dot>
+    <swizzle name = "NormalStrength_Out_in2Node_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "in" type = "vector3" nodename = "NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <mix name = "NormalStrength_Out_in3Node_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "bg" type = "float" value = "1" />
+        <input name = "fg" type = "float" nodename = "NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "mix" type = "float" nodename = "NormalStrength_Out_in3_mixNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+    </mix>
+    <swizzle name = "NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "in" type = "vector3" nodename = "NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <clamp name = "NormalStrength_Out_in3_mixNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
+        <input name = "in" type = "float" nodename = "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+    </clamp>
+    <normal name = "NormalNode_1448d353c6ac46dcadb9d2494ed68ed8" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </normal>
+    <subtract name = "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_Out_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "vector3" nodename = "NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </subtract>
+    <multiply name = "NormalBlend_Out_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "vector3" nodename = "NormalBlend_Out_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </multiply>
+    <add name = "NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_ANode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "vector3" value = "0,0,1" />
+    </add>
+    <dot name = "NormalBlend_ANode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "NormalStrength_OutNode_17a6fb112d3145278b53cdeacbbdd8f8" />
+    </dot>
+    <swizzle name = "NormalBlend_Out_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in" type = "float" nodename = "NormalBlend_Out_in1_in2_inNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </swizzle>
+    <divide name = "NormalBlend_Out_in1_in2_inNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalBlend_Out_in1_in2_in_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "float" nodename = "NormalBlend_Out_in1_in2_in_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </divide>
+    <dotproduct name = "NormalBlend_Out_in1_in2_in_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf" type = "float">
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "vector3" nodename = "NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </dotproduct>
+    <multiply name = "NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "in2" type = "vector3" value = "-1,-1,1" />
+    </multiply>
+    <dot name = "NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "NormalNode_1448d353c6ac46dcadb9d2494ed68ed8" />
+    </dot>
+    <swizzle name = "NormalBlend_Out_in1_in2_in_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf" type = "float">
+        <input name = "in" type = "vector3" nodename = "NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <combine3 name = "NormalUnpack_OutNode_e2a62117509640d0855a7bded8f7fad1" type = "vector3">
+        <input name = "in1" type = "float" nodename = "NormalUnpack_Out_in1Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "float" nodename = "NormalUnpack_Out_in2Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in3" type = "float" nodename = "NormalUnpack_Out_in3Node_e2a62117509640d0855a7bded8f7fad1" />
+    </combine3>
+    <swizzle name = "NormalUnpack_Out_in1Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <subtract name = "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "NormalUnpack_XY_in1Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "NormalUnpack_XY_in1Node_e2a62117509640d0855a7bded8f7fad1" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "NormalUnpack_XY_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "float" value = "2" />
+    </multiply>
+    <combine2 name = "NormalUnpack_XY_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" type = "vector2">
+        <input name = "in1" type = "float" nodename = "NormalUnpack_XY_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "float" nodename = "NormalUnpack_XY_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1" />
+    </combine2>
+    <multiply name = "NormalUnpack_XY_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalUnpack_XY_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "float" nodename = "NormalUnpack_XY_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1" />
+    </multiply>
+    <swizzle name = "NormalUnpack_XY_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "channels" type = "string" value = "w" />
+    </swizzle>
+    <dot name = "NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1" type = "vector4">
+        <input name = "in" type = "vector4" value = "1,0.5,0,0.5" />
+    </dot>
+    <swizzle name = "NormalUnpack_XY_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "NormalUnpack_XY_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "NormalUnpack_Out_in2Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <max name = "NormalUnpack_Out_in3Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in1" type = "float" value = "1E-16" />
+        <input name = "in2" type = "float" nodename = "NormalUnpack_Out_in3_in2Node_e2a62117509640d0855a7bded8f7fad1" />
+    </max>
+    <sqrt name = "NormalUnpack_Out_in3_in2Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "float" nodename = "NormalUnpack_Out_in3_in2_inNode_e2a62117509640d0855a7bded8f7fad1" />
+    </sqrt>
+    <subtract name = "NormalUnpack_Out_in3_in2_inNode_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "NormalUnpack_Out_in3_in2_in_in2Node_e2a62117509640d0855a7bded8f7fad1" />
+    </subtract>
+    <clamp name = "NormalUnpack_Out_in3_in2_in_in2Node_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in" type = "float" nodename = "NormalUnpack_Out_in3_in2_in_in2_inNode_e2a62117509640d0855a7bded8f7fad1" />
+    </clamp>
+    <dotproduct name = "NormalUnpack_Out_in3_in2_in_in2_inNode_e2a62117509640d0855a7bded8f7fad1" type = "float">
+        <input name = "in1" type = "vector2" nodename = "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "vector2" nodename = "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1" />
+    </dotproduct>
+    <subtract name = "NormalUnpack_OutNode_df765cbf0c4c48ee81c51fcced774793" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalUnpack_Out_in1Node_df765cbf0c4c48ee81c51fcced774793" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "NormalUnpack_Out_in1Node_df765cbf0c4c48ee81c51fcced774793" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalUnpack_Out_in1_in1Node_df765cbf0c4c48ee81c51fcced774793" />
+        <input name = "in2" type = "float" value = "2" />
+    </multiply>
+    <swizzle name = "NormalUnpack_Out_in1_in1Node_df765cbf0c4c48ee81c51fcced774793" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "NormalUnpack_InNode_df765cbf0c4c48ee81c51fcced774793" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "NormalUnpack_InNode_df765cbf0c4c48ee81c51fcced774793" type = "vector4">
+        <input name = "in" type = "vector4" value = "0.5,0.5,1,1" />
+    </dot>
+    <add name = "AddNode_2cb6a4f4eef242e8ab62bc78ddb6de60" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalUnpack_OutNode_e2a62117509640d0855a7bded8f7fad1" />
+        <input name = "in2" type = "vector3" nodename = "NormalUnpack_OutNode_df765cbf0c4c48ee81c51fcced774793" />
+    </add>
+    <GeometryModification name = "SR_NormalVertex" type = "vertexshader">
+        <input name = "normal" type = "vector3" nodename = "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Normal" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormaldiffuseColor" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Normal_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Normal" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_NormalVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Normal" />
+    </surfacematerial>
+    <subtract name = "SR_Normal_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormaldiffuseColor" type = "color3">
+        <input name = "in" type = "vector3" nodename = "AddNode_2cb6a4f4eef242e8ab62bc78ddb6de60" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

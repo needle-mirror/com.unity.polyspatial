@@ -1,0 +1,91 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_Utility"
+        {
+
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Utility/UsdPreviewSurface.outputs:surface>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Utility/GeometryModifier.outputs:vertex>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Utility/CastSwizzleFromSplitLRNode_803732670691405fb4d8504eb6e0eefdToSR_UtilitydiffuseColor.outputs:out>
+                float inputs:metallic = 0
+                color3f inputs:emissiveColor = (0, 0, 0)
+                float inputs:occlusion = 1
+                int inputs:useSpecularWorkflow = 0
+                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:roughness.connect = </MaterialX/Materials/USD_Utility/SR_Utility_roughness_OnesComplement.outputs:out>
+                float inputs:clearcoat = 0
+                float inputs:clearcoatRoughness = 0.01
+                float inputs:opacity = 1
+                float inputs:opacityThreshold = 0
+                float inputs:ior = 1.4
+                token outputs:surface
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:vertex
+            }
+
+            def Shader "CastSwizzleFromSplitLRNode_803732670691405fb4d8504eb6e0eefdToSR_UtilitydiffuseColor"
+            {
+                uniform token info:id = "ND_swizzle_float_color3"
+                float inputs:in.connect = </MaterialX/Materials/USD_Utility/SplitLRNode_803732670691405fb4d8504eb6e0eefd.outputs:out>
+                string inputs:channels = "xxx"
+                color3f outputs:out
+            }
+
+            def Shader "SplitLRNode_803732670691405fb4d8504eb6e0eefd"
+            {
+                uniform token info:id = "ND_splitlr_float"
+                float inputs:valuel = 0
+                float inputs:valuer = 0
+                float inputs:center = 0.5
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Utility/AddNode_735e51c93b594003ac48779f6f4870d7.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "AddNode_735e51c93b594003ac48779f6f4870d7"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1 = (0, 1)
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/MultiplyNode_735e51c93b594003ac48779f6f4870d7.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "MultiplyNode_735e51c93b594003ac48779f6f4870d7"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1 = (1, -1)
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/UVNode_735e51c93b594003ac48779f6f4870d7.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "UVNode_735e51c93b594003ac48779f6f4870d7"
+            {
+                uniform token info:id = "ND_texcoord_vector2"
+                int inputs:index = 0
+                float2 outputs:out
+            }
+
+            def Shader "SR_Utility_roughness_OnesComplement"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2 = 0.5
+                float outputs:out
+            }
+        }
+    }
+}

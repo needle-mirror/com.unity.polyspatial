@@ -1,63 +1,54 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
-using UnityEditor.PolySpatial.Utilities;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Internals
 {
-    class PolySpatialLoggingUI
+    class PolySpatialLoggingUI : EditorWindow
     {
-        class Styles
+        private static GUIContent s_Title = new GUIContent("PolySpatial Stack Logging UI");
+        [MenuItem("Window/PolySpatial/Logging")]
+        static void Init()
         {
-            internal GUIContent CategoriesContent { get; } = new GUIContent("Logging Categories", "Toggle logging categories to change what is output to the console log.");
-            internal GUIContent EnabledHeaderContent { get; } = new GUIContent("Enabled");
-            internal GUIContent StackTraceHeaderContent { get; } = new GUIContent("StackTrace");
-            internal List<LogCategory> LogCategoryList { get; }
-
-            internal Styles()
-            {
-                LogCategoryList = Enum.GetValues(typeof(LogCategory)).Cast<LogCategory>().ToList();
-                LogCategoryList.Sort((a,b) => string.Compare(Enum.GetName(typeof(LogCategory), a), Enum.GetName(typeof(LogCategory), b), StringComparison.Ordinal));
-            }
+            var win = (PolySpatialLoggingUI) EditorWindow.GetWindow(typeof(PolySpatialLoggingUI));
+            win.Show();
         }
 
-        static bool s_Initialized;
-        static Styles s_Styles;
-        static SavedBool s_CategoriesVisible;
+        private bool categoriesVisible = true;
+        private bool stackTraceVisible = true;
 
-        static void Initialize()
+        private static GUIContent k_CategoriesContent = new GUIContent("Categories (Enabled / Stack Trace)", null, "Toggle logging categories to change what is output to the console log.");
+        private static GUIContent k_StackTraceContent = new GUIContent("Levels (Stack Trace)", null, "Toggle stack trace logging for different log types.");
+
+        private void OnGUI()
         {
-            s_Initialized = true;
-            s_Styles = new Styles();
+            titleContent = s_Title;
 
-            s_CategoriesVisible = new SavedBool("PolySpatial.Logging.CategoriesVisible", true);
-        }
+            EditorGUILayout.Space();
 
-        static void DrawLoggingCategories()
-        {
-            using (new EditorGUILayout.HorizontalScope())
+            EditorGUILayout.BeginVertical();
+
+            categoriesVisible =
+                EditorGUILayout.BeginFoldoutHeaderGroup(categoriesVisible, k_CategoriesContent);
+
+            if (categoriesVisible)
             {
-                EditorGUILayout.PrefixLabel(" ");
-                GUILayout.Label(s_Styles.EnabledHeaderContent, GUILayout.ExpandWidth(false));
-                GUILayout.Space(6f);
-                GUILayout.Label(s_Styles.StackTraceHeaderContent, GUILayout.ExpandWidth(false));
-            }
+                EditorGUI.indentLevel++;
 
-            foreach (var cat in s_Styles.LogCategoryList)
-            {
-                using (new EditorGUILayout.HorizontalScope())
+                EditorGUILayout.BeginVertical();
+
+                foreach (LogCategory cat in Enum.GetValues(typeof(LogCategory)))
                 {
-                    var catEnabled = Logging.IsCategoryEnabled(cat);
-                    var stackEnabled = Logging.IsStackTraceEnabled(cat);
+                    GUILayout.BeginHorizontal();
+
+                    bool catEnabled = Logging.IsCategoryEnabled(cat);
+                    bool stackEnabled = Logging.IsStackTraceEnabled(cat);
                     var name = Enum.GetName(typeof(LogCategory), cat);
 
-                    EditorGUILayout.PrefixLabel(name);
-
-                    var newCat = EditorGUILayout.Toggle(catEnabled, GUILayout.Width(64));
-                    var newStack = EditorGUILayout.Toggle(stackEnabled);
+                    var newCat = EditorGUILayout.Toggle(catEnabled, GUILayout.Width(30));
+                    var newStack = EditorGUILayout.ToggleLeft(name, stackEnabled);
 
                     if (newStack != stackEnabled)
                     {
@@ -68,26 +59,46 @@ namespace UnityEditor.PolySpatial.Internals
                     {
                         Logging.SetCategoryEnabled(cat, newCat);
                     }
+
+                    GUILayout.EndHorizontal();
                 }
+
+                EditorGUILayout.EndVertical();
+
+                EditorGUI.indentLevel--;
             }
-        }
 
-        internal static void DrawLoggingSettings()
-        {
-            if (!s_Initialized)
-                Initialize();
+            EditorGUILayout.EndFoldoutHeaderGroup();
 
-            using (new EditorGUILayout.VerticalScope(GUI.skin.box))
+            EditorGUILayout.Space();
+
+            stackTraceVisible = EditorGUILayout.BeginFoldoutHeaderGroup(stackTraceVisible, k_StackTraceContent);
+
+            if (stackTraceVisible)
             {
-                s_CategoriesVisible.Value = EditorGUILayout.Foldout(s_CategoriesVisible.Value, s_Styles.CategoriesContent, true);
-                if (!s_CategoriesVisible.Value)
-                    return;
+                EditorGUILayout.BeginVertical();
 
-                using (new EditorGUI.IndentLevelScope())
+                EditorGUI.indentLevel++;
+
+                foreach (LogType logType in Enum.GetValues(typeof(LogType)))
                 {
-                    DrawLoggingCategories();
+                    bool isLoggingEnabled = Application.GetStackTraceLogType(logType) != StackTraceLogType.None;
+                    string logTypeName = Enum.GetName(typeof(LogType), logType);
+                    bool newValue = EditorGUILayout.ToggleLeft(logTypeName, isLoggingEnabled);
+                    if (newValue != isLoggingEnabled)
+                    {
+                        Application.SetStackTraceLogType(logType, newValue ? StackTraceLogType.ScriptOnly : StackTraceLogType.None);
+                    }
                 }
+
+                EditorGUI.indentLevel--;
+
+                EditorGUILayout.EndVertical();
             }
+
+            EditorGUILayout.EndFoldoutHeaderGroup();
+
+            EditorGUILayout.EndVertical();
         }
     }
 }

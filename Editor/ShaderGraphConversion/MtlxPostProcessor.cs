@@ -28,9 +28,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     continue;
 
                 var fileContents = nodeProcessor.ProcessGraph(mtlxGraph);
-
+             
                 File.WriteAllText(
-                    context.GetOutputArtifactFilePath($"{nodeProcessor.FileExtension}.polyspatial"),
+                    context.GetOutputArtifactFilePath($"{nodeProcessor.FileExtension}.polyspatial"),  
                     fileContents);
 
                 // Optionally dump the generated data to an intermediate file, which can aid in debugging shadergraph
@@ -93,70 +93,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 AdapterMap.ProcessContext(graphData, graph, externals);
 
             externals.ResolveExternals(graph);
-
-            var polySpatialSettings = PolySpatialSettings.GetInstanceIfExists();
-            if (polySpatialSettings == null || polySpatialSettings.MinifyShaderGraphNodeNames)
-                graph.MinifyNodeNames();
-
             return graph;
-        }
-
-        internal static void LogWarningForGraph(GraphData graphData, string message)
-        {
-            if (!ShouldSuppressWarningsForGraph(graphData))
-                Debug.LogWarning(message);
-        }
-
-        static bool ShouldSuppressWarningsForGraph(GraphData graphData)
-        {
-            // Only suppress warnings for assets in immutable packages and their associated imports.
-            var assetPath = AssetDatabase.GUIDToAssetPath(graphData.assetGuid);
-            var isUnityImport = assetPath.StartsWith("Assets/Samples/Universal RP/") ||
-                assetPath.StartsWith("Assets/TextMesh Pro/");
-            if (!(Path.GetFullPath(assetPath).Contains("PackageCache") || isUnityImport))
-                return false;
-                
-            var showWarningsForShaderGraphsInPackages = true;
-            var polySpatialSettings = PolySpatialSettings.GetInstanceIfExists();
-            if (polySpatialSettings != null)
-                showWarningsForShaderGraphsInPackages = polySpatialSettings.ShowWarningsForShaderGraphsInPackages;
-
-            // Suppress all warnings if specifically disabled.
-            if (!showWarningsForShaderGraphsInPackages)
-                return true;
-
-            // Otherwise, suppress Unity package warnings unless it's an internal build.
-#if POLYSPATIAL_INTERNAL
-            return false;
-#else
-            // Suppress warnings for non-PolySpatial Unity shader graphs (such as those in the URP package).
-            return assetPath.StartsWith("Packages/com.unity.") &&
-                !assetPath.StartsWith("Packages/com.unity.polyspatial") || isUnityImport;
-#endif
-        }
-
-        // Checks whether the specified node can affect the MaterialX output (which it cannot
-        // if it is upstream of the "Off" input to a MaterialX keyword node).
-        internal static bool AffectsMaterialXOutput(AbstractMaterialNode node)
-        {
-            List<MaterialSlot> outputs = new();
-            node.GetOutputSlots(outputs);
-            foreach (var outputSlot in outputs)
-            {
-                foreach (var edge in outputSlot.owner.owner.GetEdges(outputSlot.slotReference))
-                {
-                    var inputSlot = edge.inputSlot.slot;
-                    if (!(inputSlot.owner is KeywordNode keywordNode &&
-                        keywordNode.keyword.referenceName == KeywordAdapter.k_MaterialXKeywordReferenceName &&
-                        inputSlot.RawDisplayName() == "Off") &&
-                        (inputSlot.owner is BlockNode || inputSlot.owner is SubGraphOutputNode ||
-                            AffectsMaterialXOutput(inputSlot.owner)))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         class MtlxNodeValidation : INodeValidationExtension
@@ -167,7 +104,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 node.owner.messageManager.ClearNodesFromProvider(this, Enumerable.Repeat(node, 1));
 
                 var status = INodeValidationExtension.Status.None;
-
+                
                 if (node is BlockNode bnode && !MaterialX.AdapterMap.IsBlockSupported(bnode))
                 {
                     msg = $"Block Node '{bnode.descriptor.name}' are not supported for MaterialX conversion.";
@@ -196,7 +133,27 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 if (status == INodeValidationExtension.Status.Warning)
                 {
                     // Ignore/clear any warnings upstream from the "Off" input of a MaterialX keyword node.
-                    if (ShouldSuppressWarningsForGraph(node.owner) || !AffectsMaterialXOutput(node))
+                    bool AffectsMaterialXOutput(AbstractMaterialNode node)
+                    {
+                        List<MaterialSlot> outputs = new();
+                        node.GetOutputSlots(outputs);
+                        foreach (var outputSlot in outputs)
+                        {
+                            foreach (var edge in outputSlot.owner.owner.GetEdges(outputSlot.slotReference))
+                            {
+                                var inputSlot = edge.inputSlot.slot;
+                                if (!(inputSlot.owner is KeywordNode keywordNode &&
+                                    keywordNode.keyword.referenceName == KeywordAdapter.k_MaterialXKeywordReferenceName &&
+                                    inputSlot.RawDisplayName() == "Off") &&
+                                    (inputSlot.owner is BlockNode || AffectsMaterialXOutput(inputSlot.owner)))
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                    if (!AffectsMaterialXOutput(node))
                     {
                         msg = "";
                         return INodeValidationExtension.Status.None;
@@ -215,7 +172,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             public string GetValidatorKey() => "MaterialXValidator";
         }
-
+        
         public bool IsInterestedInAsset(string path) => IsAssetShaderGraph(path);
     }
 }

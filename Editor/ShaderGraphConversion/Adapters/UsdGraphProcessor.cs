@@ -47,9 +47,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             @"",
         };
 
-        static readonly string surfaceShaderOutput = @"token outputs:out";
+        static readonly string surfaceShaderOutput = @"token outputs:surface";
 
-        static readonly string vertexShaderOutput = @"token outputs:out";
+        static readonly string vertexShaderOutput = @"token outputs:vertex";
 
         // RAII solution for creating and closing nested USD scopes
         struct UsdScope : IDisposable
@@ -145,13 +145,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             // Connect shader output to material output
             AppendIndentedLine(
-                @$"token outputs:mtlx:surface.connect = <{surfaceShaderNode.nodetype}.outputs:out>",
+                @$"token outputs:mtlx:surface.connect = </MaterialX/Materials/{materialNode.name}/{surfaceShaderNode.nodetype}.outputs:surface>",
                 materialScope.ChildIndentLevel);
 
             if (vertexShaderNode != null)
             {
                 AppendIndentedLine(
-                    @$"token outputs:realitykit:vertex.connect = <GeometryModifier.outputs:out>",
+                    @$"token outputs:realitykit:vertex.connect = </MaterialX/Materials/{materialNode.name}/GeometryModifier.outputs:vertex>",
                     materialScope.ChildIndentLevel);
             }
             m_StringBuilder.AppendLine("");
@@ -229,27 +229,21 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 // Connect inputs, and gather up subgraph roots for further processing
                 foreach (var port in shaderNode.Ports)
                 {
-                    // Both inputs and connected nodes have node representations (inputs as default values).
-                    if (m_Graph.TryGetConnectedNode(shaderNode, port.name, out var connectedNode))
+                    // Attach input and/or systemInputs
+                    if (m_Graph.Inputs.Contains(port.name)
+                        || m_Graph.SystemInputs.Contains(port.name))
                     {
-                        if (m_Graph.Inputs.Contains(connectedNode.name) ||
-                            m_Graph.SystemInputs.Contains(connectedNode.name))
-                        {
-                            // Attach input and/or systemInputs.
-                            string nodeConnection =
-                                $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
-                                $"<../.inputs:{connectedNode.name}>";
-                            AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
-                        }
-                        else
-                        {
-                            // Attach connected node.
-                            string nodeConnection =
-                                $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
-                                $"<../{connectedNode.name}.outputs:{connectedNode.outputName}>";
-                            AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
-                            rootNodes.Add(connectedNode);
-                        }
+                        string nodeConnection = $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = </MaterialX/Materials/{materialNode.name}.inputs:{port.name}>";
+                        AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
+                    }
+                    // Attach connected nodes
+                    else if (m_Graph.TryGetConnectedNode(shaderNode, port.name, out var connectedNode))
+                    {
+                        string nodeConnection =
+                            $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
+                            $"</MaterialX/Materials/{materialNode.name}/{connectedNode.name}.outputs:{connectedNode.outputName}>";
+                        AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
+                        rootNodes.Add(connectedNode);
                     }
                     else
                     {
@@ -287,14 +281,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             if (m_Graph.Inputs.Contains(connectedNode.name)
                                 || m_Graph.SystemInputs.Contains(connectedNode.name))
                             {
-                                string inputParameterConnection = $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = <../.inputs:{connectedNode.name}>";
+                                string inputParameterConnection = $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = </MaterialX/Materials/{materialNode.name}.inputs:{connectedNode.name}>";
                                 AppendIndentedLine(inputParameterConnection, nodeScope.ChildIndentLevel);
                             }
                             else
                             {
                                 string nodeConnection =
                                     $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
-                                    $"<../{connectedNode.name}.outputs:{connectedNode.outputName}>";
+                                    $"</MaterialX/Materials/{materialNode.name}/{connectedNode.name}.outputs:{connectedNode.outputName}>";
                                 AppendIndentedLine(nodeConnection, nodeScope.ChildIndentLevel);
 
                                 if (!processedNodes.Contains(connectedNode))
@@ -420,7 +414,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
         private string GetUsdDefaultValue(string datatype)
         {       
             if (datatype.Equals("float", StringComparison.OrdinalIgnoreCase) ||
-                datatype.Equals("half", StringComparison.OrdinalIgnoreCase) ||
                 datatype.Equals("boolean", StringComparison.OrdinalIgnoreCase))
             {
                 return "0";
@@ -495,13 +488,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case "range":
                     return GetFloatVariantNodeInfoId(node, "inlow", "inhigh", "gamma", "outlow", "outhigh");
                 
-                case "ifequal":
-                    return GetFirstInputPortType(node, "value") switch
-                    {
-                        MtlxDataTypes.Integer => $"ND_ifequal_{node.datatype}I",
-                        MtlxDataTypes.Boolean => $"ND_ifequal_{node.datatype}B",
-                        _ => GetDefaultNodeInfoId(node),
-                    };
                 case "switch":
                     return (GetFirstInputPortType(node, "which") == MtlxDataTypes.Integer) ?
                         $"ND_switch_{node.datatype}I" : GetDefaultNodeInfoId(node);
@@ -520,30 +506,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     {
                         return GetDefaultNodeInfoId(node);
                     }
-                case "transformmatrix":
-                    return (node.datatype, GetFirstInputPortType(node, "mat")) switch
-                    {
-                        (MtlxDataTypes.Vector2, MtlxDataTypes.Matrix33) => "ND_transformmatrix_vector2M3",
-                        (MtlxDataTypes.Vector3, MtlxDataTypes.Matrix44) => "ND_transformmatrix_vector3M4",
-                        _ => GetDefaultNodeInfoId(node),
-                    };
                 default:
                     switch (node.nodetype)
                     {
                         case MtlxNodeTypes.RealityKitSurfaceModelToWorld:
-                        case MtlxNodeTypes.RealityKitSurfaceModelToView:
                         case MtlxNodeTypes.RealityKitSurfaceWorldToView:
                         case MtlxNodeTypes.RealityKitSurfaceViewToProjection:
                         case MtlxNodeTypes.RealityKitSurfaceProjectionToView:
                         case MtlxNodeTypes.RealityKitSurfaceScreenPosition:
-                        case MtlxNodeTypes.RealityKitGeometryModifierModelToWorld:
-                        case MtlxNodeTypes.RealityKitGeometryModifierWorldToModel:
-                        case MtlxNodeTypes.RealityKitGeometryModifierModelToView:
-                        case MtlxNodeTypes.RealityKitGeometryModifierViewToProjection:
-                        case MtlxNodeTypes.RealityKitGeometryModifierProjectionToView:
                         case MtlxNodeTypes.RealityKitGeometryModifierVertexID:
                         case MtlxNodeTypes.RealityKitSurfaceCustomAttribute:
-                        case MtlxNodeTypes.RealityKitEnvironmentRadiance:
                             return $"ND_{node.nodetype}";
 
                         default:

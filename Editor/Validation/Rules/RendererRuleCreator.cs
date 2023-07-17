@@ -4,7 +4,7 @@ using System.Linq;
 using Unity.PolySpatial.Internals;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
+using UnityEditor.PolySpatial.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation
@@ -22,7 +22,7 @@ namespace UnityEditor.PolySpatial.Validation
 
         static RendererRuleCreator()
         {
-            foreach (var shader in MaterialShaders.k_SupportedShaders)
+            foreach (var shader in MaterialShaders.k_ShadersToTest)
                 s_SupportedShaderNames.Add(shader);
         }
 
@@ -63,10 +63,6 @@ namespace UnityEditor.PolySpatial.Validation
                 FixItMessage = k_FixtItMessage,
                 SceneOnlyValidation = true,
                 OnClick = () => BuildValidator.SelectObject(instanceID),
-                HelpText = "Documentation",
-                HelpLink = component is ParticleSystem
-                    ?"https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/SupportedFeatures.html%23particle-systems"
-                    : "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/SupportedFeatures.html%23rendering-components-systems",
             };
 
             rule.CheckPredicate = () =>

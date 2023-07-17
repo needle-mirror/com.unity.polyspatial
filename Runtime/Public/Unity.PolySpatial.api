@@ -1,0 +1,158 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.PolySpatial
+{
+    [UnityEngine.CreateAssetMenu(menuName = @"PolySpatial/Material Swap Set")] public class MaterialSwapSet : UnityEngine.ScriptableObject
+    {
+        public MaterialSwapSet() {}
+    }
+
+    [UnityEditor.CustomEditor(typeof(MaterialSwapSet))] public class MaterialSwapSetEditor : UnityEditor.Editor
+    {
+        public MaterialSwapSetEditor() {}
+        public override void OnInspectorGUI();
+    }
+
+    public class PolySpatialHoverEffect : UnityEngine.MonoBehaviour
+    {
+        public PolySpatialHoverEffect() {}
+    }
+
+    public static class PolySpatialObjectUtils
+    {
+        public static void MarkDirty(UnityEngine.RenderTexture renderTexture);
+    }
+
+    public class PolySpatialSettings : UnityEngine.ScriptableObject, UnityEngine.ISerializationCallbackReceiver
+    {
+        [UnityEngine.SerializeField] public UnityEngine.LayerMask ColliderSyncLayerMask;
+        public const string DefaultServerAddress = @"127.0.0.1";
+        public const int DefaultServerPort = 9876;
+        public string[] DisabledTrackers;
+        [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"When enabled, a fallback unbounded Volume Camera will be created on startup if none is found in the scene. Disable this to be able to create the initial Volume Camera from script.")] public bool EnableDefaultVolumeCamera = true;
+        public bool EnableHostCameraControl;
+        [UnityEngine.SerializeField] public bool EnableMacRealityKitPreviewInPlayMode;
+        [UnityEngine.SerializeField] public bool EnablePolySpatialRuntime;
+        [UnityEngine.SerializeField] public bool EnableProgressiveMipStreaming;
+        [UnityEngine.SerializeField] public bool EnableStatistics;
+        [UnityEngine.SerializeField] public bool EnableTransformVerification;
+        [UnityEngine.SerializeField] public PolySpatialSettings.PolySpatialTextureCompressionFormat[] m_AdditionalTextureFormats;
+        [UnityEngine.SerializeField] public string MaterialXExtensionNamespace = @"mtlxextension";
+        [UnityEngine.SerializeField] public long MaxMipByteSizePerCycle;
+        [UnityEngine.SerializeField] public System.UInt64 RuntimeFlags;
+        public static PolySpatialSettings.PolySpatialTextureCompressionFormat[] AdditionalTextureFormats { get; set; }
+        public bool EnableClipping { get; }
+        public bool EnableServerCameraControl { get; }
+        public System.Collections.Generic.HashSet<string> IgnoredScenePaths { get; }
+        public static PolySpatialSettings instance { get; }
+        public PolySpatialSettings.NetworkingMode PolySpatialNetworkingMode { get; }
+        public System.Collections.Generic.List<Networking.SocketAddress> ServerAddresses { get; }
+        public int ServerPort { get; }
+        public PolySpatialSettings() {}
+        public void OnAfterDeserialize();
+        public void OnBeforeSerialize();
+        public enum NetworkingMode
+        {
+            Local = 0,
+            LocalAndClient = 1,
+        }
+        public enum PolySpatialTextureCompressionFormat
+        {
+            ASTC = 3,
+            BPTC = 6,
+            DXTC = 5,
+            DXTC_RGTC = 7,
+            ETC = 1,
+            ETC2 = 2,
+            PVRTC = 4,
+            Unknown = 0,
+        }
+        public enum RecordingMode
+        {
+            None = 0,
+            Playback = 2,
+            Record = 1,
+        }
+    }
+
+    public static class PolySpatialShaderGlobals
+    {
+        public const string CosTime = @"_CosTime";
+        public static readonly int CosTimeID;
+        public const string DeltaTime = @"unity_DeltaTime";
+        public static readonly int DeltaTimeID;
+        public const string OrthoParams = @"unity_OrthoParams";
+        public static readonly int OrthoParamsID;
+        public const string ProjectionMatrix = @"UNITY_MATRIX_P";
+        public static readonly int ProjectionMatrixID;
+        public const string ProjectionParams = @"_ProjectionParams";
+        public static readonly int ProjectionParamsID;
+        public const string ScreenParams = @"_ScreenParams";
+        public static readonly int ScreenParamsID;
+        public const string SinTime = @"_SinTime";
+        public static readonly int SinTimeID;
+        public const string Time = @"_Time";
+        public static readonly int TimeID;
+        public const string ViewMatrix = @"UNITY_MATRIX_V";
+        public static readonly int ViewMatrixID;
+        public const string WorldSpaceCameraDir = @"_WorldSpaceCameraDir";
+        public static readonly int WorldSpaceCameraDirID;
+        public const string WorldSpaceCameraPos = @"_WorldSpaceCameraPos";
+        public static readonly int WorldSpaceCameraPosID;
+        public const string WorldSpaceLightPos0 = @"_WorldSpaceLightPos0";
+        public static readonly int WorldSpaceLightPos0ID;
+        public static void SetColor(string name, UnityEngine.Color value);
+        public static void SetFloat(string name, float value);
+        public static void SetInteger(string name, int value);
+        public static void SetMatrix(string name, UnityEngine.Matrix4x4 value);
+        public static void SetTexture(string name, UnityEngine.Texture value);
+        public static void SetVector(string name, UnityEngine.Vector4 value);
+        public static bool TryAdd(string name, PolySpatialShaderGlobals.PropertyType type);
+        public enum PropertyType
+        {
+            Color = 3,
+            Float = 0,
+            Integer = 1,
+            Matrix = 4,
+            Texture = 5,
+            Vector = 2,
+        }
+    }
+
+    public class VolumeCamera : UnityEngine.MonoBehaviour
+    {
+        [UnityEngine.Tooltip(@"Only objects in the selected layers will be visible inside this Volume Camera.")] public UnityEngine.LayerMask CullingMask;
+        public UnityEngine.Camera BackingCamera { get; }
+        public UnityEngine.Vector3 Dimensions { get; set; }
+        public bool IsHostCameraAvailable { get; }
+        public VolumeCamera.PolySpatialVolumeCameraMode Mode { get; set; }
+        public UnityEngine.Matrix4x4 VolumeSpaceToWorldSpaceMatrix { get; }
+        public UnityEngine.Matrix4x4 WorldSpaceToVolumeSpaceMatrix { get; }
+        public VolumeCamera() {}
+        public enum PolySpatialVolumeCameraMode
+        {
+            Bounded = 0,
+            Unbounded = 1,
+        }
+    }
+}
+
+namespace Unity.PolySpatial.Networking
+{
+    public struct ConnectionID
+    {
+        public Unity.Collections.FixedString128Bytes Address;
+    }
+
+    public struct SocketAddress : System.IEquatable<SocketAddress>
+    {
+        public string Host;
+        public int Port;
+        public string Identifier { get; }
+        public override bool Equals(object obj);
+        public bool Equals(SocketAddress other);
+        public override int GetHashCode();
+        public static bool ParseAddress(string address, int defaultPort, out SocketAddress socketAddress);
+    }
+}

@@ -1,9 +1,6 @@
-using System.Runtime.InteropServices;
-using System.Reflection;
 using System;
 using System.Collections;
 using System.IO;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial.Internals;
@@ -19,8 +16,6 @@ namespace Tests.Runtime.Functional.Components
     public class UnityCanvasRendererTests
     {
         static Texture2D s_TestTexture = new Texture2D(1, 1);
-
-        static readonly string s_DefaultSortingLayerName = "Default";
 
         GameObject m_Canvas;
         GameObject m_TestGameObject;
@@ -118,34 +113,6 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
-        public IEnumerator Test_CanvasEnable_Disable()
-        {
-            CreateTestObjects();
-            var image = m_TestGameObject.AddComponent<Image>();
-
-            yield return null;
-
-            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestGameObject));
-            if (backingGO != null)
-            {
-                Assert.IsNotNull(backingGO.GetComponent<MeshFilter>());
-                Assert.IsNotNull(backingGO.GetComponent<MeshRenderer>());
-            }
-
-            m_Canvas.GetComponent<Canvas>().enabled = false;
-
-            yield return null;
-
-            if (backingGO != null)
-            {
-                Assert.IsNull(backingGO.GetComponent<MeshFilter>());
-                Assert.IsNull(backingGO.GetComponent<MeshRenderer>());
-            }
-
-            Object.Destroy(image);
-        }
-
-        [UnityTest]
         public IEnumerator Test_UnityCanvasRenderer_Create_Destroy_Tracking()
         {
             CreateTestObjects();
@@ -222,6 +189,63 @@ namespace Tests.Runtime.Functional.Components
 #endif
         }
 
+        [UnityTest]
+        public IEnumerator Test_CanvasRenderer_ChangesMeshCenter()
+        {
+            var canvas = new GameObject("Canvas", typeof(Canvas));
+
+            var button1 = new GameObject("Button 1", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            var label1 = new GameObject("Label 1", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+
+            var button2 = new GameObject("Button 2", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            var label2 = new GameObject("Label 2", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+
+            label1.GetComponent<TextMeshProUGUI>().text = "Label 1";
+            label2.GetComponent<TextMeshProUGUI>().text = "Label 2";
+
+            button1.transform.SetParent(canvas.transform);
+            label1.transform.SetParent(button1.transform);
+
+            // Parent button2 over button1 to tests multiple layers.
+            // Depths are computed from the hierarchy position as well as the sibling index.
+            // -> Canvas                   Depth: 0
+            //     -> Button 1             Depth: 1
+            //          -> Label 1         Depth: 2
+            //          -> Button 2        Depth: 3
+            //               -> Label 2    Depth: 4
+            button2.transform.SetParent(button1.transform);
+            label2.transform.SetParent(button2.transform);
+
+            canvas.transform.position = new Vector3(10, 10, 0);
+            button1.transform.position = new Vector3(-100, -100, 0.0f);
+            button2.transform.position = new Vector3(-200, -200, 0.0f);
+
+            yield return null;
+
+            var adjustedButton1Mesh = CanvasRendererTracker.AdjustedMeshForUISort(button1, button1.GetComponent<CanvasRenderer>().GetMesh());
+            var adjustedLabel1Mesh = CanvasRendererTracker.AdjustedMeshForUISort(label1, label1.GetComponent<CanvasRenderer>().GetMesh());
+
+            var adjustedButton2Mesh = CanvasRendererTracker.AdjustedMeshForUISort(button2, button2.GetComponent<CanvasRenderer>().GetMesh());
+            var adjustedLabel2Mesh = CanvasRendererTracker.AdjustedMeshForUISort(label2, label2.GetComponent<CanvasRenderer>().GetMesh());
+
+            // Once transformed, the meshes center's should match the canvas's position.
+            // Only test the (x,y) position here since the canvas will be aligned with the X/Y axis by default.
+            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)button1.transform.localToWorldMatrix.MultiplyPoint(adjustedButton1Mesh.bounds.center));
+            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)label1.transform.localToWorldMatrix.MultiplyPoint(adjustedLabel1Mesh.bounds.center));
+            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)button2.transform.localToWorldMatrix.MultiplyPoint(adjustedButton2Mesh.bounds.center));
+            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)label2.transform.localToWorldMatrix.MultiplyPoint(adjustedLabel2Mesh.bounds.center));
+
+            // The meshes should be offsets according to the depth of the control in the canvas's hierarchy.
+            Assert.Greater(adjustedButton1Mesh.bounds.center.z, adjustedLabel1Mesh.bounds.center.z);
+            Assert.Greater(adjustedLabel1Mesh.bounds.center.z, adjustedButton2Mesh.bounds.center.z);
+            Assert.Greater(adjustedButton2Mesh.bounds.center.z, adjustedLabel2Mesh.bounds.center.z);
+
+            GameObject.Destroy(label1);
+            GameObject.Destroy(button1);
+            GameObject.Destroy(label2);
+            GameObject.Destroy(button2);
+            GameObject.Destroy(canvas);
+        }
 
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_SetsMaterialAsset()
@@ -244,6 +268,95 @@ namespace Tests.Runtime.Functional.Components
             image = null;
         }
 
+        [UnityTest]
+        public IEnumerator Test_TextMeshProUGUI_With_Missing_USD()
+        {
+            var shader = Shader.Find(MaterialShaders.k_TextShaderGraph);
+            Assert.IsNotNull(shader, "Could not find shader for {");
+
+            // Move USD file temporarily to trigger missing asset scenario
+            var usdPaths = PolySpatialAssetData.GetPathsForAsset(shader);
+            var pathCount = usdPaths.Length;
+            var tempPaths = new string[pathCount];
+            for (var i = 0; i < pathCount; i++)
+            {
+                var usdPath = usdPaths[i];
+                FileAssert.Exists(usdPath);
+
+                var tempPath = Path.Combine(Application.temporaryCachePath, Guid.NewGuid().ToString());
+                tempPaths[i] = tempPath;
+
+                try
+                {
+                    // File.Move does not work for the virtual filesystem in editor
+                    File.Copy(usdPath, tempPath);
+                    FileAssert.Exists(tempPath, "Failed to create temp asset");
+
+                    File.Delete(usdPath);
+                    FileAssert.DoesNotExist(usdPath, "Failed to delete asset");
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
+
+            // Clear the shader graph reference so that we attempt to reload it.
+            PolySpatialCore.LocalAssetManager.RemoveShaderGraphByShaderName(MaterialShaders.k_TextShaderGraph);
+
+            m_TestGameObject = new GameObject();
+            var tmp = m_TestGameObject.AddComponent<TextMeshProUGUI>();
+            tmp.text = "Hello";
+
+            // Ensure that the font material is not already registered.
+            var materialAssetID = PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(tmp.materialForRendering);
+            PolySpatialCore.LocalAssetManager.ForceRemoveAssetFromManager(materialAssetID);
+
+            // Let a frame be processed and trigger any exceptions or assertions
+            yield return null;
+
+            // Expect two material conversions: once for creation, once for update
+            var expectedWarning = $"Non shader graph shader '{shader.name}' not supported or MaterialX encoding missing";
+            LogAssert.Expect(LogType.Warning, expectedWarning);
+            LogAssert.Expect(LogType.Warning, expectedWarning);
+
+            //TODO: Validate that the PolySpatial object linked to m_TestGameObject has a fallback material
+
+            // Move the file back if it was successfully moved in the first place
+            for (var i = 0; i < pathCount; i++)
+            {
+                var usdPath = usdPaths[i];
+                var tempPath = tempPaths[i];
+                Assert.IsFalse(string.IsNullOrEmpty(tempPath));
+                Assert.IsFalse(string.IsNullOrEmpty(usdPath));
+
+                if (File.Exists(tempPath) && !File.Exists(usdPath))
+                {
+                    try
+                    {
+                        File.Copy(tempPath, usdPath);
+                    }
+                    catch (Exception exception)
+                    {
+                        Debug.LogException(exception);
+                    }
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch (Exception exception)
+                    {
+                        Debug.LogException(exception);
+                    }
+                }
+            }
+        }
+
+
         struct SortTestSubTree : IEquatable<SortTestSubTree>, IComparable<SortTestSubTree>
         {
             public Canvas canvas;
@@ -252,7 +365,7 @@ namespace Tests.Runtime.Functional.Components
             public CanvasRenderer button2;
             public CanvasRenderer label2;
 
-            internal int SortIndexFor(CanvasRenderer item)
+            int SortIndexFor(CanvasRenderer item)
             {
                 var data = CanvasRendererTracker.GetTrackingData(item.GetInstanceID());
                 return data.customData.globalSortIndex;
@@ -336,25 +449,25 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_Canvas_SortByLayerName()
         {
-            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
-            var tree2 = CreateSortTestSubTree("Two", s_DefaultSortingLayerName, 0);
+            var tree1 = CreateSortTestSubTree("One", "Default", 0);
+            var tree2 = CreateSortTestSubTree("Two", "Default", 0);
 
             yield return null;
 
-            Assert.IsTrue(tree1.CompareTo(tree2) < 0, "Expected tree1 to be sorted before tree2 for sibling ordering");
+            Assert.IsTrue(tree1.CompareTo(tree2) == -1, "Expected tree1 to be sorted before tree2 for sibling ordering");
 
-            tree1.canvas.sortingLayerName = PolySpatialUnityBackend.PolySpatialUISortingLayerName;
-
-            yield return null;
-
-            Assert.IsTrue(tree2.CompareTo(tree1) < 0, "Expected tree2 to be sorted before tree1 in layer value ordering");
-
-            tree1.canvas.sortingLayerName = s_DefaultSortingLayerName;
-            tree2.canvas.sortingLayerName = PolySpatialUnityBackend.PolySpatialUISortingLayerName;
+            tree1.canvas.sortingLayerName = "PolySpatial";
 
             yield return null;
 
-            Assert.IsTrue(tree1.CompareTo(tree2) < 0, "Expected tree1 to be sorted before tree2 in layer value ordering");
+            Assert.IsTrue(tree2.CompareTo(tree1) == 1, "Expected tree2 to be sorted after tree1 in layer value ordering");
+
+            tree1.canvas.sortingLayerName = "Default";
+            tree2.canvas.sortingLayerName = "PolySpatial";
+
+            yield return null;
+
+            Assert.IsTrue(tree1.CompareTo(tree2) == 1, "Expected tree1 to be sorted after tree2 in layer value ordering");
 
             DestroySubtree(tree1);
             DestroySubtree(tree2);
@@ -365,8 +478,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_Canvas_SortByLayerOrder()
         {
-            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
-            var tree2 = CreateSortTestSubTree("Two", s_DefaultSortingLayerName, 0);
+            var tree1 = CreateSortTestSubTree("One", "Default", 0);
+            var tree2 = CreateSortTestSubTree("Two", "Default", 0);
 
             yield return null;
 
@@ -394,185 +507,29 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_SameLevel_SortBySiblingIndex()
         {
-            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
+            var tree1 = CreateSortTestSubTree("One", "Default", 0);
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) < 0, "Expected label to be sorted before button");
+            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) == -1, "Expected label to be sorted before button");
 
             tree1.button2.transform.SetSiblingIndex(0);
             tree1.label1.transform.SetSiblingIndex(1);
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.button2, tree1.label1) < 0, "Expected button to be sorted before label");
+            Assert.IsTrue(tree1.Compare(tree1.button2, tree1.label1) == -1, "Expected button to be sorted before label");
 
             tree1.label1.transform.SetSiblingIndex(0);
             tree1.button2.transform.SetSiblingIndex(1);
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) < 0, "Expected label to be sorted before button");
+            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) == -1, "Expected label to be sorted before button");
 
             DestroySubtree(tree1);
 
             yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator Test_CanvasRenderer_DeletingItem_ResetsSortIndices()
-        {
-            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
-
-            var canvas = tree1.canvas;
-            var image1 = new GameObject("Image 1", new[] { typeof(RectTransform), typeof(Image) });
-            image1.transform.SetParent(canvas.transform);
-            var image2 = new GameObject("Image 2", new[] { typeof(RectTransform), typeof(Image) });
-            image2.transform.SetParent(canvas.transform);
-            var image3 = new GameObject("Image 3", new[] { typeof(RectTransform), typeof(Image) });
-            image3.transform.SetParent(canvas.transform);
-
-            yield return null;
-
-            var i1Sid = tree1.SortIndexFor(image1.GetComponent<CanvasRenderer>());
-            var i2Sid = tree1.SortIndexFor(image2.GetComponent<CanvasRenderer>());
-            var i3Sid = tree1.SortIndexFor(image3.GetComponent<CanvasRenderer>());
-            Assert.IsTrue(i1Sid < i2Sid);
-            Assert.IsTrue(i2Sid < i3Sid);
-
-            GameObject.Destroy(image2);
-
-            yield return null;
-
-            var i1NewSid = tree1.SortIndexFor(image1.GetComponent<CanvasRenderer>());
-            var i3NewSid = tree1.SortIndexFor(image3.GetComponent<CanvasRenderer>());
-            Assert.AreEqual(i1Sid, i1NewSid);
-            Assert.AreNotEqual(i3Sid, i3NewSid);
-            Assert.IsTrue(i1Sid < i3Sid);
-
-            DestroySubtree(tree1);
-
-            yield return null;
-        }
-
-
-        GameObject CreateMaskedHierarchy<T>() where T : MonoBehaviour
-        {
-            Assert.IsTrue(typeof(T) == typeof(RectMask2D) || typeof(T) == typeof(Mask));
-
-            CreateTestObjects();
-            var canvas = m_TestGameObject.transform.parent.GetComponent<Canvas>();
-            var canvsRt = canvas.gameObject.GetComponent<RectTransform>();
-            canvsRt.sizeDelta = new Vector2(400, 400);
-
-            var maskObject = new GameObject();
-            maskObject.transform.parent = canvas.transform;
-            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
-            cr.transform.parent = maskObject.transform;
-            var crRt = cr.gameObject.AddComponent<RectTransform>();
-            crRt.sizeDelta = new Vector2(200, 200);
-
-            var maskRt = maskObject.AddComponent<RectTransform>();
-            if (typeof(T) == typeof(Mask))
-            {
-                var image = maskObject.gameObject.AddComponent<Image>();
-                image.sprite = Resources.Load<Sprite>("UISprite");
-            }
-
-            maskObject.gameObject.AddComponent<T>();
-            return maskObject;
-        }
-
-        [UnityTest]
-        public IEnumerator Test_MaskEnable_Disable()
-        {
-            var maskObject = CreateMaskedHierarchy<Mask>();
-            var maskRt = maskObject.GetComponent<RectTransform>();
-            var mask = maskObject.GetComponent<Mask>();
-
-            maskRt.sizeDelta = new Vector2(100, 100);
-
-            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
-
-            yield return null;
-
-            var data = PolySpatialComponentUtils.GetTrackingData(cr);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            // Mask enabled, assert that the masking transform has changed.
-            Assert.IsFalse(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
-
-            mask.enabled = false;
-
-            yield return null;
-
-            data = PolySpatialComponentUtils.GetTrackingData(cr);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            // Mask disabled, assert that the masking transform is back to default and thus no masking is occuring.
-            Assert.IsTrue(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
-
-            Object.Destroy(maskObject);
-        }
-
-        [UnityTest]
-        public IEnumerator Test_RectMask2DEnable_Disable()
-        {
-            var maskObject = CreateMaskedHierarchy<RectMask2D>();
-            var maskRt = maskObject.GetComponent<RectTransform>();
-            var mask = maskObject.GetComponent<RectMask2D>();
-
-            maskRt.sizeDelta = new Vector2(100, 100);
-            mask.padding = new Vector4(10, 10, 10, 10);
-            mask.enabled = true;
-
-            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
-
-            yield return null;
-
-            var data = PolySpatialComponentUtils.GetTrackingData(cr);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            // Mask enabled, assert that the masking transform has changed.
-            Assert.IsFalse(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
-
-            mask.enabled = false;
-
-            yield return null;
-
-            data = PolySpatialComponentUtils.GetTrackingData(cr);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            // Mask disabled, assert that the masking transform is back to default and thus no masking is occuring.
-            Assert.IsTrue(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
-
-            Object.Destroy(maskObject);
-        }
-
-        [UnityTest]
-        public IEnumerator Test_RectMask2DEnable_PSLCompoundCollider_NoNullRef()
-        {
-            var maskObject = CreateMaskedHierarchy<RectMask2D>();
-            var boxCollider = maskObject.AddComponent<BoxCollider>();
-            boxCollider.size = Vector3.one;
-
-            var image = maskObject.AddComponent<Image>();
-            image.raycastTarget = true;
-
-            var maskRt = maskObject.GetComponent<RectTransform>();
-            var mask = maskObject.GetComponent<RectMask2D>();
-
-            maskRt.sizeDelta = new Vector2(100, 100);
-            mask.padding = new Vector4(10, 10, 10, 10);
-            mask.enabled = true;
-
-            yield return null;
-
-            mask.enabled = false;
-
-            yield return null;
-
-            boxCollider.size = Vector3.one * 2;
-
-            yield return null;
-
-            Object.Destroy(maskObject);
         }
     }
 }

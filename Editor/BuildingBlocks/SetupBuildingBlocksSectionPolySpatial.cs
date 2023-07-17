@@ -16,7 +16,7 @@ namespace UnityEditor.PolySpatial.BuildingBlocks
 
         readonly IBuildingBlock[] m_PolySpatialBuildingBlocksElementIds = new IBuildingBlock[]
         {
-            VolumeCameraBuildingBlock.instance
+            new VolumeCameraBuildingBlock()
         };
 
         public IEnumerable<IBuildingBlock> GetBuildingBlocks()
@@ -24,4 +24,5 @@ namespace UnityEditor.PolySpatial.BuildingBlocks
             return m_PolySpatialBuildingBlocksElementIds;
         }
     }
+
 }

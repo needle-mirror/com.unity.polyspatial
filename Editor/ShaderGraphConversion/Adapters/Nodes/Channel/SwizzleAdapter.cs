@@ -12,18 +12,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 var portMap = new Dictionary<string, string>();
                 portMap.Add("In", "in");
+                var nodeData = QuickNode.NaryOp(MtlxNodeTypes.Swizzle, node, graph, externals, "Swizzle", portMap);
 
                 var value = snode.maskInput;
                 var inputType = SlotUtils.GetDataTypeName(NodeUtils.GetPrimaryInput(node));
-
-                // Special case for float -> float, which MaterialX doesn't handle.
-                if (inputType == MtlxDataTypes.Float && value.Length == 1)
-                {
-                    QuickNode.NaryOp(MtlxNodeTypes.Dot, node, graph, externals, "Swizzle", portMap);
-                    return;
-                }
-
-                var nodeData = QuickNode.NaryOp(MtlxNodeTypes.Swizzle, node, graph, externals, "Swizzle", portMap);
 
                 StringBuilder sb = new();
                 if (MtlxDataTypes.IsColor(inputType) && value.Any(c => "xyzw".Contains(c)))

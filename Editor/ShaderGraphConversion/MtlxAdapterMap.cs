@@ -33,7 +33,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
         }
 
-        internal static ISurfaceAdapter surfaceAdapter = new UsdPreviewSurfaceAdapter();
+        private static ISurfaceAdapter surfaceAdapter = new UsdPreviewSurfaceAdapter();
 
         internal static void SetSurfaceAdapter(ISurfaceAdapter adapter)
             => surfaceAdapter = adapter;
@@ -59,12 +59,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
             SubGraphContext sgContext = null)
         {
-            if (IsNodeSupported(node) &&
-                MtlxPostProcessor.AffectsMaterialXOutput(node) &&
-                node is not SubGraphOutputNode) // TODO: just add an adapter that does nothing?
-            {
+            if (IsNodeSupported(node) && node is not SubGraphOutputNode) // TODO: just add an adapter that does nothing?
                 NodeMap[node.GetType()].BuildInstance(node, graph, externals, sgContext);
-            }
         }
 
         internal static void ProcessContext(GraphData graphData, MtlxGraphData graph, ExternalEdgeMap externals)

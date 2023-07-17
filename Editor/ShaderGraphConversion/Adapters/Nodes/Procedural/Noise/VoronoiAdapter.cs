@@ -1,52 +1,36 @@
+
 using System;
-using System.Text;
+using System.Collections.Generic;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     class VoronoiAdapter : AbstractUVNodeAdapter<VoronoiNode>
     {
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
+        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
-            // Reference implementation:
-            // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Voronoi-Node.html
-            QuickNode.CompoundOp(node, graph, externals, sgContext, "Voronoi", $@"
-inline float2 unity_voronoi_noise_randomVector (float2 UV, float offset)
-{{
-    UV = frac(sin(mul(UV, float2x2(15.27, 47.63, 99.41, 89.98))) * 46839.32);
-    return float2(sin(UV.y*+offset)*0.5+0.5, cos(UV.x*offset)*0.5+0.5);
-}}
+            var portMap = new Dictionary<string, string>();
+            portMap.Add("AngleOffset", "jitter");
+            var outputNode = QuickNode.NaryOp(MtlxNodeTypes.WorleyNoise2d, node, graph, externals, "Voronoi", portMap);
 
-void Unity_Voronoi_float(float2 UV, float AngleOffset, float CellDensity, out float Out, out float Cells)
-{{
-    float2 g = floor(UV * CellDensity);
-    float2 f = frac(UV * CellDensity);
-    float t = 8.0;
-    float3 res = float3(8.0, 0.0, 0.0);
-    float2 lattice;
-    float2 offset;
-    float d;
+            // portMap.Add("CellDensity", "amplitude");
+            var cellSlot = NodeUtils.GetSlotByName(node, "CellDensity");
+            var uvSlot = (UVMaterialSlot)NodeUtils.GetSlotByName(node, "UV");
 
-    {((Func<string>)(() => 
-    {
-        // No support for loops in the HLSL parser yet; we have to unroll it into source.
-        StringBuilder steps = new();
-        for (var y = -1; y <= 1; ++y)
-        {
-            for (var x = -1; x <= 1; ++x)
+            var scaleNode = graph.AddNode(NodeUtils.GetNodeName(node, "CellDensity"), MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2);
+            scaleNode.AddPort("in1", MtlxDataTypes.Vector2);
+            scaleNode.AddPortValue("in2", MtlxDataTypes.Float, SlotUtils.GetDefaultValue(cellSlot));
+
+            externals.AddExternalPortAndEdge(uvSlot, scaleNode.name, "in1");
+            externals.AddExternalPortAndEdge(cellSlot, scaleNode.name, "in2");
+
+            graph.AddPortAndEdge(scaleNode.name, outputNode.name, "texcoord", MtlxDataTypes.Vector2);
+
+            if (!uvSlot.isConnected)
             {
-                steps.AppendLine($"lattice = float2({x}, {y});");
-                steps.AppendLine("offset = unity_voronoi_noise_randomVector(lattice + g, AngleOffset);");
-                steps.AppendLine("d = distance(lattice + offset, f);");
-                steps.AppendLine("res = (d < res.x) ? float3(d, offset.x, offset.y) : res;");
+                var uvNode = graph.AddNode(NodeUtils.GetNodeName(node, "GradientNoiseUV"), MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
+                uvNode.AddPortValue("index", MtlxDataTypes.Integer, new float[] { (int)uvSlot.channel });
+                graph.AddEdge(uvNode.name, scaleNode.name, "in1");
             }
-        }
-        return steps.ToString();
-    }))()}
-
-    Out = res.x;
-    Cells = res.y;
-}}", "Unity_Voronoi_float");
         }
     }
 }

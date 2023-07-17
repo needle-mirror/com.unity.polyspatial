@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using Unity.PolySpatial.Internals;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -11,7 +10,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         internal static string GetNodeName(AbstractMaterialNode node, string hint = "")
         {
-            return $"{PolySpatialShaderGraph.SanitizeName(hint)}Node_{node.objectId}";
+            return $"{RemoveWhitespace(hint)}Node_{node.objectId}";
         }
 
         internal static string RemoveWhitespace(string str)
@@ -36,44 +35,32 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return inputs.FirstOrDefault();
         }
 
-        internal static MaterialSlot GetInputByName(
-            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
+        internal static MaterialSlot GetInputByName(AbstractMaterialNode node, string rawDisplayName)
         {
             var inputs = new List<MaterialSlot>();
             node.GetInputSlots(inputs);
-            return GetSlotByName(inputs, rawDisplayName, ignoreWhitespace);
+            return GetSlotByName(inputs, rawDisplayName);
         }
 
-        internal static MaterialSlot GetOutputByName(
-            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
+        internal static MaterialSlot GetOutputByName(AbstractMaterialNode node, string rawDisplayName)
         {
             var outputs = new List<MaterialSlot>();
             node.GetOutputSlots(outputs);
-            return GetSlotByName(outputs, rawDisplayName, ignoreWhitespace);
+            return GetSlotByName(outputs, rawDisplayName);
         }
 
-        internal static MaterialSlot GetSlotByName(
-            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
+        internal static MaterialSlot GetSlotByName(AbstractMaterialNode node, string rawDisplayName)
         {
             var slots = new List<MaterialSlot>();
             node.GetSlots<MaterialSlot>(slots);
-            return GetSlotByName(slots, rawDisplayName, ignoreWhitespace);
+            return GetSlotByName(slots, rawDisplayName);
         }
 
-        static MaterialSlot GetSlotByName(
-            List<MaterialSlot> slots, string rawDisplayName, bool ignoreWhitespace = false)
+        static MaterialSlot GetSlotByName(List<MaterialSlot> slots, string rawDisplayName)
         {
-            var displayName = rawDisplayName;
-            if (ignoreWhitespace)
-                displayName = RemoveWhitespace(displayName);
-
             foreach (var slot in slots)
             {
-                var slotName = slot.RawDisplayName();
-                if (ignoreWhitespace)
-                    slotName = RemoveWhitespace(slotName);
-
-                if (slotName == displayName)
+                if (slot.RawDisplayName() == rawDisplayName)
                     return slot;
             }
             return null;
@@ -85,57 +72,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal static string GetName(MaterialSlot slot)
         {
             return slot.RawDisplayName();
-        }
-
-        internal static ShaderStage GetEffectiveShaderStage(MaterialSlot slot, SubGraphContext sgContext)
-        {
-            if (sgContext == null)
-                return UnityEditor.Graphing.NodeUtils.GetEffectiveShaderStage(slot, false);
-            
-            // Fragment is the default stage, so any occurrence of Vertex means that's the only one we can use.
-            foreach (var edge in slot.owner.owner.GetEdges(slot.slotReference))
-            {
-                switch (edge.inputSlot.node)
-                {
-                    case SubGraphOutputNode:
-                    {
-                        var output = NodeUtils.GetOutputByName(sgContext.Node, edge.inputSlot.slot.RawDisplayName());
-                        if (GetEffectiveShaderStage(output, sgContext.Parent) == ShaderStage.Vertex)
-                            return ShaderStage.Vertex;
-                        break;
-                    }
-                    case var node:
-                    {
-                        List<MaterialSlot> outputs = new();
-                        node.GetOutputSlots(outputs);
-                        foreach (var output in outputs)
-                        {
-                            if (GetEffectiveShaderStage(output, sgContext) == ShaderStage.Vertex)
-                                return ShaderStage.Vertex;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            return ShaderStage.Fragment;
-        }
-
-        internal static TextureSamplerState GetPropertyRedirectedTextureSamplerState(
-            MaterialSlot slot, SubGraphContext sgContext)
-        {
-            var (inputSlot, outputSlot) = GetPropertyRedirectedInputOutputSlots(slot, sgContext);
-            switch (outputSlot?.owner)
-            {
-                case SamplerStateNode samplerStateNode:
-                    return ((SamplerStateShaderProperty)samplerStateNode.AsShaderProperty()).value;
-                
-                case PropertyNode propertyNode:
-                    return ((SamplerStateShaderProperty)propertyNode.property).value;
-                
-                default:
-                    return ((SamplerStateMaterialSlot)inputSlot).defaultSamplerState;
-            }
         }
 
         internal static (MaterialSlot inputSlot, MaterialSlot outputSlot) GetPropertyRedirectedInputOutputSlots(
@@ -189,8 +125,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     ConcreteSlotValueType.Matrix3 => MtlxDataTypes.Matrix33,
                     ConcreteSlotValueType.Matrix4 => MtlxDataTypes.Matrix44,
                     ConcreteSlotValueType.Texture2D => MtlxDataTypes.Filename,
-                    ConcreteSlotValueType.Texture3D => MtlxDataTypes.Filename,
-                    ConcreteSlotValueType.Cubemap => MtlxDataTypes.Filename,
                     ConcreteSlotValueType.Gradient => MtlxDataTypes.Color4Array,
                     _ => null
                 }
@@ -217,92 +151,48 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             switch (slot)
             {
-                case ColorRGBMaterialSlot c3:
-                {
-                    var linearValue = ((Color)(Vector4)c3.value).linear;
-                    return new[] { linearValue.r, linearValue.g, linearValue.b };
-                }
-                case ColorRGBAMaterialSlot c4:
-                {
-                    var linearValue = ((Color)c4.value).linear;
-                    return new[] { linearValue.r, linearValue.g, linearValue.b, linearValue.a };
-                }
-                case BooleanMaterialSlot b:
-                    return new[] { b.value ? 1f : 0f };
 
-                case Vector1MaterialSlot f:
-                    return new[] { f.value };
-
-                case Vector2MaterialSlot v2:
-                    return new[] { v2.value.x, v2.value.y };
-
-                case Vector3MaterialSlot v3:
-                    return new[] { v3.value.x, v3.value.y, v3.value.z };
-
-                case DynamicVectorMaterialSlot vd:
-                    return new[] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
-
-                case Vector4MaterialSlot v4:
-                    return new[] { v4.value.x, v4.value.y, v4.value.z, v4.value.w };
-
-                case Matrix2MaterialSlot m2:
-                    return GetMatrix2Value(m2.value);
-
+                case ColorRGBMaterialSlot c3:       return new float[3] { c3.value.x, c3.value.y, c3.value.z};
+                case ColorRGBAMaterialSlot c4:      return new float[4] { c4.value.x, c4.value.y, c4.value.z, c4.value.w };
+                case BooleanMaterialSlot b:         return new float[1] { b.value ? 1f : 0f };
+                case Vector1MaterialSlot f:         return new float[1] { f.value };
+                case Vector2MaterialSlot v2:        return new float[2] { v2.value.x, v2.value.y };
+                case Vector3MaterialSlot v3:        return new float[3] { v3.value.x, v3.value.y, v3.value.z };
+                case DynamicVectorMaterialSlot vd:  return new float[4] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
+                case Vector4MaterialSlot v4:        return new float[4] { v4.value.x, v4.value.y, v4.value.z, v4.value.w };
                 case Matrix3MaterialSlot m3:
-                    return GetMatrix3Value(m3.value);
-
+                    return new float[9]
+                    {
+                        m3.value.m00, m3.value.m01, m3.value.m02,
+                        m3.value.m10, m3.value.m11, m3.value.m12,
+                        m3.value.m20, m3.value.m21, m3.value.m22,
+                    };
                 case Matrix4MaterialSlot m4:
-                    return GetMatrix4Value(m4.value);
-
+                    return new float[16]
+                    {
+                        m4.value.m00, m4.value.m01, m4.value.m02, m4.value.m03,
+                        m4.value.m10, m4.value.m11, m4.value.m12, m4.value.m13,
+                        m4.value.m20, m4.value.m21, m4.value.m22,m4.value.m23,
+                        m4.value.m30, m4.value.m31, m4.value.m32,m4.value.m33,
+                    };
                 case DynamicMatrixMaterialSlot md:
-                    return GetConcreteValue(md.concreteValueType, md.value);
-                    
+                    return new float[16]
+                    {
+                        md.value.m00, md.value.m01, md.value.m02, md.value.m03,
+                        md.value.m10, md.value.m11, md.value.m12, md.value.m13,
+                        md.value.m20, md.value.m21, md.value.m22, md.value.m23,
+                        md.value.m30, md.value.m31, md.value.m32, md.value.m33,
+                    };
                 case DynamicValueMaterialSlot dv:
-                    return GetConcreteValue(dv.concreteValueType, dv.value);
-
-                default:
-                    return null;
+                    return new float[16]
+                    {
+                        dv.value.m00, dv.value.m01, dv.value.m02, dv.value.m03,
+                        dv.value.m10, dv.value.m11, dv.value.m12, dv.value.m13,
+                        dv.value.m20, dv.value.m21, dv.value.m22, dv.value.m23,
+                        dv.value.m30, dv.value.m31, dv.value.m32, dv.value.m33,
+                    };
+                default: return null;
             }
-        }
-
-        static float[] GetConcreteValue(ConcreteSlotValueType concreteType, Matrix4x4 matrix)
-        {
-            return concreteType switch
-            {
-                ConcreteSlotValueType.Matrix2 => GetMatrix2Value(matrix),
-                ConcreteSlotValueType.Matrix3 => GetMatrix3Value(matrix),
-                _ => GetMatrix4Value(matrix),
-            };
-        }
-
-        static float[] GetMatrix2Value(Matrix4x4 matrix)
-        {
-            return new[]
-            {
-                matrix.m00, matrix.m01,
-                matrix.m10, matrix.m11,
-            };
-        }
-
-        static float[] GetMatrix3Value(Matrix4x4 matrix)
-        {
-            return new[]
-            {
-                matrix.m00, matrix.m01, matrix.m02,
-                matrix.m10, matrix.m11, matrix.m12,
-                matrix.m20, matrix.m21, matrix.m22,
-            };
-        }
-
-        static float[] GetMatrix4Value(Matrix4x4 matrix)
-        {
-            return new[]
-            {
-                matrix.m00, matrix.m01, matrix.m02, matrix.m03,
-                matrix.m10, matrix.m11, matrix.m12, matrix.m13,
-                matrix.m20, matrix.m21, matrix.m22, matrix.m23,
-                matrix.m30, matrix.m31, matrix.m32, matrix.m33,
-            };
         }
     }
 
@@ -317,18 +207,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (!slot.isConnected)
             {
                 var index = (int)slot.channel;
-                var uvRead = CreateUVNode(graph, name, index);
-
-                // Flip V coordinate to get back to Unity coordinate space for processing.
-                var multiplyNode = graph.AddNode($"{name}Multiply", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2);
-                graph.AddPortAndEdge(uvRead.name, multiplyNode.name, "in1", MtlxDataTypes.Vector2);
-                multiplyNode.AddPortValue("in2",  MtlxDataTypes.Vector2, new[] { 1.0f, -1.0f });
-
-                var addNode = graph.AddNode($"{name}Add", MtlxNodeTypes.Add, MtlxDataTypes.Vector2);
-                graph.AddPortAndEdge(multiplyNode.name, addNode.name, "in1", MtlxDataTypes.Vector2);
-                addNode.AddPortValue("in2",  MtlxDataTypes.Vector2, new[] { 0.0f, 1.0f });
-
-                graph.AddPortAndEdge(addNode.name, dstNodeName, dstPortName, MtlxDataTypes.Vector2);
+                var uvRead = graph.AddNode(name, MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
+                uvRead.AddPortValue("index", MtlxDataTypes.Integer, new float[] { index });
+                graph.AddPortAndEdge(uvRead.name, dstNodeName, dstPortName, MtlxDataTypes.Vector2);
             }
             else
             {
@@ -338,23 +219,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     dstNode.AddPort(dstPortName, MtlxDataTypes.Vector2);
                 externals.AddExternalPortAndEdge(slot, dstNodeName, dstPortName);
             }
-        }
-
-        internal static MtlxNodeData CreateUVNode(MtlxGraphData graph, string name, int index)
-        {
-            MtlxNodeData uvRead;
-            if (index == 0)
-            {
-                uvRead = graph.AddNode(name, MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
-                uvRead.AddPortValue("index", MtlxDataTypes.Integer, new float[] { index });
-            }
-            else
-            {
-                // Apple recommends using a primvar reader for UV1.
-                uvRead = graph.AddNode(name, MtlxNodeTypes.UsdPrimvarReader, MtlxDataTypes.Vector2);
-                uvRead.AddPortString("varname", MtlxDataTypes.String, $"vertexUV{index}");
-            }
-            return uvRead;
         }
 
         internal static string GetUVSupportDetails(UVMaterialSlot slot)
@@ -526,40 +390,21 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
 
         // Creates nodes and connections for a compound operation: that is, one that is defined in
-        // terms of simpler nodes.  The expression provided will be parsed using a limited subset of
-        // HLSL and turned into a nodeDefs map.
-        internal static void CompoundOp(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext, 
-            string hint, string expr, string mainFunctionName = null,
-            Dictionary<string, string> inputTypeOverrides = null)
-        {
-            CompoundOp(
-                node, graph, externals, sgContext, hint,
-                CompoundOpParser.Parse(node, sgContext, expr, mainFunctionName, inputTypeOverrides));
-        }
-
-        // Creates nodes and connections for a compound operation: that is, one that is defined in
         // terms of simpler nodes.  The nodeDefs map contains mappings for shader graph outputs
         // ("Out" being the typical name for single outputs) as well as intermediate results used by
         // multiple internal nodes.
         internal static void CompoundOp(
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
-            SubGraphContext sgContext, string hint, Dictionary<string, NodeDef> nodeDefs)
+            string hint, Dictionary<string, NodeDef> nodeDefs)
         {
-            CompoundOpContext ctx = new(node, graph, externals, sgContext, hint, nodeDefs);
+            CompoundOpContext ctx = new(node, graph, externals, hint, nodeDefs);
 
             List<MaterialSlot> outputSlots = new();
             node.GetOutputSlots(outputSlots);
             foreach (var outputSlot in outputSlots)
             {
-                // If we don't find an exact match, try removing whitespace.  Identifiers used in parsed
-                // expressions have to have whitespace removed.
-                var outputName = outputSlot.RawDisplayName();
-                if (nodeDefs.TryGetValue(outputName, out var nodeDef) ||
-                    nodeDefs.TryGetValue(NodeUtils.RemoveWhitespace(outputName), out nodeDef))
-                {
-                    nodeDef.AddNodesAndEdges(ctx, outputName);
-                }
+                if (nodeDefs.TryGetValue(outputSlot.RawDisplayName(), out var nodeDef))
+                    nodeDef.AddNodesAndEdges(ctx, outputSlot.RawDisplayName());
             }
         }
     }

@@ -1,0 +1,70 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_combine4 name = "Construction4x4Node_727545e42c6f4abab97afb399dac8017" type = "matrix44">
+        <input name = "in1" type = "vector4" nodename = "Vector4Node_636db6a3a8744712a28a76483ab81f2f" />
+        <input name = "in2" type = "vector4" nodename = "Vector4Node_0eb5cd0ecd4144cfac282474424cb516" />
+        <input name = "in3" type = "vector4" value = "0,0,1,0" />
+        <input name = "in4" type = "vector4" value = "0,0,0,1" />
+    </realitykit_combine4>
+    <transpose name = "TransposeNode_727545e42c6f4abab97afb399dac8017" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "Construction4x4Node_727545e42c6f4abab97afb399dac8017" />
+    </transpose>
+    <transformmatrix name = "MultiplyNode_77bc853857ef41a88921cf44bc9220d9" type = "vector4">
+        <input name = "mat" type = "matrix44" nodename = "TransposeNode_727545e42c6f4abab97afb399dac8017" />
+        <input name = "in" type = "vector4" nodename = "Vector4Node_a8619638241a49d3b179a3eab7077a2d" />
+    </transformmatrix>
+    <combine4 name = "Vector4Node_a8619638241a49d3b179a3eab7077a2d" type = "vector4">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "1" />
+    </combine4>
+    <combine4 name = "Vector4Node_636db6a3a8744712a28a76483ab81f2f" type = "vector4">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <combine4 name = "Vector4Node_0eb5cd0ecd4144cfac282474424cb516" type = "vector4">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <GeometryModification name = "SR_MatrixVertex" type = "vertexshader">
+        <input name = "modelPositionOffset" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" />
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Matrix" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Matrix_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Matrix" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_MatrixVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Matrix" />
+    </surfacematerial>
+    <subtract name = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in2" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_Position" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" />
+    </subtract>
+    <position name = "SR_MatrixVertex_modelPositionOffset_Position" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <subtract name = "SR_Matrix_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "MultiplyNode_77bc853857ef41a88921cf44bc9220d9" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

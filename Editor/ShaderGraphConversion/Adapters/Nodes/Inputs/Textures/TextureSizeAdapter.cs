@@ -25,8 +25,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (!graph.HasNode(textureSizeNodeName))
             {
                 var nodeData = graph.AddNode(
-                    textureSizeNodeName, MtlxNodeTypes.Constant, MtlxDataTypes.Vector3, !isSystemInput, isSystemInput);
-                nodeData.AddPortValue("value", MtlxDataTypes.Vector3, new float[3]);
+                    textureSizeNodeName, MtlxNodeTypes.Constant, MtlxDataTypes.Vector4, !isSystemInput, isSystemInput);
+                nodeData.AddPortValue("value", MtlxDataTypes.Vector4, new float[4]);
             }
             return textureSizeNodeName;
         }
@@ -36,8 +36,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return $"TextureSize{texturePropertyName}";
         }
 
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
+        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
             // Unconnected texture slots correspond to implicit properties.
             var slot = NodeUtils.GetPrimaryInput(node);
@@ -46,29 +45,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
     
             var sizeNodeName = EnsureTextureSizeProperty(slot, graph);
 
-            QuickNode.CompoundOp(node, graph, externals, sgContext, "TextureSize", new()
-            {
-                ["Width"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
-                {
-                    ["in"] = new ImplicitInputDef(sizeNodeName, MtlxDataTypes.Vector3),
-                    ["channels"] = new StringInputDef("x"),
-                }),
-                ["Height"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
-                {
-                    ["in"] = new ImplicitInputDef(sizeNodeName, MtlxDataTypes.Vector3),
-                    ["channels"] = new StringInputDef("y"),
-                }),
-                ["Texel Width"] = new(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
-                {
-                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
-                    ["in2"] = new InternalInputDef("Width"),
-                }),
-                ["Texel Height"] = new(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
-                {
-                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
-                    ["in2"] = new InternalInputDef("Height"),
-                }),
-            });
+            var channelNames = new[] { ("x", "Width"), ("y", "Height"), ("z", "Texel Width"), ("w", "Texel Height") };
+            foreach (var (channel, name) in channelNames) {
+                var nodeName = NodeUtils.GetNodeName(node, name);
+                var nodeData = graph.AddNode(nodeName, MtlxNodeTypes.Swizzle, MtlxDataTypes.Float);
+                graph.AddPortAndEdge(sizeNodeName, nodeName, "in", MtlxDataTypes.Vector4);
+                nodeData.AddPortString("channels", MtlxDataTypes.String, channel);
+                externals.AddExternalPort(NodeUtils.GetOutputByName(node, name).slotReference, nodeName);
+            }
         }
     }
 }

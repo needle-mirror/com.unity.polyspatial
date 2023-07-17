@@ -13,14 +13,40 @@ namespace UnityEditor.ShaderGraph.MaterialX
 #endif
         }
 
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
+        protected override string NodeType => MtlxNodeTypes.RealityKitImageLod;
+
+        protected override TextureType GetTextureType(SampleTexture2DLODNode node)
         {
-            // Reference implementation:
-            // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Sample-Texture-2D-LOD-Node.html
-            QuickNode.CompoundOp(
-                node, graph, externals, sgContext, "SampleTexture2DLOD",
-                GetExpr("SAMPLE_TEXTURE2D_LOD(Texture, Sampler, UV, LOD)", ((SampleTexture2DLODNode)node).textureType));
+            return node.textureType;
+        }
+
+        protected override void AddSamplerState(MtlxNodeData nodeData, TextureSamplerState samplerState)
+        {
+            var filterType = samplerState.filter switch
+            {
+                TextureSamplerState.FilterMode.Point => "nearest",
+                _ => "linear",
+            };
+            nodeData.AddPortString("mag_filter", MtlxDataTypes.String, filterType);
+            nodeData.AddPortString("min_filter", MtlxDataTypes.String, filterType);
+            nodeData.AddPortString("mip_filter", MtlxDataTypes.String, filterType);
+
+            var addressMode = samplerState.wrap switch
+            {
+                TextureSamplerState.WrapMode.Clamp => "clamp_to_edge",
+                TextureSamplerState.WrapMode.Mirror => "mirrored_repeat",
+                _ => "repeat",
+            };
+            nodeData.AddPortString("s_address", MtlxDataTypes.String, addressMode);
+            nodeData.AddPortString("t_address", MtlxDataTypes.String, addressMode);
+        }
+
+        protected override void AddInputSlot(MtlxNodeData nodeData, MaterialSlot slot, ref string externalPortName)
+        {
+            if (slot.RawDisplayName() == "LOD")
+                nodeData.AddPortValue(externalPortName = "level", MtlxDataTypes.Float, SlotUtils.GetDefaultValue(slot));
+            else
+                base.AddInputSlot(nodeData, slot, ref externalPortName);
         }
     }
 }

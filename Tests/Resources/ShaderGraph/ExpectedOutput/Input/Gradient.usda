@@ -1,0 +1,285 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_Gradient"
+        {
+
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Gradient/realitykit_unlit.outputs:surface>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Gradient/GeometryModifier.outputs:vertex>
+
+            def Shader "realitykit_unlit"
+            {
+                uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                bool inputs:applyPostProcessToneMap = 0
+                color3f inputs:color.connect = </MaterialX/Materials/USD_Gradient/CastSwizzleFromTriWaveNode_a254a47e33b7400886125f6815e8a91bToSR_Gradientcolor.outputs:out>
+                float inputs:opacity = 1
+                float inputs:opacityThreshold = 0
+                token outputs:surface
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:vertex
+            }
+
+            def Shader "CastSwizzleFromTriWaveNode_a254a47e33b7400886125f6815e8a91bToSR_Gradientcolor"
+            {
+                uniform token info:id = "ND_swizzle_vector4_color3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91b.outputs:out>
+                string inputs:channels = "xyz"
+                color3f outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91b"
+            {
+                uniform token info:id = "ND_subtract_vector4"
+                float4 inputs:in1.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bMul.outputs:out>
+                float4 inputs:in2 = (1, 1, 1, 1)
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bMul"
+            {
+                uniform token info:id = "ND_multiply_vector4"
+                float4 inputs:in1 = (2, 2, 2, 2)
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bAbs.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bAbs"
+            {
+                uniform token info:id = "ND_absval_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInMul.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bInMul"
+            {
+                uniform token info:id = "ND_multiply_vector4"
+                float4 inputs:in1 = (2, 2, 2, 2)
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInSub.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bInSub"
+            {
+                uniform token info:id = "ND_subtract_vector4"
+                float4 inputs:in1.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInput.outputs:out>
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInFloor.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bInput"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Gradient/AddNode_a52f28d75c194134add4a2476d705718.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "AddNode_a52f28d75c194134add4a2476d705718"
+            {
+                uniform token info:id = "ND_add_vector4"
+                float4 inputs:in1.connect = </MaterialX/Materials/USD_Gradient/CastSwizzleFromSampleGradient_OutNode_34c2dcec38d24e8e8cef6ff60482c724ToAddNode_a52f28d75c194134add4a2476d705718in1.outputs:out>
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_Gradient/CastSwizzleFromSampleGradient_OutNode_070b789b9272482d8cd10de2fd5757ddToAddNode_a52f28d75c194134add4a2476d705718in2.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "CastSwizzleFromSampleGradient_OutNode_34c2dcec38d24e8e8cef6ff60482c724ToAddNode_a52f28d75c194134add4a2476d705718in1"
+            {
+                uniform token info:id = "ND_swizzle_color4_vector4"
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_OutNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                string inputs:channels = "rgba"
+                float4 outputs:out
+            }
+
+            def Shader "SampleGradient_OutNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_combine2_color4CF"
+                color3f inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1Node_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2Node_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                color4f outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1Node_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_mix_color3"
+                color3f inputs:fg = (0, 0, 0)
+                color3f inputs:bg = (1, 1, 1)
+                float inputs:mix.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mixNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                color3f outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mixNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mix_inNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mix_inNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mix_in_in1Node_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mix_in_in1Node_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_TimeNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float inputs:in2 = 0
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_TimeNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.9
+                float outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bInFloor"
+            {
+                uniform token info:id = "ND_floor_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInAdd.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "TriWaveNode_a254a47e33b7400886125f6815e8a91bInAdd"
+            {
+                uniform token info:id = "ND_add_vector4"
+                float4 inputs:in1 = (0.5, 0.5, 0.5, 0.5)
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_Gradient/TriWaveNode_a254a47e33b7400886125f6815e8a91bInput.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "CastSwizzleFromSampleGradient_OutNode_070b789b9272482d8cd10de2fd5757ddToAddNode_a52f28d75c194134add4a2476d705718in2"
+            {
+                uniform token info:id = "ND_swizzle_color4_vector4"
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_OutNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                string inputs:channels = "rgba"
+                float4 outputs:out
+            }
+
+            def Shader "SampleGradient_OutNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_combine2_color4CF"
+                color3f inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1Node_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2Node_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                color4f outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2Node_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_mix_float"
+                float inputs:fg = 1
+                float inputs:bg = 1
+                float inputs:mix.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mixNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mixNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mix_inNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mix_inNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mix_in_in1Node_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mix_in_in1Node_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_TimeNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float inputs:in2 = 0
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_TimeNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.3
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1Node_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_mix_color3"
+                color3f inputs:fg = (1, 1, 1)
+                color3f inputs:bg = (0, 0, 0)
+                float inputs:mix.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mixNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                color3f outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mixNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mix_inNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mix_inNode_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in1_mix_in_in1Node_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in1_mix_in_in1Node_070b789b9272482d8cd10de2fd5757dd"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_TimeNode_070b789b9272482d8cd10de2fd5757dd.outputs:out>
+                float inputs:in2 = 0
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2Node_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_mix_float"
+                float inputs:fg = 1
+                float inputs:bg = 1
+                float inputs:mix.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mixNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mixNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mix_inNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mix_inNode_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_Out_in2_mix_in_in1Node_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "SampleGradient_Out_in2_mix_in_in1Node_34c2dcec38d24e8e8cef6ff60482c724"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Gradient/SampleGradient_TimeNode_34c2dcec38d24e8e8cef6ff60482c724.outputs:out>
+                float inputs:in2 = 0
+                float outputs:out
+            }
+        }
+    }
+}

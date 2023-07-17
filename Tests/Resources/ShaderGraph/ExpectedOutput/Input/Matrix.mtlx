@@ -1,0 +1,60 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_surface_world_to_view name = "TransformViewNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    </realitykit_surface_world_to_view>
+    <realitykit_surface_view_to_projection name = "TransformProjectionNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    </realitykit_surface_view_to_projection>
+    <multiply name = "TransformViewProjection" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformViewNode_7780a58ea00644f7be6a295a348a1d6c" />
+        <input name = "in2" type = "matrix44" nodename = "TransformProjectionNode_7780a58ea00644f7be6a295a348a1d6c" />
+    </multiply>
+    <invertmatrix name = "TransformViewProjectionInverse" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "TransformViewProjection" />
+    </invertmatrix>
+    <transformmatrix name = "MultiplyNode_93a4700a498545e49d6ec8dbf4e6a195" type = "vector4">
+        <input name = "mat" type = "matrix44" nodename = "TransformViewProjectionInverse" />
+        <input name = "in" type = "vector4" nodename = "Vector4Node_f490c91f9b2040c0ac2f02cc1ab9f90e" />
+    </transformmatrix>
+    <combine4 name = "Vector4Node_f490c91f9b2040c0ac2f02cc1ab9f90e" type = "vector4">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "1" />
+    </combine4>
+    <GeometryModification name = "SR_MatrixVertex" type = "vertexshader">
+        <input name = "modelPositionOffset" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" />
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Matrix" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Matrix_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Matrix" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_MatrixVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Matrix" />
+    </surfacematerial>
+    <subtract name = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in2" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_Position" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" />
+    </subtract>
+    <position name = "SR_MatrixVertex_modelPositionOffset_Position" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <subtract name = "SR_Matrix_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "MultiplyNode_93a4700a498545e49d6ec8dbf4e6a195" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

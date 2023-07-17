@@ -28,7 +28,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             // offset input
             addNode.AddPortValue("in2", MtlxDataTypes.Vector2, SlotUtils.GetDefaultValue(offsetSlot));
-            externals.AddExternalPortAndEdge(offsetSlot, addNode.name, "in2");
+            externals.AddExternalPortAndEdge(offsetSlot, mulNode.name, "in2");
 
             externals.AddExternalPort(outputSlot.slotReference, addNode.name);
         }

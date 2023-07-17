@@ -1,15 +1,17 @@
+
+using System;
+using System.Collections.Generic;
 using Unity.PolySpatial;
-using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
-    class ViewDirectionAdapter : GeometryVectorAdapter<ViewDirectionNode>
+    class ViewDirectionAdapter : ANodeAdapter<ViewDirectionNode>
     {
-#if DISABLE_MATERIALX_EXTENSIONS
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
             if (node is ViewDirectionNode vdNode)
             {
+
                 QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.WorldSpaceCameraPos, MtlxDataTypes.Vector3, graph);
                 QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.WorldSpaceCameraDir, MtlxDataTypes.Vector3, graph);
                 QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.OrthoParams, MtlxDataTypes.Vector4, graph);
@@ -60,24 +62,5 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, outputNode.name);
             }
         }
-#else
-        public override void BuildInstance(
-            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
-        {
-            if (((ViewDirectionNode)node).space != CoordinateSpace.Tangent)
-            {
-                base.BuildInstance(node, graph, externals, sgContext);
-                return;
-            }
-            // Special handling for tangent space view directions, which don't provide what we'd expect on
-            // RealityKit (reported to Apple as FB13683686).  We transform the world space view direction by
-            // the world-to-tangent matrix.
-            QuickNode.CompoundOp(node, graph, externals, sgContext, "ViewDirection", @"
-Out = normalize(mul(polySpatial_WorldToTangent, float4(polySpatial_WorldSpaceViewDirection, 0)).xyz);");
-        }
-#endif
-
-        protected override string Hint => "ViewDirection";
-        protected override string NodeType => MtlxNodeTypes.RealityKitViewDirection;
     }
 }

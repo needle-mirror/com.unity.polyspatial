@@ -3,7 +3,7 @@ using System.Linq;
 using Unity.PolySpatial.Internals;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
+using UnityEditor.PolySpatial.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation
@@ -57,20 +57,13 @@ namespace UnityEditor.PolySpatial.Validation
 
             rule.CheckPredicate = () =>
             {
-                // need to check the layer name every time, as it might have changed by the users
-                var polySpatialLayer = LayerMask.NameToLayer(PolySpatialUnityBackend.PolySpatialLayerName);
-
-                // is there a PolySpatial layer at all?
-                if (polySpatialLayer == -1)
-                    return true;
-
                 var go = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
                 if (go == null)
                     return true;
 
                 // Update the rule messages to keep it synced with the game object name.
                 UpdateRuleMessages(rule, go.name);
-                return go.layer != polySpatialLayer;
+                return go.layer != LayerMask.NameToLayer(PolySpatialCore.PolySpatialLayerName);
             };
 
             UpdateRuleMessages(rule, gameObject.name);

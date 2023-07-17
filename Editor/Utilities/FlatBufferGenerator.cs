@@ -9,7 +9,7 @@ namespace UnityEditor.PolySpatial.Utilities
     static class FlatBufferGenerator
     {
 #if POLYSPATIAL_INTERNAL
-        [MenuItem("Tools/Generate PolySpatial API", false, 100)]
+        [MenuItem("Window/PolySpatial/Generate PolySpatial API")]
 #endif
         static void Generate()
         {

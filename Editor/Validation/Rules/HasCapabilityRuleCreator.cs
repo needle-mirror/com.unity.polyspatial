@@ -13,8 +13,8 @@ namespace UnityEditor.PolySpatial.Validation
     /// Class that creates validation rules to check if any selected <see cref="CapabilityProfile"/> in <see cref="CapabilityProfileSelection"/> have a
     /// specific capability.
     /// </summary>
-    /// <seealso cref="StandardCapabilityKeys"/>
-    internal sealed class HasCapabilityRuleCreator : IComponentRuleCreator
+    /// <seealso cref="XRInputCapabilityKeys"/>
+    public sealed class HasCapabilityRuleCreator : IComponentRuleCreator
     {
         const string k_MessageFormat = "The {0} profile(s) don't support the <b>\"{1}\"</b> capability and the <b>{2}</b> component will not work properly.";
         const string k_RemoveMessageFormat = "Remove the <b>{0}</b> component.";

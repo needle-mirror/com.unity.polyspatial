@@ -1,0 +1,223 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_Vector"
+        {
+
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Vector/UsdPreviewSurface.outputs:surface>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Vector/GeometryModifier.outputs:vertex>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Vector/CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor.outputs:out>
+                float inputs:metallic = 0
+                color3f inputs:emissiveColor = (0, 0, 0)
+                float inputs:occlusion = 1
+                int inputs:useSpecularWorkflow = 0
+                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:roughness.connect = </MaterialX/Materials/USD_Vector/SR_Vector_roughness_OnesComplement.outputs:out>
+                float inputs:clearcoat = 0
+                float inputs:clearcoatRoughness = 0.01
+                float inputs:opacity = 1
+                float inputs:opacityThreshold = 0
+                float inputs:ior = 1.4
+                token outputs:surface
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:vertex
+            }
+
+            def Shader "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor"
+            {
+                uniform token info:id = "ND_swizzle_float_color3"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                string inputs:channels = "xxx"
+                color3f outputs:out
+            }
+
+            def Shader "FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_power_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_Out_in1Node_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_PowerNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_Out_in1Node_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_Out_in1_in2Node_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_Out_in1_in2Node_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_Out_in1_in2_inNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_Out_in1_in2_inNode_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_Out_in1_in2_in_in1Node_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_Out_in1_in2_in_in2Node_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_Out_in1_in2_in_in1Node_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_normalize_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "FresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/CastSwizzleFromDistance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5ToFresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238in.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "CastSwizzleFromDistance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5ToFresnelEffect_NormalNode_752d003d78d94e6cb3a31fbf94058238in"
+            {
+                uniform token info:id = "ND_swizzle_float_vector3"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/Distance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5.outputs:out>
+                string inputs:channels = "xxx"
+                float3 outputs:out
+            }
+
+            def Shader "Distance_OutNode_ddb3c15bf45c46ab92e58786dcc187e5"
+            {
+                uniform token info:id = "ND_magnitude_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Distance_Out_inNode_ddb3c15bf45c46ab92e58786dcc187e5.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Distance_Out_inNode_ddb3c15bf45c46ab92e58786dcc187e5"
+            {
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Distance_ANode_ddb3c15bf45c46ab92e58786dcc187e5.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Distance_BNode_ddb3c15bf45c46ab92e58786dcc187e5.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Distance_ANode_ddb3c15bf45c46ab92e58786dcc187e5"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_2cd1538b938a49e4bdc51fd66d66e086.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Vector3Node_2cd1538b938a49e4bdc51fd66d66e086"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1 = 1
+                float inputs:in2 = 1
+                float inputs:in3 = 1
+                float3 outputs:out
+            }
+
+            def Shader "SR_Vector_roughness_OnesComplement"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2 = 0.5
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_PowerNode_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/Distance_OutNode_a8dd24a2374443c5be12903490b163fa.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Distance_OutNode_a8dd24a2374443c5be12903490b163fa"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/Distance_Out_inNode_a8dd24a2374443c5be12903490b163fa.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Distance_Out_inNode_a8dd24a2374443c5be12903490b163fa"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/Distance_ANode_a8dd24a2374443c5be12903490b163fa.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/Distance_BNode_a8dd24a2374443c5be12903490b163fa.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Distance_BNode_a8dd24a2374443c5be12903490b163fa"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
+                float outputs:out
+            }
+
+            def Shader "Distance_ANode_a8dd24a2374443c5be12903490b163fa"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector1Node_d168998b7bff466cb1a90ed120c96fee.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Vector1Node_d168998b7bff466cb1a90ed120c96fee"
+            {
+                uniform token info:id = "ND_constant_float"
+                float inputs:value = 1
+                float outputs:out
+            }
+
+            def Shader "FresnelEffect_Out_in1_in2_in_in2Node_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_normalize_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in = (0, 0, 0)
+                float3 outputs:out
+            }
+
+            def Shader "Distance_BNode_ddb3c15bf45c46ab92e58786dcc187e5"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/ReflectionNode_b2353c5a0ecd419281113a88cce9dd01.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "ReflectionNode_b2353c5a0ecd419281113a88cce9dd01"
+            {
+                uniform token info:id = "ND_realitykit_reflect_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_ed4eebc8e3504810ac1f2fab59328cc2.outputs:out>
+                float3 inputs:normal = (0, 1, 0)
+                float3 outputs:out
+            }
+
+            def Shader "Vector3Node_ed4eebc8e3504810ac1f2fab59328cc2"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1 = 0
+                float inputs:in2 = 1
+                float inputs:in3 = 0
+                float3 outputs:out
+            }
+        }
+    }
+}

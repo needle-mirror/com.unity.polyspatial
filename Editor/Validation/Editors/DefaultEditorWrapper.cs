@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils.Capabilities.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
+using UnityEditor.PolySpatial.Capabilities;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
 
@@ -80,9 +80,9 @@ namespace UnityEditor.PolySpatial.Validation
 
         void DrawDefaultEditorNested()
         {
-            m_ShowDefaultEditor.Value = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowDefaultEditor.Value, k_DefaultInspectorFoldoutLabel);
+            m_ShowDefaultEditor.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowDefaultEditor.value, k_DefaultInspectorFoldoutLabel);
             EditorGUILayout.EndFoldoutHeaderGroup();
-            if (!m_ShowDefaultEditor.Value)
+            if (!m_ShowDefaultEditor.value)
                 return;
 
             // EditorGUI.indentLevel does not play nice with FoldoutHeaderGroups, so we use Vertical and Horizontal layout groups to ensure consistent layout.

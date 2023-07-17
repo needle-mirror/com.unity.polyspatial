@@ -1,0 +1,281 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_UV"
+        {
+
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_UV/realitykit_unlit.outputs:surface>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_UV/GeometryModifier.outputs:vertex>
+
+            def Shader "realitykit_unlit"
+            {
+                uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                bool inputs:applyPostProcessToneMap = 0
+                color3f inputs:color.connect = </MaterialX/Materials/USD_UV/CastConvertFinalFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor.outputs:out>
+                float inputs:opacity = 1
+                float inputs:opacityThreshold = 0
+                token outputs:surface
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:vertex
+            }
+
+            def Shader "CastConvertFinalFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor"
+            {
+                uniform token info:id = "ND_combine3_color3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/CastSwizzle1FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/CastSwizzle2FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor.outputs:out>
+                float inputs:in3 = 0
+                color3f outputs:out
+            }
+
+            def Shader "CastSwizzle1FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor"
+            {
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/RotateOutputNode_ffb23436d9574dbdb1940f539bd09cba.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "RotateOutputNode_ffb23436d9574dbdb1940f539bd09cba"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_UV/RotateNode_ffb23436d9574dbdb1940f539bd09cba.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba"
+            {
+                uniform token info:id = "ND_constant_vector2"
+                float2 inputs:value = (0, 0)
+                float2 outputs:out
+            }
+
+            def Shader "CastSwizzle2FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor"
+            {
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "RotateNode_ffb23436d9574dbdb1940f539bd09cba"
+            {
+                uniform token info:id = "ND_rotate2d_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/RotateOffsetNode_ffb23436d9574dbdb1940f539bd09cba.outputs:out>
+                float inputs:amount = 270
+                float2 outputs:out
+            }
+
+            def Shader "RotateOffsetNode_ffb23436d9574dbdb1940f539bd09cba"
+            {
+                uniform token info:id = "ND_subtract_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/TilingAndOffsetAddNode_4470133616aa40f893dd96fda2d90164.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_UV/RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "TilingAndOffsetAddNode_4470133616aa40f893dd96fda2d90164"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/TilingAndOffsetMulNode_4470133616aa40f893dd96fda2d90164.outputs:out>
+                float2 inputs:in2 = (0.5, 0.5)
+                float2 outputs:out
+            }
+
+            def Shader "TilingAndOffsetMulNode_4470133616aa40f893dd96fda2d90164"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_OutNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 inputs:in2 = (0.5, 0.5)
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_OutNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_Out_in1Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_Out_in1Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_UVNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_Out_in1_in2Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_UVNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/Vector2Node_83d395866e7446498e93265910d7baf1.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Vector2Node_83d395866e7446498e93265910d7baf1"
+            {
+                uniform token info:id = "ND_combine2_vector2"
+                float inputs:in1 = 0.5
+                float inputs:in2 = 0.5
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_divide_vector2"
+                float2 inputs:in1 = (1, 1)
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileCount_in2Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_TileCount_in2Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_combine2_vector2"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 1
+                float outputs:out
+            }
+
+            def Shader "Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 1
+                float outputs:out
+            }
+
+            def Shader "Flipbook_Out_in1_in2Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_combine2_vector2"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_TileXNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileYNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "Flipbook_TileXNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_UV/Flipbook_TileX_inNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileX_inNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_TileX_in_in1Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileX_in_in1Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_floor_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_UV/Flipbook_TileFloor_inNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileFloor_inNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileFloor_in_in2Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileFloor_in_in2Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_UV/Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileYNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_UV/Flipbook_TileY_inNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileY_inNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_TileY_in_in2Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileY_in_in2Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_modulo_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_WrappedTile_in1Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_WrappedTile_in2Node_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_WrappedTile_in1Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_floor_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_UV/Flipbook_TileNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Flipbook_TileNode_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
+                float outputs:out
+            }
+
+            def Shader "Flipbook_WrappedTile_in2Node_00b2df0a2ea04feca9efc70acf418fad"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_UV/Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_UV/Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad.outputs:out>
+                float outputs:out
+            }
+        }
+    }
+}

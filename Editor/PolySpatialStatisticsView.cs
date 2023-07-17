@@ -78,9 +78,7 @@ namespace UnityEditor.PolySpatial.Internals
     {
         bool isPlaying = false;
 
-#if POLYSPATIAL_INTERNAL
         [MenuItem("Window/PolySpatial/Statistics")]
-#endif
         private static void ShowWindow()
         {
             var window = GetWindow<statsView>();

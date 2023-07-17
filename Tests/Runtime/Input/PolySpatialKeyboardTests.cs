@@ -64,10 +64,8 @@ namespace Tests.Runtime.Functional.Input
         unsafe void SendEvents(char key)
         {
             NativeArray<char> events = new(1, Allocator.Temp);
-             events[0] = key;
-             var port = 0;
-             var type = PolySpatialInputType.Character;
-            PolySpatialCore.HostMulticastHandler?.HostCommand(PolySpatialHostCommand.InputEvent, &type, &port, events.AsSpan());
+            events[0] = key;
+            PolySpatialSimulationHostImpl.SimHostOnInputEvent(PolySpatialInputType.Character, events.Length, events.GetUnsafePtr());
             events.Dispose();
         }
     }

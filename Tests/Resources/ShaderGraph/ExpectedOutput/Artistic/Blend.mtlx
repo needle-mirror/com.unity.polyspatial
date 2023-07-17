@@ -1,0 +1,334 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <difference name = "BlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </difference>
+    <minus name = "BlendNode_26c30eb78b294882af31226cec7363e0" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_26c30eb78b294882af31226cec7363e0fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </minus>
+    <burn name = "BlendNode_fd72c3e7bcf04c89b737d1261443b481" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_fd72c3e7bcf04c89b737d1261443b481fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </burn>
+    <overlay name = "BlendNode_3350e7c65ced4984982d3835565b3870" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_3350e7c65ced4984982d3835565b3870fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </overlay>
+    <plus name = "BlendNode_13995735cb1949ec9173c8b55b84ef17" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_13995735cb1949ec9173c8b55b84ef17fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </plus>
+    <dodge name = "BlendNode_741535be9d634b2fab643f758675a714" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_741535be9d634b2fab643f758675a714fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </dodge>
+    <screen name = "BlendNode_bd64a4e24475466a881ab9effdca912f" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_bd64a4e24475466a881ab9effdca912ffg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </screen>
+    <mix name = "BlendNode_3eeb67c46e7845f4a6c3641fe1a0340b" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bfg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </mix>
+    <screen name = "BlendNode_159a88e9544a4a15881838068db4cff8" type = "color3">
+        <input name = "bg" type = "color3" nodename = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" />
+        <input name = "fg" type = "color3" nodename = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_159a88e9544a4a15881838068db4cff8fg" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </screen>
+    <combine3 name = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" type = "vector3">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <combine2 name = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" type = "vector2">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+    </combine2>
+    <multiply name = "MultiplyNode_fcb33c623a2a41c2857a45eff8f62403" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "CastSwizzleFromBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4ToMultiplyNode_fcb33c623a2a41c2857a45eff8f62403in1" />
+        <input name = "in2" type = "vector2" nodename = "CastSwizzleFromBlendNode_26c30eb78b294882af31226cec7363e0ToMultiplyNode_fcb33c623a2a41c2857a45eff8f62403in2" />
+    </multiply>
+    <multiply name = "MultiplyNode_74072703c9634c42a8a677b84bc3b39d" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "CastSwizzleFromBlendNode_13995735cb1949ec9173c8b55b84ef17ToMultiplyNode_74072703c9634c42a8a677b84bc3b39din1" />
+        <input name = "in2" type = "vector2" nodename = "CastSwizzleFromBlendNode_741535be9d634b2fab643f758675a714ToMultiplyNode_74072703c9634c42a8a677b84bc3b39din2" />
+    </multiply>
+    <multiply name = "MultiplyNode_124802c4a1ea4c35990edee6340b63ea" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "CastSwizzleFromBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bToMultiplyNode_124802c4a1ea4c35990edee6340b63eain1" />
+        <input name = "in2" type = "vector2" nodename = "CastSwizzleFromBlendNode_bd64a4e24475466a881ab9effdca912fToMultiplyNode_124802c4a1ea4c35990edee6340b63eain2" />
+    </multiply>
+    <multiply name = "MultiplyNode_1b8d10128ef24f37b9458b4da88ea93f" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "MultiplyNode_fcb33c623a2a41c2857a45eff8f62403" />
+        <input name = "in2" type = "vector2" nodename = "CastSwizzleFromBlendNode_fd72c3e7bcf04c89b737d1261443b481ToMultiplyNode_1b8d10128ef24f37b9458b4da88ea93fin2" />
+    </multiply>
+    <multiply name = "MultiplyNode_52fcaac855794fedb2086a79967a65c8" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "MultiplyNode_74072703c9634c42a8a677b84bc3b39d" />
+        <input name = "in2" type = "vector2" nodename = "CastSwizzleFromBlendNode_3350e7c65ced4984982d3835565b3870ToMultiplyNode_52fcaac855794fedb2086a79967a65c8in2" />
+    </multiply>
+    <multiply name = "MultiplyNode_da5c7173406c4049b4c4c8de08afbd77" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "CastSwizzleFromBlendNode_159a88e9544a4a15881838068db4cff8ToMultiplyNode_da5c7173406c4049b4c4c8de08afbd77in1" />
+        <input name = "in2" type = "vector2" nodename = "MultiplyNode_124802c4a1ea4c35990edee6340b63ea" />
+    </multiply>
+    <add name = "AddNode_d17317d6d1bc431fb5aaef7eed8654e3" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "MultiplyNode_52fcaac855794fedb2086a79967a65c8" />
+        <input name = "in2" type = "vector2" nodename = "MultiplyNode_da5c7173406c4049b4c4c8de08afbd77" />
+    </add>
+    <add name = "AddNode_f70cdec27f294523b79163244ae1e67a" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "MultiplyNode_1b8d10128ef24f37b9458b4da88ea93f" />
+        <input name = "in2" type = "vector2" nodename = "AddNode_d17317d6d1bc431fb5aaef7eed8654e3" />
+    </add>
+    <clamp name = "SaturateNode_0961bf8f24c743c0b59554010c6c2f7a" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "AddNode_f70cdec27f294523b79163244ae1e67a" />
+    </clamp>
+    <combine4 name = "CombineNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "color4">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" nodename = "SwizzleNode_acd8b1aa1dcd49a896e75fa9b607dc26" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <swizzle name = "SwizzleNode_acd8b1aa1dcd49a896e75fa9b607dc26" type = "float">
+        <input name = "in" type = "vector2" nodename = "SaturateNode_0961bf8f24c743c0b59554010c6c2f7a" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <GeometryModification name = "SR_BlendVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_Blend" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Blend" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_BlendVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Blend" />
+    </surfacematerial>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_26c30eb78b294882af31226cec7363e0bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_26c30eb78b294882af31226cec7363e0fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_fd72c3e7bcf04c89b737d1261443b481bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_fd72c3e7bcf04c89b737d1261443b481fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3350e7c65ced4984982d3835565b3870bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_3350e7c65ced4984982d3835565b3870fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_13995735cb1949ec9173c8b55b84ef17bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_13995735cb1949ec9173c8b55b84ef17fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_741535be9d634b2fab643f758675a714bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_741535be9d634b2fab643f758675a714fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_bd64a4e24475466a881ab9effdca912fbg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_bd64a4e24475466a881ab9effdca912ffg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bbg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bfg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <dot name = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_c9753e07769e4da3a9f7150296bbee2c" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromVector2Node_c9753e07769e4da3a9f7150296bbee2cToBlendNode_159a88e9544a4a15881838068db4cff8bg" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromVector3Node_551f6b815f984a8eb586d31c77d4444fToBlendNode_159a88e9544a4a15881838068db4cff8fg" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4ToMultiplyNode_fcb33c623a2a41c2857a45eff8f62403in1" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_8f5dd83a9ce74a44a9f33dfd1d4d1ba4" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_26c30eb78b294882af31226cec7363e0ToMultiplyNode_fcb33c623a2a41c2857a45eff8f62403in2" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_26c30eb78b294882af31226cec7363e0" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_13995735cb1949ec9173c8b55b84ef17ToMultiplyNode_74072703c9634c42a8a677b84bc3b39din1" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_13995735cb1949ec9173c8b55b84ef17" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_741535be9d634b2fab643f758675a714ToMultiplyNode_74072703c9634c42a8a677b84bc3b39din2" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_741535be9d634b2fab643f758675a714" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_3eeb67c46e7845f4a6c3641fe1a0340bToMultiplyNode_124802c4a1ea4c35990edee6340b63eain1" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_3eeb67c46e7845f4a6c3641fe1a0340b" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_bd64a4e24475466a881ab9effdca912fToMultiplyNode_124802c4a1ea4c35990edee6340b63eain2" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_bd64a4e24475466a881ab9effdca912f" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_fd72c3e7bcf04c89b737d1261443b481ToMultiplyNode_1b8d10128ef24f37b9458b4da88ea93fin2" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_fd72c3e7bcf04c89b737d1261443b481" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_3350e7c65ced4984982d3835565b3870ToMultiplyNode_52fcaac855794fedb2086a79967a65c8in2" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_3350e7c65ced4984982d3835565b3870" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromBlendNode_159a88e9544a4a15881838068db4cff8ToMultiplyNode_da5c7173406c4049b4c4c8de08afbd77in1" type = "vector2">
+        <input name = "in" type = "color3" nodename = "BlendNode_159a88e9544a4a15881838068db4cff8" />
+        <input name = "channels" type = "string" value = "rg" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromCombineNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" type = "color3">
+        <input name = "in" type = "color4" nodename = "CombineNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+</materialx>

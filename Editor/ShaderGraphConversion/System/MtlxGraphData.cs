@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using Unity.PolySpatial;
-using Unity.PolySpatial.Internals;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -53,7 +52,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         internal MtlxGraphData(string name, string path)
         {
-            this.name = PolySpatialShaderGraph.SanitizeName(name);
+            this.name = NodeUtils.RemoveWhitespace(name);
             this.path = path;
             nodes = new();
             edges = new();
@@ -161,34 +160,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
             foreach (var systemInput in other.systemInputs)
                 if (!systemInputs.Contains(systemInput))
                     systemInputs.Add(systemInput);
-        }
-
-        internal void MinifyNodeNames()
-        {
-            Dictionary<string, string> shortNames = new();
-            var lastName = 0;
-            Dictionary<string, MtlxNodeData> newNodes = new();
-            foreach (var node in nodes.Values)
-            {
-                var newName = node.name;
-                if (node.nodetype != MtlxNodeTypes.Material &&
-                    !inputs.Contains(node.name) &&
-                    !systemInputs.Contains(node.name))
-                {
-                    newName = $"_{++lastName}";
-                }
-                shortNames.Add(node.name, newName);
-                node.name = newName;
-                newNodes.Add(newName, node);
-            }
-            nodes = newNodes;
-
-            Dictionary<(string, string), string> newEdges = new();
-            foreach (var ((destName, destPort), sourceName) in edges)
-            {
-                newEdges.Add((shortNames[destName], destPort), shortNames[sourceName]);
-            }
-            edges = newEdges;
         }
     }
 

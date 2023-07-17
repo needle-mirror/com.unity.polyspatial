@@ -13,13 +13,13 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
     [TestFixture]
     public class ShaderGraphConversionTests
     {
-        private const string k_TestAssetsDirectory = "Packages/com.unity.polyspatial/Tests/Data~/ShaderGraph/SourceAssets";
-        private const string k_TestExpectedOutputDirectory = "Packages/com.unity.polyspatial/Tests/Data~/ShaderGraph/ExpectedOutput";
-        private const string k_TestImportAsset = "Packages/com.unity.polyspatial/Tests/Data/ShaderGraph/SourceAssets/Import.shadergraph";
+        private const string k_TestAssetsDirectory = "Packages/com.unity.polyspatial/Tests/Resources/ShaderGraph/SourceAssets";
+        private const string k_TestExpectedOutputDirectory = "Packages/com.unity.polyspatial/Tests/Resources/ShaderGraph/ExpectedOutput";
 
-        void ExpectGraphConverts(string assetPath, string relativePath, bool checkImport)
+        void ExpectGraphConverts(string assetPath)
         {
             var mtlxGraph = MtlxPostProcessor.ProcessFile(assetPath, "", out _);
+            var relativePath = assetPath.Substring(k_TestAssetsDirectory.Length);
             var dstPathNoExt = $"{Path.GetDirectoryName(relativePath)}/{Path.GetFileNameWithoutExtension(assetPath)}";
 
             foreach (var type in TypeCache.GetTypesDerivedFrom(typeof(IGraphProcessor)))
@@ -49,12 +49,9 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
                     Assert.AreEqual(actualContents, intermediateBaseline, $"Asset Path: {assetPath} Baseline Path: {expectedFilepath}");
                 }
 
-                if (!checkImport)
-                    return;
-
                 // Compare the generated data against the asset stored in the database
-                var readResult = PolySpatialAssetData.ReadDataForAsset(
-                    AssetDatabase.LoadAssetAtPath<Shader>(assetPath), nodeProcessor.FileExtension, data, out _);
+                var readResult = PolySpatialAssetData.ReadDataForAsset(AssetDatabase.LoadAssetAtPath<Shader>(assetPath),
+                    nodeProcessor.FileExtension, data);
                 Assert.IsTrue(readResult);
                 var assetContents = Encoding.UTF8.GetString(data.AsArray())
                     .Replace("\r\n", "\n")
@@ -72,7 +69,7 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
         /// * Enable all PolySpatial/ShaderGraph project settings.
         /// * Copy the TestAssets subdirectory into a project-- which should cause them to import and generate output files.
         /// * -- Should fix any import errors if there are any and reimport.
-        /// * Copy from ProjectDir/Library/ShaderGraphs/Assets/ to the expected test directory.
+        /// * Copy from ProjectDir/Assets/StreamingAssets/ to the expected test directory.
         /// * Clean up any assets not needed in that project.
         /// </summary>
         [Test]
@@ -82,17 +79,8 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
 
             foreach(var path in testAssets)
             {
-                ExpectGraphConverts(path, path.Substring(k_TestAssetsDirectory.Length), false);
+                ExpectGraphConverts(path);
             }
-        }
-
-        /// <summary>
-        /// Tests the single shader graph test asset that we actually import from the project.
-        /// </summary>
-        [Test]
-        public void TestImportedAsset()
-        {
-            ExpectGraphConverts(k_TestImportAsset, "/" + Path.GetFileName(k_TestImportAsset), true);
         }
     }
 }

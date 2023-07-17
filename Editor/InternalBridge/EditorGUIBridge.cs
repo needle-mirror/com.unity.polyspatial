@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-namespace UnityEditor.PolySpatial.Internals.InternalBridge
+namespace UnityEditor.PolySpatial.InternalBridge
 {
     /// <summary>
     /// This class acts as a bridge for accessing trunk methods, for the EditorGUI and EditorGuiUtility classes.
@@ -18,6 +17,8 @@ namespace UnityEditor.PolySpatial.Internals.InternalBridge
             get => EditorGUIUtility.s_LastControlID;
             set => EditorGUIUtility.s_LastControlID = value;
         }
+        internal static void BeginChangeCheck() => EditorGUI.BeginChangeCheck();
+        internal static bool EndChangeCheck() => EditorGUI.EndChangeCheck();
         internal static GUIContent BeginPropertyInternal(Rect totalPosition, GUIContent label, SerializedProperty property) =>
             EditorGUI.BeginPropertyInternal(totalPosition, label, property);
         internal static Rect MultiFieldPrefixLabel(Rect totalPosition, int id, GUIContent label, int columns, float labelWidthIndent, bool setWideMode) =>
@@ -25,6 +26,5 @@ namespace UnityEditor.PolySpatial.Internals.InternalBridge
         internal static void EndProperty() => EditorGUI.EndProperty();
         internal static GUIContent TextContent(string s) => EditorGUIUtility.TextContent(s);
         internal static float CalcPrefixLabelWidth(GUIContent subLabel) => EditorGUI.CalcPrefixLabelWidth(subLabel);
-        internal static IDisposable CreateSettingsWindowGUIScope() => new SettingsWindow.GUIScope();
     }
 }

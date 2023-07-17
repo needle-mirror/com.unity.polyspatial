@@ -33,20 +33,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
             // Unique and stable property name, should be identical to the material property name.
             string nodeName = pnode.property.referenceName;
 
-            var slot = node.FindSlot<MaterialSlot>(0);
-            externals.AddExternalPort(slot.slotReference, nodeName);
-
             // Property Nodes are special, in that we only need 1 to exist for each property.
             if (graph.HasNode(nodeName))
                 return;
-                
+
+            var slot = node.FindSlot<MaterialSlot>(0);
+            externals.AddExternalPort(slot.slotReference, nodeName);
+
             string nodeType = MtlxNodeTypes.Constant;
-            string dataType = pnode.property switch
-            {
-                ColorShaderProperty colorProperty => (colorProperty.colorMode == ColorMode.HDR) ?
-                    MtlxDataTypes.Vector4 : MtlxDataTypes.Color4,
-                _ => SlotUtils.GetDataTypeName(slot),
-            };
+            string dataType = (pnode.property.propertyType == PropertyType.Color) ?
+                MtlxDataTypes.Color4 : SlotUtils.GetDataTypeName(slot);
 
             var nodeData = graph.AddNode(nodeName, nodeType, dataType, true);
 
@@ -86,12 +82,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case Vector2ShaderProperty v2: return new float[2] { v2.value.x, v2.value.y };
                 case Vector3ShaderProperty v3: return new float[3] { v3.value.x, v3.value.y, v3.value.z };
                 case Vector4ShaderProperty vd: return new float[4] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
-                case Matrix2ShaderProperty m2:
-                    return new float[4]
-                    {
-                        m2.value.m00, m2.value.m01,
-                        m2.value.m10, m2.value.m11,
-                    };
                 case Matrix3ShaderProperty m3:
                     return new float[9]
                     {

@@ -13,8 +13,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
-            var uvNode = QuickNode.CreateUVNode(
-                graph, NodeUtils.GetNodeName(node, "UV"), (int)(node as UVNode).uvChannel);
+            var uvNode = graph.AddNode(NodeUtils.GetNodeName(node, "UV"),
+                MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
+
+            var channel = (int)(node as UVNode).uvChannel;
+            uvNode.AddPortValue("index", MtlxDataTypes.Integer, new float[] { channel });
 
             var multiplyNode = graph.AddNode(NodeUtils.GetNodeName(node, "Multiply"),
                 MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2);

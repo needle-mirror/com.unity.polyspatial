@@ -12,12 +12,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return true;
 #endif
         }
-
+        
         public override string SupportDetails(AbstractMaterialNode node)
         {
             if (node is not CustomInterpolatorNode customInterpolatorNode)
                 return "";
-
+            
             switch (customInterpolatorNode.customBlockNodeName)
             {
                 case "Color":
@@ -25,10 +25,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case "UV1":
                 case "UserAttribute":
                     return "";
-
+                
                 default:
                     return $"Custom interpolator '{customInterpolatorNode.customBlockNodeName}' not supported.";
-            }
+            };
         }
 
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
@@ -45,14 +45,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                 case "UV0":
                 {
-                    var nodeData = QuickNode.CreateUVNode(graph, NodeUtils.GetNodeName(node, "UV0"), 0);
-                    externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
+                    var nodeData = QuickNode.NaryOp(
+                        MtlxNodeTypes.GeomTexCoord, node, graph, externals, "UV0", null, null, MtlxDataTypes.Vector2);
+                    nodeData.AddPortValue("index", MtlxDataTypes.Integer, new[] { 0.0f });
                     break;
                 }
                 case "UV1":
                 {
-                    var nodeData = QuickNode.CreateUVNode(graph, NodeUtils.GetNodeName(node, "UV1"), 1);
-                    externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
+                    var nodeData = QuickNode.NaryOp(
+                        MtlxNodeTypes.GeomTexCoord, node, graph, externals, "UV1", null, null, MtlxDataTypes.Vector2);
+                    nodeData.AddPortValue("index", MtlxDataTypes.Integer, new[] { 1.0f });
                     break;
                 }
                 case "UserAttribute":

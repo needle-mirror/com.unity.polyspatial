@@ -2,12 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 #if UNITY_EDITOR && ENABLE_MULTIPLE_DISPLAYS
-using Unity.PolySpatial.Internals.InternalBridge;
+using Unity.PolySpatial.InternalBridge;
 #endif
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.Events;
-using Debug = UnityEngine.Debug;
+using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
 
 namespace Unity.PolySpatial
@@ -21,37 +20,24 @@ namespace Unity.PolySpatial
     //
     // In unbounded mode, everything works similar, except that the volume camera and volume renderer each define an
     // unbounded 3-space rather than a bounded 3-space volume.
-    [Icon("Camera Gizmo")]
     public class VolumeCamera : MonoBehaviour
     {
         internal static string PolySpatialLayerName => "PolySpatial";
 
-        internal const PolySpatialVolumeCameraMode k_DefaultMode = PolySpatialVolumeCameraMode.Bounded;
-
-        internal static readonly Vector3 k_DefaultDimensions = new Vector3(0.25f, 0.25f, 0.25f);
+        [SerializeField]
+        [Tooltip("Whether the camera should restrict the rendered content to objects within its bounding box or be unbounded.")]
+        PolySpatialVolumeCameraMode m_Mode = PolySpatialVolumeCameraMode.Bounded;
 
         [SerializeField]
-        [Tooltip("The dimensions in Unity's world space of the volume camera's bounding box. Ignored if the volume camera is displayed in an Unbounded output.")]
-        Vector3 m_Dimensions = k_DefaultDimensions;
+        [Tooltip("The dimensions that are mapped to a unit cube in the destination view.")]
+        Vector3 m_Dimensions = Vector3.one;
+
+        [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
+        public LayerMask CullingMask = ~0x0;
 
         // This will lock the current ratio and scale the camera uniformly.
         [SerializeField]
-        // ReSharper disable once NotAccessedField
-#pragma warning disable CS0414 // Field is assigned but its value is never used
         bool m_IsUniformScale;
-#pragma warning restore CS0414
-
-        [SerializeField]
-        [Tooltip("The output Volume Camera Window Configuration object for this volume camera, or None for default. Create new volume camera configurations via the Asset Create menu.")]
-        VolumeCameraWindowConfiguration m_OutputConfiguration = null;
-
-        [SerializeField]
-        [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
-        LayerMask m_CullingMask = ~0x0;
-
-        [SerializeField]
-        [Tooltip("If true, a window is automatically opened for this volume camera when loaded. If false, the window must be opened manually via OpenWindow().")]
-        public bool OpenWindowOnLoad = true;
 
         bool m_MatricesValid = false;
 
@@ -64,39 +50,17 @@ namespace Unity.PolySpatial
         GameObject m_BackingCameraGO;
         Camera m_BackingCamera;
 
-        internal Camera BackingCamera => m_BackingCamera;
-
-        internal int m_PolySpatialLayerIndex;
         internal int m_PolySpatialLayerMask;
 
-        // these change when we are notified by the host
-        bool m_WindowOpen = false;
-
-        bool m_WindowFocused = false;
-
-        // this is set by OpenWindow/CloseWindow, which the VC tracker looks at
-        internal bool m_RequestedWindowOpenState = false;
-
-        #if UNITY_EDITOR
-        // fields used in the editor that wont carry on to runtime
-        [SerializeField]
-#pragma warning disable CS0414 // Field is assigned but its value is never used
-        bool m_ShowVolumeCameraEventsFoldout;
-#pragma warning restore CS0414
-        #endif
-
-        /// <summary>
-        /// Only objects in the selected layers will be visible inside this Volume Camera.
-        /// </summary>
-        public LayerMask CullingMask
-        {
-            get => m_CullingMask;
-            set
-            {
-                m_CullingMask = value;
-                ObjectBridge.MarkDirty(this);
-            }
-        }
+        // Due to environment limitations, the host camera may not be available (returns null) in all modes, but
+        // when present, the host camera serves as a kind of volume-specific "main camera." It reflects the position,
+        // orientation, and other properties of the camera actually used to render the scene on the host, but
+        // transformed into the simulation client's canonical space. It can be used to construct camera rays from the
+        // user's perspective, oriented geometry can be rotated to face it, and so forth.
+        //
+        // Any time the mode of a volume camera changes, its host camera is assumed to be disabled until the host
+        // supplies updated camera information by calling OnHostCameraChanged(). A host camera
+        bool m_IsHostCameraAvailable;
 
         public enum PolySpatialVolumeCameraMode : int
         {
@@ -104,131 +68,38 @@ namespace Unity.PolySpatial
             Unbounded = 1,
         }
 
-        public enum WindowEvent : int
+        public PolySpatialVolumeCameraMode Mode
         {
-            /// <summary>
-            ///  The volume camera window was opened.
-            /// </summary>
-            Opened,
-
-            /// <summary>
-            /// The volume camera window was resized. See the OutputDimensions and ContentDimensions to
-            /// figure out what the volume camera window was resized to.
-            /// </summary>
-            Resized,
-
-            /// <summary>
-            /// The volume camera window either received focus or lost focus.
-            /// </summary>
-            Focused,
-
-            /// <summary>
-            ///  The volume camera window was closed due to being backgrounded.
-            /// </summary>
-            Backgrounded,
-
-            /// <summary>
-            ///  The volume camera window was closed due to being dismissed.
-            /// </summary>
-            Closed,
-        }
-
-
-        /// <summary>
-        ///  Struct to encapsulate a change in window state.
-        /// </summary>
-        public struct WindowState
-        {
-            /// <summary>
-            /// The change in state that just occurred for this window. Change of states can mean actions such as the window
-            /// was opened or the window was backgrounded.
-            /// </summary>
-            public WindowEvent WindowEvent;
-
-            /// <summary>
-            /// The actual dimensions of the window in world space, or `Vector3.zero` if the volume is unbounded.
-            /// </summary>
-            public Vector3 OutputDimensions;
-
-            /// <summary>
-            /// The dimensions that your Volume Camera's dimensions are mapped to, in Unity's coordinate units.
-            /// (On visionOS, these will typically be the same, but they may not be on other platforms.)
-            /// </summary>
-            public Vector3 ContentDimensions;
-
-            /// <summary>
-            /// The mode this volume camera will display its content in, Bounded or Unbounded.
-            /// </summary>
-            public PolySpatialVolumeCameraMode Mode;
-
-            /// <summary>
-            /// When windowEvent is set to WindowEvent.Focused, this will indicate whether it has received focus or lost it.
-            /// </summary>
-            public bool IsFocused;
-        }
-
-        public VolumeCameraWindowConfiguration WindowConfiguration
-        {
-            get => m_OutputConfiguration;
+            get => m_Mode;
             set
             {
-                m_OutputConfiguration = value;
-                SetDirty();
+                if (m_Mode != value)
+                {
+                    m_Mode = value;
+
+                    if (m_Mode == PolySpatialVolumeCameraMode.Unbounded)
+                        m_BackingCamera.enabled = false;
+
+                    m_IsHostCameraAvailable = false;
+                    SetDirty();
+                }
             }
         }
 
-        VolumeCameraWindowConfiguration ResolvedWindowConfiguration {
-            get
-            {
-                if (m_OutputConfiguration != null)
-                    return m_OutputConfiguration;
-                return PolySpatialSettings.instance.DefaultVolumeCameraWindowConfiguration;
-            }
-        }
+        public Camera BackingCamera => m_BackingCamera.enabled ? m_BackingCamera : null;
 
-        /// <summary>
-        /// The mode this volume camera will display its content in, Bounded or Unbounded.
-        /// </summary>
-        public PolySpatialVolumeCameraMode WindowMode => ResolvedWindowConfiguration?.Mode ?? PolySpatialVolumeCameraMode.Unbounded;
+        public bool IsHostCameraAvailable => m_IsHostCameraAvailable;
 
-        /// <summary>
-        /// The dimensions in meters of the actual output size of the volume camera. May be different than Dimensions,
-        /// in which case the space described by Dimensions is scaled to fit the OutputDimensions.
-        /// </summary>
-        public Vector3 OutputDimensions => ResolvedWindowConfiguration?.Dimensions ?? Vector3.one;
-
-        /// <summary>
-        /// Defines the (unscaled) size of the camera's bounding box. The box is centered at the position of the
-        /// **VolumeCamera**’s transform.
-        /// </summary>
-        /// <remarks>
-        /// The effective, world space dimensions of the bounding box are calculated by
-        /// multiplying the Dimensions by the transform's scale.
-        ///
-        /// When you set the volume camera **Mode** to **Bounded**, the camera only displays GameObjects
-        /// within the scaled bounding box.  A bounding box is not used when you set the **Mode** to **Unbounded**.
-        /// </remarks>
         public Vector3 Dimensions
         {
-            get
-            {
-                if (WindowMode == PolySpatialVolumeCameraMode.Unbounded)
-                    return Vector3.one;
-                return m_Dimensions;
-            }
+            get => m_Dimensions;
             set
             {
-                if (!ValidateDimensions(value, out var errorMsg))
-                {
-                    Debug.LogError(errorMsg);
-                }
-                else
-                {
-                    m_Dimensions = value;
-                }
-
-                UpdateMatrices();
-                UpdateConfiguration();
+                value.x = Math.Max(value.x, 0.0f);
+                value.y = Math.Max(value.y, 0.0f);
+                value.z = Math.Max(value.z, 0.0f);
+                m_Dimensions = value;
+                SetDirty();
             }
         }
 
@@ -253,60 +124,12 @@ namespace Unity.PolySpatial
             }
         }
 
-        /// <summary>
-        /// Returns true if a window is open and showing the contents of this volume camera.
-        /// </summary>
-        public bool WindowOpen => m_WindowOpen;
-
-        /// <summary>
-        /// Returns true if a window that is showing the contents of this volume camera is focused.
-        /// </summary>
-        public bool WindowFocused => m_WindowFocused;
-
-        /// <summary>
-        /// An event that is triggered when this volume camera's window changes state. Changing states can mean window actions such as
-        /// the window opening or the window becoming unfocused.
-        /// </summary>
-        [SerializeField]
-        [Tooltip("An event that is triggered when this volume camera's window changes state.")]
-        public UnityEvent<WindowState> OnWindowEvent = new();
-
-        /// <summary>
-        /// Request that a window is opened to show the contents of this volume camera. Does nothing
-        /// if the window is already open.
-        /// </summary>
-        public void OpenWindow()
-        {
-            if (WindowOpen)
-                return;
-
-            m_RequestedWindowOpenState = true;
-            SetDirty();
-        }
-
-        /// <summary>
-        /// Request that the OS close the window that is showing the contents of this volume camera. Does nothing
-        /// if the window is not open.
-        /// </summary>
-        public void CloseWindow()
-        {
-            if (!WindowOpen)
-                return;
-
-            m_RequestedWindowOpenState = false;
-            SetDirty();
-        }
-
         internal void CalculateWorldToVolumeTRS(out Vector3 pos, out Quaternion rot, out Vector3 scale)
         {
-            CalculateWorldToVolumeTRS(transform.localPosition, transform.localRotation, transform.localScale, Dimensions,
+            CalculateWorldToVolumeTRS(transform.localPosition, transform.localRotation, transform.localScale, m_Dimensions,
                 out pos, out rot, out scale);
         }
 
-        //
-        // For a given volume camera position, rotation, and scale in Unity space, calculate the TRS that will transform
-        // that into a unit cube at the origin.
-        //
         internal static void CalculateWorldToVolumeTRS(Vector3 camPos, Quaternion camRot, Vector3 camScale, Vector3 camDim,
             out Vector3 pos, out Quaternion rot, out Vector3 scale)
         {
@@ -334,7 +157,7 @@ namespace Unity.PolySpatial
                 return;
 
             CalculateWorldToVolumeTRS(transform.position, transform.rotation, transform.lossyScale,
-                Dimensions, out var pos, out var rot, out var scale);
+                m_Dimensions, out var pos, out var rot, out var scale);
 
             m_WorldToVolume = Matrix4x4.TRS(pos, rot, scale);
             m_VolumeToWorld = m_WorldToVolume.inverse;
@@ -343,29 +166,39 @@ namespace Unity.PolySpatial
 
         void Awake()
         {
-            if (!PolySpatialBridge.RuntimeEnabled)
+            if (!PolySpatialSettings.instance.EnablePolySpatialRuntime)
             {
                 this.enabled = false;
-                return;
-            }
-
-            if (OpenWindowOnLoad)
-            {
-                OpenWindow();
             }
         }
 
         void OnEnable()
         {
-            m_PolySpatialLayerIndex = LayerMask.NameToLayer(PolySpatialLayerName);
-            m_PolySpatialLayerMask = m_PolySpatialLayerIndex != -1 ? 1 << m_PolySpatialLayerIndex : 0;
+            m_PolySpatialLayerMask = LayerMask.NameToLayer(PolySpatialLayerName);
 
-            UpdateBoundedSimulationCamera();
+            m_BackingCameraGO = new GameObject("Culling Camera");
+            m_BackingCameraGO.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
+            m_BackingCameraGO.layer = m_PolySpatialLayerMask;
+            m_BackingCameraGO.transform.SetParent(transform);
+
+            m_BackingCamera = m_BackingCameraGO.AddComponent<Camera>();
+#if ENABLE_MULTIPLE_DISPLAYS
+#if UNITY_EDITOR
+            m_BackingCamera.targetDisplay = DisplayUtilityBridge.GetDisplayIndices().Max() + 1; // something high, so it doesn't conflict with users configured displays
+#else
+            m_BackingCamera.targetDisplay = Display.displays.Length;
+#endif
+#endif
+            m_BackingCamera.depth = 500;
+
+            m_IsHostCameraAvailable = false;
         }
 
         void OnDisable()
         {
             Object.Destroy(m_BackingCameraGO);
+
+            m_IsHostCameraAvailable = false;
         }
 
         void SetDirty()
@@ -383,45 +216,20 @@ namespace Unity.PolySpatial
             // can pick them up and handle them appropriately.
             if (transform.hasChanged)
             {
-                transform.hasChanged = false;
-                UpdateBoundedSimulationCamera();
                 SetDirty();
+                transform.hasChanged = false;
             }
-        }
-
-        internal void UpdateConfiguration()
-        {
-            UpdateBoundedSimulationCamera();
-            SetDirty();
         }
 
         // TODO -- save all these values, so that we stop re-setting the camera values every frame!
 
-        internal void UpdateBoundedSimulationCamera()
+        internal void UpdateBoundedCullingCamera()
         {
-            if (WindowMode != PolySpatialVolumeCameraMode.Bounded)
+            if (Mode != PolySpatialVolumeCameraMode.Bounded)
                 return;
 
             if (m_BackingCamera == null)
-            {
-                m_BackingCameraGO = new GameObject("PolySpatial Simulation Support");
-                m_BackingCameraGO.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable | HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
-                m_BackingCameraGO.transform.SetParent(transform);
-                m_BackingCameraGO.layer = m_PolySpatialLayerIndex != -1 ? m_PolySpatialLayerIndex : transform.gameObject.layer;
-
-                m_BackingCamera = m_BackingCameraGO.AddComponent<Camera>();
-
-#if ENABLE_MULTIPLE_DISPLAYS
-#if UNITY_EDITOR
-                m_BackingCamera.targetDisplay =
-                    DisplayUtilityBridge.GetDisplayIndices().Max() + 1; // something high, so it doesn't conflict with users configured displays
-#else
-                m_BackingCamera.targetDisplay = Display.displays.Length;
-#endif
-#endif
-                // TODO [LXR-3611]: What is an appropriate depth value. Can it match the depth of the cameras created in UnityBackend?
-                m_BackingCamera.depth = 500;
-            }
+                return;
 
             m_BackingCamera.orthographic = true;
 
@@ -454,8 +262,9 @@ namespace Unity.PolySpatial
         // We need a copy because we can't reference the type inside PolySpatial.Core
         internal struct PolySpatialCameraDataExternal
         {
-            public UnityEngine.Vector3 worldPosition;
-            public UnityEngine.Quaternion worldRotation;
+            public UnityEngine.Vector3 position;
+            public UnityEngine.Quaternion rotation;
+            public UnityEngine.Vector3 scale;
             public bool isOrthographic;
             public float orthographicHalfSize;
             public float aspectRatio;
@@ -464,97 +273,55 @@ namespace Unity.PolySpatial
             public float nearClip;
             public float farClip;
             public int cullingMask;
-            public Color backgroundColor;
         }
 
-        Vector3 m_LastOutputDimensions;
-        Vector3 m_LastContentDimensions;
-
-        internal void UpdateWindowState(WindowState state)
+        // Keep the HostCamera in sync with the "main camera" of the host app
+        internal void UpdateUnboundedCullingCamera(PolySpatialCameraDataExternal hostData)
         {
-            OnWindowEvent.Invoke(state);
+            // hostData's TRS should be in world coordinates
+            var camx = m_BackingCameraGO.transform;
+            var cam = m_BackingCamera;
+
+            var lossyScale = transform.lossyScale;
+
+            camx.position = hostData.position;
+            camx.rotation = hostData.rotation;
+            camx.localScale = Vector3.Scale(hostData.scale, new Vector3(1.0f / lossyScale.x, 1.0f / lossyScale.y, 1.0f / lossyScale.z));
+
+            cam.orthographic = hostData.isOrthographic;
+            cam.orthographicSize = hostData.orthographicHalfSize;
+            cam.aspect = hostData.aspectRatio;
+            cam.fieldOfView = hostData.fieldOfViewY;
+            cam.focalLength = hostData.focalLength;
+            cam.nearClipPlane = hostData.nearClip;
+            cam.farClipPlane = hostData.farClip;
+            cam.cullingMask = hostData.cullingMask & ~m_PolySpatialLayerMask;
+
+            // The host is not required to invoke this function, but once it has done so, the host camera is assumed to
+            // be in sync until the volume camera's mode changes.
+            m_IsHostCameraAvailable = true;
+
+            cam.enabled = true;
         }
 
-        internal static bool ValidateDimensions(Vector3 dim, out string errorMsg)
+        [Conditional("UNITY_EDITOR")]
+        void OnValidate()
         {
-            var ok = true;
-            errorMsg = "";
-
-            ok = dim.x > 0.0f && dim.y > 0.0f && dim.z > 0.0f;
-            if (!ok)
-            {
-                errorMsg = $"Dimensions must be greater than 0.";
-                return ok;
-            }
-
-            return ok;
+            Dimensions = m_Dimensions;
         }
 
-#if UNITY_EDITOR
-        void OnDrawGizmosSelected()
+        [Conditional("UNITY_EDITOR")]
+        internal void OnDrawGizmosSelected()
         {
-            if (WindowMode == PolySpatialVolumeCameraMode.Bounded)
+            // Draw a green box that shows what will be included in 1x1x1 units of canonical space
+            if (Mode == PolySpatialVolumeCameraMode.Bounded)
             {
                 Gizmos.matrix = gameObject.transform.localToWorldMatrix;
-                Gizmos.color = new Color(1, 1, 1, 0.1f);
+                Gizmos.color = new Color(0, 0.5f, 0, 0.2f);
                 Gizmos.DrawCube(Vector3.zero, Dimensions);
+                Gizmos.color = new Color(0, 0.1f, 0, 0.7f);
+                Gizmos.DrawWireCube(Vector3.zero, Dimensions);
             }
         }
-
-        void OnDrawGizmos()
-        {
-            Gizmos.DrawIcon(transform.position, "Camera Gizmo");
-            DrawVolumeEdges(Dimensions);
-        }
-
-        void DrawVolumeEdges(Vector3 dimensions)
-        {
-            if (WindowMode != PolySpatialVolumeCameraMode.Bounded || WindowConfiguration == null)
-                return;
-
-            Gizmos.matrix = gameObject.transform.localToWorldMatrix;
-            Gizmos.color = new Color(1, 1, 1, 0.7f);
-            const float edgeSize = 0.2f;//as a percentage
-
-            var halfDimX = dimensions.x / 2;
-            var halfDimY = dimensions.y / 2;
-            var halfDimZ = dimensions.z / 2;
-
-            var corner1 = new Vector3(halfDimX, halfDimY, halfDimZ);
-            var corner2 = new Vector3(halfDimX, halfDimY, -halfDimZ);
-            var corner3 = new Vector3(halfDimX, -halfDimY, halfDimZ);
-            var corner4 = new Vector3(halfDimX, -halfDimY, -halfDimZ);
-            var corner5 = new Vector3(-halfDimX, halfDimY, halfDimZ);
-            var corner6 = new Vector3(-halfDimX, halfDimY, -halfDimZ);
-            var corner7 = new Vector3(-halfDimX, -halfDimY, halfDimZ);
-            var corner8 = new Vector3(-halfDimX, -halfDimY, -halfDimZ);
-
-            DrawSegment(corner1, corner2, edgeSize);
-            DrawSegment(corner1, corner3, edgeSize);
-            DrawSegment(corner1, corner5, edgeSize);
-            DrawSegment(corner2, corner4, edgeSize);
-            DrawSegment(corner2, corner6, edgeSize);
-            DrawSegment(corner3, corner4, edgeSize);
-            DrawSegment(corner3, corner7, edgeSize);
-            DrawSegment(corner4, corner8, edgeSize);
-            DrawSegment(corner5, corner6, edgeSize);
-            DrawSegment(corner5, corner7, edgeSize);
-            DrawSegment(corner6, corner8, edgeSize);
-            DrawSegment(corner7, corner8, edgeSize);
-        }
-
-        void DrawSegment(Vector3 a, Vector3 b, float edgeSizePct)
-        {
-            var ab = new Vector3(b.x - a.x, b.y - a.y, b.z - a.z);
-            var sqrLengthAB =  Vector3.SqrMagnitude(ab);
-
-            Vector3 edgeVec = ab / sqrLengthAB * sqrLengthAB * edgeSizePct/2;
-            Vector3 segmentPosA = new Vector3(a.x + edgeVec.x, a.y + edgeVec.y, a.z + edgeVec.z);
-            Vector3 segmentPosB = new Vector3(b.x - edgeVec.x, b.y - edgeVec.y, b.z - edgeVec.z);
-
-            Gizmos.DrawLine(a, segmentPosA);
-            Gizmos.DrawLine(b, segmentPosB);
-        }
-#endif
     }
 }

@@ -1,19 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.PolySpatial;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
+using UnityEditor.PolySpatial.Capabilities;
 using UnityEngine;
 using UnityEngine.Rendering;
-
-#if ENABLE_AR_FOUNDATION
-using UnityEngine.XR.ARFoundation;
-#else
-using UnityEditor.PackageManager;
-#endif
-
 using Object = UnityEngine.Object;
 
 namespace UnityEditor.PolySpatial.Validation
@@ -25,8 +17,6 @@ namespace UnityEditor.PolySpatial.Validation
     {
         const string k_MessageFormat = "The <b>{0}</b> profile(s) do not support the following properties: {1}.";
         const string k_FixItMessageFormat = "Do not use the following properties: {0}.";
-        const string k_FixParticleSystemProperties = "Fix Particle System Properties";
-        static readonly string[] k_ARFoundationPackages = { "com.unity.xr.arfoundation" };
 
         static readonly HashSet<ParticleSystemShapeType> k_AllowedShapeTypes = new HashSet<ParticleSystemShapeType>()
         {
@@ -52,173 +42,54 @@ namespace UnityEditor.PolySpatial.Validation
             base.CreateRules(component, createdRules);
 
             var instanceID = component.GetInstanceID();
-            var replicatePropertyRules = new List<PropertyRule>();
-            var failedReplicateRules = new List<PropertyRule>();
-            PopulateReplicatePropertyRules(EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem, replicatePropertyRules);
+            var propertyRules = new List<PropertyRule>();
+            var failedRules = new List<PropertyRule>();
+            PopulatePropertyRules(EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem, propertyRules);
 
-            var replicateRule = new BuildValidationRule
+            var rule = new BuildValidationRule
             {
-                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile)
-                                      && PolySpatialSettings.instance.ParticleMode != PolySpatialSettings.ParticleReplicationMode.BakeToMesh,
+                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile),
                 Category = string.Format(PolySpatialSceneValidator.RuleCategoryFormat, component.GetType().Name),
                 Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
-                    string.Join(", ", replicatePropertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
+                    string.Join(", ", propertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
                 FixItAutomatic = true,
                 FixItMessage = string.Format(k_FixItMessageFormat,
-                    string.Join(", ", replicatePropertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
+                    string.Join(", ", propertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
                 SceneOnlyValidation = true,
                 Error = false,
                 OnClick = () => BuildValidator.SelectObject(instanceID),
             };
 
-            replicateRule.CheckPredicate = () =>
+            rule.CheckPredicate = () =>
             {
                 var particleSystem = EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem;
                 if (particleSystem == null)
                     return true;
 
-                failedReplicateRules.Clear();
-                failedReplicateRules.AddRange(replicatePropertyRules.Where(propertyRule => !propertyRule.CheckPredicate()));
+                failedRules.Clear();
+                failedRules.AddRange(propertyRules.Where(propertyRule => !propertyRule.CheckPredicate()));
 
-                replicateRule.Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
-                    string.Join(", ", failedReplicateRules.Select(propertyRule => propertyRule.Name)));
+                rule.Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
+                    string.Join(", ", failedRules.Select(propertyRule => propertyRule.Name)));
 
-                return failedReplicateRules.Count == 0;
+                return failedRules.Count == 0;
             };
 
-            replicateRule.FixIt = () =>
+            rule.FixIt = () =>
             {
                 var particleSystem = EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem;
                 if (particleSystem == null)
                     return;
 
-                Undo.RecordObjects(new Object[]{particleSystem, particleSystem.GetComponent<ParticleSystemRenderer>()}, k_FixParticleSystemProperties);
-                foreach (var propertyRule in failedReplicateRules)
+                Undo.RecordObjects(new Object[]{particleSystem, particleSystem.GetComponent<ParticleSystemRenderer>()}, "Fix Particle System Properties");
+                foreach (var propertyRule in failedRules)
                     propertyRule.FixIt();
             };
 
-            createdRules.Add(replicateRule);
-
-            // Note the below createdRules is separate from the above group because of the BakeToMesh check below is different
-
-            var bakeToMeshPropertyRules = new List<PropertyRule>();
-            var failedBakeToMeshRules = new List<PropertyRule>();
-            PopulateBakeToMeshRules(EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem, bakeToMeshPropertyRules);
-
-            var bakeToMeshRule = new BuildValidationRule
-            {
-
-                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile)
-                                      && PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.BakeToMesh,
-                Category = string.Format(PolySpatialSceneValidator.RuleCategoryFormat, component.GetType().Name),
-                Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
-                    string.Join(", ", bakeToMeshPropertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
-                FixItAutomatic = true,
-                FixItMessage = string.Format(k_FixItMessageFormat,
-                    string.Join(", ", bakeToMeshPropertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
-                SceneOnlyValidation = true,
-                Error = false,
-                OnClick = () => BuildValidator.SelectObject(instanceID),
-            };
-
-            bakeToMeshRule.CheckPredicate = () =>
-            {
-                var particleSystem = EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem;
-                if (particleSystem == null)
-                    return true;
-
-                failedBakeToMeshRules.Clear();
-                failedBakeToMeshRules.AddRange(bakeToMeshPropertyRules.Where(propertyRule => !propertyRule.CheckPredicate()));
-
-                bakeToMeshRule.Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
-                    string.Join(", ", failedBakeToMeshRules.Select(propertyRule => propertyRule.Name)));
-
-                return failedBakeToMeshRules.Count == 0;
-            };
-
-            bakeToMeshRule.FixIt = () =>
-            {
-                var particleSystem = EditorUtility.InstanceIDToObject(instanceID) as ParticleSystem;
-                if (particleSystem == null)
-                    return;
-
-                Undo.RecordObjects(new Object[]{particleSystem, particleSystem.GetComponent<ParticleSystemRenderer>()}, k_FixParticleSystemProperties);
-                foreach (var propertyRule in failedBakeToMeshRules)
-                    propertyRule.FixIt();
-            };
-
-            createdRules.Add(bakeToMeshRule);
+            createdRules.Add(rule);
         }
 
-        void PopulateBakeToMeshRules(ParticleSystem particleSystem, List<PropertyRule> propertyRules)
-        {
-            //Renderer
-            var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
-#if ENABLE_AR_FOUNDATION
-            propertyRules.Add(new PropertyRule("Billboard's using BakeToMesh require an ARSession",
-                () =>
-                {
-                    var renderMode = renderer.renderMode;
-
-                    // If the particle system doesn't need to face the camera this rule can ignore it.
-                    if (renderMode == ParticleSystemRenderMode.Mesh || renderMode == ParticleSystemRenderMode.None ||
-                        renderMode == ParticleSystemRenderMode.Stretch)
-                    {
-                        return true;
-                    }
-
-                    // Only BakeToMesh needs to to know about camera orientation
-                    if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
-                        return true;
-
-                    return Object.FindAnyObjectByType<ARSession>(FindObjectsInactive.Include) != null;
-                },
-                () =>
-                {
-                    var arSession = Object.FindAnyObjectByType<ARSession>(FindObjectsInactive.Include);
-                    if (arSession != null)
-                        return;
-
-                    var newARSession = new GameObject("AR Session");
-                    newARSession.AddComponent<ARSession>();
-                    Undo.RegisterCreatedObjectUndo(newARSession, "Create AR Session");
-                }));
-#else
-            propertyRules.Add(new PropertyRule("Billboard's using BakeToMesh require ARFoundation",
-                () =>
-                {
-                    var renderMode = renderer.renderMode;
-
-                    // If the particle system doesn't need to face the camera this rule can ignore it.
-                    if (renderMode == ParticleSystemRenderMode.Mesh || renderMode == ParticleSystemRenderMode.None ||
-                        renderMode == ParticleSystemRenderMode.Stretch)
-                    {
-                        return true;
-                    }
-
-                    // Only BakeToMesh needs to to know about camera orientation
-                    if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
-                        return true;
-
-                    // ENABLE_AR_FOUNDATION is false so ARFoundation isn't an installed package dependency
-                    return false;
-                },
-                () =>
-                {
-                    EditorApplication.delayCall += () =>
-                    {
-                        if (EditorUtility.DisplayDialog("Install ARFoundation",
-                                "Billboarded ParticleSystems using BakeToMesh require the ARFoundation package. Click Yes to install the ARFoundation package.",
-                                "Yes", "No"))
-                        {
-                            Client.AddAndRemove(k_ARFoundationPackages);
-                        }
-                    };
-                }));
-#endif
-        }
-
-        void PopulateReplicatePropertyRules (ParticleSystem particleSystem, List<PropertyRule> propertyRules)
+        void PopulatePropertyRules (ParticleSystem particleSystem, List<PropertyRule> propertyRules)
         {
             //Main
             var main = particleSystem.main;
@@ -262,7 +133,7 @@ namespace UnityEditor.PolySpatial.Validation
                 () => main.ringBufferMode = ParticleSystemRingBufferMode.Disabled));
 
             //Emission
-            var emission = particleSystem.emission;
+            var emission = particleSystem.emission;;
 
             propertyRules.Add(new PropertyRule("Rate Over Distance",
                 () => !emission.enabled || emission.rateOverDistance.mode == ParticleSystemCurveMode.Constant
@@ -428,7 +299,7 @@ namespace UnityEditor.PolySpatial.Validation
             //Trails
             var trails = particleSystem.trails;
             propertyRules.Add(new PropertyRule("Trails",
-                () => !trails.enabled || PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.BakeToMesh,
+                () => !trails.enabled,
                 () => trails.enabled = false));
 
             //Custom Data

@@ -1,0 +1,120 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <image name = "Node_946cc4763c8a43298a3d3ec96ff71183" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_MainTex" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd" />
+        <input name = "filtertype" type = "string" value = "closest" />
+        <input name = "uaddressmode" type = "string" value = "clamp" />
+        <input name = "vaddressmode" type = "string" value = "clamp" />
+    </image>
+    <swizzle name = "Node_946cc4763c8a43298a3d3ec96ff71183R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_946cc4763c8a43298a3d3ec96ff71183G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_946cc4763c8a43298a3d3ec96ff71183B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_946cc4763c8a43298a3d3ec96ff71183A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <texcoord name = "Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <constant name = "_MainTex" type = "filename">
+        <input name = "value" type = "filename" value = "placeholder.png" />
+    </constant>
+    <realitykit_image_lod name = "Node_863147e977944b3e828c0de0418dbcb8" type = "color4">
+        <input name = "default" type = "color4" value = "1,1,1,1" />
+        <input name = "file" type = "filename" nodename = "_VertexTex" />
+        <input name = "texcoord" type = "vector2" nodename = "Node_863147e977944b3e828c0de0418dbcb8_UV_fwd" />
+        <input name = "level" type = "float" value = "0" />
+    </realitykit_image_lod>
+    <swizzle name = "Node_863147e977944b3e828c0de0418dbcb8R" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
+        <input name = "channels" type = "string" value = "r" />
+    </swizzle>
+    <swizzle name = "Node_863147e977944b3e828c0de0418dbcb8G" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
+        <input name = "channels" type = "string" value = "g" />
+    </swizzle>
+    <swizzle name = "Node_863147e977944b3e828c0de0418dbcb8B" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
+        <input name = "channels" type = "string" value = "b" />
+    </swizzle>
+    <swizzle name = "Node_863147e977944b3e828c0de0418dbcb8A" type = "float">
+        <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
+        <input name = "channels" type = "string" value = "a" />
+    </swizzle>
+    <texcoord name = "Node_863147e977944b3e828c0de0418dbcb8_UV_fwd" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <constant name = "_VertexTex" type = "filename">
+        <input name = "value" type = "filename" value = "placeholder.png" />
+    </constant>
+    <constant name = "TextureSize_MainTex" type = "vector4">
+        <input name = "value" type = "vector4" value = "0,0,0,0" />
+    </constant>
+    <swizzle name = "WidthNode_806a6e888e464735ba91c5000dcb1175" type = "float">
+        <input name = "in" type = "vector4" nodename = "TextureSize_MainTex" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "HeightNode_806a6e888e464735ba91c5000dcb1175" type = "float">
+        <input name = "in" type = "vector4" nodename = "TextureSize_MainTex" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "TexelWidthNode_806a6e888e464735ba91c5000dcb1175" type = "float">
+        <input name = "in" type = "vector4" nodename = "TextureSize_MainTex" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <swizzle name = "TexelHeightNode_806a6e888e464735ba91c5000dcb1175" type = "float">
+        <input name = "in" type = "vector4" nodename = "TextureSize_MainTex" />
+        <input name = "channels" type = "string" value = "w" />
+    </swizzle>
+    <GeometryModification name = "SR_TextureVertex" type = "vertexshader">
+        <input name = "modelPositionOffset" type = "vector3" nodename = "SR_TextureVertex_modelPositionOffset_SubtractPosition" />
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Texture" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturediffuseColor" />
+        <input name = "metallic" type = "float" nodename = "WidthNode_806a6e888e464735ba91c5000dcb1175" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Texture_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Texture" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_TextureVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Texture" />
+    </surfacematerial>
+    <subtract name = "SR_TextureVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in2" type = "vector3" nodename = "SR_TextureVertex_modelPositionOffset_Position" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1" />
+    </subtract>
+    <position name = "SR_TextureVertex_modelPositionOffset_Position" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <subtract name = "SR_Texture_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+        <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturediffuseColor" type = "color3">
+        <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+</materialx>

@@ -1,0 +1,66 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <splitlr name = "Ellipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "float">
+        <input name = "valuel" type = "float" value = "1" />
+        <input name = "center" type = "float" value = "1" />
+        <input name = "texcoord" type = "vector2" nodename = "Ellipse_Out_texcoordNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+    </splitlr>
+    <combine2 name = "Ellipse_Out_texcoordNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Ellipse_Out_texcoord_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" />
+    </combine2>
+    <magnitude name = "Ellipse_Out_texcoord_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" type = "float">
+        <input name = "in" type = "vector2" nodename = "Ellipse_Out_texcoord_in1_inNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+    </magnitude>
+    <divide name = "Ellipse_Out_texcoord_in1_inNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Ellipse_Out_texcoord_in1_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "in2" type = "vector2" nodename = "Ellipse_Out_texcoord_in1_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c" />
+    </divide>
+    <subtract name = "Ellipse_Out_texcoord_in1_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Ellipse_Out_texcoord_in1_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "Ellipse_Out_texcoord_in1_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "in2" type = "float" value = "2" />
+    </multiply>
+    <dot name = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cAdd" />
+    </dot>
+    <texcoord name = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cUV" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cMultiply" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cUV" />
+        <input name = "in2" type = "vector2" value = "1,-1" />
+    </multiply>
+    <add name = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cAdd" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68cMultiply" />
+        <input name = "in2" type = "vector2" value = "0,1" />
+    </add>
+    <combine2 name = "Ellipse_Out_texcoord_in1_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Ellipse_WidthNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "in2" type = "float" nodename = "Ellipse_HeightNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+    </combine2>
+    <dot name = "Ellipse_WidthNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <dot name = "Ellipse_HeightNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <GeometryModification name = "SR_ShapesVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_Shapes" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Shapes" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_ShapesVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Shapes" />
+    </surfacematerial>
+    <swizzle name = "CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor" type = "color3">
+        <input name = "in" type = "float" nodename = "Ellipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+</materialx>

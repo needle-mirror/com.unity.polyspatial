@@ -1,13 +1,10 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.Collections;
-using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -23,36 +20,8 @@ namespace Tests.Runtime.Functional.Components
 
         const string k_TestMaterialName = "ParticleTestMaterial";
         const string k_TestMeshName = "ParticleTestMesh";
-        const string k_TestParticleTextureName = "Texture2DBlue";
 
-        PolySpatialSettings.ParticleReplicationMode m_previousParticleMode;
-
-        // This test is designed to test ReplicateProperties; always entre that mode before running the test and
-        // restore the prior state when exiting.
-        internal override void InternalSetup()
-        {
-            m_previousParticleMode = PolySpatialSettings.instance.ParticleMode;
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.ReplicateProperties;
-            base.InternalSetup();
-        }
-
-        GameObject GetBackingGameObjectForParticleSystem(ParticleSystem ps)
-        {
-            if (m_ParticleSystem == null)
-                return null;
-
-            if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
-                return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
-
-#if POLYSPATIAL_BAKE_TO_TEXTURE_PARTICLES
-            if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ExperimentalBakeToTexture)
-                return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
-#endif
-
-            return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem));
-        }
-
-        private void CreateTestParticleSystem(Material material)
+        private void CreateTestParticleSystem()
         {
             m_TestGameObject = new GameObject("Test object main particle system");
             m_SubEmitterObject = new GameObject("Test object subemitter particle system");
@@ -198,6 +167,7 @@ namespace Tests.Runtime.Functional.Components
             textureSheetAnimations.frameOverTime = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, 1, 1, 1));
             textureSheetAnimations.cycleCount = 6;
 
+            var material = PolySpatialComponentUtils.CreateUnlitParticleMaterial(Color.blue);
             particleRenderer.material = material;
             particleRenderer.material.name = k_TestMaterialName;
             particleRenderer.sortMode = ParticleSystemSortMode.Depth;
@@ -269,8 +239,6 @@ namespace Tests.Runtime.Functional.Components
 
         internal override IEnumerator InternalUnityTearDown()
         {
-            var go = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-
             if (m_SubEmitterParticleSystems != null)
                 Object.Destroy(m_SubEmitterParticleSystems);
             if (m_SubEmitterObject != null)
@@ -281,16 +249,12 @@ namespace Tests.Runtime.Functional.Components
                 Object.Destroy(m_TestGameObject);
 
             yield return base.InternalUnityTearDown();
-            yield return null;
-            Assert.IsTrue(go == null);
-            PolySpatialSettings.instance.ParticleMode = m_previousParticleMode;
         }
 
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Create_Destroy_Tracking()
         {
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
+            CreateTestParticleSystem();
 
             // Let a frame be processed and trigger the above assertions
             yield return null;
@@ -321,110 +285,15 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Create_Disabled_ReplicateProperties()
-        {
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.ReplicateProperties;
-
-            // The CreateOrUpdateParticleSystem command should not be sent when the particle system is disabled
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
-            m_TestGameObject.SetActive(false);
-
-            yield return null;
-
-            // ParticleSystem and Subemitter should both be inactive
-            Assert.IsFalse(m_TestGameObject.activeSelf);
-            Assert.IsFalse(m_ParticleSystem.IsAlive());
-            Assert.IsTrue(m_SubEmitterObject.activeSelf);
-            Assert.IsFalse(m_SubEmitterObject.activeInHierarchy);
-
-#if UNITY_EDITOR
-            // backing game objects should exists (since those are through GameObjectTracker), but ParticleSystem components should not
-            var backingGameObject = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            Assert.IsTrue(backingGameObject != null);
-            Assert.IsFalse(backingGameObject.TryGetComponent<ParticleSystem>(out _));
-
-            var backingSubEmitterGameObject = GetBackingGameObjectForParticleSystem(m_SubEmitterParticleSystems);
-            Assert.IsTrue(backingSubEmitterGameObject != null);
-            Assert.IsFalse(backingSubEmitterGameObject.TryGetComponent<ParticleSystem>(out _));
-#endif
-
-            m_TestGameObject.SetActive(true);
-
-            yield return null;
-
-            // ParticleSystem and Subemitter should both be active now
-            Assert.IsTrue(m_TestGameObject.activeSelf);
-            Assert.IsTrue(m_ParticleSystem.IsAlive());
-            Assert.IsTrue(m_SubEmitterObject.activeSelf);
-            Assert.IsTrue(m_SubEmitterObject.activeInHierarchy);
-
-#if UNITY_EDITOR
-            Assert.IsTrue(backingGameObject.TryGetComponent(out ParticleSystem backingParticleSystem));
-            Assert.IsTrue(backingParticleSystem.IsAlive());
-
-            Assert.IsTrue(backingSubEmitterGameObject.TryGetComponent<ParticleSystem>(out _));
-#endif
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Create_Disabled_BakeToMesh()
-        {
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-
-            // The CreateOrUpdateParticleSystem command should not be sent when the particle system is disabled
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
-            m_TestGameObject.SetActive(false);
-
-            yield return null;
-
-            // ParticleSystem and Subemitter should both be inactive
-            Assert.IsFalse(m_TestGameObject.activeSelf);
-            Assert.IsFalse(m_ParticleSystem.IsAlive());
-            Assert.IsTrue(m_SubEmitterObject.activeSelf);
-            Assert.IsFalse(m_SubEmitterObject.activeInHierarchy);
-
-#if UNITY_EDITOR
-            // Backing objects should not exists, since they would be created as part of handling CreateOrUpdateParticleSystem
-            Assert.Throws<KeyNotFoundException>(() => GetBackingGameObjectForParticleSystem(m_ParticleSystem));
-            Assert.Throws<KeyNotFoundException>(() => GetBackingGameObjectForParticleSystem(m_SubEmitterParticleSystems));
-#endif
-
-            m_TestGameObject.SetActive(true);
-
-            yield return null;
-
-            // ParticleSystem and Subemitter should both be active now
-            Assert.IsTrue(m_TestGameObject.activeSelf);
-            Assert.IsTrue(m_ParticleSystem.IsAlive());
-            Assert.IsTrue(m_SubEmitterObject.activeSelf);
-            Assert.IsTrue(m_SubEmitterObject.activeInHierarchy);
-
-#if UNITY_EDITOR
-            // Backing game object should both exist and have MeshRenderer components on them
-            var backingGameObject = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            Assert.IsTrue(backingGameObject != null);
-            Assert.IsTrue(backingGameObject.TryGetComponent<MeshRenderer>(out _));
-
-            var subEmitterBackingGameObject = GetBackingGameObjectForParticleSystem(m_SubEmitterParticleSystems);
-            Assert.IsTrue(subEmitterBackingGameObject != null);
-            // TODO: Is this correct considering IsAlive for the sim's submitter is false?
-            Assert.IsTrue(subEmitterBackingGameObject.TryGetComponent<MeshRenderer>(out _));
-#endif
-        }
-
-        [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialParticlePlayState()
         {
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
+            CreateTestParticleSystem();
             m_ParticleSystem.Play();
             Assert.IsTrue(m_ParticleSystem.isPlaying);
 
             yield return null;
 
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
             if (backingGO != null)
             {
                 var main = m_ParticleSystem.main;
@@ -490,8 +359,7 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialMinMaxCurves()
         {
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
+            CreateTestParticleSystem();
 
             yield return null;
 
@@ -502,7 +370,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
             if (backingGO != null)
             {
                 var backingParticleSystem = backingGO.GetComponent<ParticleSystem>();
@@ -547,12 +415,11 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialParticleGradients()
         {
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
+            CreateTestParticleSystem();
 
             yield return null;
 
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
             if (backingGO != null)
             {
                 var backingParticleSystem = backingGO.GetComponent<ParticleSystem>();
@@ -632,244 +499,6 @@ namespace Tests.Runtime.Functional.Components
             }
 
             yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_BakeToMeshParticlesWithTrail()
-        {
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-
-            CreateTestParticleSystem(material);
-
-            yield return null;
-
-            var particleSystemTrails = m_ParticleSystem.trails;
-            particleSystemTrails.enabled = true;
-            var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
-            particleRenderer.trailMaterial = material;
-            yield return null;
-            particleRenderer.renderMode = ParticleSystemRenderMode.None;
-            yield return null;
-            particleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
-            yield return null;
-            particleRenderer.enabled = false;
-            yield return null;
-            particleRenderer.enabled = true;
-            yield return null;
-        }
-
-        /// <summary>
-        /// Scales the auto-generated volume camera and checks to see if the baked mesh backing-GO's lossy scale reflects
-        /// those changes. This ensures the backing-GO is parented to the root object that receives scaling updates relative
-        /// to the scene's volume camera.
-        /// </summary>
-        /// <returns></returns>
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_BakeToMeshParticleScale()
-        {
-            const float scaleFactor = 10f;
-
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-
-            CreateTestParticleSystem(material);
-            var particleSystemScale = m_ParticleSystem.transform.lossyScale;
-            var qvc = GameObject.FindAnyObjectByType<VolumeCamera>();
-            qvc.transform.localScale = Vector3.one * scaleFactor;
-
-            // Not a typo - For some reason this requires 2 frames.
-            yield return null;
-            yield return null;
-
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-
-            // TODO: LXR-3062 for some reason, backingGO is null on macOS standalone tests
-            if (backingGO == null)
-                yield break;
-
-            var lossyScale = backingGO.transform.lossyScale;
-            Assert.IsTrue(Mathf.Approximately(particleSystemScale.x / scaleFactor, lossyScale.x) &&
-                          Mathf.Approximately(particleSystemScale.y / scaleFactor, lossyScale.y) &&
-                          Mathf.Approximately(particleSystemScale.z / scaleFactor, lossyScale.z));
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_BiRPUnlitMaterialParticleSystem()
-        {
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var baseColor = Color.red;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleBIRPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
-
-            if (material == null)
-                yield break;
-
-            var renderType = material.GetTag(MaterialTags.k_RenderType, true);
-            var isTransparent = renderType == MaterialRenderTypes.k_Transparent;
-            var materialBaseMap = material.GetTexture("_MainTex");
-            CreateTestParticleSystem(material);
-
-            yield return null;
-
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            if (backingGO == null)
-                yield break;
-
-            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
-            var backingMaterialBaseMap = backingMaterial.GetTexture("_BaseMap");
-            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
-
-            // Check dimensions are equal as texture name doesn't seem to be transmitted.
-            Assert.IsTrue(backingMaterialBaseMap.width == materialBaseMap.width && backingMaterialBaseMap.height == materialBaseMap.height);
-            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface) == isTransparent);
-
-            Assert.AreEqual(backingBaseColor, baseColor);
-            yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_URPUnlitMaterialParticleSystem()
-        {
-            var baseColor = Color.red;
-
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
-
-            if (material == null)
-                yield break;
-
-            var transparencyKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_TransparentSurface);
-            material.SetKeyword(transparencyKeyword, true);
-
-            CreateTestParticleSystem(material);
-
-            yield return null;
-
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-
-            if (backingGO == null)
-                yield break;
-
-            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
-            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
-            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface));
-            Assert.AreEqual(backingBaseColor, baseColor);
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_ShadowsOnly()
-        {
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-
-            CreateTestParticleSystem(material);
-            m_ParticleSystem.GetComponent<ParticleSystemRenderer>().shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-
-            yield return null;
-
-#if UNITY_EDITOR
-            var backingGameObject = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            Assert.NotNull(backingGameObject);
-            var particleSystemRenderer = backingGameObject.GetComponent<ParticleSystemRenderer>();
-            Assert.Null(particleSystemRenderer);
-#endif
-		}
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_BiRPLitMaterialParticleSystem()
-        {
-            const float k_Metallic = 0.25f;
-            const float k_Smoothness = 0.75f;
-
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateLitParticleBIRPMaterial(Color.white, "Textures/" + k_TestParticleTextureName);
-
-            if (material == null)
-                yield break;
-
-            var renderType = material.GetTag(MaterialTags.k_RenderType, true);
-            var isTransparent = renderType == MaterialRenderTypes.k_Transparent;
-
-            material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
-            // Glossiness is the smoothness property of birp lit.
-            material.SetFloat(MaterialProperties.k_Glossiness, k_Smoothness);
-            var materialBaseMap = material.GetTexture("_MainTex");
-            CreateTestParticleSystem(material);
-
-            yield return null;
-
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
-            var backingMaterialBaseMap = backingMaterial.GetTexture("_BaseMap");
-
-            // Check dimensions are equal as texture name doesn't seem to be transmitted.
-            Assert.IsTrue(backingMaterialBaseMap.width == materialBaseMap.width && backingMaterialBaseMap.height == materialBaseMap.height);
-
-            var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
-            var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
-
-            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface) == isTransparent);
-            Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
-            Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
-        }
-
-        [UnityTest]
-        public IEnumerator Test_UnityParticleSystem_Check_URPLitMaterialParticleSystem()
-        {
-            const float k_Metallic = 0.25f;
-            const float k_Smoothness = 0.75f;
-            var baseColor = Color.red;
-            var emissionColor = Color.blue;
-
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateLitParticleURPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
-
-            if (material == null)
-                yield break;
-
-            var transparencyKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_TransparentSurface);
-            material.SetKeyword(transparencyKeyword, true);
-            material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
-            material.SetFloat(MaterialProperties.k_Smoothness, k_Smoothness);
-            var emissionKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_Emission);
-            material.SetKeyword(emissionKeyword, true);
-            material.SetColor(MaterialProperties.k_EmissionColor, emissionColor);
-            CreateTestParticleSystem(material);
-
-            yield return null;
-
-            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            if (backingGO == null)
-                yield break;
-
-            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
-            var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
-            var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
-            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
-            var backingEmissionColor = backingMaterial.GetColor(MaterialProperties.k_EmissionColor);
-
-            Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
-            Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
-            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_Emission));
-            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface));
-            Assert.AreEqual(backingBaseColor, baseColor);
-            Assert.AreEqual(backingEmissionColor, emissionColor);
-        }
-
-        [UnityTest, Ignore("Ignore because assemblies are built without POLYSPATIAL_BAKE_TO_TEXTURE_PARTICLES defined. Reinstate prior to shipping this feature.")]
-        public IEnumerator Test_UnityParticleSystem_Check_BakeToTexture()
-        {
-#if POLYSPATIAL_BAKE_TO_TEXTURE_PARTICLES
-            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.ExperimentalBakeToTexture;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
-            CreateTestParticleSystem(material);
-            var particleSystemTrails = m_ParticleSystem.trails;
-            particleSystemTrails.enabled = true;
-            var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
-            particleRenderer.trailMaterial = material;
-            yield return null;
-#else
-            yield break;
-#endif
         }
     }
 }

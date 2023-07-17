@@ -1,0 +1,48 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <splitlr name = "SplitLRNode_803732670691405fb4d8504eb6e0eefd" type = "float">
+        <input name = "valuel" type = "float" value = "0" />
+        <input name = "valuer" type = "float" value = "0" />
+        <input name = "center" type = "float" value = "0.5" />
+        <input name = "texcoord" type = "vector2" nodename = "AddNode_735e51c93b594003ac48779f6f4870d7" />
+    </splitlr>
+    <texcoord name = "UVNode_735e51c93b594003ac48779f6f4870d7" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "MultiplyNode_735e51c93b594003ac48779f6f4870d7" type = "vector2">
+        <input name = "in1" type = "vector2" value = "1,-1" />
+        <input name = "in2" type = "vector2" nodename = "UVNode_735e51c93b594003ac48779f6f4870d7" />
+    </multiply>
+    <add name = "AddNode_735e51c93b594003ac48779f6f4870d7" type = "vector2">
+        <input name = "in1" type = "vector2" value = "0,1" />
+        <input name = "in2" type = "vector2" nodename = "MultiplyNode_735e51c93b594003ac48779f6f4870d7" />
+    </add>
+    <GeometryModification name = "SR_UtilityVertex" type = "vertexshader">
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Utility" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromSplitLRNode_803732670691405fb4d8504eb6e0eefdToSR_UtilitydiffuseColor" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Utility_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Utility" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_UtilityVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Utility" />
+    </surfacematerial>
+    <subtract name = "SR_Utility_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "CastSwizzleFromSplitLRNode_803732670691405fb4d8504eb6e0eefdToSR_UtilitydiffuseColor" type = "color3">
+        <input name = "in" type = "float" nodename = "SplitLRNode_803732670691405fb4d8504eb6e0eefd" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+</materialx>

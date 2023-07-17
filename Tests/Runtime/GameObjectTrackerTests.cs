@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using NUnit.Framework;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 
@@ -29,8 +27,8 @@ namespace Tests.Runtime.Functional
         [SetUp]
         public void SetUp()
         {
-            m_RestoreEnablePolySpatialRuntime = PolySpatialRuntime.Enabled;
-            PolySpatialRuntime.Enabled = true;
+            m_RestoreEnablePolySpatialRuntime = PolySpatialSettings.instance.EnablePolySpatialRuntime;
+            PolySpatialSettings.instance.EnablePolySpatialRuntime = true;
 
             if (!(PolySpatialCore.LocalBackend is PolySpatialUnityBackend))
             {
@@ -51,14 +49,14 @@ namespace Tests.Runtime.Functional
             m_Child1 = null;
             m_Child2 = null;
 
-            PolySpatialRuntime.Enabled = m_RestoreEnablePolySpatialRuntime;
+            PolySpatialSettings.instance.EnablePolySpatialRuntime = m_RestoreEnablePolySpatialRuntime;
         }
 
         [Test]
         public void Test_GameObjectTracker_Asserts_UsingPolySpatialCullingMask()
         {
 #if UNITY_EDITOR
-            Assert.Throws<UnityEngine.Assertions.AssertionException>(() => PolySpatialCore.UnitySimulation?.Tracker.TrackObjectChanges(LayerMask.GetMask(PolySpatialUnityBackend.PolySpatialLayerName)));
+            Assert.Throws<UnityEngine.Assertions.AssertionException>(() => PolySpatialCore.UnitySimulation?.Tracker.TrackObjectChanges(LayerMask.GetMask(PolySpatialCore.PolySpatialLayerName)));
 #endif
         }
 
@@ -74,6 +72,7 @@ namespace Tests.Runtime.Functional
                 out var unregisteredRendererAssets);
 
             var diffState = stateValidator.GenerateStateDiff(simState, rendererState);
+
             Assert.IsEmpty(diffState.ToString(), $"Found state diff: {diffState}");
             var stateEntries = simState.Count;
 
@@ -306,86 +305,6 @@ namespace Tests.Runtime.Functional
             HasMatchingState(stateValidator, stateEntries);
         }
 
-        [UnityTest]
-        public IEnumerator Test_GameObjectTracker_DisableTrackingMask()
-        {
-            var disabledTrackingLayer = LayerMask.NameToLayer("DisabledTrackingLayer");
-            Assert.AreNotEqual(-1, disabledTrackingLayer, "Layer 'DisabledTrackingLayer' not set up, it is required for tests!");
-
-            PolySpatialStateValidator stateValidator = new();
-            stateValidator.GetState(
-                out var simState,
-                out var rendererState,
-                out var unregisteredSimAssets,
-                out var unregisteredRendererAssets);
-            var baselineStateEntries = simState.Count;
-
-            GameObject trackedObject = new("Tracked");
-            GameObject untrackedObject = new("Untracked");
-
-            trackedObject.layer = 1;
-            untrackedObject.layer = disabledTrackingLayer;
-
-            yield return null;
-
-            // We should only see the tracked object; not the untracked one.
-            HasMatchingState(stateValidator, baselineStateEntries + 1);
-
-            GameObject.Destroy(trackedObject);
-            GameObject.Destroy(untrackedObject);
-        }
-
-        [UnityTest]
-        public IEnumerator Test_GameObjectTracker_Create_Destroy_Tracking_ManualRegister()
-        {
-            Assert.IsTrue(PolySpatialCore.LocalBackend is PolySpatialUnityBackend);
-            var unityBackend = PolySpatialCore.LocalBackend as PolySpatialUnityBackend;
-            var sceneGraph = unityBackend.SceneGraph;
-            var simTracker = PolySpatialCore.UnitySimulation.Tracker;
-
-            // Creation
-            {
-                const string kGrandparentName = "Grandparent";
-                const int kGrandparentLayer = 13;
-
-                m_Grandparent = new GameObject(kGrandparentName);
-                m_Grandparent.layer = kGrandparentLayer;
-
-                var grandparentId = PolySpatialInstanceID.For(m_Grandparent);
-
-                sceneGraph.RegisterCustomUnitySceneGraphGameObject(grandparentId, m_Grandparent);
-
-                Assert.IsFalse(simTracker.IsTrackedGameObjectInstanceID(grandparentId.id));
-                Assert.IsTrue(sceneGraph.FindUnitySceneGraphGameObjectForId(grandparentId) != null);
-
-                yield return null;
-
-                // This fails because the GameObjectTracker.ShouldTrackGameObject will always return false
-                // when the GameObject is already registered to the UnitySceneGraph.
-                // In Distributed Rendering, PolySpatialUnitySimulation and UnitySceneGraph never co-exist
-                // in the same Unity instance.
-                // Assert.IsTrue(simTracker.IsTrackedGameObjectInstanceID(grandparentId.id));
-
-                var clientGameObject = sceneGraph.FindUnitySceneGraphGameObjectForId(grandparentId);
-                Assert.IsTrue(clientGameObject != null);
-                Assert.AreEqual(kGrandparentLayer, clientGameObject.layer, "UnitySceneGraph should preserve the GameObject layer");
-                Assert.AreEqual(kGrandparentName, clientGameObject.name, "UnitySceneGraph should preserve the GameObject name");
-                Assert.AreEqual(SceneManager.GetActiveScene(), m_Grandparent.scene, "UnitySceneGraph should not move manually registered GameObjects");
-            }
-
-            // Destruction
-            {
-                var grandparentId = PolySpatialInstanceID.For(m_Grandparent);
-
-                GameObject.Destroy(m_Grandparent);
-
-                yield return null;
-
-                var clientGameObject = sceneGraph.FindUnitySceneGraphGameObjectForId(grandparentId);
-                Assert.IsTrue(clientGameObject == null);
-            }
-        }
-
         bool RandomBool()
         {
             return (UnityEngine.Random.Range(0, 2) == 1);
@@ -441,32 +360,14 @@ namespace Tests.Runtime.Functional
             Debug.Assert(unregisteredSimAssets.Count == 0 && unregisteredRendererAssets.Count == 0);
 
             Assert.IsEmpty(diffText, $"Found state diff: {diffText}");
-
-            StringBuilder sb = new();
-            if (expectedStateEntries != simState.Count ||
-                expectedStateEntries != rendererState.Count)
-            {
-                foreach (var (k, v) in simState)
-                {
-                    sb.AppendLine($"SimState: {k} -> {v.clientSimName}");
-                }
-
-                sb.AppendLine("===============");
-
-                foreach (var (k, v) in rendererState)
-                {
-                    sb.AppendLine($"BackendState: {k} -> {v.clientSimName}");
-                }
-            }
-
             Assert.AreEqual(
                 expectedStateEntries,
                 simState.Count,
-                $"Sim state entry count mismatch; expecting {expectedStateEntries} but got {simState.Count}\n{sb}");
+                $"Sim state entry count mismatch; expecting {expectedStateEntries} but go {simState.Count}");
             Assert.AreEqual(
                 expectedStateEntries,
                 rendererState.Count,
-                $"Renderer state entry count mismatch; expecting {expectedStateEntries} but got {rendererState.Count}\n{sb}");
+                $"Renderer state entry count mismatch; expecting {expectedStateEntries} but go {rendererState.Count}");
         }
     }
 }

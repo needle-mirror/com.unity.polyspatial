@@ -1,0 +1,44 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_geometry_modifier_vertex_id name = "VertexIDNode_ec90452928824015a445211766951f61" type = "integer">
+    </realitykit_geometry_modifier_vertex_id>
+    <GeometryModification name = "SR_GeometryVertex" type = "vertexshader">
+        <input name = "modelPositionOffset" type = "vector3" nodename = "SR_GeometryVertex_modelPositionOffset_SubtractPosition" />
+    </GeometryModification>
+    <UsdPreviewSurface name = "SR_Geometry" type = "surfaceshader">
+        <input name = "diffuseColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "occlusion" type = "float" value = "1" />
+        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "roughness" type = "float" nodename = "SR_Geometry_roughness_OnesComplement" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+        <input name = "ior" type = "float" value = "1.4" />
+    </UsdPreviewSurface>
+    <surfacematerial name = "USD_Geometry" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_GeometryVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Geometry" />
+    </surfacematerial>
+    <subtract name = "SR_GeometryVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in2" type = "vector3" nodename = "SR_GeometryVertex_modelPositionOffset_Position" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" />
+    </subtract>
+    <position name = "SR_GeometryVertex_modelPositionOffset_Position" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <subtract name = "SR_Geometry_roughness_OnesComplement" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <convert name = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" type = "float">
+        <input name = "in" type = "integer" nodename = "VertexIDNode_ec90452928824015a445211766951f61" />
+    </convert>
+    <swizzle name = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+        <input name = "in" type = "float" nodename = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" />
+        <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+</materialx>

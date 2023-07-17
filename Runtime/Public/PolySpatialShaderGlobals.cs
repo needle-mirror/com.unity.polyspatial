@@ -10,6 +10,7 @@ namespace Unity.PolySpatial
         public const string SinTime = "_SinTime";
         public const string CosTime = "_CosTime";
         public const string DeltaTime = "unity_DeltaTime";
+        public const string WorldSpaceLightPos0 = "_WorldSpaceLightPos0";
         public const string WorldSpaceCameraPos = "_WorldSpaceCameraPos";
         public const string WorldSpaceCameraDir = "_WorldSpaceCameraDir";
         public const string OrthoParams = "unity_OrthoParams";
@@ -17,42 +18,19 @@ namespace Unity.PolySpatial
         public const string ScreenParams = "_ScreenParams";
         public const string ViewMatrix = "UNITY_MATRIX_V";
         public const string ProjectionMatrix = "UNITY_MATRIX_P";
-        public const string AmbientSkyColor = "unity_AmbientSky";
-        public const string AmbientEquatorColor = "unity_AmbientEquator";
-        public const string AmbientGroundColor = "unity_AmbientGround";
-        public const string FogColor = "unity_FogColor";
-        public const string FogParams = "unity_FogParams";
 
-        public const int LightCount = 4;
-        public const string LightColorPrefix = "polySpatial_LightColor";
-        public const string LightPositionPrefix = "polySpatial_LightPosition";
-        public const string SpotDirectionPrefix = "polySpatial_SpotDirection";
-        public const string LightAttenPrefix = "polySpatial_LightAtten";
-
-        public const string GlossyEnvironmentColor = "polySpatial_GlossyEnvironmentColor";
-
-        internal static readonly int TimeID = Shader.PropertyToID(Time);
-        internal static readonly int SinTimeID = Shader.PropertyToID(SinTime);
-        internal static readonly int CosTimeID = Shader.PropertyToID(CosTime);
-        internal static readonly int DeltaTimeID = Shader.PropertyToID(DeltaTime);
-        internal static readonly int WorldSpaceCameraPosID = Shader.PropertyToID(WorldSpaceCameraPos);
-        internal static readonly int WorldSpaceCameraDirID = Shader.PropertyToID(WorldSpaceCameraDir);
-        internal static readonly int OrthoParamsID = Shader.PropertyToID(OrthoParams);
-        internal static readonly int ProjectionParamsID = Shader.PropertyToID(ProjectionParams);
-        internal static readonly int ScreenParamsID = Shader.PropertyToID(ScreenParams);
-        internal static readonly int ViewMatrixID = Shader.PropertyToID(ViewMatrix);
-        internal static readonly int ProjectionMatrixID = Shader.PropertyToID(ProjectionMatrix);
-        internal static readonly int AmbientSkyColorID = Shader.PropertyToID(AmbientSkyColor);
-        internal static readonly int AmbientEquatorColorID = Shader.PropertyToID(AmbientEquatorColor);
-        internal static readonly int AmbientGroundColorID = Shader.PropertyToID(AmbientGroundColor);
-        internal static readonly int FogColorID = Shader.PropertyToID(FogColor);
-        internal static readonly int FogParamsID = Shader.PropertyToID(FogParams);
-        internal static readonly int GlossyEnvironmentColorID = Shader.PropertyToID(GlossyEnvironmentColor);
-
-        internal static readonly int[] LightColorIDs = GetLightPropertyIDs(LightColorPrefix);
-        internal static readonly int[] LightPositionIDs = GetLightPropertyIDs(LightPositionPrefix);
-        internal static readonly int[] SpotDirectionIDs = GetLightPropertyIDs(SpotDirectionPrefix);
-        internal static readonly int[] LightAttenIDs = GetLightPropertyIDs(LightAttenPrefix);
+        public static readonly int TimeID = Shader.PropertyToID(Time);
+        public static readonly int SinTimeID = Shader.PropertyToID(SinTime);
+        public static readonly int CosTimeID = Shader.PropertyToID(CosTime);
+        public static readonly int DeltaTimeID = Shader.PropertyToID(DeltaTime);
+        public static readonly int WorldSpaceLightPos0ID = Shader.PropertyToID(WorldSpaceLightPos0);
+        public static readonly int WorldSpaceCameraPosID = Shader.PropertyToID(WorldSpaceCameraPos);
+        public static readonly int WorldSpaceCameraDirID = Shader.PropertyToID(WorldSpaceCameraDir);
+        public static readonly int OrthoParamsID = Shader.PropertyToID(OrthoParams);
+        public static readonly int ProjectionParamsID = Shader.PropertyToID(ProjectionParams);
+        public static readonly int ScreenParamsID = Shader.PropertyToID(ScreenParams);
+        public static readonly int ViewMatrixID = Shader.PropertyToID(ViewMatrix);
+        public static readonly int ProjectionMatrixID = Shader.PropertyToID(ProjectionMatrix);
 
         public enum PropertyType
         {
@@ -70,6 +48,7 @@ namespace Unity.PolySpatial
             [SinTime] = PropertyType.Vector,
             [CosTime] = PropertyType.Vector,
             [DeltaTime] = PropertyType.Vector,
+            [WorldSpaceLightPos0] = PropertyType.Vector,
             [WorldSpaceCameraPos] = PropertyType.Vector,
             [WorldSpaceCameraDir] = PropertyType.Vector,
             [OrthoParams] = PropertyType.Vector,
@@ -77,36 +56,9 @@ namespace Unity.PolySpatial
             [ScreenParams] = PropertyType.Vector,
             [ViewMatrix] = PropertyType.Matrix,
             [ProjectionMatrix] = PropertyType.Matrix,
-            [AmbientSkyColor] = PropertyType.Vector,
-            [AmbientEquatorColor] = PropertyType.Vector,
-            [AmbientGroundColor] = PropertyType.Vector,
-            [FogColor] = PropertyType.Vector,
-            [FogParams] = PropertyType.Vector,
-            [GlossyEnvironmentColor] = PropertyType.Vector,
         };
 
         static Dictionary<PropertyType, string[]> s_Names = new();
-
-        static PolySpatialShaderGlobals()
-        {
-            for (var i = 0; i < LightCount; ++i)
-            {
-                s_PropertyTypes.Add(LightColorPrefix + i, PropertyType.Vector);
-                s_PropertyTypes.Add(LightPositionPrefix + i, PropertyType.Vector);
-                s_PropertyTypes.Add(SpotDirectionPrefix + i, PropertyType.Vector);
-                s_PropertyTypes.Add(LightAttenPrefix + i, PropertyType.Vector);
-            }
-        }
-
-        static int[] GetLightPropertyIDs(string prefix)
-        {
-            var propertyIDs = new int[LightCount];
-            for (var i = 0; i < LightCount; ++i)
-            {
-                propertyIDs[i] = Shader.PropertyToID(prefix + i);
-            }
-            return propertyIDs;
-        }
 
         internal static int GetCount()
         {

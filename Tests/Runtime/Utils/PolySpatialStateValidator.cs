@@ -32,7 +32,7 @@ using UnityObject = UnityEngine.Object;
 /// JIRA link should be included above the relevant lines of code). If missing, please add a JIRA or reach out to the
 /// PolySpatial QA and/or PolySpatial Core team.
 /// </summary>
-internal class PolySpatialStateValidator
+public class PolySpatialStateValidator
 {
     // collection of all properties a GameObjectNode may have
     private const string k_ActiveProperty = "active";
@@ -154,7 +154,7 @@ internal class PolySpatialStateValidator
     /// Captures a GameObject's state as well as linking clientSim and hostPlatform GameObjects and their respective parents.
     /// GameObject properties define its state, capturing simple (string, int, etc) or complex (Mesh, Material) types.
     /// </summary>
-    internal class GameObjectNode
+    public class GameObjectNode
     {
         public string clientSimName;
         public string hostPlatformName;
@@ -444,7 +444,7 @@ internal class PolySpatialStateValidator
         m_HostPlatformIdToClientSimId.Clear();
 
         // Get map of all tracked clientSim IDs => hostPlatform GOs so we can loop through GOs and map clientSim ID => hostPlatform ID
-        var clientSimIdToHostPlatformGOs = m_UnitySceneGraph.GatherUnitySceneGraphGameObjectsFromVolume();
+        var clientSimIdToHostPlatformGOs = m_UnitySceneGraph.GetSimIDToScenegraphGOs();
         foreach (var clientSimIdToHostPlatformGO in clientSimIdToHostPlatformGOs)
         {
             PolySpatialInstanceID clientSimId = clientSimIdToHostPlatformGO.Key;
@@ -452,7 +452,7 @@ internal class PolySpatialStateValidator
             m_HostPlatformIdToClientSimId[hostPlatformId] = clientSimId;
         }
         // Get all clientSim GO names for each clientSim ID
-        m_ClientSimIdToName = m_UnitySceneGraph.GatherUnitySceneGraphGameObjectNames();
+        m_ClientSimIdToName = m_UnitySceneGraph.GetSimInstanceIDsToNames();
 
         // Fetch all GameObjects to classify them as either clientSim GO or hostPlatform GO
         var allObjs = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.InstanceID);
@@ -531,7 +531,7 @@ internal class PolySpatialStateValidator
     private bool IsMarkedForDestroy(GameObject obj, HashSet<int> allObjIds)
     {
         // determine if obj is a backing GO whose clientSim GO has been destroyed
-        if (!m_UnitySceneGraph.IsUnitySceneGraphGameObject(obj.GetInstanceID()) && m_PolySpatialNameRegex.IsMatch(obj.name))
+        if (!m_UnitySceneGraph.IsUnitySceneGraphObject(obj.GetInstanceID()) && m_PolySpatialNameRegex.IsMatch(obj.name))
         {
             Match match = m_PolySpatialNameRegex.Match(obj.name);
             var matchGroup = match.Groups;
@@ -555,7 +555,7 @@ internal class PolySpatialStateValidator
         // Client side objects that are in the PolySpatial layer
         // are not tracked and so will not have matching items
         // in the host list.
-        if (go.layer == LayerMask.NameToLayer(PolySpatialUnityBackend.PolySpatialLayerName))
+        if (go.layer == LayerMask.NameToLayer(PolySpatialCore.PolySpatialLayerName))
             return false;
 
         // Can't use GameObjectTracker.IsTrackedGameObjectInstanceID because we may not have actually
@@ -569,10 +569,10 @@ internal class PolySpatialStateValidator
             return false;
 
         // this has no equivalent on the clientSim side, but is a hostPlatform object
-        if (m_UnitySceneGraph.IsVolumeRootGameObject(go))
+        if (m_UnitySceneGraph.IsRootGameObject(go))
             return false;
 
-        return m_UnitySceneGraph.IsUnitySceneGraphGameObject(go.GetInstanceID());
+        return m_UnitySceneGraph.IsUnitySceneGraphObject(go.GetInstanceID());
     }
 
     /// <summary>

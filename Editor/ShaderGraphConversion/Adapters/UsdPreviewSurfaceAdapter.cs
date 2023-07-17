@@ -9,27 +9,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     internal class UsdPreviewSurfaceAdapter : ISurfaceAdapter
     {
-        private MaterialSlot m_DebugOutputSlot;
-
-        public UsdPreviewSurfaceAdapter(MaterialSlot debugOutputSlot = null)
-        {
-            m_DebugOutputSlot = debugOutputSlot;
-        }
-
         public void BuildContextInstance(GraphData graphData, MtlxGraphData graph, ExternalEdgeMap externals)
         {
 #if DISABLE_MATERIALX_EXTENSIONS
-            UsdPreviewSurfaceUtils.BuildContextInstance(graphData, graph, externals, m_DebugOutputSlot, true);
+            UsdPreviewSurfaceUtils.BuildContextInstance(graphData, graph, externals, true);
 #else
-            // We disable the vertex stage iff the debug output slot connects to it.  The idea is that if you're
-            // debugging the fragment stage, you probably want to be able to visualize the vertex stage's
-            // interpolants (position, normal, custom interpolators, etc.)  If you're debugging the vertex stage,
-            // however, we don't want to set a possibly invalid position that might make the debug output invisible
-            // (and there may be issues with using the same nodes to output to both the vertex and fragment stages).
-            UsdPreviewSurfaceUtils.BuildContextInstance(
-                graphData, graph, externals, m_DebugOutputSlot,
-                m_DebugOutputSlot != null && UnityEditor.Graphing.NodeUtils.GetEffectiveShaderStage(
-                    m_DebugOutputSlot, false) == ShaderStage.Vertex);
+            UsdPreviewSurfaceUtils.BuildContextInstance(graphData, graph, externals, false);
 #endif
         }
 
@@ -42,120 +27,27 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         private const string GeometryModification = "GeometryModification";
 
-        struct TargetInfo
-        {
-            internal bool isTransparent;
-            internal bool alphaIsPremultiplied;
-            internal bool alphaIsAdditive;
-            internal bool alphaClipEnabled;
-            internal bool isUnlit;
-            internal bool enableUnlitToneMapping;
-        }
-
-        static TargetInfo GetTargetInfo(GraphData graphData)
-        {
-            TargetInfo targetInfo = default;
-            foreach (var target in graphData.activeTargets)
-            {
-                var surfaceType = "Opaque";
-                var alphaMode = "Alpha";
-                var subTargetName = "Lit";
-                switch (target)
-                {
-                    case BuiltInTarget builtInTarget:
-                        surfaceType = builtInTarget.surfaceType.ToString();
-                        alphaMode = builtInTarget.alphaMode.ToString();
-                        targetInfo.alphaClipEnabled = builtInTarget.alphaClip;
-                        subTargetName = builtInTarget.activeSubTarget.displayName;
-                        break;
-                    
-                    // UniversalTarget cannot be accessed directly due to its protection level.  Instead, we use
-                    // reflection to access its properties (identical to those in BuiltInTarget).
-                    default:
-                        var type = target.GetType();
-                        if (type.FullName == "UnityEditor.Rendering.Universal.ShaderGraph.UniversalTarget")
-                        {
-                            surfaceType = type.GetProperty("surfaceType").GetValue(target).ToString();
-                            alphaMode = type.GetProperty("alphaMode").GetValue(target).ToString();
-                            targetInfo.alphaClipEnabled = (bool)type.GetProperty("alphaClip").GetValue(target);
-                            var subTarget = (SubTarget)type.GetProperty("activeSubTarget").GetValue(target);
-                            subTargetName = subTarget.displayName;
-                        }
-                        else
-                        {
-                            MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported target type: {type}");
-                        }
-                        break;
-                }
-                switch (surfaceType)
-                {
-                    case "Opaque":
-                        break;
-                    
-                    case "Transparent":
-                        targetInfo.isTransparent = true;
-                        break;
-                    
-                    default:
-                        MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported surface type: {surfaceType}");
-                        break;
-                }
-                if (targetInfo.isTransparent)
-                {
-                    switch (alphaMode)
-                    {
-                        case "Alpha":
-                            break;
-                        
-                        case "Premultiply":
-                            targetInfo.alphaIsPremultiplied = true;
-                            break;
-
-                        case "Additive":
-                            targetInfo.alphaIsAdditive = true;
-                            break;
-
-                        default:
-                            MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported alpha mode: {alphaMode}");
-                            break;
-                    }
-                }
-
-                switch (subTargetName)
-                {
-                    case "Lit":
-                        break;
-
-                    case "Unlit":
-                        targetInfo.isUnlit = true;
-                        break;
-                    
-                    default:
-                        MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported subtarget: {subTargetName}");
-                        break;
-                }
-            }
-            foreach (var subData in graphData.SubDatas)
-            {
-                if (subData is MtlxDataExtension mtlxData)
-                    targetInfo.enableUnlitToneMapping = mtlxData.EnableUnlitToneMapping;
-            }
-            return targetInfo;
-        }
-
-        internal static void BuildContextInstance(
-            GraphData graphData, MtlxGraphData graph, ExternalEdgeMap externals,
-            MaterialSlot debugOutputSlot, bool ignoreVertexStage = false)
+        internal static void BuildContextInstance(GraphData graphData, MtlxGraphData graph, ExternalEdgeMap externals, bool ignoreVertexStage = false)
         {
             Init();
 
-            // Debug output is always unlit/opaque.
-            var targetInfo = (debugOutputSlot == null) ? GetTargetInfo(graphData) : new() { isUnlit = true };
-            
 #if DISABLE_MATERIALX_EXTENSIONS
             var fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
 #else
-            var fragmentNodeType = targetInfo.isUnlit ? MtlxNodeTypes.RealityKitUnlit : MtlxNodeTypes.RealityKitPbr;
+            // Use the presence of lighting parameter blocks as an indicator of whether the material is lit.
+            var fragmentNodeType = MtlxNodeTypes.RealityKitUnlit;
+            var blocks = graphData.GetNodes<BlockNode>();
+            foreach (var block in blocks)
+            {
+                if (block.descriptor.shaderStage == ShaderStage.Fragment &&
+                    block.descriptor.name != "BaseColor" &&
+                    block.descriptor.name != "Alpha" &&
+                    block.descriptor.name != "AlphaClipThreshold")
+                {
+                    fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
+                    break;
+                }
+            }
 #endif
 
             // setup the surface shader node.
@@ -167,17 +59,70 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             // Disable tone mapping for unlit surfaces to match Unity's behavior.
             if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
-            {
-                fragmentNode.AddPortValue(
-                    "applyPostProcessToneMap", MtlxDataTypes.Boolean,
-                    new[] { targetInfo.enableUnlitToneMapping ? 1.0f : 0.0f });
-            }
+                fragmentNode.AddPortValue("applyPostProcessToneMap", MtlxDataTypes.Boolean, new[] { 0.0f });
 
-            // Premultiplied and additive modes use premultiplied alpha.
-            if (fragmentNodeType != MtlxNodeTypes.UsdPreviewSurface &&
-                (targetInfo.alphaIsPremultiplied || targetInfo.alphaIsAdditive))
+            var isTransparent = false;
+            var alphaIsAdditive = false;
+            var alphaClipEnabled = false;
+            foreach (var target in graphData.activeTargets)
             {
-                fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                var surfaceType = "Opaque";
+                var alphaMode = "Alpha";
+                switch (target)
+                {
+                    case BuiltInTarget builtInTarget:
+                        surfaceType = builtInTarget.surfaceType.ToString();
+                        alphaMode = builtInTarget.alphaMode.ToString();
+                        alphaClipEnabled = builtInTarget.alphaClip;
+                        break;
+                    
+                    // UniversalTarget cannot be accessed directly due to its protection level.  Instead, we use
+                    // reflection to access its properties (identical to those in BuiltInTarget).
+                    default:
+                        var type = target.GetType();
+                        if (type.FullName == "UnityEditor.Rendering.Universal.ShaderGraph.UniversalTarget")
+                        {
+                            surfaceType = type.GetProperty("surfaceType").GetValue(target).ToString();
+                            alphaMode = type.GetProperty("alphaMode").GetValue(target).ToString();
+                            alphaClipEnabled = (bool)type.GetProperty("alphaClip").GetValue(target);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Unsupported target type: {type}");
+                        }
+                        break;
+                }
+                switch (surfaceType)
+                {
+                    case "Opaque":
+                        break;
+                    
+                    case "Transparent":
+                        isTransparent = true;
+                        break;
+                    
+                    default:
+                        Debug.LogWarning($"Unsupported surface type: {surfaceType}");
+                        break;
+                }
+                switch (alphaMode)
+                {
+                    case "Alpha":
+                        break;
+                    
+                    case "Premultiply":
+                        fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                        break;
+
+                    case "Additive":
+                        fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                        alphaIsAdditive = true;
+                        break;
+
+                    default:
+                        Debug.LogWarning($"Unsupported alpha mode: {alphaMode}");
+                        break;
+                }
             }
 
             // initialize the material node boiler plate.
@@ -187,7 +132,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
             graph.AddPortAndEdge(fragmentNodeName, materialNodeName, "surfaceshader", MtlxDataTypes.Surface);
 
             // each relevant block should map to a surfaceshader input in UsdPreviewSurface.
-            var blocks = graphData.GetNodes<BlockNode>();
             foreach (var block in blocks)
             {
                 if (!HasAdapter(block))
@@ -199,8 +143,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     ShaderStage.Vertex => vertexNode,
                     _ => throw new NotSupportedException($"Unsupported shader stage {block.descriptor.shaderStage}")
                 };
-                if (shaderNode == null)
-                    continue; // Ignore vertex stage if unsupported.
 
                 var thisSlot    = block.FindInputSlot<MaterialSlot>(0);
                 var srcSlot     = SlotUtils.GetSourceConnectionSlot(thisSlot);
@@ -208,20 +150,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 var fileValue   = SlotUtils.GetDefaultFilename(thisSlot);
                 var floatValue  = SlotUtils.GetDefaultValue(thisSlot);
                 var portName    = blockMap[block.descriptor.name];
-
-                if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
-                {
-                    // As a special case, convert the "baseColor" mapping to RealityKitUnlit's "color".
-                    // TODO (LXR-2242): Refactor the way we handle these mappings and rules, since they're full
-                    // of special cases like this.
-                    if (portName == "baseColor")
-                        portName = "color";
-                    
-                    // For Unlit surfaces, ignore anything that isn't in the input map (we don't need to do this
-                    // for Lit surfaces, since all Unlit inputs are also Lit inputs)
-                    if (shaderNode == fragmentNode && !unlitSurfaceInputs.ContainsKey(portName))
-                        continue;
-                }
 
                 string externalNodeName = shaderNode.name;
                 string externalPortName = portName;
@@ -237,20 +165,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         case SpecialRules.EnablesSpecularWorkflow:
                             if (block.owner.GetActiveBlocksForAllActiveTargets().Contains(block.descriptor))
                                 shaderNode.AddPortValue("useSpecularWorkflow", MtlxDataTypes.Integer, new float[] { 1 });
-                            break;
-
-                        // Create a "dotproduct" node to convert to grayscale for RealityKit specular level.
-                        case SpecialRules.SpecularGrayscale:
-                            externalNodeName = $"{shaderNode.name}_{portName}_Grayscale";
-                            externalPortName = "in2";
-                            externalNode = graph.AddNode(
-                                externalNodeName, MtlxNodeTypes.DotProduct, MtlxDataTypes.Float);
-                            
-                            // Convert specular color to grayscale according to the Unity reference conversion:
-                            // https://docs.unity3d.com/ScriptReference/Color-grayscale.html
-                            portType = MtlxDataTypes.Vector3;
-                            externalNode.AddPortValue("in1", portType, new[] { 0.299f, 0.587f, 0.114f });
-                            graph.AddEdge(externalNodeName, shaderNode.name, portName);
                             break;
 
                         // we create a 'subtract' node to perform the one's complement,
@@ -279,90 +193,66 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             portType = MtlxDataTypes.Vector3;
                             ignoreIfNotConnected = true;
 
-                            // Flip the Z coordinate to convert from Unity to RealityKit space.
-                            externalNodeName = $"{vertexNodeName}_{portName}_FlipZ";
-                            externalPortName = "in1";
-                            externalNode = graph.AddNode(externalNodeName, "multiply", portType);
-                            externalNode.AddPortValue("in2", portType, new[] { 1.0f, 1.0f, -1.0f });
-
                             // Subtract the model space position to get the offset.
-                            var subtractNodeName = $"{vertexNodeName}_{portName}_SubtractPosition";
-                            graph.AddNode(subtractNodeName, "subtract", portType);
-                            graph.AddPortAndEdge(externalNodeName, subtractNodeName, "in1", portType);
-                            graph.AddPortAndEdge(subtractNodeName, vertexNodeName, portName, portType);
+                            externalNodeName = $"{vertexNodeName}_{portName}_SubtractPosition";
+                            externalPortName = "in1";
+                            externalNode = graph.AddNode(externalNodeName, "subtract", portType);
+                            graph.AddPortAndEdge(externalNodeName, vertexNodeName, portName, portType);
 
                             var positionNodeName = $"{vertexNodeName}_{portName}_Position";
-                            var positionNode = graph.AddNode(positionNodeName, MtlxNodeTypes.GeomPosition, portType);
+                            var positionNode = graph.AddNode(
+                                positionNodeName, MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3);
                             positionNode.AddPortString("space", MtlxDataTypes.String, "object");
-                            graph.AddPortAndEdge(positionNodeName, subtractNodeName, "in2", portType);
+                            graph.AddPortAndEdge(positionNodeName, externalNodeName, "in2", portType);
+
                             break;
                         
-                        case SpecialRules.FlipZ:
-                            if (ignoreVertexStage  || srcSlot == null)
-                                continue;
-                            
-                            portType = MtlxDataTypes.Vector3;
-                            ignoreIfNotConnected = true;
-
-                            // Flip the Z coordinate to convert from Unity to RealityKit space.
-                            externalNodeName = $"{vertexNodeName}_{portName}_FlipZ";
-                            externalPortName = "in1";
-                            externalNode = graph.AddNode(externalNodeName, "multiply", portType);
-                            graph.AddPortAndEdge(externalNodeName, vertexNodeName, portName, portType);
-                            externalNode.AddPortValue("in2", portType, new[] { 1.0f, 1.0f, -1.0f });
-                            break;
-
                         case SpecialRules.VertexStage:
                             if (ignoreVertexStage)
                                 continue;
 
                             if (!typeMap.TryGetValue(block.descriptor.name, out portType))
                                 portType = MtlxDataTypes.Vector3;
+
+                            ignoreIfNotConnected = true;
                             break;
                         
-                        case SpecialRules.AdditiveColor:
-                            // If we have a debug output slot, that slot becomes the color source.
-                            if (debugOutputSlot != null)
+                        case SpecialRules.UnlitColor:
+                            if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
                             {
-                                if (debugOutputSlot.isInputSlot)
+                                if (alphaIsAdditive)
                                 {
-                                    srcSlot = SlotUtils.GetSourceConnectionSlot(debugOutputSlot);
-                                    floatValue = SlotUtils.GetDefaultValue(debugOutputSlot);
+                                    // If alpha is additive, scale the color by what would be the alpha.
+                                    externalNodeName = $"{fragmentNodeName}_{portName}_MultiplyAlpha";
+                                    externalPortName = "in1";
+                                    externalNode = graph.AddNode(
+                                        externalNodeName, MtlxNodeTypes.Multiply, MtlxDataTypes.Color3);
+                                    graph.AddPortAndEdge(
+                                        externalNodeName, fragmentNodeName, "color", MtlxDataTypes.Color3);
+
+                                    var alphaBlock = blocks.FirstOrDefault(block => block.descriptor.name == "Alpha");
+                                    if (alphaBlock != null)
+                                    {
+                                        QuickNode.AddInputPortAndEdge(
+                                            externals, externalNode, alphaBlock.FindInputSlot<MaterialSlot>(0),
+                                            "in2", MtlxDataTypes.Float);
+                                    }
                                 }
                                 else
                                 {
-                                    srcSlot = debugOutputSlot;
-                                }
-                            }
-
-                            if (targetInfo.alphaIsAdditive)
-                            {
-                                // If alpha is additive, scale the color by what would be the alpha.
-                                externalNodeName = $"{fragmentNodeName}_{portName}_MultiplyAlpha";
-                                externalPortName = "in1";
-                                externalNode = graph.AddNode(
-                                    externalNodeName, MtlxNodeTypes.Multiply, MtlxDataTypes.Color3);
-                                graph.AddPortAndEdge(
-                                    externalNodeName, fragmentNodeName, portName, MtlxDataTypes.Color3);
-
-                                var alphaBlock = blocks.FirstOrDefault(block => block.descriptor.name == "Alpha");
-                                if (alphaBlock != null)
-                                {
-                                    QuickNode.AddInputPortAndEdge(
-                                        externals, externalNode, alphaBlock.FindInputSlot<MaterialSlot>(0),
-                                        "in2", MtlxDataTypes.Float);
+                                    externalPortName = "color";
                                 }
                             }
                             break;
                         
                         case SpecialRules.AdditiveAlpha:
-                            if (!(targetInfo.isTransparent || targetInfo.alphaClipEnabled))
+                            if (!isTransparent)
                             {
-                                // If opaque and alpha clipping is disabled, omit opacity entirely.
+                                // If opaque, omit opacity entirely.
                                 srcSlot = null;
                                 ignoreIfNotConnected = true;
                             }
-                            else if (targetInfo.alphaIsAdditive)
+                            else if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit && alphaIsAdditive)
                             {
                                 // If alpha is additive, opacity should be zero (because the
                                 // destination color will be multiplied by (1 - alpha)).
@@ -372,7 +262,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             break;
                         
                         case SpecialRules.EnableAlphaClip:
-                            if (!targetInfo.alphaClipEnabled)
+                            if (!alphaClipEnabled)
                             {
                                 // If alpha clip is not enabled, omit opacity threshold entirely.
                                 srcSlot = null;
@@ -381,6 +271,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             break;
                     }
                 }
+
 
                 if (srcSlot != null && AdapterMap.IsNodeSupported(srcSlot.owner))
                 {
@@ -399,21 +290,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
 
             // We then need to setup Unity defaults to override UsdPreviewSurface defaults for any input not used.
-            var surfaceInputs = (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit) ?
-                unlitSurfaceInputs : litSurfaceInputs;
+            var surfaceInputs = (fragmentNodeType == MtlxNodeTypes.UsdPreviewSurface) ?
+                litSurfaceInputs : unlitSurfaceInputs;
             foreach (var defaultPorts in surfaceInputs.Values)
             {
                 if (!fragmentNode.HasPort(defaultPorts.name))
                 {
-                    // As a special case, if alpha clipping is disabled, we need to omit opacityThreshold entirely.
-                    // Including it in any form causes the surface to be treated as opaque, causing a "cut-out"
-                    // effect on visionOS.  Similarly, we omit opacity if the surface isn't transparent/alpha-clipped;
-                    // including it causes the object to be sorted as transparent.
-                    if (!(defaultPorts.name == "opacityThreshold" && !targetInfo.alphaClipEnabled ||
-                        defaultPorts.name == "opacity" && !(targetInfo.isTransparent || targetInfo.alphaClipEnabled)))
-                    {
-                        fragmentNode.AddPortValue(defaultPorts.name, defaultPorts.datatype, defaultPorts.value);
-                    }
+                    fragmentNode.AddPortValue(defaultPorts.name, defaultPorts.datatype, defaultPorts.value);
                 }
             }
         }
@@ -450,11 +333,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             WorldToTangent,
             ObjectToTangent,
             EnablesSpecularWorkflow,
-            SpecularGrayscale,
             SubtractPosition,
             VertexStage,
-            FlipZ,
-            AdditiveColor,
+            UnlitColor,
             AdditiveAlpha,
             EnableAlphaClip,
         }
@@ -466,9 +347,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             blockMap.Add("Position", "modelPositionOffset");
             rulesMap.Add("Position", SpecialRules.SubtractPosition);
             blockMap.Add("Normal", "normal");
-            rulesMap.Add("Normal", SpecialRules.FlipZ);
+            rulesMap.Add("Normal", SpecialRules.VertexStage);
             blockMap.Add("Tangent", "bitangent");
-            rulesMap.Add("Tangent", SpecialRules.FlipZ);
+            rulesMap.Add("Tangent", SpecialRules.VertexStage);
 
             blockMap.Add("Color", "color");
             rulesMap.Add("Color", SpecialRules.VertexStage);
@@ -483,23 +364,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
             rulesMap.Add("UserAttribute", SpecialRules.VertexStage);
             typeMap.Add("UserAttribute", MtlxDataTypes.Vector4);
 
-#if DISABLE_MATERIALX_EXTENSIONS
             blockMap.Add("BaseColor", "diffuseColor");
+            rulesMap.Add("BaseColor", SpecialRules.UnlitColor);
+            blockMap.Add("Emission", "emissiveColor");
             blockMap.Add("Specular", "specularColor");
             rulesMap.Add("Specular", SpecialRules.EnablesSpecularWorkflow);
-            blockMap.Add("Occlusion", "occlusion");
-            blockMap.Add("IOR", "ior");
-            blockMap.Add("RefractionIndex", "ior");
-            blockMap.Add("TessellationDisplacement", "displacement");
-#else
-            blockMap.Add("BaseColor", "baseColor");
-            blockMap.Add("Specular", "specular");
-            rulesMap.Add("Specular", SpecialRules.SpecularGrayscale);
-            blockMap.Add("Occlusion", "ambientOcclusion");
-
-#endif
-            rulesMap.Add("BaseColor", SpecialRules.AdditiveColor);
-            blockMap.Add("Emission", "emissiveColor");
             blockMap.Add("Metallic", "metallic");
             blockMap.Add("NormalTS", "normal");
             rulesMap.Add("NormalTS", SpecialRules.DefaultIsTangent);
@@ -509,7 +378,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             rulesMap.Add("NormalOS", SpecialRules.ObjectToTangent);
             blockMap.Add("Smoothness", "roughness");
             rulesMap.Add("Smoothness", SpecialRules.OnesComplement);
-            
+            blockMap.Add("Occlusion", "occlusion");
             blockMap.Add("Alpha", "opacity");
             rulesMap.Add("Alpha", SpecialRules.AdditiveAlpha);
             blockMap.Add("AlphaClipThreshold", "opacityThreshold");
@@ -517,31 +386,27 @@ namespace UnityEditor.ShaderGraph.MaterialX
             blockMap.Add("CoatMask", "clearcoat");
             blockMap.Add("CoatSmoothness", "clearcoatRoughness");
             rulesMap.Add("CoatSmoothness", SpecialRules.OnesComplement);
+            blockMap.Add("IOR", "ior");
+            blockMap.Add("RefractionIndex", "ior");
+            blockMap.Add("TessellationDisplacement", "displacement");
         }
 
         private static void InitSurfaceDescription()
         {
-#if DISABLE_MATERIALX_EXTENSIONS
-            // Color values are (0.5, 0.5, 0.5) converted to linear (raised to the power of 2.2)
-            SetupLitInput("diffuseColor",         MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
-            SetupLitInput("specularColor",        MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
-            SetupLitInput("useSpecularWorkflow",  MtlxDataTypes.Integer,  new float[] { 0 });
-            SetupLitInput("ior",                  MtlxDataTypes.Float,    new float[] { 1.4f });
-            SetupLitInput("occlusion",            MtlxDataTypes.Float,    new float[] { 1 });
-#else
-            SetupLitInput("baseColor",            MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
-            SetupLitInput("specular",             MtlxDataTypes.Float,    new float[] { .5f });
-            SetupLitInput("ambientOcclusion",     MtlxDataTypes.Float,    new float[] { 1 });
-#endif
+            SetupLitInput("diffuseColor",         MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
             SetupLitInput("emissiveColor",        MtlxDataTypes.Color3,   new float[] { 0, 0, 0 });
+            SetupLitInput("useSpecularWorkflow",  MtlxDataTypes.Integer,  new float[] { 0 });
+            SetupLitInput("specularColor",        MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
             SetupLitInput("metallic",             MtlxDataTypes.Float,    new float[] { 0 });
             SetupLitInput("roughness",            MtlxDataTypes.Float,    new float[] { 0.5f });
             SetupLitInput("clearcoat",            MtlxDataTypes.Float,    new float[] { 0 });
             SetupLitInput("clearcoatRoughness",   MtlxDataTypes.Float,    new float[] { 0.01f });
             SetupLitInput("opacity",              MtlxDataTypes.Float,    new float[] { 1 });
             SetupLitInput("opacityThreshold",     MtlxDataTypes.Float,    new float[] { 0 });
-            
-            SetupUnlitInput("color",              MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
+            SetupLitInput("ior",                  MtlxDataTypes.Float,    new float[] { 1.4f });
+            SetupLitInput("occlusion",            MtlxDataTypes.Float,    new float[] { 1 });
+
+            SetupUnlitInput("color",              MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
             SetupUnlitInput("opacity",            MtlxDataTypes.Float,    new float[] { 1 });
             SetupUnlitInput("opacityThreshold",   MtlxDataTypes.Float,    new float[] { 0 });
         }

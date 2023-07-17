@@ -10,7 +10,6 @@ namespace Unity.PolySpatial.Internals
     internal class PolySpatialCompoundCollider : MonoBehaviour
     {
         Dictionary<int, Collider> m_ColliderMap = new();
-        Dictionary<int, bool> m_ColliderEnabledCachesState = new();
 
         public enum PolySpatialTrackingFlags : uint
         {
@@ -61,34 +60,10 @@ namespace Unity.PolySpatial.Internals
             internal Vector3 center;
             internal UnityColliderShape shape;
             internal Mesh sharedMesh;
-            internal bool convex;
         }
 
-        void OnEnable()
+        private static void DestroyAppropriately(UnityEngine.Object obj)
         {
-            foreach (var kvp in m_ColliderEnabledCachesState)
-            {
-                if (TryGetBackingCollider(kvp.Key, out var collider))
-                {
-                    collider.enabled = kvp.Value;
-                }
-            }
-            m_ColliderEnabledCachesState.Clear();
-        }
-
-        void OnDisable()
-        {
-            foreach (var kvp in m_ColliderMap)
-            {
-                m_ColliderEnabledCachesState[kvp.Key] = kvp.Value.enabled;
-                kvp.Value.enabled = false;
-            }
-        }
-
-        private void DestroyAppropriately(int id, UnityEngine.Object obj)
-        {
-            m_ColliderMap.Remove(id);
-            m_ColliderEnabledCachesState.Remove(id);
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
@@ -104,14 +79,15 @@ namespace Unity.PolySpatial.Internals
             if (trackingFlags.HasFlag(PolySpatialTrackingFlags.Destroyed) &&
                 TryGetBackingCollider(colliderInfo.colliderId, out var destroyedComponent))
             {
-                DestroyAppropriately(colliderInfo.colliderId, destroyedComponent);
+                m_ColliderMap.Remove(colliderInfo.colliderId);
+                DestroyAppropriately(destroyedComponent);
                 return;
             }
 
             if (trackingFlags.HasFlag(PolySpatialTrackingFlags.Disabled) &&
                 TryGetBackingCollider(colliderInfo.colliderId, out var disabledComponent))
             {
-                SetColliderEnabledState(colliderInfo.colliderId, disabledComponent, false);
+                disabledComponent.enabled = false;
                 return;
             }
 
@@ -138,11 +114,6 @@ namespace Unity.PolySpatial.Internals
                     break;
                 case UnityColliderShape.Mesh:
                     var meshCollider = GetOrAddBackingCollider<MeshCollider>(colliderInfo.colliderId);
-                    // The setters for both isTrigger and convex report an error if (isTrigger && !convex).
-                    // Avoid that error if we are setting both at once to a valid state.
-                    if (!colliderInfo.convex && meshCollider.isTrigger)
-                        meshCollider.isTrigger = false;
-                    meshCollider.convex = colliderInfo.convex;
                     meshCollider.isTrigger = colliderInfo.isTrigger;
                     meshCollider.sharedMesh = colliderInfo.sharedMesh;
                     break;
@@ -165,30 +136,16 @@ namespace Unity.PolySpatial.Internals
             return false;
         }
 
-        void SetColliderEnabledState(int id, Collider collider, bool isEnabled)
-        {
-            if (!isEnabled)
-            {
-                m_ColliderEnabledCachesState[id] = collider.enabled;
-            }
-            else
-            {
-                m_ColliderEnabledCachesState.Remove(id);
-            }
-
-            collider.enabled = isEnabled;
-        }
-
         T GetOrAddBackingCollider<T>(int id) where T : Collider
         {
             if (m_ColliderMap.TryGetValue(id, out var foundComponent))
             {
-                SetColliderEnabledState(id, foundComponent, this.enabled);
+                foundComponent.enabled = true;
                 return foundComponent as T;
             }
 
             var component = gameObject.AddComponent<T>();
-
+            //gameObject.MarkAsBackingComponent(component);
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
@@ -196,7 +153,6 @@ namespace Unity.PolySpatial.Internals
             }
 #endif
             m_ColliderMap.Add(id, component);
-            SetColliderEnabledState(id, component, this.enabled);
             return component;
         }
     }

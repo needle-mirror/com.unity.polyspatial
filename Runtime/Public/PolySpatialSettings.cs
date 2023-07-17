@@ -14,12 +14,12 @@ using UnityEditor;
 
 namespace Unity.PolySpatial
 {
-    /// <summary>
-    /// Class containing the PolySpatial settings asset.
-    /// </summary>
-    public partial class PolySpatialSettings : ScriptableObject
+    public class PolySpatialSettings : ScriptableObject
+#if UNITY_EDITOR
+        ,ISerializationCallbackReceiver
+#endif
     {
-        internal enum PolySpatialTextureCompressionFormat
+        public enum PolySpatialTextureCompressionFormat
         {
             Unknown = 0,
             ETC = 1,
@@ -31,72 +31,29 @@ namespace Unity.PolySpatial
             DXTC_RGTC = 7
         }
 
-        internal enum NetworkingMode
+        public enum NetworkingMode
         {
             Local,
             LocalAndClient,
-        }
+        };
 
-        internal enum RecordingMode
+        public enum RecordingMode
         {
             None,
             Record,
             Playback
-        }
+        };
 
-        internal enum ParticleReplicationMode
-        {
-            ReplicateProperties,
-            BakeToMesh,
-#if POLYSPATIAL_BAKE_TO_TEXTURE_PARTICLES
-            ExperimentalBakeToTexture
+#if UNITY_EDITOR
+        const string k_DefaultAssetPath = "Assets/Resources/PolySpatialSettings.asset";
+        const string k_SessionRecordingModeKey = "PolySpatial.Session.Recording.Mode";
+        const string k_SessionRecordingFilePathKey = "PolySpatial.Session.Recording.FilePath";
+        const string k_SessionRecordingFrameRateKey = "PolySpatial.Session.Recording.FrameRate";
+        const string k_SessionRecordingFrameLimit = "PolySpatial.Session.Recording.FrameLimit";
 #endif
-        }
-
-        [Serializable]
-        internal struct ProjectionHalfAngles
-        {
-            public ProjectionHalfAngles(float left, float right, float top, float bottom)
-            {
-                this.left = left;
-                this.right = right;
-                this.top = top;
-                this.bottom = bottom;
-            }
-
-            public float left;
-            public float right;
-            public float top;
-            public float bottom;
-
-            public static ProjectionHalfAngles Default => new ProjectionHalfAngles(-1.0f, 1.0f, 1.0f, -1.0f);
-        }
-
-        [Serializable]
-        internal class DisplayProviderParameters
-        {
-            // Put tooltips in class so you can individually hover on serialized elements to see them.
-            [Tooltip("FramebufferWidth = 1830x1600. Half of the Vision Pro physical screen resolution.")]
-            public Vector2Int dimensions = new(1830, 1600);
-            [Tooltip("EyePoses are an average estimate of a person with 66 mm IPD using the device." +
-                     "EyePoses do not need to be precise for StereoRenderTargets to appear correct and should not be changed.")]
-            public Pose leftEyePose = new(position: new Vector3(-.033f, -.02f, -.01f), rotation: Quaternion.identity);
-            [Tooltip("EyePoses are an average estimate of a person with 66 mm IPD using the device." +
-                     "EyePoses do not need to be precise for StereoRenderTargets to appear correct and should not be changed.")]
-            public Pose rightEyePose = new(position: new Vector3(-.033f, -.02f, -.01f), rotation: Quaternion.identity);
-            [Tooltip("ProjectHalfAngles are values derived from the actual device. These should not need be changed.")]
-            public ProjectionHalfAngles leftProjectionHalfAngles = new(-1.73205f, 1.0f, 1.0f, -1.19175f);
-            [Tooltip("ProjectHalfAngles are values derived from the actual device. These should not need be changed.")]
-            public ProjectionHalfAngles rightProjectionHalfAngles = new(-1.73205f, 1.0f, 1.0f, -1.19175f);
-        }
-
-        const int k_DefaultMaxMipByteSizePerCycle = 128000;
 
         static PolySpatialSettings s_Instance;
 
-        /// <summary>
-        /// Gets a reference for an instance of the PolySpatial settings asset in the project.
-        /// </summary>
         public static PolySpatialSettings instance {
             get {
                 InitializeInstance();
@@ -104,25 +61,35 @@ namespace Unity.PolySpatial
             }
         }
 
-        internal static PolySpatialSettings GetInstanceIfExists()
-        {
-            return s_Instance;
-        }
-
         static void InitializeInstance()
         {
             if (s_Instance != null)
                 return;
+#if UNITY_EDITOR
+            s_Instance = AssetDatabase.LoadAssetAtPath<PolySpatialSettings>(k_DefaultAssetPath);
+            if (s_Instance == null)
+            {
+                s_Instance = CreateInstance<PolySpatialSettings>();
 
-            InitializeInstanceForEditor();
-            InitializeInstanceForRuntime();
-        }
+                // Dispatch asset creation on main thread in case instance is created on worker thread
+                EditorApplication.delayCall += () =>
+                {
+                    // Don't overwrite an existing asset if one already exists
+                    if (File.Exists(k_DefaultAssetPath))
+                    {
+                        Debug.LogError($"A new {nameof(PolySpatialSettings)} asset was initialized when its asset already exists. " +
+                            $"Was {nameof(PolySpatialSettings)}.{nameof(instance)} used by an asset importer?");
 
-        #if UNITY_EDITOR
-        [Conditional("DEADBEEF_SHOULD_NOT_BE_DEFINED")]
-        #endif
-        static void InitializeInstanceForRuntime()
-        {
+                        return;
+                    }
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(k_DefaultAssetPath));
+                    AssetDatabase.CreateAsset(s_Instance, k_DefaultAssetPath);
+                    EditorUtility.SetDirty(s_Instance);
+                    AssetDatabase.SaveAssetIfDirty(s_Instance);
+                };
+            }
+#else
             s_Instance = Resources.Load<PolySpatialSettings>("PolySpatialSettings");
             if (s_Instance == null)
             {
@@ -131,67 +98,116 @@ namespace Unity.PolySpatial
             }
 
             RuntimeOverrideFromEnvironment(s_Instance);
+#endif
         }
 
-        void Awake()
+#if UNITY_EDITOR
+        // what to do when we enter play mode
+        internal static RecordingMode SessionRecordingMode
         {
-            if (m_DefaultVolumeCameraWindowConfiguration == null)
-                m_DefaultVolumeCameraWindowConfiguration = Resources.Load<VolumeCameraWindowConfiguration>("Default Unbounded Configuration");
+            get => (RecordingMode)SessionState.GetInt(k_SessionRecordingModeKey, (int)RecordingMode.None);
+            set => SessionState.SetInt(k_SessionRecordingModeKey, (int)value);
         }
 
-        [SerializeField] string m_PackageVersion;
-
-        /// <summary>The version of the PolySpatial package</summary>
-        public string PackageVersion => m_PackageVersion;
-
-        [SerializeField]
-        [Tooltip("When enabled, PolySpatial will collect information about its tracked objects. You can see this data in the PolySpatial Statistics windows.")]
-        bool m_EnableStatistics;
-
-        internal bool EnableStatistics => m_EnableStatistics;
-
-        [SerializeField]
-        [Tooltip("Only colliders in these layers are tracked by PolySpatial.")]
-        LayerMask m_ColliderSyncLayerMask = 1;
-
-        internal LayerMask ColliderSyncLayerMask
+        //The FrameRate to use when recording
+        internal static int SessionRecordingFrameRate
         {
-            get => m_ColliderSyncLayerMask;
-            set => m_ColliderSyncLayerMask = value;
+            get => SessionState.GetInt(k_SessionRecordingFrameRateKey, 0);
+            set => SessionState.SetInt(k_SessionRecordingFrameRateKey, value);
         }
 
-        [SerializeField]
-        [Tooltip("The technique used to translate particle data to Reality Kit. Replicate Properties: Unity Particle System Properties will be mapped to " +
-                 "RealityKit Particle System Properties. BakeToMesh: Particle Systems will be baked to a mesh every frame and rendered in RealityKit.")]
-        ParticleReplicationMode m_ParticleMode;
 
-        internal ParticleReplicationMode ParticleMode
+        internal static bool SessionLimitFramerateWhenRecording
         {
-            get => m_ParticleMode;
-            set => m_ParticleMode = value;
+            get => SessionState.GetBool(k_SessionRecordingFrameLimit, false);
+            set => SessionState.SetBool(k_SessionRecordingFrameLimit, value);
         }
 
-        [SerializeField]
-        [Tooltip("Whether or not to track light and reflection probes for PolySpatial Lighting node.")]
-        bool m_TrackLightAndReflectionProbes = true;
-
-        internal bool TrackLightAndReflectionProbes => m_TrackLightAndReflectionProbes;
-
-        [SerializeField]
-        [Tooltip("GameObjects created in these layers will have tracking completely disabled.")]
-        LayerMask m_DisableTrackingMask;
-
-        internal LayerMask DisableTrackingMask
+        // the target file path for recording or playback
+        internal static string SessionRecordingFilePath
         {
-            get => m_DisableTrackingMask;
-            set => m_DisableTrackingMask = value;
+            get => SessionState.GetString(k_SessionRecordingFilePathKey, null);
+            set => SessionState.SetString(k_SessionRecordingFilePathKey, value);
         }
 
-        [SerializeField]
-        [Tooltip("PolySpatial tracker type names to disable. When a tracker is disabled, PolySpatial won't track their respective Unity object types.")]
-        string[] m_DisabledTrackers;
+        internal static void EraseSessionRecordingMode()
+        {
+            SessionState.EraseInt(k_SessionRecordingModeKey);
+        }
 
-        internal string[] DisabledTrackers => m_DisabledTrackers;
+        internal static void EraseSessionRecordingFilePath()
+        {
+            SessionState.EraseString(k_SessionRecordingFilePathKey);
+        }
+#endif
+
+        internal static string FindCmdArg(string arg)
+        {
+            var cmdargs = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < cmdargs.Length; i++)
+            {
+                if (cmdargs[i].ToLowerInvariant() == arg)
+                {
+                    if (i + 1 < cmdargs.Length)
+                        return cmdargs[i + 1];
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        [Conditional("POLYSPATIAL_INTERNAL")]
+        internal static void RuntimeOverrideFromEnvironment(PolySpatialSettings inst)
+        {
+            // Environment overrides command line variables
+
+            var netmode =
+                Environment.GetEnvironmentVariable("POLYSPATIAL_NETMODE") ??
+                FindCmdArg("-qnetmode");
+            var server =
+                Environment.GetEnvironmentVariable("POLYSPATIAL_HOST") ??
+                FindCmdArg("-qhost");
+            var launchscene =
+                Environment.GetEnvironmentVariable("POLYSPATIAL_SCENE") ??
+                FindCmdArg("-qscene");
+
+            #if POLYSPATIAL_INTERNAL
+            if (!string.IsNullOrEmpty(netmode))
+            {
+                if (Enum.TryParse(netmode, true, out NetworkingMode mode))
+                {
+                    inst.m_PolySpatialNetworkingMode = mode;
+                }
+                else
+                {
+                    Debug.LogWarning($"Invalid POLYSPATIAL_NETMODE value: {netmode}");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(server))
+            {
+                inst.m_SerializedServerAddresses = new List<string> { server };
+            }
+
+            inst.m_DemoLaunchSceneName = launchscene;
+            #endif
+        }
+
+        public const int DefaultServerPort = 9876;
+        public const string DefaultServerAddress = "127.0.0.1";
+
+        [SerializeField] public bool EnablePolySpatialRuntime;
+        [SerializeField] public bool EnableStatistics;
+        [SerializeField] public bool EnableTransformVerification;
+        [SerializeField] public bool EnableMacRealityKitPreviewInPlayMode;
+        [SerializeField] public bool EnableProgressiveMipStreaming;
+        [SerializeField] public long MaxMipByteSizePerCycle = 128000;
+        [SerializeField] public ulong RuntimeFlags = 0;
+
+        [SerializeField] public LayerMask ColliderSyncLayerMask = 1;
+
+        public string[] DisabledTrackers;
 
         // Additional texture formats to be produced by the PolySpatialTextureImporter.
         // This cannot be a simple serialized field on the PolySpatialSettings ScriptableObject,
@@ -202,94 +218,61 @@ namespace Unity.PolySpatial
         // So, why have a serialized field here at all then? Because it makes the settings UI in the
         // PolySpatialSettingsProvider "just work". So we have a field backed by the static property using
         // ISerializationCallbackReceiver.
-        [SerializeField]
-        PolySpatialTextureCompressionFormat[] m_AdditionalTextureFormats;
+        [SerializeField] public PolySpatialTextureCompressionFormat[] m_AdditionalTextureFormats;
 
-        internal static PolySpatialTextureCompressionFormat[] AdditionalTextureFormats
+#if UNITY_EDITOR
+        public void OnBeforeSerialize()
+        {
+            m_AdditionalTextureFormats = AdditionalTextureFormats;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            AdditionalTextureFormats = m_AdditionalTextureFormats;
+        }
+#endif
+
+        public static PolySpatialTextureCompressionFormat[] AdditionalTextureFormats
         {
             get
             {
-                PolySpatialTextureCompressionFormat[] additionalFormats = null;
-                GetAdditionalTextureFormatsInEditor(ref additionalFormats);
-                return additionalFormats;
+#if UNITY_EDITOR
+                var path = Path.ChangeExtension(k_DefaultAssetPath, "textureFormats");
+                if (File.Exists(path))
+                    return File.ReadAllLines(path).Select(l => Enum.Parse<PolySpatialTextureCompressionFormat>(l)).ToArray();
+#endif
+                return null;
             }
-
-            #if UNITY_EDITOR
             set
             {
-                SetAdditionalTextureFormatsInEditor(value);
+#if UNITY_EDITOR
+                var path = Path.ChangeExtension(k_DefaultAssetPath, "textureFormats");
+                if (value != null)
+                    File.WriteAllLines(path, value.Select(f => f.ToString()).ToArray());
+                else
+                    File.Delete(path);
+#endif
             }
-            #endif
         }
 
         [SerializeField]
-        [Tooltip("Default Volume Camera Window configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed. This also determines the start-up scene for the application.")]
-        VolumeCameraWindowConfiguration m_DefaultVolumeCameraWindowConfiguration;
+        [Tooltip("When enabled, a fallback unbounded Volume Camera will be created on startup if none is found in the scene. Disable this to be able to create the initial Volume Camera from script.")]
+        public bool EnableDefaultVolumeCamera = true;
 
-        /// <summary>
-        /// Default Volume Camera camera configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.
-        /// </summary>
-        public VolumeCameraWindowConfiguration DefaultVolumeCameraWindowConfiguration
-        {
-            get => m_DefaultVolumeCameraWindowConfiguration;
-            set => m_DefaultVolumeCameraWindowConfiguration = value;
-        }
-
-        [Obsolete("Renamed to DefaultVolumeCameraWindowConfiguration (UnityUpgradable) -> DefaultVolumeCameraWindowConfiguration")]
-        public VolumeCameraWindowConfiguration DefaultVolumeCameraConfiguration
-        {
-            get => m_DefaultVolumeCameraWindowConfiguration;
-            set => m_DefaultVolumeCameraWindowConfiguration = value;
-        }
-
+#if UNITY_EDITOR
         [SerializeField]
-        [Tooltip("When enabled, if there is no Volume Camera after scene load, one will be automatically created using the default settings. Disable this to be able to create the initial Volume Camera from script.")]
-        bool m_AutoCreateVolumeCamera = true;
+        [Tooltip("When enabled, GameObjects created to support PolySpatial preview will be hidden in the Scene view.")]
+        internal bool HidePolySpatialPreviewObjectsInScene = true;
+#endif
 
-        public bool AutoCreateVolumeCamera
-        {
-            get => m_AutoCreateVolumeCamera;
-            set => m_AutoCreateVolumeCamera = value;
-        }
+        [SerializeField] public string MaterialXExtensionNamespace = "mtlxextension";
 
-        [SerializeField]
-        [Tooltip("When enabled, PolySpatial tracks preview object names and display them in the Hierarchy view.")]
-        bool m_TransmitDebugInfo;
+#if POLYSPATIAL_INTERNAL
+        [SerializeField] public bool ForceLinkPolySpatialRuntime;
+#endif
 
-        internal bool TransmitDebugInfo
-        {
-            get => m_TransmitDebugInfo;
-            set => m_TransmitDebugInfo = value;
-        }
-
-        [Tooltip("Convert unsupported shaders at runtime to a best guess.")]
-        [SerializeField]
-        bool m_EnableFallbackShaderConversion = true;
-
-        /// <summary>
-        /// Convert unsupported shaders at runtime to a best guess.
-        /// </summary>
-        public bool EnableFallbackShaderConversion => m_EnableFallbackShaderConversion;
-
-        [Tooltip("Run tests at runtime to validate setup.")]
-        [SerializeField]
-        bool m_EnableRuntimeValidation = false;
-
-        /// <summary>
-        /// Run tests at runtime to validate setup.
-        /// </summary>
-        public bool EnableRuntimeValidation => m_EnableRuntimeValidation;
-
-        [Tooltip("The frame count from launch before running the runtime validation.")]
-        [SerializeField]
-        int m_RuntimeValidationFrameCount = 10;
-
-        /// <summary>
-        /// The frame count from launch before running the runtime validation.
-        /// </summary>
-        public int RuntimeValidationFrameCount => m_RuntimeValidationFrameCount;
-
-        internal NetworkingMode PolySpatialNetworkingMode
+#if POLYSPATIAL_INTERNAL
+        public NetworkingMode PolySpatialNetworkingMode
         {
             get
             {
@@ -302,60 +285,67 @@ namespace Unity.PolySpatial
                 return NetworkingMode.Client;
 #endif
 
-                var mode = InternalNetworkingMode;
-                AdjustNetworkingModeInEditor(ref mode);
-                return mode;
+                return m_PolySpatialNetworkingMode;
             }
-
-#if POLYSPATIAL_INTERNAL
             set => m_PolySpatialNetworkingMode = value;
-#endif
         }
 
-        internal List<SocketAddress> ServerAddresses => m_ServerAddresses.Value;
-
-        internal const int DefaultServerPort = 9876;
-        internal const string DefaultServerAddress = "127.0.0.1";
-        internal const uint DefaultConnectionTimeout = 2;
-
-        [SerializeField] int m_ConnectionDiscoveryPort = 9877;
-
-        /// <summary>Default port for auto connection discovery</summary>
-        internal int ConnectionDiscoveryPort => m_ConnectionDiscoveryPort;
-
-        [SerializeField] float m_ConnectionDiscoverySendInterval = 30.0f;
-
-        /// <summary>Default interval between UDP broadcast for auto connection discovery app host</summary>
-        internal float ConnectionDiscoverySendInterval => m_ConnectionDiscoverySendInterval;
-
-        [SerializeField] float m_ConnectionDiscoveryTimeOutDuration = 5.0f;
-
-        /// <summary>The timeout duration in seconds to mark a connection as Lost for auto connection discovery</summary>
-        internal float ConnectionDiscoveryTimeOutDuration => m_ConnectionDiscoveryTimeOutDuration;
-
-        internal HashSet<string> IgnoredScenePaths => m_IgnoredScenePaths.Value;
-
-        // TODO -- this should not be in settings, it is platform/device specific
-
-        [Tooltip("Default values that get used by the StereoRenderTargets.")]
-        [SerializeField] private DisplayProviderParameters m_DeviceDisplayProviderParameters;
-
-        internal DisplayProviderParameters DeviceDisplayProviderParameters => m_DeviceDisplayProviderParameters;
-
-        [Tooltip("Define material substitutions that will be used by PolySpatial at runtime. Add any MaterialSwapSet assets you would like to use to this " +
-            "list. The material on the left will be replaced with the material on the right as a fallback. For example, you may swap a material which uses a " +
-            "custom shader for one which uses URP/Lit.")]
         [SerializeField]
-        MaterialSwapSet[] m_MaterialSwapSets = Array.Empty<MaterialSwapSet>();
+        NetworkingMode m_PolySpatialNetworkingMode;
 
-        internal MaterialSwapSet[] MaterialSwapSets => m_MaterialSwapSets;
+        public bool EnableHostCameraControl
+        {
+            get => m_EnableHostCameraControl;
+            internal set => m_EnableHostCameraControl = value;
+        }
 
-        [Tooltip("For any scene that has a Canvas in it, PolySpatial will replace the GraphicRaycaster with a PolySpatialRaycster at runtime." +
-            "This is to ensure that UI elements are interactable in the PolySpatial environment. This may interact badly with other custom raycasters." +
-            "If you would like to disable this feature, uncheck this box.")]
         [SerializeField]
-        bool m_EnablePolySpatialRaycaster = true;
+        bool m_EnableHostCameraControl;
 
-        internal bool EnablePolySpatialRaycaster => m_EnablePolySpatialRaycaster;
+        public bool EnableClipping => m_EnableClipping;
+
+        [SerializeField]
+        bool m_EnableClipping;
+
+        public List<SocketAddress> ServerAddresses => m_ServerAddresses.Value;
+
+        readonly Lazy<List<SocketAddress>> m_ServerAddresses = new(() =>
+        {
+            var results = new List<SocketAddress>();
+            foreach (var address in instance.m_SerializedServerAddresses)
+            {
+                if (SocketAddress.ParseAddress(address, DefaultServerPort, out var socketAddress))
+                {
+                    results.Add(socketAddress);
+                }
+            }
+
+            return results;
+        });
+
+        [SerializeField]
+        List<string> m_SerializedServerAddresses = new() { DefaultServerAddress };
+
+        public HashSet<string> IgnoredScenePaths => m_IgnoredScenePaths.Value;
+
+        readonly Lazy<HashSet<string>> m_IgnoredScenePaths = new(() => new HashSet<string>(instance.m_SerializedIgnoredScenePaths));
+
+        [SerializeField]
+        List<string> m_SerializedIgnoredScenePaths;
+
+        // Non-serialized value to store the launch scene that comes from
+        // the command line or environment.  Used for sample bootstrapping.
+        string m_DemoLaunchSceneName = null;
+        public static string DemoLaunchSceneName => instance.m_DemoLaunchSceneName;
+#else
+        public NetworkingMode PolySpatialNetworkingMode => NetworkingMode.Local;
+        public bool EnableHostCameraControl;
+        static readonly HashSet<string> s_EmptyStringHash = new();
+        public HashSet<string> IgnoredScenePaths => s_EmptyStringHash;
+        public int ServerPort => DefaultServerPort;
+        public List<SocketAddress> ServerAddresses => new() { new SocketAddress() { Host = DefaultServerAddress, Port = DefaultServerPort} };
+        public bool EnableClipping => false;
+        public bool EnableServerCameraControl => false;
+#endif
     }
 }

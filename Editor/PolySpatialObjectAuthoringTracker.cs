@@ -12,9 +12,14 @@ namespace UnityEditor.PolySpatial.Internals
         static readonly List<int> s_DestroyedList = new();
         static readonly Dictionary<Type, Action<List<UnityObject>, List<int>>> s_TypeEventMap = new();
 
-        static ObjectDispatcherProxy s_Dispatcher;
+        static readonly ObjectDispatcherProxy s_Dispatcher = new(data =>
+        {
+            s_ChangedList.AddRange(data.changed);
 
-        internal static event Action OnTrackChanges;
+            // Passing NativeArray to List.AddRange triggers code path that makes GC
+            for (var i = 0; i < data.destroyedID.Length; ++i)
+                s_DestroyedList.Add(data.destroyedID[i]);
+        });
 
         internal static bool IsTracking(Type type) => s_TypeEventMap.ContainsKey(type);
 
@@ -57,16 +62,6 @@ namespace UnityEditor.PolySpatial.Internals
         static void StartTracking()
         {
             s_IsTracking = true;
-
-            s_Dispatcher = new(data =>
-            {
-                s_ChangedList.AddRange(data.changed);
-
-                // Passing NativeArray to List.AddRange triggers code path that makes GC
-                for (var i = 0; i < data.destroyedID.Length; ++i)
-                    s_DestroyedList.Add(data.destroyedID[i]);
-            });
-
             foreach (var type in s_TypeEventMap.Keys)
                 s_Dispatcher.EnableTypeTracking(ObjectDispatcherProxy.TypeTrackingFlags.SceneObjects, type);
 
@@ -80,12 +75,6 @@ namespace UnityEditor.PolySpatial.Internals
             Undo.postprocessModifications -= OnPostProcessModifications;
             foreach (var type in s_TypeEventMap.Keys)
                 s_Dispatcher.DisableTypeTracking(type);
-
-            if (s_Dispatcher != null)
-            {
-                s_Dispatcher.Dispose();
-                s_Dispatcher = null;
-            }
 
             s_IsTracking = false;
         }
@@ -111,21 +100,13 @@ namespace UnityEditor.PolySpatial.Internals
 
         static void TrackChanges()
         {
-            var hasTrackedChanges = false;
-
             foreach (var pair in s_TypeEventMap)
             {
                 ClearLists();
                 GetObjectChanges(pair.Key);
                 if (s_ChangedList.Count != 0 || s_DestroyedList.Count != 0)
-                {
-                    hasTrackedChanges = true;
                     pair.Value?.Invoke(s_ChangedList, s_DestroyedList);
-                }
             }
-
-            if (hasTrackedChanges)
-                OnTrackChanges?.Invoke();
         }
 
         static void ClearLists()

@@ -1,16 +1,8 @@
-#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
+#if ENABLE_CLOUD_SERVICES_ANALYTICS
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.Analytics;
-
-#if ENABLE_XR_MANAGEMENT
-using UnityEditor.XR.Management;
-#endif
 
 namespace UnityEditor.PolySpatial.Analytics
 {
@@ -18,13 +10,10 @@ namespace UnityEditor.PolySpatial.Analytics
     /// Editor event used to send editor usage <see cref="PolySpatialAnalytics"/> data.
     /// Only accepts <see cref="PolySpatialPlaymodeUsageEvent.Payload"/> parameters.
     /// </summary>
-#if UNITY_2023_2_OR_NEWER
-    [AnalyticInfo(k_EventName, PolySpatialAnalytics.VendorKey, k_EventVersion, k_MaxEventPerHour, k_MaxItems)]
-#endif
     class PolySpatialPlaymodeUsageEvent : PolySpatialEditorAnalyticsEvent<PolySpatialPlaymodeUsageEvent.Payload>
     {
-        const string k_EventName = "polyspatial_playmode_usage";
-        const int k_EventVersion = 2;
+        const string k_EventName = "quantum_playmode_usage";
+        const int k_EventVersion = 3;
 
         /// <summary>
         /// The event parameter.
@@ -32,27 +21,16 @@ namespace UnityEditor.PolySpatial.Analytics
         /// </summary>
         [Serializable]
         internal struct Payload
-#if UNITY_2023_2_OR_NEWER
-            : IAnalytic.IData
-#endif
         {
-            internal const string EnteredPlaymodeState = "EnteredPlaymode";
-            internal const string NotInstalledState = "NotInstalled";
-            internal const string ActivatedState = "Activated";
-            internal const string DeactivatedState = "Deactivated";
-            internal const string MRMode = "MR";
-            internal const string VRMode = "VR";
-            internal const string WindowedMode = "Windowed";
-            internal const string UndefinedMode = "Undefined";
+            internal const string EnteredPlaymodeCategory = "EnteredPlaymode";
+            internal const string PolySpatialScenePlayedName = "PolySpatialScenePlayed";
+            internal const string NonPolySpatialScenePlayedName = "NonPolySpatialScenePlayed";
 
             [SerializeField]
-            internal string PlaymodeState;
+            internal string Name;
 
             [SerializeField]
-            internal string ActiveBuildTarget;
-
-            [SerializeField]
-            internal string PolySpatialRuntimeState;
+            string Category;
 
             [SerializeField]
             internal int BoundedVolumes;
@@ -60,85 +38,16 @@ namespace UnityEditor.PolySpatial.Analytics
             [SerializeField]
             internal int UnboundedVolumes;
 
-            [SerializeField]
-            internal string XRManagementState;
-
-            [SerializeField]
-            internal string[] ActiveXRLoaders;
-
-            [SerializeField]
-            internal string ConfiguredMode;
-
-            [SerializeField]
-            internal List<AppNetworkPayload> AppNetworkConnections;
-
-#if UNITY_2023_2_OR_NEWER
-            [SerializeField]
-            internal string package;
-
-            [SerializeField]
-            internal string package_ver;
-#endif
-        }
-
-        [Serializable]
-        internal struct AppNetworkPayload
-        {
-            internal const string UnknownAppName = "Unknown";
-            internal const string UnityPlayToDeviceName = "UnityPlayToDevice";
-
-            [SerializeField]
-            internal bool IsConnected;
-
-            [SerializeField]
-            internal string AppName;
-        }
-
-        static List<AppNetworkPayload> GetLocalAppNetworkConnections()
-        {
-            var localAppNetwork = new List<AppNetworkPayload>();
-            if (!PolySpatialRuntime.Enabled)
-                return localAppNetwork;
-
-            var selectedCandidate = PolySpatialUserSettings.instance.ConnectionCandidates.Values.FirstOrDefault(c => c.IsSelected);
-            var playToDeviceIP = selectedCandidate != null && IPAddress.TryParse(selectedCandidate.IP, out var ipAddress) ? ipAddress : null;
-
-            // Will be marked true if one or more connections are valid
-            var connected = false;
-
-            foreach (var connection in PolySpatialCore.HostConnectionManager.Connections)
+            internal Payload(string name, string category, int boundedVolumes = 0, int unboundedVolumes = 0)
             {
-                if (connection.Connected)
-                {
-                    connected = true;
-
-                    localAppNetwork.Add(new AppNetworkPayload()
-                    {
-                        IsConnected = true,
-                        AppName = connection.Address.Equals(playToDeviceIP)
-                            ? AppNetworkPayload.UnityPlayToDeviceName
-                            : AppNetworkPayload.UnknownAppName
-                    });
-                }
+                Name = name;
+                Category = category;
+                BoundedVolumes = boundedVolumes;
+                UnboundedVolumes = unboundedVolumes;
             }
-
-            if (!connected && PolySpatialUserSettings.instance.ConnectToPlayToDevice && playToDeviceIP != null)
-            {
-                localAppNetwork.Add(new AppNetworkPayload()
-                {
-                    IsConnected = false,
-                    AppName = AppNetworkPayload.UnityPlayToDeviceName
-                });
-            }
-
-            return localAppNetwork;
         }
 
-
-        internal PolySpatialPlaymodeUsageEvent()
-#if !UNITY_2023_2_OR_NEWER
-            : base(k_EventName, k_EventVersion)
-#endif
+        internal PolySpatialPlaymodeUsageEvent() : base(k_EventName, k_EventVersion)
         {
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
@@ -148,76 +57,35 @@ namespace UnityEditor.PolySpatial.Analytics
             if (newState != PlayModeStateChange.EnteredPlayMode)
                 return;
 
-            var activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
-            var payload = new Payload()
+            if (PolySpatialSettings.instance.EnablePolySpatialRuntime)
             {
-                PlaymodeState = Payload.EnteredPlaymodeState,
-                ActiveBuildTarget = activeBuildTarget.ToString(),
-                PolySpatialRuntimeState = Payload.DeactivatedState,
-                XRManagementState = Payload.NotInstalledState,
-                ActiveXRLoaders = new string[0],
-                ConfiguredMode = Payload.UndefinedMode,
-#if UNITY_2023_2_OR_NEWER
-                package = PolySpatialAnalytics.PackageName,
-                package_ver = PolySpatialAnalytics.PackageVersion
-#endif
-            };
+                var boundedVolumes = 0;
+                var unboundedVolumes = 0;
 
-            if (PolySpatialRuntime.Enabled)
-            {
-                payload.PolySpatialRuntimeState = Payload.ActivatedState;
-                if (PolySpatialCore.UnitySimulation != null)
+                if (PolySpatialSettings.instance.EnablePolySpatialRuntime && PolySpatialCore.UnitySimulation != null)
                 {
-                    foreach (var volumeCamera in PolySpatialCore.UnitySimulation.VolumeCameras)
+                    var volumeCamera = PolySpatialCore.UnitySimulation?.Camera;
+                    if (volumeCamera != null)
                     {
-                        switch (volumeCamera.WindowMode)
+                        switch (volumeCamera.Mode)
                         {
                             case VolumeCamera.PolySpatialVolumeCameraMode.Bounded:
-                                payload.BoundedVolumes++;
+                                boundedVolumes++;
                                 break;
                             case VolumeCamera.PolySpatialVolumeCameraMode.Unbounded:
-                                payload.UnboundedVolumes++;
+                                unboundedVolumes++;
                                 break;
                         }
                     }
                 }
-            }
 
-#if ENABLE_XR_MANAGEMENT
-            var group = BuildPipeline.GetBuildTargetGroup(activeBuildTarget);
-            var generalSettings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(group);
-            var isXRManagementActive = generalSettings != null && generalSettings.InitManagerOnStart;
-            if (isXRManagementActive)
-            {
-                payload.XRManagementState = Payload.ActivatedState;
-                if (generalSettings.Manager != null)
-                {
-                    payload.ActiveXRLoaders = generalSettings.Manager.activeLoaders
-                        .Where(l => l != null)
-                        .Select(l => l.GetType().Name)
-                        .ToArray();
-                }
+                Send(new Payload(Payload.PolySpatialScenePlayedName, Payload.EnteredPlaymodeCategory, boundedVolumes, unboundedVolumes));
             }
             else
             {
-                payload.XRManagementState = Payload.DeactivatedState;
+                Send(new Payload(Payload.NonPolySpatialScenePlayedName, Payload.EnteredPlaymodeCategory));
             }
-#endif
-
-            if (activeBuildTarget == BuildTarget.VisionOS)
-            {
-                if (payload.PolySpatialRuntimeState == Payload.ActivatedState)
-                    payload.ConfiguredMode = Payload.MRMode;
-                else if (payload.XRManagementState == Payload.ActivatedState)
-                    payload.ConfiguredMode = Payload.VRMode;
-                else
-                    payload.ConfiguredMode = Payload.WindowedMode;
-            }
-
-            payload.AppNetworkConnections = GetLocalAppNetworkConnections();
-
-            Send(payload);
         }
     }
 }
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS

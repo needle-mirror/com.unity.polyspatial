@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace UnityEditor.PolySpatial.Internals.InternalBridge
+namespace UnityEditor.PolySpatial.InternalBridge
 {
     /// <summary>
     /// Internal access is required here to access to the WindowLayout class and methods.

@@ -12,8 +12,7 @@
         "Unity.InputSystem.TestFramework",
         "Unity.TextMeshPro",
         "Unity.PolySpatial.Core",
-        "Unity.InternalAPIEngineBridge.021",
-        "FlatSharp.Runtime.Extensions"
+        "Unity.InternalAPIEngineBridge.021"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -28,6 +27,12 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.video",
+            "expression": "1.0.0",
+            "define": "VIDEO_MODULE_EXISTS"
+        }
+    ],
     "noEngineReferences": false
 }

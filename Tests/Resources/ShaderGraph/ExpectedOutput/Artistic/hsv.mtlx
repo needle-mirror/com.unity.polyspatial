@@ -1,0 +1,94 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <contrast name = "ContrastNode_710d9b0cc87b4bbc801429331c60c8dd" type = "color3">
+        <input name = "in" type = "color3" value = "0,1,0" />
+        <input name = "amount" type = "float" value = "1" />
+        <input name = "pivot" type = "float" value = "0.2176376" />
+    </contrast>
+    <hsvadjust name = "HueNode_75a552a90b6a4d0187b82c8683fcfcef" type = "color3">
+        <input name = "in" type = "color3" value = "1,0.5,0" />
+        <input name = "amount" type = "vector3" nodename = "HueOffsetNode_75a552a90b6a4d0187b82c8683fcfcef" />
+    </hsvadjust>
+    <combine3 name = "HueOffsetNode_75a552a90b6a4d0187b82c8683fcfcef" type = "vector3">
+        <input name = "in1" type = "float" value = "90" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "1" />
+    </combine3>
+    <saturate name = "SaturationNode_b439cc0bd5a74af59e956dd2d81d7724" type = "color3">
+        <input name = "in" type = "color3" value = "0,1,0" />
+        <input name = "amount" type = "float" value = "1" />
+        <input name = "lumacoeffs" type = "color3" value = "0.2126729,0.7151522,0.072175" />
+    </saturate>
+    <add name = "AddNode_da38f6f44cca4385aca5c5cf0c370713" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromSaturationNode_b439cc0bd5a74af59e956dd2d81d7724ToAddNode_da38f6f44cca4385aca5c5cf0c370713in1" />
+        <input name = "in2" type = "vector3" nodename = "CastSwizzleFromHueNode_75a552a90b6a4d0187b82c8683fcfcefToAddNode_da38f6f44cca4385aca5c5cf0c370713in2" />
+    </add>
+    <clamp name = "SaturateNode_630e7fed80fa45b590093f2f516be12f" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "AddNode_39d538ad93b64be98d15bd0b575c0e24" />
+    </clamp>
+    <add name = "AddNode_39d538ad93b64be98d15bd0b575c0e24" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "AddNode_da38f6f44cca4385aca5c5cf0c370713" />
+        <input name = "in2" type = "vector3" nodename = "CastSwizzleFromContrastNode_710d9b0cc87b4bbc801429331c60c8ddToAddNode_39d538ad93b64be98d15bd0b575c0e24in2" />
+    </add>
+    <ifequal name = "ComparisonNode_53195a756ed74b958e82d133020d3c80" type = "float">
+        <input name = "value1" type = "float" nodename = "SplitNode_278a375330ae4f16b8fd56d19bba6416G" />
+        <input name = "value2" type = "float" value = "1" />
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+    </ifequal>
+    <ifequal name = "ComparisonNode_1365ee0e2a124a4697cfc5799cabb153" type = "float">
+        <input name = "value1" type = "float" nodename = "SplitNode_278a375330ae4f16b8fd56d19bba6416G" />
+        <input name = "value2" type = "float" value = "1" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+    </ifequal>
+    <combine4 name = "CombineNode_00f72d4538b64277b273c0ce08329809" type = "color4">
+        <input name = "in1" type = "float" nodename = "ComparisonNode_1365ee0e2a124a4697cfc5799cabb153" />
+        <input name = "in2" type = "float" nodename = "ComparisonNode_53195a756ed74b958e82d133020d3c80" />
+        <input name = "in3" type = "float" value = "0" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <dot name = "SplitNode_278a375330ae4f16b8fd56d19bba6416" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "SaturateNode_630e7fed80fa45b590093f2f516be12f" />
+    </dot>
+    <extract name = "SplitNode_278a375330ae4f16b8fd56d19bba6416R" type = "float">
+        <input name = "in" type = "vector3" nodename = "SplitNode_278a375330ae4f16b8fd56d19bba6416" />
+        <input name = "index" type = "integer" value = "0" />
+    </extract>
+    <extract name = "SplitNode_278a375330ae4f16b8fd56d19bba6416G" type = "float">
+        <input name = "in" type = "vector3" nodename = "SplitNode_278a375330ae4f16b8fd56d19bba6416" />
+        <input name = "index" type = "integer" value = "1" />
+    </extract>
+    <extract name = "SplitNode_278a375330ae4f16b8fd56d19bba6416B" type = "float">
+        <input name = "in" type = "vector3" nodename = "SplitNode_278a375330ae4f16b8fd56d19bba6416" />
+        <input name = "index" type = "integer" value = "2" />
+    </extract>
+    <GeometryModification name = "SR_hsvVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_hsv" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_hsv" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_hsvVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_hsv" />
+    </surfacematerial>
+    <swizzle name = "CastSwizzleFromSaturationNode_b439cc0bd5a74af59e956dd2d81d7724ToAddNode_da38f6f44cca4385aca5c5cf0c370713in1" type = "vector3">
+        <input name = "in" type = "color3" nodename = "SaturationNode_b439cc0bd5a74af59e956dd2d81d7724" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromHueNode_75a552a90b6a4d0187b82c8683fcfcefToAddNode_da38f6f44cca4385aca5c5cf0c370713in2" type = "vector3">
+        <input name = "in" type = "color3" nodename = "HueNode_75a552a90b6a4d0187b82c8683fcfcef" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromContrastNode_710d9b0cc87b4bbc801429331c60c8ddToAddNode_39d538ad93b64be98d15bd0b575c0e24in2" type = "vector3">
+        <input name = "in" type = "color3" nodename = "ContrastNode_710d9b0cc87b4bbc801429331c60c8dd" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromCombineNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor" type = "color3">
+        <input name = "in" type = "color4" nodename = "CombineNode_00f72d4538b64277b273c0ce08329809" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+</materialx>

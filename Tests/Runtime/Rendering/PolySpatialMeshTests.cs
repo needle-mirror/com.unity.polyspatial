@@ -58,8 +58,7 @@ namespace Tests.Runtime.Functional.Rendering
 
         static void ConvertAndCheckMesh(Mesh mesh)
         {
-            var representation = new AssetRepresentation(mesh);
-            MeshConversionHelpers.ConvertMeshAssetToPolySpatialMesh(representation, (assetId, convertedMesh) =>
+            MeshConversionHelpers.ConvertMeshAssetToPolySpatialMesh(mesh, convertedMesh =>
              {
                  Assert.IsTrue(convertedMesh.subMeshes.HasValue);
                  Assert.AreEqual(mesh.subMeshCount, convertedMesh.subMeshes.Value.Length,
@@ -241,23 +240,6 @@ namespace Tests.Runtime.Functional.Rendering
         {
             var mesh = CreateMeshWithBlankUV0();
             ConvertAndCheckMesh(mesh);
-        }
-
-        [Test]
-        public void Test_Mesh_With_Partial_Index_Coverage_Converts_To_PolySpatialMesh()
-        {
-            m_Mesh = new Mesh();
-            m_Mesh.vertices = s_PlaneVertices;
-
-            // Use an index buffer of size 100, but only use the six elements at the end.
-            const int kIndexBufferSize = 100;
-            m_Mesh.SetIndexBufferParams(kIndexBufferSize, IndexFormat.UInt32);
-            var indices = s_TriangleIndices[0][0];
-            var indexStart = kIndexBufferSize - indices.Length;
-            m_Mesh.SetIndexBufferData(indices, 0, indexStart, indices.Length, MeshUpdateFlags.Default);
-            m_Mesh.SetSubMesh(0, new(indexStart, indices.Length, MeshTopology.Triangles), MeshUpdateFlags.Default);
-
-            ConvertAndCheckMesh(m_Mesh);
         }
 
         [UnityTest]

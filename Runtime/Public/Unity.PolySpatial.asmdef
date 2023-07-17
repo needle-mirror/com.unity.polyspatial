@@ -1,6 +1,6 @@
 {
     "name": "Unity.PolySpatial",
-    "rootNamespace": "Unity.PolySpatial",
+    "rootNamespace": "",
     "references": [
         "Unity.Collections",
         "Unity.InternalAPIEngineBridge.021"

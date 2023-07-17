@@ -1,15 +1,7 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using Platforms.Unity;
-using TMPro;
-using Unity.PolySpatial;
-using Unity.PolySpatial.Editor;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEditor.PolySpatial.Utilities;
 
 #if HAS_SCRIPTABLE_BUILDPIPELINE
 using UnityEditor.Build.Pipeline;
@@ -18,15 +10,14 @@ using UnityEditor.Build.Pipeline;
 namespace UnityEditor.PolySpatial.Internals
 {
     /// <summary>
-    /// Performs custom build steps, such as ensuring that the default material will be present in standalone
-    /// builds.
+    /// This class performs custom build steps, such as ensuring that the default material will be present in standalone
+    /// builds
     /// </summary>
-    internal class PolySpatialBuildProvider : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+    public class PolySpatialBuildProvider : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
-        /// <summary>
-        /// The order in which this provider is called relative to other build providers.
-        /// </summary>
-        /// <seealso cref="IOrderedCallback.callbackOrder"/>
+        private Shader tempShader;
+
+        /// <inheritdoc/>
         public int callbackOrder => 0;
 
 #if HAS_SCRIPTABLE_BUILDPIPELINE
@@ -35,114 +26,56 @@ namespace UnityEditor.PolySpatial.Internals
         {
             ContentPipeline.BuildCallbacks.PostDependencyCallback += (parameters, data) =>
             {
-                if (PolySpatialBuildProvider.ShouldProcessBuild(parameters.Target))
-                {
-                    PlayerSettingsBridge.SetRequiresReadableAssets(true);
-                }
-
+                PlayerSettingsBridge.SetRequiresReadableAssets(true);
                 return ReturnCode.Success;
             };
             ContentPipeline.BuildCallbacks.PostWritingCallback += (parameters, data, arg3, arg4) =>
             {
-                if (PolySpatialBuildProvider.ShouldProcessBuild(parameters.Target))
-                {
-                    PlayerSettingsBridge.SetRequiresReadableAssets(false);
-                }
-
+                PlayerSettingsBridge.SetRequiresReadableAssets(false);
                 return ReturnCode.Success;
             };
         }
 #endif
 
-        static bool ShouldProcessBuild(BuildTarget target)
+        static bool ShouldProcessBuild(BuildReport report)
         {
-            // While caching is a lovely idea, it won't work if you don't trigger
-            // a domain reload (thus clearing out the cache) in between changing settings.
-            //
-            // Ultimately this is going to get called so few times that it doesn't matter.
+            if (report.summary.platform == BuildTarget.iOS)
+                return false;
 
-            var args = new object[] { target };
+            return true;
+        }
 
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                // consider only PolySpatial assemblies
-                if (!asm.FullName.Contains("PolySpatial"))
-                    continue;
+        /// <inheritdoc cref="OnPreprocessBuild"/>>
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            PlayerSettingsBridge.SetRequiresReadableAssets(true);
 
-                foreach (var type in asm.GetTypes().Where(t =>
-                             !t.IsAbstract && t.IsClass && typeof(IPolySpatialEditorPlatform).IsAssignableFrom(t)))
-                {
-                    var method = type.GetMethod("ShouldEnablePolySpatialRuntimeForBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                    if (method == null)
-                    {
-                        Debug.LogError($"{type.FullName} is an IPolySpatialEditorPlatform but is missing ShouldEnablePolySpatialRuntimeForBuild()");
-                        continue;
-                    }
+            if (!ShouldProcessBuild(report))
+                return;
+        }
 
-                    bool enable = (bool)method.Invoke(null, args);
-                    if (enable)
-                    {
-                        return true;
-                    }
-                }
-            }
+        /// <inheritdoc cref="OnPostprocessBuild"/>>
+        public void OnPostprocessBuild(BuildReport report)
+        {
+            PlayerSettingsBridge.SetRequiresReadableAssets(false);
 
+            if (!ShouldProcessBuild(report))
+                return;
+        }
+
+        private static bool IsPlayerSettingsDirty()
+        {
+            var settings = Resources.FindObjectsOfTypeAll<PlayerSettings>();
+            if (settings != null && settings.Length > 0)
+                return EditorUtility.IsDirty(settings[0]);
             return false;
         }
 
-        void MapAllFontAssets()
+        private static void ClearPlayerSettingsDirtyFlag()
         {
-            var assetGuids = AssetDatabase.FindAssets("t:TMP_FontAsset");
-
-            foreach (var assetGuid in assetGuids)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
-                var tmpFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
-                if (tmpFontAsset != null)
-                {
-                    PolySpatialFontManager.Instance.UpdateFontAssociation(tmpFontAsset, PolySpatialPlatformTextUtility.FontForTmpFont(tmpFontAsset));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called before a build is started.
-        /// </summary>
-        /// <param name="report">The build report.</param>
-        public void OnPreprocessBuild(BuildReport report)
-        {
-            if (!ShouldProcessBuild(report.summary.platform))
-                return;
-
-            PlayerSettingsBridge.SetRequiresReadableAssets(true);
-
-            MapAllFontAssets();
-
-            PolySpatialFontManager.WriteFontMapToAssets();
-        }
-
-        /// <summary>
-        /// Called after a build is finished.
-        /// </summary>
-        /// <param name="report">The build report.</param>
-        public void OnPostprocessBuild(BuildReport report)
-        {
-            if (!ShouldProcessBuild(report.summary.platform))
-                return;
-
-            PlayerSettingsBridge.SetRequiresReadableAssets(false);
-
-            PolySpatialFontManager.RemoveFontMapFromAssets();
-
-            WriteBootConfigSettings(report);
-        }
-
-        public void WriteBootConfigSettings(BuildReport report)
-        {
-            var bootConfig = new BootConfigBuildUtility(report);
-            bootConfig.SetValue("polyspatial", "1");
-            bootConfig.SetValue("polyspatial_logging", Logging.LoggingPrefsToString());
-            bootConfig.Write();
+            var settings = Resources.FindObjectsOfTypeAll<PlayerSettings>();
+            if (settings != null && settings.Length > 0)
+                EditorUtility.ClearDirty(settings[0]);
         }
     }
 }

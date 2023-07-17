@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Internals.Capabilities;
+using UnityEditor.PolySpatial.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation

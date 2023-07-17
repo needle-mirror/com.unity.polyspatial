@@ -1,11 +1,10 @@
-using System;
+
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     internal static class MtlxNodeTypes // TODO: Maybe enum.
     {
         internal const string UsdPreviewSurface = "UsdPreviewSurface";
-        internal const string UsdPrimvarReader = "UsdPrimvarReader";
 
         internal const string Material = "surfacematerial";
 
@@ -109,7 +108,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string WorleyNoise2d = "worleynoise2d";
 
         internal const string SplitLR = "splitlr";
-        internal const string Time = "time";
 
         // Non-standard RealityKit nodes.
         internal const string RealityKitCameraPosition = "realitykit_cameraposition";
@@ -117,29 +115,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitCombine2 = "realitykit_combine2";
         internal const string RealityKitCombine3 = "realitykit_combine3";
         internal const string RealityKitCombine4 = "realitykit_combine4";
-        internal const string RealityKitFractional = "realitykit_fractional";
         internal const string RealityKitSurfaceModelToWorld = "realitykit_surface_model_to_world";
-        internal const string RealityKitSurfaceModelToView = "realitykit_surface_model_to_view";
         internal const string RealityKitSurfaceWorldToView = "realitykit_surface_world_to_view";
         internal const string RealityKitSurfaceViewToProjection = "realitykit_surface_view_to_projection";
         internal const string RealityKitSurfaceProjectionToView = "realitykit_surface_projection_to_view";
         internal const string RealityKitSurfaceScreenPosition = "realitykit_surface_screen_position";
-        internal const string RealityKitGeometryModifierModelToWorld = "realitykit_geometry_modifier_model_to_world";
-        internal const string RealityKitGeometryModifierWorldToModel = "realitykit_geometry_modifier_world_to_model";
-        internal const string RealityKitGeometryModifierModelToView = "realitykit_geometry_modifier_model_to_view";
-        internal const string RealityKitGeometryModifierViewToProjection = "realitykit_geometry_modifier_view_to_projection";
-        internal const string RealityKitGeometryModifierProjectionToView = "realitykit_geometry_modifier_projection_to_view";
         internal const string RealityKitGeometryModifierVertexID = "realitykit_geometry_modifier_vertex_id";
         internal const string RealityKitSurfaceCustomAttribute = "realitykit_surface_custom_attribute";
         internal const string RealityKitUnlit = "realitykit_unlit";
-        internal const string RealityKitPbr = "realitykit_pbr";
+        internal const string RealityKitImageLod = "realitykit_image_lod";
         internal const string RealityKitReflect = "realitykit_reflect";
-        internal const string RealityKitRefract = "realitykit_refract";
-        internal const string RealityKitStep = "realitykit_step";
-        internal const string RealityKitGeometrySwitchCameraIndex = "realitykit_geometry_switch_cameraindex";
-        internal const string RealityKitEnvironmentRadiance = "realitykit_environment_radiance";
-        internal const string RealityKitTexture2D = "RealityKitTexture2D";
-        internal const string RealityKitTexture2DLOD = "RealityKitTexture2DLOD";
     }
     
     internal static class MtlxDataTypes
@@ -163,11 +148,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string Filename = "filename";
         internal const string String = "string";
 
-        // TODO (LXR-2897): Support half precision types throughout the conversion process when the shader graph
-        // precision is set to "half".  Currently, we only use this type for a node that specifically requires
-        // it (realitykit_environment_radiance).  
-        internal const string Half = "half";
-
         internal const string FloatArray = "floatarray"; // For Gradients only.
         internal const string Color4Array = "color4array"; // For Gradients only.
 
@@ -176,7 +156,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
             Integer => 1,
             Boolean => 1,
             Float => 1,
-            Half => 1,
             Vector2 => 2,
             Vector3 => 3,
             Color3 => 3,
@@ -188,17 +167,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
             _ => 0,
         };
 
-        internal static string GetTypeOfLength(int length) => length switch
-        {
-            1 => Float,
-            2 => Vector2,
-            3 => Vector3,
-            4 => Vector4,
-            9 => Matrix33,
-            16 => Matrix44,
-            _ => null,
-        };
-
         internal static int GetElementLength(string datatype) => datatype switch
         {
             Matrix22 => 2,
@@ -206,30 +174,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
             Matrix44 => 4,
             Color4Array => 4,
             _ => 1,
-        };
-
-        internal static string GetHlslForType(string datatype) => datatype switch
-        {
-            Vector2 => "float2",
-            Vector3 or Color3 => "float3",
-            Vector4 or Color4 => "float4",
-            Matrix22 => "float2x2",
-            Matrix33 => "float3x3",
-            Matrix44 => "float4x4",
-            _ => "float",
-        };
-
-        internal static string GetTypeForHlsl(string hlsl) => hlsl switch
-        {
-            "float" => MtlxDataTypes.Float,
-            "float2" => MtlxDataTypes.Vector2,
-            "float3" => MtlxDataTypes.Vector3,
-            "float4" => MtlxDataTypes.Vector4,
-            "float2x2" => MtlxDataTypes.Matrix22,
-            "float3x3" => MtlxDataTypes.Matrix33,
-            "float4x4" => MtlxDataTypes.Matrix44,
-            "UnityTexture2D" or "UnityTexture3D" or "UnityTextureCube" => MtlxDataTypes.Filename,
-            _ => null,
         };
 
         internal static bool IsColor(string datatype) => datatype.Contains("color");

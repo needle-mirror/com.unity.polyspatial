@@ -1,0 +1,134 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <multiply name = "TilingAndOffsetMulNode_4470133616aa40f893dd96fda2d90164" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Flipbook_OutNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "vector2" value = "0.5,0.5" />
+    </multiply>
+    <add name = "TilingAndOffsetAddNode_4470133616aa40f893dd96fda2d90164" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "TilingAndOffsetMulNode_4470133616aa40f893dd96fda2d90164" />
+        <input name = "in2" type = "vector2" value = "0.5,0.5" />
+    </add>
+    <constant name = "RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba" type = "vector2">
+        <input name = "value" type = "vector2" value = "0,0" />
+    </constant>
+    <subtract name = "RotateOffsetNode_ffb23436d9574dbdb1940f539bd09cba" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "TilingAndOffsetAddNode_4470133616aa40f893dd96fda2d90164" />
+        <input name = "in2" type = "vector2" nodename = "RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba" />
+    </subtract>
+    <rotate2d name = "RotateNode_ffb23436d9574dbdb1940f539bd09cba" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "RotateOffsetNode_ffb23436d9574dbdb1940f539bd09cba" />
+        <input name = "amount" type = "float" value = "270" />
+    </rotate2d>
+    <add name = "RotateOutputNode_ffb23436d9574dbdb1940f539bd09cba" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "RotateCenterNode_ffb23436d9574dbdb1940f539bd09cba" />
+        <input name = "in2" type = "vector2" nodename = "RotateNode_ffb23436d9574dbdb1940f539bd09cba" />
+    </add>
+    <combine2 name = "Vector2Node_83d395866e7446498e93265910d7baf1" type = "vector2">
+        <input name = "in1" type = "float" value = "0.5" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </combine2>
+    <multiply name = "Flipbook_OutNode_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Flipbook_Out_in1Node_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "vector2" nodename = "Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </multiply>
+    <add name = "Flipbook_Out_in1Node_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Flipbook_UVNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "vector2" nodename = "Flipbook_Out_in1_in2Node_00b2df0a2ea04feca9efc70acf418fad" />
+    </add>
+    <dot name = "Flipbook_UVNode_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Vector2Node_83d395866e7446498e93265910d7baf1" />
+    </dot>
+    <combine2 name = "Flipbook_Out_in1_in2Node_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Flipbook_TileXNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_TileYNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </combine2>
+    <absval name = "Flipbook_TileXNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" nodename = "Flipbook_TileX_inNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </absval>
+    <subtract name = "Flipbook_TileX_inNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_TileX_in_in1Node_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </subtract>
+    <multiply name = "Flipbook_TileX_in_in1Node_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </multiply>
+    <dot name = "Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" value = "1" />
+    </dot>
+    <floor name = "Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" nodename = "Flipbook_TileFloor_inNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </floor>
+    <multiply name = "Flipbook_TileFloor_inNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_TileFloor_in_in2Node_00b2df0a2ea04feca9efc70acf418fad" />
+    </multiply>
+    <modulo name = "Flipbook_WrappedTileNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_WrappedTile_in1Node_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_WrappedTile_in2Node_00b2df0a2ea04feca9efc70acf418fad" />
+    </modulo>
+    <floor name = "Flipbook_WrappedTile_in1Node_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" nodename = "Flipbook_TileNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </floor>
+    <dot name = "Flipbook_TileNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <multiply name = "Flipbook_WrappedTile_in2Node_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </multiply>
+    <dot name = "Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" value = "1" />
+    </dot>
+    <swizzle name = "Flipbook_TileFloor_in_in2Node_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "vector2" nodename = "Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <divide name = "Flipbook_TileCountNode_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in1" type = "vector2" value = "1,1" />
+        <input name = "in2" type = "vector2" nodename = "Flipbook_TileCount_in2Node_00b2df0a2ea04feca9efc70acf418fad" />
+    </divide>
+    <combine2 name = "Flipbook_TileCount_in2Node_00b2df0a2ea04feca9efc70acf418fad" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Flipbook_WidthNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </combine2>
+    <absval name = "Flipbook_TileYNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in" type = "float" nodename = "Flipbook_TileY_inNode_00b2df0a2ea04feca9efc70acf418fad" />
+    </absval>
+    <subtract name = "Flipbook_TileY_inNode_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_HeightNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" nodename = "Flipbook_TileY_in_in2Node_00b2df0a2ea04feca9efc70acf418fad" />
+    </subtract>
+    <add name = "Flipbook_TileY_in_in2Node_00b2df0a2ea04feca9efc70acf418fad" type = "float">
+        <input name = "in1" type = "float" nodename = "Flipbook_TileFloorNode_00b2df0a2ea04feca9efc70acf418fad" />
+        <input name = "in2" type = "float" value = "1" />
+    </add>
+    <GeometryModification name = "SR_UVVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_UV" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "CastConvertFinalFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" />
+        <input name = "opacity" type = "float" value = "1" />
+        <input name = "opacityThreshold" type = "float" value = "0" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_UV" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_UVVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_UV" />
+    </surfacematerial>
+    <dot name = "CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "RotateOutputNode_ffb23436d9574dbdb1940f539bd09cba" />
+    </dot>
+    <combine3 name = "CastConvertFinalFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" type = "color3">
+        <input name = "in1" type = "float" nodename = "CastSwizzle1FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" />
+        <input name = "in2" type = "float" nodename = "CastSwizzle2FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <swizzle name = "CastSwizzle1FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <swizzle name = "CastSwizzle2FromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" type = "float">
+        <input name = "in" type = "vector2" nodename = "CastConvertFromRotateOutputNode_ffb23436d9574dbdb1940f539bd09cbaToSR_UVcolor" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+</materialx>
