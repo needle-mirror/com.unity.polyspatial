@@ -1,1 +1,1 @@
-* [UPM Package Starter Kit](index)
+* [Unity PolySpatial](index)
