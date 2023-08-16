@@ -1,7 +1,7 @@
 {
   "name": "com.unity.polyspatial",
   "displayName": "PolySpatial",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "unity": "2022.3",
   "description": "The Unity PolySpatial runtime includes platform-agnostic code required to build and deploy apps for supported platforms.",
   "dependencies": {
@@ -9,7 +9,7 @@
     "com.unity.render-pipelines.universal": "14.0.1",
     "com.unity.collections": "1.2.3",
     "com.unity.textmeshpro": "3.0.6",
-    "com.unity.xr.core-utils": "2.4.0-exp.1",
+    "com.unity.xr.core-utils": "2.4.0-exp.2",
     "com.unity.ext.flatsharp": "0.10.1",
     "com.unity.modules.particlesystem": "1.0.0",
     "com.unity.inputsystem": "1.4.4"
@@ -19,16 +19,16 @@
     "changelog": ""
   },
   "_upm": {
-    "changelog": ""
+    "changelog": "### Added\n- `WorldTouchState.colliderObject`, which provides the GameObject targeted by input. \n\n### Fixed\n\n- Crash when loading a scene containing a disabled mesh collider.\n- In-use skinned meshes were removed from scenes when calling `Resourced.UnloadUnusedAssets()`. \n- Project Validation entries not displaying when targeting visionOS. These validation entries no longer appear when targeting Standalone, iOS, or Android.\n- Samples: Input now uses `worldTouch.colliderObject` to identify the hit object, fixing issues where input would occasionally miss the targeted object. \n- Samples: Objects reset position after being manipulated. \n- Samples: Missing script warnings resolved. \n- Samples: Settings assets removed from samples, fixing settings-related issues. \n- Samples: Samples now import to the Assets/Samples/ folder rather than Assets/ directly. \n- Documentation: Fixed broken links.\n- Documentation: Component reference images displaying. \n- Documentation: Various typo fixes and clarity improvements."
   },
   "upmCi": {
-    "footprint": "435e4982706ee2e663e335559f94e0dd2d6435ab"
+    "footprint": "e065cd284f559bf9b0a3ef742ccbcddc5916d298"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@0.1/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/quantum.git",
     "type": "git",
-    "revision": "88192d50c511a8eac886b743b0afbe39a988c9cf"
+    "revision": "8ea655f9e7e52b48112028a1a8b25a2fbeac7357"
   },
   "samples": [
     {

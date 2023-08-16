@@ -242,9 +242,8 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
-        public IEnumerator Test_UnitySkinnedMeshRenderer_CreateAndDeletePolySpatialAnimationRig()
+        public IEnumerator Test_UnitySkinnedMeshRenderer_CheckSkinnedMeshRendererBones()
         {
-            // Create rig.
             CreateTestObjects();
             m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
 
@@ -253,140 +252,83 @@ namespace Tests.Runtime.Functional.Components
             var data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
             Assert.IsTrue(data.ValidateTrackingFlags());
             var cachedData = data.customData;
-            var rig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(cachedData.rigId);
-
-            Assert.IsNotNull(rig, "Rig was null.");
 
             // Test to see if it's got the correct data.
-            Assert.AreEqual(m_SkinnedMeshRenderer.rootBone.gameObject.GetInstanceID(), rig.m_SkeletonHierarchy.RootBone.id);
-            Assert.AreEqual(m_SkinnedMeshRenderer.quality.ToPlatform(), rig.m_SkinWeight);
-
-            for (int i = 0; i < rig.m_SkeletonHierarchy.AsPolySpatialIDs.Length; i++)
+            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
+            if (backingGO != null)
             {
-                Assert.IsTrue(rig.m_SkeletonHierarchy.AsPolySpatialIDs[i].Equals(PolySpatialInstanceID.For(m_TestSkeleton[i].gameObject)));
-            }
+                var backingSkinnedMeshRenderer = backingGO.GetComponent<SkinnedMeshRenderer>();
 
-            // Change the skinning quality to one bone and check again.
-            m_SkinnedMeshRenderer.quality = SkinQuality.Bone1;
-
-            yield return null;
-
-            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            cachedData = data.customData;
-            rig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(cachedData.rigId);
-            Assert.AreEqual(1, rig.m_SkinWeight);
-
-            // Destroy the skinned mesh renderer and ensure proper cleanup happens. Cache the ids so we can attempt to access them later for testing.
-            var smriid = m_SkinnedMeshRenderer.GetInstanceID();
-            var mesh = m_SkinnedMeshRenderer.sharedMesh;
-            var material = m_SkinnedMeshRenderer.material;
-            m_SkinnedMeshRenderer.DestroyAppropriately();
-
-            yield return null;
-
-#if UNITY_EDITOR
-            data = PolySpatialComponentUtils.GetSkinnedMeshRendererTrackingData(smriid);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            Assert.IsFalse(data.customData.rigId.IsValid());
-            Assert.IsFalse(data.customData.meshRendererTrackingData.meshId.IsValid());
-            foreach (var materialId in data.customData.meshRendererTrackingData.materialIds)
-                Assert.IsFalse(materialId.IsValid());
-#endif
-
-            mesh.DestroyAppropriately();
-            material.DestroyAppropriately();
-
-            void ClearIfDeleted(IAssetManager mgr, ref PolySpatialAssetID aid) {
-                if (aid != PolySpatialAssetID.InvalidAssetID && mgr.GetRegisteredResource(aid) == null)
+                for (var i = 0; i < m_SkinnedMeshRenderer.bones.Length; i++)
                 {
-                    aid = PolySpatialAssetID.InvalidAssetID;
+                    var simulationId = PolySpatialInstanceID.For(m_SkinnedMeshRenderer.bones[i].gameObject);
+                    var backingBoneGO = backingSkinnedMeshRenderer.bones[i].gameObject;
+                    Assert.AreEqual(BackingComponentUtils.GetBackingGameObjectFor(simulationId), backingBoneGO,
+                        $"Backing bone game object {backingBoneGO} does not match original bone {m_SkinnedMeshRenderer.bones[i].gameObject}");
                 }
+
+                var simulatorRootBoneId = PolySpatialInstanceID.For(m_SkinnedMeshRenderer.rootBone.gameObject);
+                var backingRootBone = backingSkinnedMeshRenderer.rootBone.gameObject;
+                Assert.AreEqual(BackingComponentUtils.GetBackingGameObjectFor(simulatorRootBoneId), backingRootBone,
+                    $"Backing root bone {backingRootBone} does not match original root {m_SkinnedMeshRenderer.rootBone.gameObject}.");
+
+                Assert.AreEqual(m_SkinnedMeshRenderer.quality, backingSkinnedMeshRenderer.quality, "Skinned mesh quality are not equivalent.");
+
+                yield return null;
+
+                data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
+                Assert.IsTrue(data.ValidateTrackingFlags());
+                cachedData = data.customData;
+
+                // Destroy the skinned mesh renderer and ensure proper cleanup happens. Cache the ids so we can attempt to access them later for testing.
+                var smriid = m_SkinnedMeshRenderer.GetInstanceID();
+                var mesh = m_SkinnedMeshRenderer.sharedMesh;
+                var material = m_SkinnedMeshRenderer.material;
+                m_SkinnedMeshRenderer.DestroyAppropriately();
+
+                yield return null;
+
+    #if UNITY_EDITOR
+                data = PolySpatialComponentUtils.GetSkinnedMeshRendererTrackingData(smriid);
+                Assert.IsTrue(data.ValidateTrackingFlags());
+                Assert.IsFalse(data.customData.meshRendererTrackingData.meshId.IsValid());
+                foreach (var materialId in data.customData.meshRendererTrackingData.materialIds)
+                    Assert.IsFalse(materialId.IsValid());
+    #endif
+
+                mesh.DestroyAppropriately();
+                material.DestroyAppropriately();
+
+                void ClearIfDeleted(IAssetManager mgr, ref PolySpatialAssetID aid) {
+                    if (aid != PolySpatialAssetID.InvalidAssetID && mgr.GetRegisteredResource(aid) == null)
+                    {
+                        aid = PolySpatialAssetID.InvalidAssetID;
+                    }
+                }
+
+                Assert.AreEqual(1, cachedData.meshRendererTrackingData.materialIds.Length);
+
+                var cachedDataBackend = cachedData;
+
+                m_TestPlatformWrapper.OnAfterAssetsDeletedCalled = (assetIds) =>
+                {
+                    ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.meshId);
+                    ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.materialIds.ElementAt(0));
+
+                    // Assert that meshes and materials have been properly removed from the Platform Asset Manager.
+                    ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.meshId);
+                    ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.materialIds.ElementAt(0));
+                };
+
+                yield return null;
+
+                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.meshId);
+                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.materialIds[0]);
+                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.meshId);
+                Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.materialIds[0]);
             }
 
-            Assert.AreEqual(1, cachedData.meshRendererTrackingData.materialIds.Length);
-
-            var cachedDataBackend = cachedData;
-
-            m_TestPlatformWrapper.OnAfterAssetsDeletedCalled = (assetIds) =>
-            {
-                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.meshId);
-                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.rigId);
-                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cachedData.meshRendererTrackingData.materialIds.ElementAt(0));
-
-                // Assert that meshes, materials, and rigs have been properly removed from the Platform Asset Manager.
-                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.meshId);
-                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.rigId);
-                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cachedDataBackend.meshRendererTrackingData.materialIds.ElementAt(0));
-            };
-
             yield return null;
-
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.meshId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.rigId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedData.meshRendererTrackingData.materialIds[0]);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.meshId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.rigId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cachedDataBackend.meshRendererTrackingData.materialIds[0]);
-        }
-
-        [UnityTest]
-#if UNITY_IOS
-        [Ignore("Disabling as it currently crashes/fails on iOS.")]
-#endif
-        public IEnumerator Test_AnimationRig_Equality()
-        {
-            CreateTestObjects();
-
-            yield return null;
-
-            var data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            var firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
-
-            // Create another animation rig.
-            var secondRig = PolySpatialAnimationRig.CreateAnimationRig(m_SkinnedMeshRenderer);
-
-            bool isHierarchyEqual;
-            Assert.IsTrue(firstRig.Compare(m_SkinnedMeshRenderer, out isHierarchyEqual));
-            Assert.IsTrue(firstRig.Compare(secondRig, out isHierarchyEqual));
-
-            // Modify the skeleton transforms for the first rig.
-            var newBone = new GameObject("New Bone");
-            m_TestSkeleton[^1] = newBone.transform;
-            m_SkinnedMeshRenderer.bones = m_TestSkeleton;
-
-            yield return null;
-
-            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
-
-            // First rig will have a new skeleton, but second rig should still have original skeleton transforms.
-            Assert.IsFalse(firstRig.Compare(secondRig, out isHierarchyEqual));
-            Assert.IsFalse(isHierarchyEqual);
-
-            secondRig.UpdateFrom(m_SkinnedMeshRenderer);
-            Assert.IsTrue(firstRig.Compare(secondRig, out isHierarchyEqual));
-            Assert.IsTrue(isHierarchyEqual);
-
-            m_SkinnedMeshRenderer.quality = SkinQuality.Bone2;
-
-            yield return null;
-
-            data = PolySpatialComponentUtils.GetTrackingData(m_SkinnedMeshRenderer);
-            Assert.IsTrue(data.ValidateTrackingFlags());
-            firstRig = PolySpatialCore.LocalAssetManager.GetRegisteredResource<PolySpatialAnimationRig>(data.customData.rigId);
-
-            // Shouldn't need to update the skeleton here.
-            Assert.IsFalse(firstRig.Compare(secondRig, out isHierarchyEqual));
-            Assert.IsTrue(isHierarchyEqual);
-
-            // Cleanup locally created resources.
-            if (secondRig != null)
-            {
-                Object.Destroy(secondRig);
-            }
         }
 
         [UnityTest]

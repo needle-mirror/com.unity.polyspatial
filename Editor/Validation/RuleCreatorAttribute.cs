@@ -10,15 +10,16 @@ namespace UnityEditor.PolySpatial.Validation
     /// </summary>
     /// <remarks>
     /// The tagged method should have the following signature:
-    /// <code>static void Method(List<ValueTuple<Type, IComponentRuleCreator>> ruleCreators)</code>
+    /// <![CDATA[<code>static void Method(List<ValueTuple<Type, IComponentRuleCreator>> ruleCreators)</code>]]>
     /// <br/>
     /// The rule creators are registered in the same order as they are added in the <code>ruleCreators</code> list parameter.
-    /// It's possible to associate a component type with a <see lagword="null"/> <see cref="IComponentRuleCreator"/>,
+    /// It's possible to associate a component type with a <see langword="null"/> <see cref="IComponentRuleCreator"/>,
     /// in this case no validation will be performed for the component type. This is useful to override validations for
     /// derived types.
     /// </remarks>
     /// <example>
     /// <code>
+    /// <![CDATA[
     /// public class MyInvalidComponent : MonoBehaviour
     /// { }
     ///
@@ -35,6 +36,7 @@ namespace UnityEditor.PolySpatial.Validation
     ///         ruleCreators.Add(new(typeof(MyInvalidComponent), new UnsupportedComponentsRule(PolySpatialSceneType.Volume, PolySpatialSceneType.MR, PolySpatialSceneType.VR)));
     ///     }
     /// }
+    /// ]]>
     /// </code>
     /// </example>
     /// <seealso cref="BuildValidationRule"/>

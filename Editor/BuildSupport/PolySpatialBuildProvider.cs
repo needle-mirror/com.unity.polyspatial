@@ -10,14 +10,17 @@ using UnityEditor.Build.Pipeline;
 namespace UnityEditor.PolySpatial.Internals
 {
     /// <summary>
-    /// This class performs custom build steps, such as ensuring that the default material will be present in standalone
-    /// builds
+    /// Performs custom build steps, such as ensuring that the default material will be present in standalone
+    /// builds.
     /// </summary>
     public class PolySpatialBuildProvider : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         private Shader tempShader;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// The order in which this provider is called relative to other build providers.
+        /// </summary>
+        /// <seealso cref="IOrderedCallback.callbackOrder"/>
         public int callbackOrder => 0;
 
 #if HAS_SCRIPTABLE_BUILDPIPELINE
@@ -45,7 +48,10 @@ namespace UnityEditor.PolySpatial.Internals
             return true;
         }
 
-        /// <inheritdoc cref="OnPreprocessBuild"/>>
+        /// <summary>
+        /// Called before a build is started.
+        /// </summary>
+        /// <param name="report">The build report.</param>
         public void OnPreprocessBuild(BuildReport report)
         {
             PlayerSettingsBridge.SetRequiresReadableAssets(true);
@@ -54,7 +60,10 @@ namespace UnityEditor.PolySpatial.Internals
                 return;
         }
 
-        /// <inheritdoc cref="OnPostprocessBuild"/>>
+        /// <summary>
+        /// Called after a build is finished.
+        /// </summary>
+        /// <param name="report">The build report.</param>
         public void OnPostprocessBuild(BuildReport report)
         {
             PlayerSettingsBridge.SetRequiresReadableAssets(false);

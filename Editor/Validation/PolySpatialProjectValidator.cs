@@ -20,9 +20,12 @@ namespace UnityEditor.PolySpatial.Validation
             rules.Add(CreatePolySpatialLayerExistRule());
             rules.Add(CreateCollisionMatrixRule());
 
+#if POLYSPATIAL_INTERNAL
             BuildValidator.AddRules(BuildTargetGroup.Standalone, rules);
-            BuildValidator.AddRules(BuildTargetGroup.iOS, rules);
             BuildValidator.AddRules(BuildTargetGroup.Android, rules);
+#endif
+
+            BuildValidator.AddRules(BuildTargetGroup.VisionOS, rules);
         }
 
         static BuildValidationRule CreatePolySpatialLayerExistRule()

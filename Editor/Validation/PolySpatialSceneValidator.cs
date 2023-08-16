@@ -447,13 +447,16 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_ComponentRules.Count == 0)
                 return;
 
+#if POLYSPATIAL_INTERNAL
             BuildValidator.AddRules(BuildTargetGroup.Standalone, s_ComponentRules);
-            BuildValidator.AddRules(BuildTargetGroup.iOS, s_ComponentRules);
             BuildValidator.AddRules(BuildTargetGroup.Android, s_ComponentRules);
 
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.Standalone, s_ComponentRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.iOS, s_ComponentRules);
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.Android, s_ComponentRules);
+#endif
+
+            BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
+            s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
         }
 
         static void TryCreateRules(List<GameObject> gameObjects)
@@ -474,13 +477,16 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_GameObjectRules.Count == 0)
                 return;
 
+#if POLYSPATIAL_INTERNAL
             BuildValidator.AddRules(BuildTargetGroup.Standalone, s_GameObjectRules);
-            BuildValidator.AddRules(BuildTargetGroup.iOS, s_GameObjectRules);
             BuildValidator.AddRules(BuildTargetGroup.Android, s_GameObjectRules);
 
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.Standalone, s_GameObjectRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.iOS, s_GameObjectRules);
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.Android, s_GameObjectRules);
+#endif
+
+            BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
+            s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
         }
 
         static IComponentRuleCreator GetRuleCreator(Type componentType)

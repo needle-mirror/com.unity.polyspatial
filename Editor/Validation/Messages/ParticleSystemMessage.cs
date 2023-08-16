@@ -8,6 +8,6 @@ namespace UnityEditor.PolySpatial.Validation
         public MessageType MessageType => MessageType.Info;
 
         public ITypeMessage.LinkData Link { get; } = new ITypeMessage.LinkData("Documentation",
-            "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/PortingUnityProjectsToPolySpatialXR.html%23particle-systems");
+            "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/SupportedFeatures.html%23particle-systems");
     }
 }
