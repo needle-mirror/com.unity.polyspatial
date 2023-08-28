@@ -41,6 +41,7 @@ namespace UnityEditor.PolySpatial
         SerializedProperty m_AdditionalTextureFormatsProperty;
 
         SerializedProperty m_IgnoredScenesListProperty;
+        SerializedProperty m_TransmitDebugInfoProperty;
         ReorderableList m_IgnoredScenesReorderableList;
         int m_SelectedTracker;
 
@@ -99,6 +100,8 @@ namespace UnityEditor.PolySpatial
 
             m_PolySpatialRecordingModeProperty = m_SerializedObject.FindProperty("PolySpatialRecordingMode");
             m_PolySpatialRecordingPathProperty = m_SerializedObject.FindProperty("RecordingPath");
+
+            m_TransmitDebugInfoProperty = m_SerializedObject.FindProperty("m_TransmitDebugInfo");
 
 #if POLYSPATIAL_INTERNAL
             m_ForceLinkPolySpatialRuntimeProperty = m_SerializedObject.FindProperty("ForceLinkPolySpatialRuntime");
@@ -176,6 +179,8 @@ namespace UnityEditor.PolySpatial
                     EditorGUI.BeginDisabledGroup(!isMacEditor);
                     EditorGUILayout.PropertyField(m_EnableMacRealityKitPreviewInPlayMode);
                     EditorGUI.EndDisabledGroup();
+
+                    EditorGUILayout.PropertyField(m_TransmitDebugInfoProperty);
 
                     var flags = (PolySpatialRuntimeFlags)m_RuntimeFlags.ulongValue;
                     flags = (PolySpatialRuntimeFlags)EditorGUILayout.EnumFlagsField("Runtime Flags", flags);

@@ -12,7 +12,9 @@
         "Unity.TextMeshPro",
         "Unity.InputSystem",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.PolySpatial.Core"
+        "Unity.PolySpatial.Core",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -51,6 +53,11 @@
             "name": "com.unity.inputsystem",
             "expression": "1.0.0",
             "define": "ENABLE_INPUT_SYSTEM"
+        },
+        {
+            "name": "com.unity.xr.management",
+            "expression": "",
+            "define": "ENABLE_XR_MANAGEMENT"
         }
     ],
     "noEngineReferences": false

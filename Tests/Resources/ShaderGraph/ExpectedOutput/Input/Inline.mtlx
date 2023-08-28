@@ -138,7 +138,6 @@
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_5d290b3e7ea749e0a3fcf48c9aedc046ToSR_Inlinecolor" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Inline" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_InlineVertex" />

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using UnityEditor.PolySpatial.Capabilities;
+using Unity.PolySpatial.Capabilities;
 using UnityEditor.PolySpatial.InternalBridge;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
@@ -78,7 +78,7 @@ namespace UnityEditor.PolySpatial.Validation
         static InspectorValidationUI()
         {
             Editor.finishedDefaultHeaderGUI += OnHeaderGUI;
-            PolySpatialSceneValidator.onValidateRules += OnRulesValidated;
+            PolySpatialSceneValidator.OnValidateRules += OnRulesValidated;
             EditorElementBridge.AddDecorator(new InspectorValidationDecorator());
         }
 

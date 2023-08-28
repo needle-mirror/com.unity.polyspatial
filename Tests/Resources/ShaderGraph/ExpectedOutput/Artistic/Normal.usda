@@ -11,35 +11,32 @@ def "MaterialX"
         def Material "USD_Normal"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Normal/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Normal/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Normal/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Normal/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Normal/CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormaldiffuseColor.outputs:out>
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Normal/CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormalbaseColor.outputs:out>
                 float inputs:metallic = 0
                 color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Normal/SR_Normal_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
                 float3 inputs:normal.connect = </MaterialX/Materials/USD_Normal/NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                token outputs:vertex
+                token outputs:out
             }
 
-            def Shader "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormaldiffuseColor"
+            def Shader "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormalbaseColor"
             {
                 uniform token info:id = "ND_swizzle_vector3_color3"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/AddNode_2cb6a4f4eef242e8ab62bc78ddb6de60.outputs:out>
@@ -67,48 +64,48 @@ def "MaterialX"
             def Shader "NormalUnpack_Out_in1Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xyNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
-            def Shader "NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xyNode_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_subtract_vector2FA"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 float inputs:in2 = 1
                 float2 outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_multiply_vector2FA"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 float inputs:in2 = 2
                 float2 outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_combine2_vector2"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_multiply_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XY_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xy_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 float outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1_in1_in1_in1Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_swizzle_vector4_float"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
-                string inputs:channels = "w"
+                string inputs:channels = "x"
                 float outputs:out
             }
 
@@ -131,15 +128,23 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_subtract_vector3"
                 float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_uNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf"
+            def Shader "NormalBlend_uNode_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
                 uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_u_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
                 float3 inputs:in2 = (-1, -1, 1)
+                float3 outputs:out
+            }
+
+            def Shader "NormalBlend_u_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
@@ -159,48 +164,33 @@ def "MaterialX"
 
             def Shader "NormalBlend_Out_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
-                uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
                 float3 outputs:out
             }
 
             def Shader "NormalBlend_Out_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
-                uniform token info:id = "ND_swizzle_float_vector3"
-                float inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in2_inNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_tNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_uNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NormalBlend_tNode_ccc49edcd79a472b8ad6d6b78afacaaf"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_t_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 inputs:in2 = (0, 0, 1)
                 float3 outputs:out
             }
 
-            def Shader "NormalBlend_Out_in1_in2_inNode_ccc49edcd79a472b8ad6d6b78afacaaf"
+            def Shader "NormalBlend_t_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
-                uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in2_in_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in2_in_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "NormalBlend_Out_in1_in2_in_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf"
-            {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                string inputs:channels = "z"
-                float outputs:out
-            }
-
-            def Shader "NormalBlend_Out_in1_in2_in_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf"
-            {
-                uniform token info:id = "ND_dotproduct_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_UNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "NormalBlend_TNode_ccc49edcd79a472b8ad6d6b78afacaaf"
-            {
-                uniform token info:id = "ND_add_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_ANode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
-                float3 inputs:in2 = (0, 0, 1)
+                uniform token info:id = "ND_swizzle_vector3_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalBlend_ANode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
@@ -220,21 +210,28 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "NormalStrength_Out_in3Node_17a6fb112d3145278b53cdeacbbdd8f8"
+            def Shader "NormalStrength_Out_in2Node_17a6fb112d3145278b53cdeacbbdd8f8"
             {
-                uniform token info:id = "ND_mix_float"
-                float inputs:bg = 1
-                float inputs:fg.connect = </MaterialX/Materials/USD_Normal/NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                float inputs:mix.connect = </MaterialX/Materials/USD_Normal/NormalStrength_Out_in3_mixNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength___Tmp0Node_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                string inputs:channels = "y"
                 float outputs:out
             }
 
-            def Shader "NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8"
+            def Shader "NormalStrength___Tmp0Node_17a6fb112d3145278b53cdeacbbdd8f8"
             {
-                uniform token info:id = "ND_swizzle_vector3_float"
+                uniform token info:id = "ND_multiply_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalStrength___Tmp0_in1Node_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "NormalStrength___Tmp0_in1Node_17a6fb112d3145278b53cdeacbbdd8f8"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                string inputs:channels = "z"
-                float outputs:out
+                string inputs:channels = "xy"
+                float2 outputs:out
             }
 
             def Shader "NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8"
@@ -244,42 +241,27 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "NormalStrength_Out_in2Node_17a6fb112d3145278b53cdeacbbdd8f8"
-            {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                string inputs:channels = "y"
-                float outputs:out
-            }
-
-            def Shader "NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8"
-            {
-                uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalStrength_ScaledIn_in2Node_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "NormalStrength_ScaledIn_in2Node_17a6fb112d3145278b53cdeacbbdd8f8"
-            {
-                uniform token info:id = "ND_swizzle_float_vector3"
-                float inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
-                string inputs:channels = "xxx"
-                float3 outputs:out
-            }
-
-            def Shader "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8"
-            {
-                uniform token info:id = "ND_dot_float"
-                float inputs:in = 5
-                float outputs:out
-            }
-
             def Shader "NormalStrength_Out_in1Node_17a6fb112d3145278b53cdeacbbdd8f8"
             {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_ScaledInNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength___Tmp0Node_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
                 string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "NormalBlend_Out_in1_in1Node_ccc49edcd79a472b8ad6d6b78afacaaf"
+            {
+                uniform token info:id = "ND_divide_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_tNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalBlend_Out_in1_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "NormalBlend_Out_in1_in1_in2Node_ccc49edcd79a472b8ad6d6b78afacaaf"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalBlend_tNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                string inputs:channels = "z"
                 float outputs:out
             }
 
@@ -317,7 +299,7 @@ def "MaterialX"
             def Shader "NormalUnpack_Out_in2Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xyNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 string inputs:channels = "y"
                 float outputs:out
             }
@@ -355,12 +337,12 @@ def "MaterialX"
             def Shader "NormalUnpack_Out_in3_in2_in_in2_inNode_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_dotproduct_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_XYNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xyNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_xyNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
                 float outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_swizzle_vector4_float"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
@@ -368,11 +350,20 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "NormalUnpack_XY_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1"
+            def Shader "NormalUnpack_xy_in1_in1_in1_in2Node_e2a62117509640d0855a7bded8f7fad1"
             {
                 uniform token info:id = "ND_swizzle_vector4_float"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalUnpack_InNode_e2a62117509640d0855a7bded8f7fad1.outputs:out>
-                string inputs:channels = "x"
+                string inputs:channels = "w"
+                float outputs:out
+            }
+
+            def Shader "NormalStrength_Out_in3Node_17a6fb112d3145278b53cdeacbbdd8f8"
+            {
+                uniform token info:id = "ND_mix_float"
+                float inputs:bg = 1
+                float inputs:fg.connect = </MaterialX/Materials/USD_Normal/NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                float inputs:mix.connect = </MaterialX/Materials/USD_Normal/NormalStrength_Out_in3_mixNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
                 float outputs:out
             }
 
@@ -380,6 +371,21 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_clamp_float"
                 float inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NormalStrength_Out_in3_fgNode_17a6fb112d3145278b53cdeacbbdd8f8"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalStrength_InNode_17a6fb112d3145278b53cdeacbbdd8f8.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 5
                 float outputs:out
             }
         }

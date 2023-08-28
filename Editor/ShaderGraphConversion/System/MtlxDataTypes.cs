@@ -1,4 +1,4 @@
-
+using System;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -115,6 +115,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitCombine2 = "realitykit_combine2";
         internal const string RealityKitCombine3 = "realitykit_combine3";
         internal const string RealityKitCombine4 = "realitykit_combine4";
+        internal const string RealityKitFractional = "realitykit_fractional";
         internal const string RealityKitSurfaceModelToWorld = "realitykit_surface_model_to_world";
         internal const string RealityKitSurfaceWorldToView = "realitykit_surface_world_to_view";
         internal const string RealityKitSurfaceViewToProjection = "realitykit_surface_view_to_projection";
@@ -123,8 +124,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitGeometryModifierVertexID = "realitykit_geometry_modifier_vertex_id";
         internal const string RealityKitSurfaceCustomAttribute = "realitykit_surface_custom_attribute";
         internal const string RealityKitUnlit = "realitykit_unlit";
+        internal const string RealityKitPbr = "realitykit_pbr";
         internal const string RealityKitImageLod = "realitykit_image_lod";
         internal const string RealityKitReflect = "realitykit_reflect";
+        internal const string RealityKitStep = "realitykit_step";
+        internal const string RealityKitGeometrySwitchCameraIndex = "realitykit_geometry_switch_cameraindex";
     }
     
     internal static class MtlxDataTypes
@@ -165,6 +169,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
             Matrix33 => 9,
             Matrix44 => 16,
             _ => 0,
+        };
+
+        internal static string GetTypeOfLength(int length) => length switch
+        {
+            1 => Float,
+            2 => Vector2,
+            3 => Vector3,
+            4 => Vector4,
+            9 => Matrix33,
+            16 => Matrix44,
+            _ => throw new ArgumentException($"No type known of length {length}"),
         };
 
         internal static int GetElementLength(string datatype) => datatype switch

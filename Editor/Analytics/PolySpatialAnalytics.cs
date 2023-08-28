@@ -7,7 +7,7 @@ namespace UnityEditor.PolySpatial.Analytics
     [InitializeOnLoad]
     static class PolySpatialAnalytics
     {
-        internal const string VendorKey = "unity.quantum";
+        internal const string VendorKey = "unity.polyspatial";
 
         static PolySpatialPlaymodeUsageEvent PlaymodeUsageEvent { get; } = new();
 

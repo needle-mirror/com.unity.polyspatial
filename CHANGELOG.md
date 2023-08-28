@@ -7,6 +7,37 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2023-08-28
+
+## [0.2.1] - 2023-08-25
+
+## [0.2.0] - 2023-08-21
+
+### Added
+- PolySpatial now supports Xcode 15 beta 5 & 6
+- Lighting
+    - Adds PolySpatial Lighting node, which allows developers to opt into using Unity's internal lighting in addition to the IBL lighting model provided by RealityKit
+    - Lighting parameter shader globals (dynamic lights, light probe volumes, and baked lightmaps) are now accessible via Unity ShaderGraph & MaterialX
+
+- Materials/ShaderGraph/MaterialX
+    - Adds limited support for the custom funtion node in Unity ShaderGraph (see documentation for details)
+    - Additional materialX nodes are now supported (see documentation for details)
+    - Unity PBR materials now map to the RealityKitPBR shader node rather than the UsdPreviewSurface shader node, as the RealityKitPBR supports additional useful features
+
+### Fixed
+- Input
+    - XRI now works with QuantumTouchSpace
+    - Other assorted input fixes
+- UI
+- Other Bug fixes
+    - Native Texture & UI texture fixes
+    - Fixes for sprite UVs
+    - ARKit meshes now appear in MR mode
+    - Fixes null object error related to particle systems
+    - Fixes bad reference caused by inactive skinned mesh renderers
+    - Fixes crash if mesh collider was disabled at scene load.
+    - Other sssorted bug fixes
+
 ## [0.1.2] - 2023-08-16
 
 ### Added

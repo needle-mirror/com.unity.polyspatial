@@ -117,7 +117,6 @@
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromTriWaveNode_a254a47e33b7400886125f6815e8a91bToSR_Gradientcolor" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Gradient" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_GradientVertex" />

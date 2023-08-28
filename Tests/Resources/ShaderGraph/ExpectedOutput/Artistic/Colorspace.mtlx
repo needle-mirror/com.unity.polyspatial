@@ -35,7 +35,6 @@
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_a45a88de1f1e40a5a0902d7ea2afa4cdToSR_Colorspacecolor" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Colorspace" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_ColorspaceVertex" />

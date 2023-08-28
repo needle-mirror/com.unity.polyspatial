@@ -1,60 +1,92 @@
+using System;
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     internal class CompoundOpContext
     {
-        internal readonly AbstractMaterialNode node;
-        internal readonly MtlxGraphData graph;
-        internal readonly ExternalEdgeMap externals;
-        internal string hint;
-        internal Dictionary<string, NodeDef> nodeDefs;
-        internal Dictionary<string, MtlxNodeData> nodeData = new();
-        internal Dictionary<string, MtlxNodeData> externalDotNodes = new();
+        internal AbstractMaterialNode Node { get; private set; }
+        internal MtlxGraphData Graph { get; private set; }
+        internal ExternalEdgeMap Externals { get; private set; }
+        internal string Hint { get; private set; }
+        internal Dictionary<string, NodeDef> NodeDefs { get; private set; }
+        internal Dictionary<string, MtlxNodeData> NodeData  { get; private set; } = new();
+        internal Dictionary<string, MtlxNodeData> ExternalDotNodes  { get; private set; } = new();
 
         internal CompoundOpContext(
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
             string hint, Dictionary<string, NodeDef> nodeDefs)
         {
-            this.node = node;
-            this.graph = graph;
-            this.externals = externals;
-            this.hint = hint;
-            this.nodeDefs = nodeDefs;
+            Node = node;
+            Graph = graph;
+            Externals = externals;
+            Hint = hint;
+            NodeDefs = nodeDefs;
         }
     }
 
     internal class NodeDef
     {
-        readonly string nodeType;
-        readonly string outputType;
-        readonly Dictionary<string, InputDef> inputs;
+        internal string NodeType { get; private set; }
+        internal string OutputType { get; private set; }
+        internal Dictionary<string, InputDef> Inputs { get; private set; }
 
         internal NodeDef(string nodeType, string outputType, Dictionary<string, InputDef> inputs)
         {
-            this.nodeType = nodeType;
-            this.outputType = outputType;
-            this.inputs = inputs;
+            NodeType = nodeType;
+            OutputType = outputType;
+            Inputs = inputs;
         }
 
         internal MtlxNodeData AddNodesAndEdges(CompoundOpContext ctx, string key)
         {
-            if (!ctx.nodeData.TryGetValue(key, out var nodeDatum))
+            if (!ctx.NodeData.TryGetValue(key, out var nodeDatum))
             {
-                nodeDatum = ctx.graph.AddNode(
-                    NodeUtils.GetNodeName(ctx.node, $"{ctx.hint}_{key}"), nodeType, outputType);
-                ctx.nodeData.Add(key, nodeDatum);
+                nodeDatum = ctx.Graph.AddNode(
+                    NodeUtils.GetNodeName(ctx.Node, $"{ctx.Hint}_{key}"), NodeType, OutputType);
+                ctx.NodeData.Add(key, nodeDatum);
 
-                var outputSlot = NodeUtils.GetOutputByName(ctx.node, key);
+                var outputSlot = NodeUtils.GetOutputByName(ctx.Node, key);
                 if (outputSlot != null)
-                    ctx.externals.AddExternalPort(outputSlot.slotReference, nodeDatum.name);
+                    ctx.Externals.AddExternalPort(outputSlot.slotReference, nodeDatum.name);
                 
-                foreach (var (inputName, inputDef) in inputs)
+                foreach (var (inputName, inputDef) in Inputs)
                 {
                     inputDef.AddPortsAndEdges(ctx, nodeDatum, key, inputName);
                 }
             }
             return nodeDatum;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (obj is not NodeDef other ||
+                other.NodeType != NodeType ||
+                other.OutputType != OutputType ||
+                other.Inputs.Count != Inputs.Count)
+            {
+                return false;
+            }
+            foreach (var entry in other.Inputs)
+            {
+                if (!(Inputs.TryGetValue(entry.Key, out var value) && entry.Value.Equals(value)))
+                    return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hashCode = new();
+            hashCode.Add(NodeType);
+            hashCode.Add(OutputType);
+            foreach (var entry in Inputs)
+            {
+                hashCode.Add(entry.Key);
+                hashCode.Add(entry.Value);
+            }
+            return hashCode.ToHashCode();
         }
     }
 
@@ -67,122 +99,285 @@ namespace UnityEditor.ShaderGraph.MaterialX
     // An input that resolves to a constant numeric value.
     internal class FloatInputDef : InputDef
     {
-        readonly string portType;
-        readonly float[] values;
+        internal string PortType { get; private set; }
+        internal float[] Values { get; private set; }
 
         internal FloatInputDef(string portType, params float[] values)
         {
-            this.portType = portType;
-            this.values = values;
+            PortType = portType;
+            Values = values;
         }
 
         internal override void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
         {
-            nodeDatum.AddPortValue(inputKey, portType, values);
+            nodeDatum.AddPortValue(inputKey, PortType, Values);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (obj is not FloatInputDef other || other.PortType != PortType || other.Values.Length != Values.Length)
+                return false;
+            
+            for (var i = 0; i < other.Values.Length; ++i)
+            {
+                if (other.Values[i] != Values[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hashCode = new();
+            hashCode.Add(PortType);
+            foreach (var value in Values)
+            {
+                hashCode.Add(value);
+            }
+            return hashCode.ToHashCode();
         }
     }
 
     // An input that resolves to a constant string value.
     internal class StringInputDef : InputDef
     {
-        readonly string value;
+        internal string Value { get; private set; }
 
         internal StringInputDef(string value)
         {
-            this.value = value;
+            Value = value;
         }
 
         internal override void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
         {
-            nodeDatum.AddPortString(inputKey, MtlxDataTypes.String, value);
+            nodeDatum.AddPortString(inputKey, MtlxDataTypes.String, Value);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is StringInputDef other && other.Value == Value;
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
         }
     }
 
     // An input that resolves to the output of a node defined and mapped in the compound op.
     internal class InternalInputDef : InputDef
     {
-        readonly string source;
+        internal string Source { get; private set; }
 
         internal InternalInputDef(string source)
         {
-            this.source = source;
+            Source = source;
         }
 
         internal override void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
         {
-            var sourceNode = ctx.nodeDefs[source].AddNodesAndEdges(ctx, source);
-            ctx.graph.AddPortAndEdge(sourceNode.name, nodeDatum.name, inputKey, sourceNode.datatype);
+            var sourceNode = ctx.NodeDefs[Source].AddNodesAndEdges(ctx, Source);
+            ctx.Graph.AddPortAndEdge(sourceNode.name, nodeDatum.name, inputKey, sourceNode.datatype);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is InternalInputDef other && other.Source == Source;
+        }
+
+        public override int GetHashCode()
+        {
+            return Source.GetHashCode();
         }
     }
 
     // An input that resolves to one of the inputs of the original shader graph node.
     internal class ExternalInputDef : InputDef
     {
-        readonly string source;
+        internal string Source { get; private set; }
 
         internal ExternalInputDef(string source)
         {
-            this.source = source;
+            Source = source;
         }
 
         internal override void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
         {
-            if (!ctx.externalDotNodes.TryGetValue(source, out var dotNode))
+            if (!ctx.ExternalDotNodes.TryGetValue(Source, out var dotNode))
             {
-                var slot = NodeUtils.GetInputByName(ctx.node, source);
+                var slot = NodeUtils.GetInputByName(ctx.Node, Source, true);
                 var dataType = SlotUtils.GetDataTypeName(slot);
 
                 // "Dot" is the identity function, not a dot product; we create a new node to represent
                 // the external input because ExternalEdgeMap can only map a slot to a single port, but we
                 // assume that this will be optimized out in the final shader code.
-                dotNode = ctx.graph.AddNode(
-                    NodeUtils.GetNodeName(ctx.node, $"{ctx.hint}_{source}"), MtlxNodeTypes.Dot, dataType);
-                ctx.externalDotNodes.Add(source, dotNode);
+                dotNode = ctx.Graph.AddNode(
+                    NodeUtils.GetNodeName(ctx.Node, $"{ctx.Hint}_{Source}"), MtlxNodeTypes.Dot, dataType);
+                ctx.ExternalDotNodes.Add(Source, dotNode);
                 
-                // Unconnected UV inputs need a GeomTexCoord node (flipping the v coord)
-                if (!slot.isConnected && slot is UVMaterialSlot uvSlot)
+                if (slot.isConnected)
                 {
-                    var texCoordNode = ctx.graph.AddNode($"{dotNode.name}UV", MtlxNodeTypes.GeomTexCoord, dataType);
-                    texCoordNode.AddPortValue("index", MtlxDataTypes.Integer, new[] { (float)uvSlot.channel });
-                    
-                    var multiplyNode = ctx.graph.AddNode($"{dotNode.name}Multiply", MtlxNodeTypes.Multiply, dataType);
-                    ctx.graph.AddPortAndEdge(texCoordNode.name, multiplyNode.name, "in1", dataType);
-                    multiplyNode.AddPortValue("in2", dataType, new[] { 1.0f, -1.0f });
-
-                    var addNode = ctx.graph.AddNode($"{dotNode.name}Add", MtlxNodeTypes.Add, dataType);
-                    ctx.graph.AddPortAndEdge(multiplyNode.name, addNode.name, "in1", dataType);
-                    addNode.AddPortValue("in2", dataType, new[] { 0.0f, 1.0f });
-
-                    ctx.graph.AddPortAndEdge(addNode.name, dotNode.name, "in", dataType);
+                    QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, "in", dataType);
                 }
                 else
                 {
-                    QuickNode.AddInputPortAndEdge(ctx.externals, dotNode, slot, "in", dataType);
+                    switch (slot)
+                    {
+                        case UVMaterialSlot uvSlot:
+                        {
+                            // Unconnected UV inputs need a GeomTexCoord node (flipping the v coord)
+                            var texCoordNode = ctx.Graph.AddNode(
+                                $"{dotNode.name}UV", MtlxNodeTypes.GeomTexCoord, dataType);
+                            texCoordNode.AddPortValue("index", MtlxDataTypes.Integer, new[] { (float)uvSlot.channel });
+                            
+                            var multiplyNode = ctx.Graph.AddNode(
+                                $"{dotNode.name}Multiply", MtlxNodeTypes.Multiply, dataType);
+                            ctx.Graph.AddPortAndEdge(texCoordNode.name, multiplyNode.name, "in1", dataType);
+                            multiplyNode.AddPortValue("in2", dataType, new[] { 1.0f, -1.0f });
+
+                            var addNode = ctx.Graph.AddNode($"{dotNode.name}Add", MtlxNodeTypes.Add, dataType);
+                            ctx.Graph.AddPortAndEdge(multiplyNode.name, addNode.name, "in1", dataType);
+                            addNode.AddPortValue("in2", dataType, new[] { 0.0f, 1.0f });
+
+                            ctx.Graph.AddPortAndEdge(addNode.name, dotNode.name, "in", dataType);
+                            break;
+                        }
+                        case Texture2DInputMaterialSlot:
+                        {
+                            // Unconnected texture inputs need an implicit property
+                            var variableName = ctx.Node.GetVariableNameForSlot(slot.id);
+                            QuickNode.EnsureImplicitProperty(variableName, MtlxDataTypes.Filename, ctx.Graph);
+                            ctx.Graph.AddPortAndEdge(variableName, dotNode.name, "in", MtlxDataTypes.Filename);
+                            break;
+                        }
+                        case ViewDirectionMaterialSlot:
+                        {
+                            var geomNode = ctx.Graph.AddNode(
+                                $"{dotNode.name}Geom", MtlxNodeTypes.RealityKitViewDirection, MtlxDataTypes.Vector3);
+                            var flipNode = ctx.Graph.AddNode(
+                                $"{dotNode.name}Flip", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3);
+                            ctx.Graph.AddPortAndEdge(geomNode.name, flipNode.name, "in1", MtlxDataTypes.Vector3);
+                            flipNode.AddPortValue("in2", MtlxDataTypes.Vector3, new[] { 1.0f, 1.0f, -1.0f });
+                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, "in", MtlxDataTypes.Vector3);
+                            break;
+                        }
+                        case NormalMaterialSlot normalSlot and { space: CoordinateSpace.Tangent }:
+                            // RealityKit doesn't accept tangent space normals, but we know that they're (0, 0, 1).
+                            dotNode.AddPortValue("in", MtlxDataTypes.Vector3, new[] { 0.0f, 0.0f, 1.0f });
+                            break;
+
+                        case SpaceMaterialSlot spaceMaterialSlot:
+                        {
+                            var nodeType = slot switch
+                            {
+                                TangentMaterialSlot => MtlxNodeTypes.GeomTangent,
+                                BitangentMaterialSlot => MtlxNodeTypes.GeomBitangent,
+                                NormalMaterialSlot => MtlxNodeTypes.GeomNormal,
+                                PositionMaterialSlot => MtlxNodeTypes.GeomPosition,
+                                _ => throw new NotSupportedException($"Unsupported slot type {slot.GetType()}"),
+                            };
+                            var geomNode = ctx.Graph.AddNode($"{dotNode.name}Geom", nodeType, MtlxDataTypes.Vector3);
+                            var space = spaceMaterialSlot.space switch
+                            {
+                                CoordinateSpace.Object => "object",
+                                CoordinateSpace.World => "world",
+                                CoordinateSpace.Tangent => "tangent",
+                                _ => throw new NotSupportedException($"Unsupported space {spaceMaterialSlot.space}"),
+                            };
+                            geomNode.AddPortString("space", MtlxDataTypes.String, space);
+
+                            // Flip to convert between RealityKit and Unity coordinates.
+                            var flipNode = ctx.Graph.AddNode(
+                                $"{dotNode.name}Flip", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3);
+                            ctx.Graph.AddPortAndEdge(geomNode.name, flipNode.name, "in1", MtlxDataTypes.Vector3);
+                            flipNode.AddPortValue("in2", MtlxDataTypes.Vector3, new[] { 1.0f, 1.0f, -1.0f });
+
+                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, "in", MtlxDataTypes.Vector3);
+                            break;
+                        }
+                        default:
+                            // Other unconnected inputs just use the default value.
+                            QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, "in", dataType);
+                            break;
+                    }
                 }
             }
-            ctx.graph.AddPortAndEdge(dotNode.name, nodeDatum.name, inputKey, dotNode.datatype);
+            ctx.Graph.AddPortAndEdge(dotNode.name, nodeDatum.name, inputKey, dotNode.datatype);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is ExternalInputDef other && other.Source == Source;
+        }
+
+        public override int GetHashCode()
+        {
+            return Source.GetHashCode();
         }
     }
 
     // An input that resolves to the output of an unmapped node described inline in the constructor.
     internal class InlineInputDef : InputDef
     {
-        readonly NodeDef source;
+        internal NodeDef Source { get; private set; }
 
         internal InlineInputDef(string nodeType, string outputType, Dictionary<string, InputDef> inputs)
         {
-            this.source = new NodeDef(nodeType, outputType, inputs);
+            Source = new NodeDef(nodeType, outputType, inputs);
         }
 
         internal override void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
         {
-            var sourceNode = source.AddNodesAndEdges(ctx, $"{nodeKey}_{inputKey}");
-            ctx.graph.AddPortAndEdge(sourceNode.name, nodeDatum.name, inputKey, sourceNode.datatype);
+            var sourceNode = Source.AddNodesAndEdges(ctx, $"{nodeKey}_{inputKey}");
+            ctx.Graph.AddPortAndEdge(sourceNode.name, nodeDatum.name, inputKey, sourceNode.datatype);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is InlineInputDef other && other.Source.Equals(Source);
+        }
+
+        public override int GetHashCode()
+        {
+            return Source.GetHashCode();
+        }
+    }
+
+    // An input that resolves to an implicit property in the graph: that is, a property that does not correspond to one
+    // of the user-specified inputs.  This includes both global properties (like "_SinTime") and properties
+    // automatically supplied by PolySpatial on a per-renderer basis (like "polySpatial_Lightmap").
+    internal class ImplicitInputDef : InputDef
+    {
+        internal string NodeName { get; private set; }
+        internal string DataType { get; private set; }
+
+        internal ImplicitInputDef(string nodeName, string dataType)
+        {
+            NodeName = nodeName;
+            DataType = dataType;
+        }
+
+        internal override void AddPortsAndEdges(
+            CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
+        {
+            QuickNode.EnsureImplicitProperty(NodeName, DataType, ctx.Graph);
+            ctx.Graph.AddPortAndEdge(NodeName, nodeDatum.name, inputKey, DataType);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is ImplicitInputDef other && other.NodeName == NodeName && other.DataType == DataType;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(NodeName, DataType);
         }
     }
 }

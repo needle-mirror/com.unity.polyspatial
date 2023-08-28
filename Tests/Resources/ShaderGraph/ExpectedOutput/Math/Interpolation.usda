@@ -11,34 +11,31 @@ def "MaterialX"
         def Material "USD_Interpolation"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Interpolation/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Interpolation/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Interpolation/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Interpolation/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Interpolation/CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationdiffuseColor.outputs:out>
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Interpolation/CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationbaseColor.outputs:out>
                 float inputs:metallic.connect = </MaterialX/Materials/USD_Interpolation/InverseLerp_OutNode_8db8a4d24c37473cac21a07c76d52555.outputs:out>
                 color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Interpolation/SR_Interpolation_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
-            def Shader "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationdiffuseColor"
+            def Shader "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationbaseColor"
             {
                 uniform token info:id = "ND_swizzle_vector3_color3"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_Interpolation/InverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614.outputs:out>

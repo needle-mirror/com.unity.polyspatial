@@ -1,8 +1,13 @@
 #if ENABLE_CLOUD_SERVICES_ANALYTICS
 using System;
+using System.Linq;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+
+#if ENABLE_XR_MANAGEMENT
+using UnityEditor.XR.Management;
+#endif
 
 namespace UnityEditor.PolySpatial.Analytics
 {
@@ -12,8 +17,8 @@ namespace UnityEditor.PolySpatial.Analytics
     /// </summary>
     class PolySpatialPlaymodeUsageEvent : PolySpatialEditorAnalyticsEvent<PolySpatialPlaymodeUsageEvent.Payload>
     {
-        const string k_EventName = "quantum_playmode_usage";
-        const int k_EventVersion = 3;
+        const string k_EventName = "polyspatial_playmode_usage";
+        const int k_EventVersion = 1;
 
         /// <summary>
         /// The event parameter.
@@ -22,15 +27,23 @@ namespace UnityEditor.PolySpatial.Analytics
         [Serializable]
         internal struct Payload
         {
-            internal const string EnteredPlaymodeCategory = "EnteredPlaymode";
-            internal const string PolySpatialScenePlayedName = "PolySpatialScenePlayed";
-            internal const string NonPolySpatialScenePlayedName = "NonPolySpatialScenePlayed";
+            internal const string EnteredPlaymodeState = "EnteredPlaymode";
+            internal const string NotInstalledState = "NotInstalled";
+            internal const string ActivatedState = "Activated";
+            internal const string DeactivatedState = "Deactivated";
+            internal const string MRMode = "MR";
+            internal const string VRMode = "VR";
+            internal const string WindowedMode = "Windowed";
+            internal const string UndefinedMode = "Undefined";
 
             [SerializeField]
-            internal string Name;
+            internal string PlaymodeState;
 
             [SerializeField]
-            string Category;
+            internal string ActiveBuildTarget;
+
+            [SerializeField]
+            internal string PolySpatialRuntimeState;
 
             [SerializeField]
             internal int BoundedVolumes;
@@ -38,13 +51,14 @@ namespace UnityEditor.PolySpatial.Analytics
             [SerializeField]
             internal int UnboundedVolumes;
 
-            internal Payload(string name, string category, int boundedVolumes = 0, int unboundedVolumes = 0)
-            {
-                Name = name;
-                Category = category;
-                BoundedVolumes = boundedVolumes;
-                UnboundedVolumes = unboundedVolumes;
-            }
+            [SerializeField]
+            internal string XRManagementState;
+
+            [SerializeField]
+            internal string[] ActiveXRLoaders;
+
+            [SerializeField]
+            internal string ConfiguredMode;
         }
 
         internal PolySpatialPlaymodeUsageEvent() : base(k_EventName, k_EventVersion)
@@ -57,34 +71,70 @@ namespace UnityEditor.PolySpatial.Analytics
             if (newState != PlayModeStateChange.EnteredPlayMode)
                 return;
 
+            var activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+            var payload = new Payload()
+            {
+                PlaymodeState = Payload.EnteredPlaymodeState,
+                ActiveBuildTarget = activeBuildTarget.ToString(),
+                PolySpatialRuntimeState = Payload.DeactivatedState,
+                XRManagementState = Payload.NotInstalledState,
+                ActiveXRLoaders = new string[0],
+                ConfiguredMode = Payload.UndefinedMode
+            };
+
             if (PolySpatialSettings.instance.EnablePolySpatialRuntime)
             {
-                var boundedVolumes = 0;
-                var unboundedVolumes = 0;
-
+                payload.PolySpatialRuntimeState = Payload.ActivatedState;
                 if (PolySpatialSettings.instance.EnablePolySpatialRuntime && PolySpatialCore.UnitySimulation != null)
                 {
-                    var volumeCamera = PolySpatialCore.UnitySimulation?.Camera;
+                    var volumeCamera = PolySpatialCore.UnitySimulation.Camera;
                     if (volumeCamera != null)
                     {
                         switch (volumeCamera.Mode)
                         {
                             case VolumeCamera.PolySpatialVolumeCameraMode.Bounded:
-                                boundedVolumes++;
+                                payload.BoundedVolumes++;
                                 break;
                             case VolumeCamera.PolySpatialVolumeCameraMode.Unbounded:
-                                unboundedVolumes++;
+                                payload.UnboundedVolumes++;
                                 break;
                         }
                     }
                 }
+            }
 
-                Send(new Payload(Payload.PolySpatialScenePlayedName, Payload.EnteredPlaymodeCategory, boundedVolumes, unboundedVolumes));
+#if ENABLE_XR_MANAGEMENT
+            var group = BuildPipeline.GetBuildTargetGroup(activeBuildTarget);
+            var generalSettings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(group);
+            var isXRManagementActive = generalSettings != null && generalSettings.InitManagerOnStart;
+            if (isXRManagementActive)
+            {
+                payload.XRManagementState = Payload.ActivatedState;
+                if (generalSettings.Manager != null)
+                {
+                    payload.ActiveXRLoaders = generalSettings.Manager.activeLoaders
+                        .Where(l => l != null)
+                        .Select(l => l.GetType().Name)
+                        .ToArray();
+                }
             }
             else
             {
-                Send(new Payload(Payload.NonPolySpatialScenePlayedName, Payload.EnteredPlaymodeCategory));
+                payload.XRManagementState = Payload.DeactivatedState;
             }
+#endif
+
+            if (activeBuildTarget == BuildTarget.VisionOS)
+            {
+                if (payload.PolySpatialRuntimeState == Payload.ActivatedState)
+                    payload.ConfiguredMode = Payload.MRMode;
+                else if (payload.XRManagementState == Payload.ActivatedState)
+                    payload.ConfiguredMode = Payload.VRMode;
+                else
+                    payload.ConfiguredMode = Payload.WindowedMode;
+            }
+
+            Send(payload);
         }
     }
 }

@@ -4,6 +4,25 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class SampleTexture2DLODAdapter : AbstractSampleTexture2DAdapter<SampleTexture2DLODNode>
     {
+        internal static string GetFilterType(TextureSamplerState samplerState)
+        {
+            return samplerState.filter switch
+            {
+                TextureSamplerState.FilterMode.Point => "nearest",
+                _ => "linear",
+            };
+        }
+
+        internal static string GetAddressMode(TextureSamplerState samplerState)
+        {
+            return samplerState.wrap switch
+            {
+                TextureSamplerState.WrapMode.Clamp => "clamp_to_edge",
+                TextureSamplerState.WrapMode.Mirror => "mirrored_repeat",
+                _ => "repeat",
+            };
+        }
+
         public override bool IsNodeSupported(AbstractMaterialNode node)
         {
 #if DISABLE_MATERIALX_EXTENSIONS
@@ -22,21 +41,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         protected override void AddSamplerState(MtlxNodeData nodeData, TextureSamplerState samplerState)
         {
-            var filterType = samplerState.filter switch
-            {
-                TextureSamplerState.FilterMode.Point => "nearest",
-                _ => "linear",
-            };
+            var filterType = GetFilterType(samplerState);
             nodeData.AddPortString("mag_filter", MtlxDataTypes.String, filterType);
             nodeData.AddPortString("min_filter", MtlxDataTypes.String, filterType);
             nodeData.AddPortString("mip_filter", MtlxDataTypes.String, filterType);
 
-            var addressMode = samplerState.wrap switch
-            {
-                TextureSamplerState.WrapMode.Clamp => "clamp_to_edge",
-                TextureSamplerState.WrapMode.Mirror => "mirrored_repeat",
-                _ => "repeat",
-            };
+            var addressMode = GetAddressMode(samplerState);
             nodeData.AddPortString("s_address", MtlxDataTypes.String, addressMode);
             nodeData.AddPortString("t_address", MtlxDataTypes.String, addressMode);
         }

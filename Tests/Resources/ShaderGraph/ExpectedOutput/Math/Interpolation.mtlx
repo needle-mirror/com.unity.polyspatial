@@ -62,20 +62,17 @@
     </constant>
     <GeometryModification name = "SR_InterpolationVertex" type = "vertexshader">
     </GeometryModification>
-    <UsdPreviewSurface name = "SR_Interpolation" type = "surfaceshader">
-        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationdiffuseColor" />
+    <realitykit_pbr name = "SR_Interpolation" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationbaseColor" />
         <input name = "metallic" type = "float" nodename = "InverseLerp_OutNode_8db8a4d24c37473cac21a07c76d52555" />
         <input name = "emissiveColor" type = "color3" value = "0,0,0" />
-        <input name = "occlusion" type = "float" value = "1" />
-        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
-        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
         <input name = "roughness" type = "float" nodename = "SR_Interpolation_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
-        <input name = "ior" type = "float" value = "1.4" />
-    </UsdPreviewSurface>
+    </realitykit_pbr>
     <surfacematerial name = "USD_Interpolation" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_InterpolationVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Interpolation" />
@@ -84,7 +81,7 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />
     </subtract>
-    <swizzle name = "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationdiffuseColor" type = "color3">
+    <swizzle name = "CastSwizzleFromInverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614ToSR_InterpolationbaseColor" type = "color3">
         <input name = "in" type = "vector3" nodename = "InverseLerp_OutNode_0530b49ce26442d08c785f93c6e54614" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>

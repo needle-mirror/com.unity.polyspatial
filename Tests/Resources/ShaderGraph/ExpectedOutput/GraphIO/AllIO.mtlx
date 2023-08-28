@@ -64,21 +64,18 @@
     </multiply>
     <GeometryModification name = "SR_AllIOVertex" type = "vertexshader">
     </GeometryModification>
-    <UsdPreviewSurface name = "SR_AllIO" type = "surfaceshader">
+    <realitykit_pbr name = "SR_AllIO" type = "surfaceshader">
         <input name = "normal" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
         <input name = "metallic" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOmetallic" />
         <input name = "emissiveColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOemissiveColor" />
-        <input name = "occlusion" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOocclusion" />
-        <input name = "specularColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOspecularColor" />
+        <input name = "ambientOcclusion" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOambientOcclusion" />
         <input name = "clearcoat" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOclearcoat" />
-        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOdiffuseColor" />
-        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
+        <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIObaseColor" />
+        <input name = "specular" type = "float" nodename = "SR_AllIO_specular_Grayscale" />
         <input name = "roughness" type = "float" nodename = "SR_AllIO_roughness_OnesComplement" />
         <input name = "clearcoatRoughness" type = "float" nodename = "SR_AllIO_clearcoatRoughness_OnesComplement" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
-        <input name = "ior" type = "float" value = "1.4" />
-    </UsdPreviewSurface>
+    </realitykit_pbr>
     <surfacematerial name = "USD_AllIO" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_AllIOVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_AllIO" />
@@ -87,6 +84,10 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIO_roughness_OnesComplementin2" />
     </subtract>
+    <dotproduct name = "SR_AllIO_specular_Grayscale" type = "float">
+        <input name = "in1" type = "vector3" value = "0.299,0.587,0.114" />
+        <input name = "in2" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
+    </dotproduct>
     <subtract name = "SR_AllIO_clearcoatRoughness_OnesComplement" type = "float">
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" nodename = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIO_clearcoatRoughness_OnesComplementin2" />
@@ -119,13 +120,9 @@
         <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOocclusion" type = "float">
+    <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOambientOcclusion" type = "float">
         <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
         <input name = "channels" type = "string" value = "x" />
-    </swizzle>
-    <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOspecularColor" type = "color3">
-        <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
-        <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
     <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOclearcoat" type = "float">
         <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
@@ -135,7 +132,7 @@
         <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
         <input name = "channels" type = "string" value = "x" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOdiffuseColor" type = "color3">
+    <swizzle name = "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIObaseColor" type = "color3">
         <input name = "in" type = "vector3" nodename = "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>

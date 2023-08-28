@@ -9,6 +9,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
+#if DISABLE_MATERIALX_EXTENSIONS
             if (node is ViewDirectionNode vdNode)
             {
 
@@ -61,6 +62,21 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                 externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, outputNode.name);
             }
+#else
+            QuickNode.CompoundOp(node, graph, externals, "ViewDirection", new()
+            {
+                // Flip z coordinate to convert RealityKit space to Unity space.
+                ["Out"] = new(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.RealityKitViewDirection, MtlxDataTypes.Vector3, new()
+                    {
+                        ["space"] = new StringInputDef(
+                            PositionAdapter.SpaceToMtlxString(((ViewDirectionNode)node).space)),
+                    }),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector3, new[] { 1.0f, 1.0f, -1.0f }),
+                }),
+            });
+#endif
         }
     }
 }

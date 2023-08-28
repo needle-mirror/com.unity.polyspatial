@@ -267,6 +267,15 @@ namespace Unity.PolySpatial
 
         [SerializeField] public string MaterialXExtensionNamespace = "mtlxextension";
 
+        [SerializeField]
+        bool m_TransmitDebugInfo;
+
+        internal bool TransmitDebugInfo
+        {
+            get => m_TransmitDebugInfo;
+            set => m_TransmitDebugInfo = value;
+        }
+
 #if POLYSPATIAL_INTERNAL
         [SerializeField] public bool ForceLinkPolySpatialRuntime;
 #endif

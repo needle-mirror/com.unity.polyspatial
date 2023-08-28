@@ -19,32 +19,29 @@ def "MaterialX"
             float2 inputs:_Vector2 = (1, 1)
             color4f inputs:_Color = (0, 0.2530122, 1, 0)
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_AllIO/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_AllIO/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_AllIO/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_AllIO/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
                 float3 inputs:normal.connect = </MaterialX/Materials/USD_AllIO/MultiplyNode_4f37b1c4abe342b3821578ef3daec19a.outputs:out>
                 float inputs:metallic.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOmetallic.outputs:out>
                 color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOemissiveColor.outputs:out>
-                float inputs:occlusion.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOocclusion.outputs:out>
-                color3f inputs:specularColor.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOspecularColor.outputs:out>
+                float inputs:ambientOcclusion.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOambientOcclusion.outputs:out>
                 float inputs:clearcoat.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOclearcoat.outputs:out>
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOdiffuseColor.outputs:out>
-                int inputs:useSpecularWorkflow = 0
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIObaseColor.outputs:out>
+                float inputs:specular.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_specular_Grayscale.outputs:out>
                 float inputs:roughness.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoatRoughness.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_clearcoatRoughness_OnesComplement.outputs:out>
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a"
@@ -104,20 +101,12 @@ def "MaterialX"
                 color3f outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOocclusion"
+            def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOambientOcclusion"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_AllIO/MultiplyNode_4f37b1c4abe342b3821578ef3daec19a.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
-            }
-
-            def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOspecularColor"
-            {
-                uniform token info:id = "ND_swizzle_vector3_color3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_AllIO/MultiplyNode_4f37b1c4abe342b3821578ef3daec19a.outputs:out>
-                string inputs:channels = "xyz"
-                color3f outputs:out
             }
 
             def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOclearcoat"
@@ -128,12 +117,20 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOdiffuseColor"
+            def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIObaseColor"
             {
                 uniform token info:id = "ND_swizzle_vector3_color3"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_AllIO/MultiplyNode_4f37b1c4abe342b3821578ef3daec19a.outputs:out>
                 string inputs:channels = "xyz"
                 color3f outputs:out
+            }
+
+            def Shader "SR_AllIO_specular_Grayscale"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1 = (0.299, 0.587, 0.114)
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_AllIO/MultiplyNode_4f37b1c4abe342b3821578ef3daec19a.outputs:out>
+                float outputs:out
             }
 
             def Shader "SR_AllIO_roughness_OnesComplement"

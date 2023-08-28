@@ -80,7 +80,7 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return GetSkinnedMeshRendererTrackingData(sMr.GetInstanceID());
         }
 
-        internal static DefaultTrackingData GetTrackingData(Light l)
+        internal static TrackingData<PolySpatialLightTrackingData> GetTrackingData(Light l)
         {
             return GetLightTrackingData(l.GetInstanceID());
         }
@@ -127,12 +127,12 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return MeshRendererTracker.GetTrackingData(iid);
         }
 
-        internal static TrackingData<PolySpatialSkinnedMeshRendererTrackingData>GetSkinnedMeshRendererTrackingData(int iid)
+        internal static TrackingData<PolySpatialSkinnedMeshRendererTrackingData> GetSkinnedMeshRendererTrackingData(int iid)
         {
             return SkinnedMeshRendererTracker.GetTrackingData(iid);
         }
 
-        internal static DefaultTrackingData GetLightTrackingData(int iid)
+        internal static TrackingData<PolySpatialLightTrackingData> GetLightTrackingData(int iid)
         {
             return LightTracker.GetTrackingData(iid);
         }

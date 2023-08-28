@@ -10,7 +10,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.WorldSpaceLightPos0, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.LightPositionPrefix + 0, MtlxDataTypes.Vector4, node,
                 graph, externals, "Direction", MtlxDataTypes.Vector3, "xyz");
         }
     }

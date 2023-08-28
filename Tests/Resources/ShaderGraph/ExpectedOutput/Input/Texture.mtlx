@@ -80,20 +80,17 @@
     <GeometryModification name = "SR_TextureVertex" type = "vertexshader">
         <input name = "modelPositionOffset" type = "vector3" nodename = "SR_TextureVertex_modelPositionOffset_SubtractPosition" />
     </GeometryModification>
-    <UsdPreviewSurface name = "SR_Texture" type = "surfaceshader">
-        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturediffuseColor" />
+    <realitykit_pbr name = "SR_Texture" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor" />
         <input name = "metallic" type = "float" nodename = "WidthNode_806a6e888e464735ba91c5000dcb1175" />
         <input name = "emissiveColor" type = "color3" value = "0,0,0" />
-        <input name = "occlusion" type = "float" value = "1" />
-        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
-        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
         <input name = "roughness" type = "float" nodename = "SR_Texture_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
-        <input name = "ior" type = "float" value = "1.4" />
-    </UsdPreviewSurface>
+    </realitykit_pbr>
     <surfacematerial name = "USD_Texture" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_TextureVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Texture" />
@@ -113,7 +110,7 @@
         <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
         <input name = "channels" type = "string" value = "rgb" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturediffuseColor" type = "color3">
+    <swizzle name = "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor" type = "color3">
         <input name = "in" type = "color4" nodename = "Node_946cc4763c8a43298a3d3ec96ff71183" />
         <input name = "channels" type = "string" value = "rgb" />
     </swizzle>

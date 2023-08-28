@@ -31,12 +31,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             Init();
 
+            var blocks = graphData.GetNodes<BlockNode>();
+
 #if DISABLE_MATERIALX_EXTENSIONS
             var fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
 #else
             // Use the presence of lighting parameter blocks as an indicator of whether the material is lit.
             var fragmentNodeType = MtlxNodeTypes.RealityKitUnlit;
-            var blocks = graphData.GetNodes<BlockNode>();
             foreach (var block in blocks)
             {
                 if (block.descriptor.shaderStage == ShaderStage.Fragment &&
@@ -44,7 +45,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     block.descriptor.name != "Alpha" &&
                     block.descriptor.name != "AlphaClipThreshold")
                 {
-                    fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
+                    fragmentNodeType = MtlxNodeTypes.RealityKitPbr;
                     break;
                 }
             }
@@ -105,23 +106,26 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         Debug.LogWarning($"Unsupported surface type: {surfaceType}");
                         break;
                 }
-                switch (alphaMode)
+                if (isTransparent && fragmentNodeType != MtlxNodeTypes.UsdPreviewSurface)
                 {
-                    case "Alpha":
-                        break;
-                    
-                    case "Premultiply":
-                        fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
-                        break;
+                    switch (alphaMode)
+                    {
+                        case "Alpha":
+                            break;
+                        
+                        case "Premultiply":
+                            fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                            break;
 
-                    case "Additive":
-                        fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
-                        alphaIsAdditive = true;
-                        break;
+                        case "Additive":
+                            fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                            alphaIsAdditive = true;
+                            break;
 
-                    default:
-                        Debug.LogWarning($"Unsupported alpha mode: {alphaMode}");
-                        break;
+                        default:
+                            Debug.LogWarning($"Unsupported alpha mode: {alphaMode}");
+                            break;
+                    }
                 }
             }
 
@@ -143,6 +147,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     ShaderStage.Vertex => vertexNode,
                     _ => throw new NotSupportedException($"Unsupported shader stage {block.descriptor.shaderStage}")
                 };
+                if (shaderNode == null)
+                    continue; // Ignore vertex stage if unsupported.
 
                 var thisSlot    = block.FindInputSlot<MaterialSlot>(0);
                 var srcSlot     = SlotUtils.GetSourceConnectionSlot(thisSlot);
@@ -165,6 +171,20 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         case SpecialRules.EnablesSpecularWorkflow:
                             if (block.owner.GetActiveBlocksForAllActiveTargets().Contains(block.descriptor))
                                 shaderNode.AddPortValue("useSpecularWorkflow", MtlxDataTypes.Integer, new float[] { 1 });
+                            break;
+
+                        // Create a "dotproduct" node to convert to grayscale for RealityKit specular level.
+                        case SpecialRules.SpecularGrayscale:
+                            externalNodeName = $"{shaderNode.name}_{portName}_Grayscale";
+                            externalPortName = "in2";
+                            externalNode = graph.AddNode(
+                                externalNodeName, MtlxNodeTypes.DotProduct, MtlxDataTypes.Float);
+                            
+                            // Convert specular color to grayscale according to the Unity reference conversion:
+                            // https://docs.unity3d.com/ScriptReference/Color-grayscale.html
+                            portType = MtlxDataTypes.Vector3;
+                            externalNode.AddPortValue("in1", portType, new[] { 0.299f, 0.587f, 0.114f });
+                            graph.AddEdge(externalNodeName, shaderNode.name, portName);
                             break;
 
                         // we create a 'subtract' node to perform the one's complement,
@@ -217,30 +237,26 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             ignoreIfNotConnected = true;
                             break;
                         
-                        case SpecialRules.UnlitColor:
+                        case SpecialRules.AdditiveColor:
                             if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
-                            {
-                                if (alphaIsAdditive)
-                                {
-                                    // If alpha is additive, scale the color by what would be the alpha.
-                                    externalNodeName = $"{fragmentNodeName}_{portName}_MultiplyAlpha";
-                                    externalPortName = "in1";
-                                    externalNode = graph.AddNode(
-                                        externalNodeName, MtlxNodeTypes.Multiply, MtlxDataTypes.Color3);
-                                    graph.AddPortAndEdge(
-                                        externalNodeName, fragmentNodeName, "color", MtlxDataTypes.Color3);
+                                externalPortName = portName = "color";
 
-                                    var alphaBlock = blocks.FirstOrDefault(block => block.descriptor.name == "Alpha");
-                                    if (alphaBlock != null)
-                                    {
-                                        QuickNode.AddInputPortAndEdge(
-                                            externals, externalNode, alphaBlock.FindInputSlot<MaterialSlot>(0),
-                                            "in2", MtlxDataTypes.Float);
-                                    }
-                                }
-                                else
+                            if (alphaIsAdditive)
+                            {
+                                // If alpha is additive, scale the color by what would be the alpha.
+                                externalNodeName = $"{fragmentNodeName}_{portName}_MultiplyAlpha";
+                                externalPortName = "in1";
+                                externalNode = graph.AddNode(
+                                    externalNodeName, MtlxNodeTypes.Multiply, MtlxDataTypes.Color3);
+                                graph.AddPortAndEdge(
+                                    externalNodeName, fragmentNodeName, portName, MtlxDataTypes.Color3);
+
+                                var alphaBlock = blocks.FirstOrDefault(block => block.descriptor.name == "Alpha");
+                                if (alphaBlock != null)
                                 {
-                                    externalPortName = "color";
+                                    QuickNode.AddInputPortAndEdge(
+                                        externals, externalNode, alphaBlock.FindInputSlot<MaterialSlot>(0),
+                                        "in2", MtlxDataTypes.Float);
                                 }
                             }
                             break;
@@ -252,7 +268,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                                 srcSlot = null;
                                 ignoreIfNotConnected = true;
                             }
-                            else if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit && alphaIsAdditive)
+                            else if (alphaIsAdditive)
                             {
                                 // If alpha is additive, opacity should be zero (because the
                                 // destination color will be multiplied by (1 - alpha)).
@@ -290,13 +306,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
 
             // We then need to setup Unity defaults to override UsdPreviewSurface defaults for any input not used.
-            var surfaceInputs = (fragmentNodeType == MtlxNodeTypes.UsdPreviewSurface) ?
-                litSurfaceInputs : unlitSurfaceInputs;
+            var surfaceInputs = (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit) ?
+                unlitSurfaceInputs : litSurfaceInputs;
             foreach (var defaultPorts in surfaceInputs.Values)
             {
                 if (!fragmentNode.HasPort(defaultPorts.name))
                 {
-                    fragmentNode.AddPortValue(defaultPorts.name, defaultPorts.datatype, defaultPorts.value);
+                    // As a special case, if alpha clipping is disabled, we need to omit opacityThreshold entirely.
+                    // Including it in any form causes the surface to be treated as opaque, causing a "cut-out"
+                    // effect on visionOS.
+                    if (defaultPorts.name != "opacityThreshold" || alphaClipEnabled)
+                        fragmentNode.AddPortValue(defaultPorts.name, defaultPorts.datatype, defaultPorts.value);
                 }
             }
         }
@@ -333,9 +353,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
             WorldToTangent,
             ObjectToTangent,
             EnablesSpecularWorkflow,
+            SpecularGrayscale,
             SubtractPosition,
             VertexStage,
-            UnlitColor,
+            AdditiveColor,
             AdditiveAlpha,
             EnableAlphaClip,
         }
@@ -364,11 +385,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
             rulesMap.Add("UserAttribute", SpecialRules.VertexStage);
             typeMap.Add("UserAttribute", MtlxDataTypes.Vector4);
 
+#if DISABLE_MATERIALX_EXTENSIONS
             blockMap.Add("BaseColor", "diffuseColor");
-            rulesMap.Add("BaseColor", SpecialRules.UnlitColor);
-            blockMap.Add("Emission", "emissiveColor");
             blockMap.Add("Specular", "specularColor");
             rulesMap.Add("Specular", SpecialRules.EnablesSpecularWorkflow);
+            blockMap.Add("Occlusion", "occlusion");
+            blockMap.Add("IOR", "ior");
+            blockMap.Add("RefractionIndex", "ior");
+            blockMap.Add("TessellationDisplacement", "displacement");
+#else
+            blockMap.Add("BaseColor", "baseColor");
+            blockMap.Add("Specular", "specular");
+            rulesMap.Add("Specular", SpecialRules.SpecularGrayscale);
+            blockMap.Add("Occlusion", "ambientOcclusion");
+
+#endif
+            rulesMap.Add("BaseColor", SpecialRules.AdditiveColor);
+            blockMap.Add("Emission", "emissiveColor");
             blockMap.Add("Metallic", "metallic");
             blockMap.Add("NormalTS", "normal");
             rulesMap.Add("NormalTS", SpecialRules.DefaultIsTangent);
@@ -378,7 +411,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             rulesMap.Add("NormalOS", SpecialRules.ObjectToTangent);
             blockMap.Add("Smoothness", "roughness");
             rulesMap.Add("Smoothness", SpecialRules.OnesComplement);
-            blockMap.Add("Occlusion", "occlusion");
+            
             blockMap.Add("Alpha", "opacity");
             rulesMap.Add("Alpha", SpecialRules.AdditiveAlpha);
             blockMap.Add("AlphaClipThreshold", "opacityThreshold");
@@ -386,26 +419,29 @@ namespace UnityEditor.ShaderGraph.MaterialX
             blockMap.Add("CoatMask", "clearcoat");
             blockMap.Add("CoatSmoothness", "clearcoatRoughness");
             rulesMap.Add("CoatSmoothness", SpecialRules.OnesComplement);
-            blockMap.Add("IOR", "ior");
-            blockMap.Add("RefractionIndex", "ior");
-            blockMap.Add("TessellationDisplacement", "displacement");
         }
 
         private static void InitSurfaceDescription()
         {
+#if DISABLE_MATERIALX_EXTENSIONS
             SetupLitInput("diffuseColor",         MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
-            SetupLitInput("emissiveColor",        MtlxDataTypes.Color3,   new float[] { 0, 0, 0 });
-            SetupLitInput("useSpecularWorkflow",  MtlxDataTypes.Integer,  new float[] { 0 });
             SetupLitInput("specularColor",        MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
+            SetupLitInput("useSpecularWorkflow",  MtlxDataTypes.Integer,  new float[] { 0 });
+            SetupLitInput("ior",                  MtlxDataTypes.Float,    new float[] { 1.4f });
+            SetupLitInput("occlusion",            MtlxDataTypes.Float,    new float[] { 1 });
+#else
+            SetupLitInput("baseColor",            MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
+            SetupLitInput("specular",             MtlxDataTypes.Float,    new float[] { .5f });
+            SetupLitInput("ambientOcclusion",     MtlxDataTypes.Float,    new float[] { 1 });
+#endif
+            SetupLitInput("emissiveColor",        MtlxDataTypes.Color3,   new float[] { 0, 0, 0 });
             SetupLitInput("metallic",             MtlxDataTypes.Float,    new float[] { 0 });
             SetupLitInput("roughness",            MtlxDataTypes.Float,    new float[] { 0.5f });
             SetupLitInput("clearcoat",            MtlxDataTypes.Float,    new float[] { 0 });
             SetupLitInput("clearcoatRoughness",   MtlxDataTypes.Float,    new float[] { 0.01f });
             SetupLitInput("opacity",              MtlxDataTypes.Float,    new float[] { 1 });
             SetupLitInput("opacityThreshold",     MtlxDataTypes.Float,    new float[] { 0 });
-            SetupLitInput("ior",                  MtlxDataTypes.Float,    new float[] { 1.4f });
-            SetupLitInput("occlusion",            MtlxDataTypes.Float,    new float[] { 1 });
-
+            
             SetupUnlitInput("color",              MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
             SetupUnlitInput("opacity",            MtlxDataTypes.Float,    new float[] { 1 });
             SetupUnlitInput("opacityThreshold",   MtlxDataTypes.Float,    new float[] { 0 });

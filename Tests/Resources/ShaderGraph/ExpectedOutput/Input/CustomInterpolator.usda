@@ -13,25 +13,22 @@ def "MaterialX"
             asset inputs:_SampleTexture2D_dde48ea7f0274d75aa3672cfec65d3b7_Texture_1_Texture2D = @placeholder.png@ (colorSpace = "srgb_texture")
             asset inputs:_SampleTexture2D_f702726f6d1743cf8a7973bf7d3a1068_Texture_1_Texture2D = @placeholder.png@ (colorSpace = "srgb_texture")
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_CustomInterpolator/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_CustomInterpolator/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_CustomInterpolator/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_CustomInterpolator/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_CustomInterpolator/CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatordiffuseColor.outputs:out>
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_CustomInterpolator/CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatorbaseColor.outputs:out>
                 float inputs:metallic = 0
                 color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_CustomInterpolator/CastSwizzleFromMultiplyNode_c1a681f3e8774968a7aa10acf90d0039ToSR_CustomInterpolatoremissiveColor.outputs:out>
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_CustomInterpolator/SR_CustomInterpolator_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
@@ -41,10 +38,10 @@ def "MaterialX"
                 float2 inputs:uv0.connect = </MaterialX/Materials/USD_CustomInterpolator/CastSwizzleFromMultiplyNode_0ff6b46f94424fdcb902d63c99274507ToSR_CustomInterpolatorVertexuv0.outputs:out>
                 float2 inputs:uv1.connect = </MaterialX/Materials/USD_CustomInterpolator/CastSwizzleFromMultiplyNode_73254b2b29094a33822099b0bbb6f1d0ToSR_CustomInterpolatorVertexuv1.outputs:out>
                 float4 inputs:userAttribute.connect = </MaterialX/Materials/USD_CustomInterpolator/CastConvertFinalFromNormalNode_4c677514806c485f8106000b231fd71dToSR_CustomInterpolatorVertexuserAttribute.outputs:out>
-                token outputs:vertex
+                token outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatordiffuseColor"
+            def Shader "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatorbaseColor"
             {
                 uniform token info:id = "ND_swizzle_vector4_color3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_CustomInterpolator/MultiplyNode_3222954943754dd585433ad4a86393d5.outputs:out>

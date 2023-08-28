@@ -82,6 +82,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case Vector2ShaderProperty v2: return new float[2] { v2.value.x, v2.value.y };
                 case Vector3ShaderProperty v3: return new float[3] { v3.value.x, v3.value.y, v3.value.z };
                 case Vector4ShaderProperty vd: return new float[4] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
+                case Matrix2ShaderProperty m2:
+                    return new float[4]
+                    {
+                        m2.value.m00, m2.value.m01,
+                        m2.value.m10, m2.value.m11,
+                    };
                 case Matrix3ShaderProperty m3:
                     return new float[9]
                     {

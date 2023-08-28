@@ -1,0 +1,35 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <absval name = "InvertColors_OutNode_5237ae5963fa42938c49854cd99f24de" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "InvertColors_Out_inNode_5237ae5963fa42938c49854cd99f24de" />
+    </absval>
+    <subtract name = "InvertColors_Out_inNode_5237ae5963fa42938c49854cd99f24de" type = "vector4">
+        <input name = "in1" type = "vector4" value = "1,1,1,0" />
+        <input name = "in2" type = "vector4" nodename = "InvertColors_InNode_5237ae5963fa42938c49854cd99f24de" />
+    </subtract>
+    <dot name = "InvertColors_InNode_5237ae5963fa42938c49854cd99f24de" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "CastSwizzleFromColorNode_57fe4d80a31b47a9b6c2d6e5656f9121ToInvertColors_InNode_5237ae5963fa42938c49854cd99f24dein" />
+    </dot>
+    <constant name = "ColorNode_57fe4d80a31b47a9b6c2d6e5656f9121" type = "color4">
+        <input name = "value" type = "color4" value = "0,1,1,1" />
+    </constant>
+    <GeometryModification name = "SR_AdjustmentVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_Adjustment" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromInvertColors_OutNode_5237ae5963fa42938c49854cd99f24deToSR_Adjustmentcolor" />
+        <input name = "opacity" type = "float" value = "1" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Adjustment" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_AdjustmentVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Adjustment" />
+    </surfacematerial>
+    <swizzle name = "CastSwizzleFromColorNode_57fe4d80a31b47a9b6c2d6e5656f9121ToInvertColors_InNode_5237ae5963fa42938c49854cd99f24dein" type = "vector4">
+        <input name = "in" type = "color4" nodename = "ColorNode_57fe4d80a31b47a9b6c2d6e5656f9121" />
+        <input name = "channels" type = "string" value = "rgba" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromInvertColors_OutNode_5237ae5963fa42938c49854cd99f24deToSR_Adjustmentcolor" type = "color3">
+        <input name = "in" type = "vector4" nodename = "InvertColors_OutNode_5237ae5963fa42938c49854cd99f24de" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

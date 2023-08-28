@@ -47,9 +47,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             @"",
         };
 
-        static readonly string surfaceShaderOutput = @"token outputs:surface";
+        static readonly string surfaceShaderOutput = @"token outputs:out";
 
-        static readonly string vertexShaderOutput = @"token outputs:vertex";
+        static readonly string vertexShaderOutput = @"token outputs:out";
 
         // RAII solution for creating and closing nested USD scopes
         struct UsdScope : IDisposable
@@ -145,13 +145,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             // Connect shader output to material output
             AppendIndentedLine(
-                @$"token outputs:mtlx:surface.connect = </MaterialX/Materials/{materialNode.name}/{surfaceShaderNode.nodetype}.outputs:surface>",
+                @$"token outputs:mtlx:surface.connect = </MaterialX/Materials/{materialNode.name}/{surfaceShaderNode.nodetype}.outputs:out>",
                 materialScope.ChildIndentLevel);
 
             if (vertexShaderNode != null)
             {
                 AppendIndentedLine(
-                    @$"token outputs:realitykit:vertex.connect = </MaterialX/Materials/{materialNode.name}/GeometryModifier.outputs:vertex>",
+                    @$"token outputs:realitykit:vertex.connect = </MaterialX/Materials/{materialNode.name}/GeometryModifier.outputs:out>",
                     materialScope.ChildIndentLevel);
             }
             m_StringBuilder.AppendLine("");

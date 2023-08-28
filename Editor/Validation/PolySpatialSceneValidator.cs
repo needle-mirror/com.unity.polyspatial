@@ -6,7 +6,7 @@ using Unity.XR.CoreUtils;
 using Unity.XR.CoreUtils.Capabilities;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using UnityEditor.PolySpatial.Capabilities;
+using Unity.PolySpatial.Capabilities;
 using UnityEditor.PolySpatial.Internals;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
@@ -87,7 +87,7 @@ namespace UnityEditor.PolySpatial.Validation
         // The tracked types registered by this class in PolySpatialObjectAuthoringTracker, used to avoid registering callbacks
         // twice and to avoid collision errors with other classes registering the same type in PolySpatialObjectAuthoringTracker
         static readonly HashSet<Type> s_TrackedTypes = new();
-        internal static event Action onValidateRules;
+        internal static event Action OnValidateRules;
 
         static string s_CachedCapabilityProfileNames;
 
@@ -95,22 +95,23 @@ namespace UnityEditor.PolySpatial.Validation
 
         static string GetPolySpatialCapabilityProfileNames()
         {
-            var s_CapabilityProfiles = new List<CapabilityProfile>();
+            var capabilityProfiles = new List<CapabilityProfile>();
             foreach (var assetGuid in AssetDatabase.FindAssets("t:CapabilityProfile"))
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
                 var capabilityProfile = AssetDatabase.LoadAssetAtPath<CapabilityProfile>(assetPath);
                 if (capabilityProfile != null && capabilityProfile is PolySpatialCapabilityProfile)
-                    s_CapabilityProfiles.Add(capabilityProfile);
+                    capabilityProfiles.Add(capabilityProfile);
             }
-            s_CapabilityProfiles.Sort((a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
+            capabilityProfiles.Sort((a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
 
-            return string.Join(", ", s_CapabilityProfiles.Select(c => c.name));
+            return string.Join(", ", capabilityProfiles.Select(c => c.name));
         }
 
         static PolySpatialSceneValidator()
         {
-            Initialize();
+            // Delay the initialization to allow AssetDatabase.FindAssets to work properly in a clean checkout (LXR-2335)
+            EditorApplication.delayCall += Initialize;
         }
 
         static void Initialize()
@@ -505,7 +506,7 @@ namespace UnityEditor.PolySpatial.Validation
             if (repaintHierarchy)
                 EditorApplication.RepaintHierarchyWindow();
 
-            onValidateRules?.Invoke();
+            OnValidateRules?.Invoke();
         }
 
         static void CacheObjectFailures()

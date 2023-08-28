@@ -11,34 +11,31 @@ def "MaterialX"
         def Material "USD_Vector"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Vector/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Vector/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Vector/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Vector/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Vector/CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor.outputs:out>
-                float inputs:metallic = 0
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Vector/CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectorbaseColor.outputs:out>
+                float inputs:metallic.connect = </MaterialX/Materials/USD_Vector/SphereMask_OutNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
                 color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Vector/SR_Vector_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
-            def Shader "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectordiffuseColor"
+            def Shader "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectorbaseColor"
             {
                 uniform token info:id = "ND_swizzle_float_color3"
                 float inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238.outputs:out>
@@ -130,6 +127,88 @@ def "MaterialX"
                 float3 outputs:out
             }
 
+            def Shader "SphereMask_OutNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2Node_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2Node_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_inNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2_inNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in1Node_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in2Node_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2_in_in2Node_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_HardnessNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_HardnessNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.8
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2_in_in1Node_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_RadiusNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_RadiusNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.1
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.5
+                float outputs:out
+            }
+
+            def Shader "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
+                float outputs:out
+            }
+
             def Shader "SR_Vector_roughness_OnesComplement"
             {
                 uniform token info:id = "ND_subtract_float"
@@ -191,7 +270,21 @@ def "MaterialX"
             def Shader "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238"
             {
                 uniform token info:id = "ND_dot_vector3"
-                float3 inputs:in = (0, 0, 0)
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238Flip.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238Flip"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238Geom.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
+            }
+
+            def Shader "FresnelEffect_ViewDirNode_752d003d78d94e6cb3a31fbf94058238Geom"
+            {
+                uniform token info:id = "ND_realitykit_viewdirection_vector3"
                 float3 outputs:out
             }
 

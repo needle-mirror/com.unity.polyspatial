@@ -11,8 +11,8 @@ def "MaterialX"
         def Material "USD_Linear"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Linear/realitykit_unlit.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Linear/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Linear/realitykit_unlit.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Linear/GeometryModifier.outputs:out>
 
             def Shader "realitykit_unlit"
             {
@@ -20,14 +20,13 @@ def "MaterialX"
                 bool inputs:applyPostProcessToneMap = 0
                 color3f inputs:color.connect = </MaterialX/Materials/USD_Linear/CastSwizzleFromCombineNode_a72c99b6da4149f586dbba8a5b2c5130ToSR_Linearcolor.outputs:out>
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "CastSwizzleFromCombineNode_a72c99b6da4149f586dbba8a5b2c5130ToSR_Linearcolor"

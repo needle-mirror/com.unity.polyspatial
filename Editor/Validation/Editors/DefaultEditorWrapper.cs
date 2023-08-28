@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils.Capabilities.Editor;
-using UnityEditor.PolySpatial.Capabilities;
+using Unity.PolySpatial.Capabilities;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
 

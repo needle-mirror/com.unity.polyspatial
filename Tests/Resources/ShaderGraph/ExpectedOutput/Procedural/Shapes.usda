@@ -11,8 +11,8 @@ def "MaterialX"
         def Material "USD_Shapes"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Shapes/realitykit_unlit.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Shapes/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Shapes/realitykit_unlit.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Shapes/GeometryModifier.outputs:out>
 
             def Shader "realitykit_unlit"
             {
@@ -20,14 +20,13 @@ def "MaterialX"
                 bool inputs:applyPostProcessToneMap = 0
                 color3f inputs:color.connect = </MaterialX/Materials/USD_Shapes/CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor.outputs:out>
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor"
@@ -42,6 +41,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_splitlr_float"
                 float inputs:valuel = 1
+                float inputs:valuer = 0
                 float inputs:center = 1
                 float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoordNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
                 float outputs:out
@@ -50,34 +50,35 @@ def "MaterialX"
             def Shader "Ellipse_Out_texcoordNode_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_combine2_vector2"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoord_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_dNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float inputs:in2 = 0
                 float2 outputs:out
             }
 
-            def Shader "Ellipse_Out_texcoord_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c"
+            def Shader "Ellipse_dNode_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_magnitude_vector2"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoord_in1_inNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Shapes/Ellipse_d_inNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
                 float outputs:out
             }
 
-            def Shader "Ellipse_Out_texcoord_in1_inNode_11b8ca005bdf4cc89a2d1e431df2f68c"
+            def Shader "Ellipse_d_inNode_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_divide_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoord_in1_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoord_in1_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_d_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Shapes/Ellipse_d_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "Ellipse_Out_texcoord_in1_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c"
+            def Shader "Ellipse_d_in_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_subtract_vector2FA"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_Out_texcoord_in1_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_d_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
                 float inputs:in2 = 1
                 float2 outputs:out
             }
 
-            def Shader "Ellipse_Out_texcoord_in1_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c"
+            def Shader "Ellipse_d_in_in1_in1Node_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_multiply_vector2FA"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_UVNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>
@@ -115,7 +116,7 @@ def "MaterialX"
                 float2 outputs:out
             }
 
-            def Shader "Ellipse_Out_texcoord_in1_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c"
+            def Shader "Ellipse_d_in_in2Node_11b8ca005bdf4cc89a2d1e431df2f68c"
             {
                 uniform token info:id = "ND_combine2_vector2"
                 float inputs:in1.connect = </MaterialX/Materials/USD_Shapes/Ellipse_WidthNode_11b8ca005bdf4cc89a2d1e431df2f68c.outputs:out>

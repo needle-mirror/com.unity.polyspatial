@@ -101,7 +101,6 @@
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_812e8fb079a44cd2aa80182fdb61e3a9ToSR_ReconstructZcolor" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
     </realitykit_unlit>
     <surfacematerial name = "USD_ReconstructZ" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_ReconstructZVertex" />

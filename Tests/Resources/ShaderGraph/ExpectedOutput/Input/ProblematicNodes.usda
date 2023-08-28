@@ -10,10 +10,8 @@ def "MaterialX"
     {
         def Material "USD_ProblematicNodes"
         {
-            float3 inputs:_WorldSpaceCameraPos = (0, 0, 0)
-            float3 inputs:_WorldSpaceCameraDir = (0, 0, 0)
+            float4 inputs:polySpatial_LightPosition0 = (0, 0, 0, 0)
             float4 inputs:unity_OrthoParams = (0, 0, 0, 0)
-            float4 inputs:_WorldSpaceLightPos0 = (0, 0, 0, 0)
             float4 inputs:_ProjectionParams = (0, 0, 0, 0)
             float3 inputs:ObjectPosition = (0, 0, 0)
             float3 inputs:ObjectScale = (0, 0, 0)
@@ -26,8 +24,8 @@ def "MaterialX"
             float4 inputs:_SinTime = (0, 0, 0, 0)
             float4 inputs:unity_DeltaTime = (0, 0, 0, 0)
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_ProblematicNodes/realitykit_unlit.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_ProblematicNodes/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_ProblematicNodes/realitykit_unlit.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_ProblematicNodes/GeometryModifier.outputs:out>
 
             def Shader "realitykit_unlit"
             {
@@ -35,17 +33,16 @@ def "MaterialX"
                 bool inputs:applyPostProcessToneMap = 0
                 color3f inputs:color.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromDitherNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor.outputs:out>
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                float3 inputs:normal.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromBlendNode_0406d4b89a8949d5bd68644cb77af2b3ToSR_ProblematicNodesVertexnormal.outputs:out>
+                float3 inputs:normal.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_OutNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
                 float3 inputs:modelPositionOffset.connect = </MaterialX/Materials/USD_ProblematicNodes/SR_ProblematicNodesVertex_modelPositionOffset_SubtractPosition.outputs:out>
                 float3 inputs:bitangent.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromunity_DeltaTimezNode_c5cb396b8fdf49e28bf229266cabd530ToSR_ProblematicNodesVertexbitangent.outputs:out>
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "CastSwizzleFromDitherNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor"
@@ -72,29 +69,43 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "CastSwizzleFromBlendNode_0406d4b89a8949d5bd68644cb77af2b3ToSR_ProblematicNodesVertexnormal"
+            def Shader "Blend_OutNode_0406d4b89a8949d5bd68644cb77af2b3"
             {
-                uniform token info:id = "ND_swizzle_color3_vector3"
-                color3f inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/BlendNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_mix_vector3"
+                float3 inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BaseNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
+                float3 inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_Out_fgNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
+                float inputs:mix.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_OpacityNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "BlendNode_0406d4b89a8949d5bd68644cb77af2b3"
+            def Shader "Blend_Out_fgNode_0406d4b89a8949d5bd68644cb77af2b3"
             {
-                uniform token info:id = "ND_difference_color3"
-                color3f inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromCombineNode_fca738e426504445b748e7f704d8a65fToBlendNode_0406d4b89a8949d5bd68644cb77af2b3bg.outputs:out>
-                color3f inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromMultiplyNode_c7d009e1ece54b839399345528b5e226ToBlendNode_0406d4b89a8949d5bd68644cb77af2b3fg.outputs:out>
-                float inputs:mix = 1
-                color3f outputs:out
+                uniform token info:id = "ND_absval_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_Out_fg_inNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
+                float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_c7d009e1ece54b839399345528b5e226ToBlendNode_0406d4b89a8949d5bd68644cb77af2b3fg"
+            def Shader "Blend_Out_fg_inNode_0406d4b89a8949d5bd68644cb77af2b3"
             {
-                uniform token info:id = "ND_swizzle_vector4_color3"
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BlendNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BaseNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Blend_BlendNode_0406d4b89a8949d5bd68644cb77af2b3"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromMultiplyNode_c7d009e1ece54b839399345528b5e226ToBlend_BlendNode_0406d4b89a8949d5bd68644cb77af2b3in.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "CastSwizzleFromMultiplyNode_c7d009e1ece54b839399345528b5e226ToBlend_BlendNode_0406d4b89a8949d5bd68644cb77af2b3in"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/MultiplyNode_c7d009e1ece54b839399345528b5e226.outputs:out>
                 string inputs:channels = "xyz"
-                color3f outputs:out
+                float3 outputs:out
             }
 
             def Shader "MultiplyNode_c7d009e1ece54b839399345528b5e226"
@@ -126,12 +137,19 @@ def "MaterialX"
                 matrix4d outputs:worldToView
             }
 
-            def Shader "CastSwizzleFromCombineNode_fca738e426504445b748e7f704d8a65fToBlendNode_0406d4b89a8949d5bd68644cb77af2b3bg"
+            def Shader "Blend_BaseNode_0406d4b89a8949d5bd68644cb77af2b3"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromCombineNode_fca738e426504445b748e7f704d8a65fToBlend_BaseNode_0406d4b89a8949d5bd68644cb77af2b3in.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "CastSwizzleFromCombineNode_fca738e426504445b748e7f704d8a65fToBlend_BaseNode_0406d4b89a8949d5bd68644cb77af2b3in"
+            {
+                uniform token info:id = "ND_swizzle_color4_vector3"
                 color4f inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/CombineNode_fca738e426504445b748e7f704d8a65f.outputs:out>
                 string inputs:channels = "rgb"
-                color3f outputs:out
+                float3 outputs:out
             }
 
             def Shader "CombineNode_fca738e426504445b748e7f704d8a65f"
@@ -158,7 +176,7 @@ def "MaterialX"
                 float inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromObjectBoundsMinToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain1.outputs:out>
                 float inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromObjectBoundsMaxToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain2.outputs:out>
                 float inputs:in3.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromObjectBoundsSizeToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain3.outputs:out>
-                float inputs:in4.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFrom_WorldSpaceLightPos0xyzNode_a989449d760b4cb59946ab664401b169ToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain4.outputs:out>
+                float inputs:in4.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFrompolySpatial_LightPosition0xyzNode_a989449d760b4cb59946ab664401b169ToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain4.outputs:out>
                 color4f outputs:out
             }
 
@@ -208,15 +226,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_subtract_vector3"
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/SR_ProblematicNodesVertex_modelPositionOffset_Position.outputs:out>
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromBlendNode_0406d4b89a8949d5bd68644cb77af2b3ToSR_ProblematicNodesVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "CastSwizzleFromBlendNode_0406d4b89a8949d5bd68644cb77af2b3ToSR_ProblematicNodesVertex_modelPositionOffset_SubtractPositionin1"
-            {
-                uniform token info:id = "ND_swizzle_color3_vector3"
-                color3f inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/BlendNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
-                string inputs:channels = "rgb"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_OutNode_0406d4b89a8949d5bd68644cb77af2b3.outputs:out>
                 float3 outputs:out
             }
 
@@ -513,6 +523,13 @@ def "MaterialX"
                 float outputs:out
             }
 
+            def Shader "Blend_OpacityNode_0406d4b89a8949d5bd68644cb77af2b3"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 1
+                float outputs:out
+            }
+
             def Shader "CastConvertFinalFromNode_e4e8032223904ec7b132675ede25586bToMultiplyNode_c7d009e1ece54b839399345528b5e226in"
             {
                 uniform token info:id = "ND_combine4_vector4"
@@ -558,119 +575,104 @@ def "MaterialX"
             def Shader "LerpNode_092962c86b2c4d4b90f1c0f9d66843bd"
             {
                 uniform token info:id = "ND_mix_vector3"
-                float3 inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromBlendNode_aa117239363c4497b2e98c714aa4ecb5ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdbg.outputs:out>
-                float3 inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirTransformNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
-                float inputs:mix.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromViewDirTransformNode_bb05909988544b62a58276ff2251f9f3ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdmix.outputs:out>
+                float3 inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromBlend_OutNode_aa117239363c4497b2e98c714aa4ecb5ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdbg.outputs:out>
+                float3 inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirection_OutNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
+                float inputs:mix.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromViewDirection_OutNode_bb05909988544b62a58276ff2251f9f3ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdmix.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromViewDirTransformNode_bb05909988544b62a58276ff2251f9f3ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdmix"
+            def Shader "CastSwizzleFromViewDirection_OutNode_bb05909988544b62a58276ff2251f9f3ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdmix"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirTransformNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirection_OutNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
-            def Shader "ViewDirTransformNode_bb05909988544b62a58276ff2251f9f3"
+            def Shader "ViewDirection_OutNode_bb05909988544b62a58276ff2251f9f3"
             {
-                uniform token info:id = "ND_transformnormal_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirIsOrthoNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
-                string inputs:fromspace = "world"
-                string inputs:tospace = "object"
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirection_Out_in1Node_bb05909988544b62a58276ff2251f9f3.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
                 float3 outputs:out
             }
 
-            def Shader "ViewDirIsOrthoNode_bb05909988544b62a58276ff2251f9f3"
+            def Shader "ViewDirection_Out_in1Node_bb05909988544b62a58276ff2251f9f3"
             {
-                uniform token info:id = "ND_ifequal_vector3"
-                float inputs:value1.connect = </MaterialX/Materials/USD_ProblematicNodes/IsOrthoNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
-                float inputs:value2 = 0
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirPerspectiveNormalNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirOrthoNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
+                uniform token info:id = "ND_realitykit_viewdirection_vector3"
+                string inputs:space = "object"
                 float3 outputs:out
             }
 
-            def Shader "IsOrthoNode_bb05909988544b62a58276ff2251f9f3"
+            def Shader "ViewDirection_OutNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
             {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                string inputs:channels = "w"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:unity_OrthoParams>
-                float outputs:out
-            }
-
-            def Shader "ViewDirTransformNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
-            {
-                uniform token info:id = "ND_transformnormal_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirIsOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
-                string inputs:fromspace = "world"
-                string inputs:tospace = "tangent"
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirection_Out_in1Node_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
                 float3 outputs:out
             }
 
-            def Shader "ViewDirIsOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
+            def Shader "ViewDirection_Out_in1Node_0b37ebfdb0374ffd859c8af1c4e5b7af"
             {
-                uniform token info:id = "ND_ifequal_vector3"
-                float inputs:value1.connect = </MaterialX/Materials/USD_ProblematicNodes/IsOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
-                float inputs:value2 = 0
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirPerspectiveNormalNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
+                uniform token info:id = "ND_realitykit_viewdirection_vector3"
+                string inputs:space = "tangent"
                 float3 outputs:out
             }
 
-            def Shader "ViewDirPerspectiveNormalNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
+            def Shader "CastSwizzleFromBlend_OutNode_aa117239363c4497b2e98c714aa4ecb5ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdbg"
             {
-                uniform token info:id = "ND_normalize_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirPerspectiveDiffNode_0b37ebfdb0374ffd859c8af1c4e5b7af.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "ViewDirPerspectiveDiffNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
-            {
-                uniform token info:id = "ND_subtract_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:_WorldSpaceCameraPos>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirectionWorldPositionInput.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "ViewDirectionWorldPositionInput"
-            {
-                uniform token info:id = "ND_position_vector3"
-                string inputs:space = "world"
-                float3 outputs:out
-            }
-
-            def Shader "IsOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                string inputs:channels = "w"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:unity_OrthoParams>
-                float outputs:out
-            }
-
-            def Shader "CastSwizzleFromBlendNode_aa117239363c4497b2e98c714aa4ecb5ToLerpNode_092962c86b2c4d4b90f1c0f9d66843bdbg"
-            {
-                uniform token info:id = "ND_swizzle_color3_vector3"
-                color3f inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/BlendNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
-                string inputs:channels = "rgb"
-                float3 outputs:out
-            }
-
-            def Shader "BlendNode_aa117239363c4497b2e98c714aa4ecb5"
-            {
-                uniform token info:id = "ND_dodge_color3"
-                color3f inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromMultiplyNode_d603d1ea1ce34585927afd231cb995d1ToBlendNode_aa117239363c4497b2e98c714aa4ecb5bg.outputs:out>
-                color3f inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromLerpNode_a928c634e2cb4b6f8c340ee500afafa8ToBlendNode_aa117239363c4497b2e98c714aa4ecb5fg.outputs:out>
-                float inputs:mix = 0.5
-                color3f outputs:out
-            }
-
-            def Shader "CastSwizzleFromLerpNode_a928c634e2cb4b6f8c340ee500afafa8ToBlendNode_aa117239363c4497b2e98c714aa4ecb5fg"
-            {
-                uniform token info:id = "ND_swizzle_vector4_color3"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/LerpNode_a928c634e2cb4b6f8c340ee500afafa8.outputs:out>
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_OutNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
                 string inputs:channels = "xyz"
-                color3f outputs:out
+                float3 outputs:out
+            }
+
+            def Shader "Blend_OutNode_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_mix_vector4"
+                float4 inputs:bg.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BaseNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_Out_fgNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float inputs:mix.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_OpacityNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Blend_OpacityNode_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0.5
+                float outputs:out
+            }
+
+            def Shader "Blend_Out_fgNode_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_divide_vector4"
+                float4 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BaseNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_Out_fg_in2Node_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Blend_Out_fg_in2Node_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_subtract_vector4"
+                float4 inputs:in1 = (1, 1, 1, 1)
+                float4 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_Out_fg_in2_in2Node_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Blend_Out_fg_in2_in2Node_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_clamp_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/Blend_BlendNode_aa117239363c4497b2e98c714aa4ecb5.outputs:out>
+                float4 inputs:low = (1E-06, 1E-06, 1E-06, 1E-06)
+                float4 inputs:high = (0.999999, 0.999999, 0.999999, 0.999999)
+                float4 outputs:out
+            }
+
+            def Shader "Blend_BlendNode_aa117239363c4497b2e98c714aa4ecb5"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/LerpNode_a928c634e2cb4b6f8c340ee500afafa8.outputs:out>
+                float4 outputs:out
             }
 
             def Shader "LerpNode_a928c634e2cb4b6f8c340ee500afafa8"
@@ -680,6 +682,20 @@ def "MaterialX"
                 float4 inputs:fg.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPositionNode_79eff7183be54c2ea03e8d6cbcc5bf24.outputs:screenPosition>
                 float inputs:mix.connect = </MaterialX/Materials/USD_ProblematicNodes/CastSwizzleFromScreenPositionNode_91b9beb4e5224f6090554fe88b69846eToLerpNode_a928c634e2cb4b6f8c340ee500afafa8mix.outputs:out>
                 float4 outputs:out
+            }
+
+            def Shader "CastSwizzleFromScreenPositionNode_91b9beb4e5224f6090554fe88b69846eToLerpNode_a928c634e2cb4b6f8c340ee500afafa8mix"
+            {
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPositionNode_91b9beb4e5224f6090554fe88b69846e.outputs:screenPosition>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "ScreenPositionNode_91b9beb4e5224f6090554fe88b69846e"
+            {
+                uniform token info:id = "ND_realitykit_surface_screen_position"
+                float4 outputs:screenPosition
             }
 
             def Shader "ScreenPositionNode_79eff7183be54c2ea03e8d6cbcc5bf24"
@@ -694,12 +710,11 @@ def "MaterialX"
                 float4 outputs:screenPosition
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_d603d1ea1ce34585927afd231cb995d1ToBlendNode_aa117239363c4497b2e98c714aa4ecb5bg"
+            def Shader "Blend_BaseNode_aa117239363c4497b2e98c714aa4ecb5"
             {
-                uniform token info:id = "ND_swizzle_vector4_color3"
+                uniform token info:id = "ND_dot_vector4"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/MultiplyNode_d603d1ea1ce34585927afd231cb995d1.outputs:out>
-                string inputs:channels = "xyz"
-                color3f outputs:out
+                float4 outputs:out
             }
 
             def Shader "MultiplyNode_d603d1ea1ce34585927afd231cb995d1"
@@ -886,19 +901,19 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "CastSwizzleFrom_WorldSpaceLightPos0xyzNode_a989449d760b4cb59946ab664401b169ToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain4"
+            def Shader "CastSwizzleFrompolySpatial_LightPosition0xyzNode_a989449d760b4cb59946ab664401b169ToCombineNode_54ac247ef5ca47eeab6b84b46c926a3ain4"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/_WorldSpaceLightPos0xyzNode_a989449d760b4cb59946ab664401b169.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/polySpatial_LightPosition0xyzNode_a989449d760b4cb59946ab664401b169.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
-            def Shader "_WorldSpaceLightPos0xyzNode_a989449d760b4cb59946ab664401b169"
+            def Shader "polySpatial_LightPosition0xyzNode_a989449d760b4cb59946ab664401b169"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
                 string inputs:channels = "xyz"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:_WorldSpaceLightPos0>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:polySpatial_LightPosition0>
                 float3 outputs:out
             }
 
@@ -934,51 +949,6 @@ def "MaterialX"
                 matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:UNITY_MATRIX_V>
                 matrix4d inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:UNITY_MATRIX_P>
                 matrix4d outputs:out
-            }
-
-            def Shader "ViewDirPerspectiveNormalNode_bb05909988544b62a58276ff2251f9f3"
-            {
-                uniform token info:id = "ND_normalize_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirPerspectiveDiffNode_bb05909988544b62a58276ff2251f9f3.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "ViewDirPerspectiveDiffNode_bb05909988544b62a58276ff2251f9f3"
-            {
-                uniform token info:id = "ND_subtract_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:_WorldSpaceCameraPos>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/ViewDirectionWorldPositionInput.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "ViewDirOrthoNode_bb05909988544b62a58276ff2251f9f3"
-            {
-                uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1 = (-1, -1, -1)
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:_WorldSpaceCameraDir>
-                float3 outputs:out
-            }
-
-            def Shader "ViewDirOrthoNode_0b37ebfdb0374ffd859c8af1c4e5b7af"
-            {
-                uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1 = (-1, -1, -1)
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes.inputs:_WorldSpaceCameraDir>
-                float3 outputs:out
-            }
-
-            def Shader "CastSwizzleFromScreenPositionNode_91b9beb4e5224f6090554fe88b69846eToLerpNode_a928c634e2cb4b6f8c340ee500afafa8mix"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPositionNode_91b9beb4e5224f6090554fe88b69846e.outputs:screenPosition>
-                string inputs:channels = "x"
-                float outputs:out
-            }
-
-            def Shader "ScreenPositionNode_91b9beb4e5224f6090554fe88b69846e"
-            {
-                uniform token info:id = "ND_realitykit_surface_screen_position"
-                float4 outputs:screenPosition
             }
         }
     }

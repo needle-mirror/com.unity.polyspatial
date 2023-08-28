@@ -3,7 +3,7 @@ using System.Linq;
 using Unity.PolySpatial;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using UnityEditor.PolySpatial.Capabilities;
+using Unity.PolySpatial.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation
@@ -11,9 +11,15 @@ namespace UnityEditor.PolySpatial.Validation
     /// <summary>
     /// Class that creates validation rules for the PolySpatial project.
     /// </summary>
+    [InitializeOnLoad]
     static class PolySpatialProjectValidator
     {
-        [InitializeOnLoadMethod]
+        static PolySpatialProjectValidator()
+        {
+            // Delay the initialization to allow AssetDatabase.FindAssets to work properly in a clean checkout (LXR-2335)
+            EditorApplication.delayCall += Initialize;
+        }
+
         static void Initialize()
         {
             var rules = new List<BuildValidationRule>();

@@ -86,6 +86,72 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_Create_Disable_Enable_Tracking()
+        {
+            CreateTestObjects();
+            m_TestGameObject.SetActive(false);
+
+            // Let a frame be processed to create the inactive backing objects
+            yield return null;
+
+            // right after the frame, we expect inactive in the tracking flags
+            var data = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            Assert.IsFalse((data.TrackingFlags & PolySpatialTrackingFlags.Inactive) == 0);
+
+            var mriid = m_TestMeshRenderer.GetInstanceID();
+
+            // DebugPolySpatialGameObjectLink is only set up in Editor and Development builds
+            // On CI and in shipped packages, we pre-compile runtime code, but not tests. As a result, the runtime assembly is built without `DEVELOPMENT_BUILD`
+            // or `UNITY_EDITOR` defined. Thus, on CI runs, DebugPolySpatialGameObjectLink components are not used. For macOS tests, the RealityKit backend
+            // is used, but on Windows, PolySpatialUnityBackend is used, without DebugPolySpatialGameObjectLink. This is why we also skip validation on backing
+            // objects when UNITY_STANDALONE_WIN is defined.
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR) && !UNITY_STANDALONE_WIN
+            DebugPolySpatialGameObjectLink link = null;
+            if (PolySpatialCore.LocalBackend is PolySpatialUnityBackend)
+            {
+                // get linked object, and verify that it does not have rendering components yet
+                link = m_TestGameObject.GetComponent<DebugPolySpatialGameObjectLink>();
+                Assert.IsNotNull(link);
+                Assert.IsNull(link.LinkedTo.GetComponent<MeshFilter>());
+                Assert.IsNull(link.LinkedTo.GetComponent<MeshRenderer>());
+            }
+#endif
+
+            m_TestGameObject.SetActive(true);
+
+            // wait a frame to track the activation
+            yield return null;
+
+            // we should no longer be inactive
+            data = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            Assert.IsTrue((data.TrackingFlags & PolySpatialTrackingFlags.Inactive) == 0);
+
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR) && !UNITY_STANDALONE_WIN
+            if (link != null)
+            {
+                // check that backing objects have a MeshRenderer and MeshCollider
+                Assert.IsNotNull(link.LinkedTo.GetComponent<MeshFilter>());
+                Assert.IsNotNull(link.LinkedTo.GetComponent<MeshRenderer>());
+            }
+#endif
+
+            // destroy the component
+            m_TestMeshRenderer.DestroyAppropriately();
+            m_TestMeshFilter.DestroyAppropriately();
+
+            yield return null;
+
+#if UNITY_EDITOR
+            // check that it's destroyed
+            data = PolySpatialComponentUtils.GetMeshRendererTrackingData(mriid);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            Assert.AreEqual(PolySpatialTrackingFlags.Destroyed, data.GetLifecycleStage());
+#endif
+        }
+
+        [UnityTest]
         public IEnumerator Test_UnityMeshRenderer_Disable_Tracking()
         {
             CreateTestObjects();

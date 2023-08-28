@@ -11,32 +11,29 @@ def "MaterialX"
         def Material "USD_Matrix"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Matrix/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Matrix/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Matrix/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Matrix/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor = (0.5, 0.5, 0.5)
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor = (0.5, 0.5, 0.5)
                 float inputs:metallic = 0
                 color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Matrix/SR_Matrix_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
                 float3 inputs:modelPositionOffset.connect = </MaterialX/Materials/USD_Matrix/SR_MatrixVertex_modelPositionOffset_SubtractPosition.outputs:out>
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "SR_Matrix_roughness_OnesComplement"

@@ -10,7 +10,8 @@
         "Unity.InputSystem.TestFramework",
         "UnityEngine.TestRunner",
         "Unity.Collections",
-        "Unity.PolySpatial.Core"
+        "Unity.PolySpatial.Core",
+        "Unity.ShaderGraph.Editor"
     ],
     "includePlatforms": [
         "Editor"

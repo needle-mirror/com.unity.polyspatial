@@ -11,8 +11,8 @@ def "MaterialX"
         def Material "USD_LerpRange"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_LerpRange/realitykit_unlit.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_LerpRange/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_LerpRange/realitykit_unlit.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_LerpRange/GeometryModifier.outputs:out>
 
             def Shader "realitykit_unlit"
             {
@@ -20,14 +20,13 @@ def "MaterialX"
                 bool inputs:applyPostProcessToneMap = 0
                 color3f inputs:color.connect = </MaterialX/Materials/USD_LerpRange/CastSwizzleFromCombineNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor.outputs:out>
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
             def Shader "CastSwizzleFromCombineNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor"

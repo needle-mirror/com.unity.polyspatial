@@ -89,13 +89,6 @@ namespace UnityEditor.PolySpatial.Internals
 
                 s_SceneAssets[scene] = guids;
             }
-
-            // Ensure that the build contains the placeholder referenced by and necessary for loading USD materials.
-            if (!File.Exists("Assets/StreamingAssets/placeholder.png"))
-            {
-                buildPlayerContext.AddAdditionalPathToStreamingAssets(
-                    "Packages/com.unity.polyspatial/Textures/placeholder.png");
-            }
         }
 
         private static void CollectAssetReference(BuildPlayerContext buildPlayerContext, string guid,

@@ -142,20 +142,17 @@
         <input name = "uv1" type = "vector2" nodename = "CastSwizzleFromMultiplyNode_73254b2b29094a33822099b0bbb6f1d0ToSR_CustomInterpolatorVertexuv1" />
         <input name = "userAttribute" type = "vector4" nodename = "CastConvertFinalFromNormalNode_4c677514806c485f8106000b231fd71dToSR_CustomInterpolatorVertexuserAttribute" />
     </GeometryModification>
-    <UsdPreviewSurface name = "SR_CustomInterpolator" type = "surfaceshader">
-        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatordiffuseColor" />
+    <realitykit_pbr name = "SR_CustomInterpolator" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatorbaseColor" />
         <input name = "metallic" type = "float" value = "0" />
         <input name = "emissiveColor" type = "color3" nodename = "CastSwizzleFromMultiplyNode_c1a681f3e8774968a7aa10acf90d0039ToSR_CustomInterpolatoremissiveColor" />
-        <input name = "occlusion" type = "float" value = "1" />
-        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
-        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
         <input name = "roughness" type = "float" nodename = "SR_CustomInterpolator_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
-        <input name = "ior" type = "float" value = "1.4" />
-    </UsdPreviewSurface>
+    </realitykit_pbr>
     <surfacematerial name = "USD_CustomInterpolator" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_CustomInterpolatorVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_CustomInterpolator" />
@@ -210,7 +207,7 @@
         <input name = "in" type = "color4" nodename = "Node_f702726f6d1743cf8a7973bf7d3a1068" />
         <input name = "channels" type = "string" value = "rgba" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatordiffuseColor" type = "color3">
+    <swizzle name = "CastSwizzleFromMultiplyNode_3222954943754dd585433ad4a86393d5ToSR_CustomInterpolatorbaseColor" type = "color3">
         <input name = "in" type = "vector4" nodename = "MultiplyNode_3222954943754dd585433ad4a86393d5" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>

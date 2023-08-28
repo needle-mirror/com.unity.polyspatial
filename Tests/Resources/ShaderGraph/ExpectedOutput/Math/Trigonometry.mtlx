@@ -4,22 +4,38 @@
         <input name = "iny" type = "float" value = "1" />
         <input name = "inx" type = "float" value = "1" />
     </atan2>
+    <multiply name = "RadiansToDegrees_OutNode_73344cbff9624eefa56b5c3776e8c914" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "RadiansToDegrees_InNode_73344cbff9624eefa56b5c3776e8c914" />
+        <input name = "in2" type = "float" value = "57.29578" />
+    </multiply>
+    <dot name = "RadiansToDegrees_InNode_73344cbff9624eefa56b5c3776e8c914" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_e12f6be7dbc3438ab76e3d176a77e142" />
+    </dot>
+    <multiply name = "DegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54ac" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "DegreesToRadians_InNode_417fb76d584b4507ab0e9d99b00b54ac" />
+        <input name = "in2" type = "float" value = "0.01745329" />
+    </multiply>
+    <dot name = "DegreesToRadians_InNode_417fb76d584b4507ab0e9d99b00b54ac" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "RadiansToDegrees_OutNode_73344cbff9624eefa56b5c3776e8c914" />
+    </dot>
+    <combine3 name = "Vector3Node_e12f6be7dbc3438ab76e3d176a77e142" type = "vector3">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" value = "1" />
+    </combine3>
     <GeometryModification name = "SR_TrigonometryVertex" type = "vertexshader">
     </GeometryModification>
-    <UsdPreviewSurface name = "SR_Trigonometry" type = "surfaceshader">
-        <input name = "diffuseColor" type = "color3" nodename = "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor" />
+    <realitykit_pbr name = "SR_Trigonometry" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrybaseColor" />
         <input name = "metallic" type = "float" value = "0" />
-        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
-        <input name = "occlusion" type = "float" value = "1" />
-        <input name = "useSpecularWorkflow" type = "integer" value = "0" />
-        <input name = "specularColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "emissiveColor" type = "color3" nodename = "CastSwizzleFromDegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54acToSR_TrigonometryemissiveColor" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
         <input name = "roughness" type = "float" nodename = "SR_Trigonometry_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
         <input name = "opacity" type = "float" value = "1" />
-        <input name = "opacityThreshold" type = "float" value = "0" />
-        <input name = "ior" type = "float" value = "1.4" />
-    </UsdPreviewSurface>
+    </realitykit_pbr>
     <surfacematerial name = "USD_Trigonometry" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_TrigonometryVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Trigonometry" />
@@ -28,8 +44,12 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />
     </subtract>
-    <swizzle name = "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor" type = "color3">
+    <swizzle name = "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrybaseColor" type = "color3">
         <input name = "in" type = "float" nodename = "ArctangentNode_db95fe01a76b4cb795da70aa723a8ed7" />
         <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromDegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54acToSR_TrigonometryemissiveColor" type = "color3">
+        <input name = "in" type = "vector3" nodename = "DegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54ac" />
+        <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
 </materialx>

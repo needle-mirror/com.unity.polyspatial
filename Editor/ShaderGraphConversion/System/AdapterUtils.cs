@@ -35,32 +35,44 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return inputs.FirstOrDefault();
         }
 
-        internal static MaterialSlot GetInputByName(AbstractMaterialNode node, string rawDisplayName)
+        internal static MaterialSlot GetInputByName(
+            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
         {
             var inputs = new List<MaterialSlot>();
             node.GetInputSlots(inputs);
-            return GetSlotByName(inputs, rawDisplayName);
+            return GetSlotByName(inputs, rawDisplayName, ignoreWhitespace);
         }
 
-        internal static MaterialSlot GetOutputByName(AbstractMaterialNode node, string rawDisplayName)
+        internal static MaterialSlot GetOutputByName(
+            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
         {
             var outputs = new List<MaterialSlot>();
             node.GetOutputSlots(outputs);
-            return GetSlotByName(outputs, rawDisplayName);
+            return GetSlotByName(outputs, rawDisplayName, ignoreWhitespace);
         }
 
-        internal static MaterialSlot GetSlotByName(AbstractMaterialNode node, string rawDisplayName)
+        internal static MaterialSlot GetSlotByName(
+            AbstractMaterialNode node, string rawDisplayName, bool ignoreWhitespace = false)
         {
             var slots = new List<MaterialSlot>();
             node.GetSlots<MaterialSlot>(slots);
-            return GetSlotByName(slots, rawDisplayName);
+            return GetSlotByName(slots, rawDisplayName, ignoreWhitespace);
         }
 
-        static MaterialSlot GetSlotByName(List<MaterialSlot> slots, string rawDisplayName)
+        static MaterialSlot GetSlotByName(
+            List<MaterialSlot> slots, string rawDisplayName, bool ignoreWhitespace = false)
         {
+            var displayName = rawDisplayName;
+            if (ignoreWhitespace)
+                displayName = RemoveWhitespace(displayName);
+
             foreach (var slot in slots)
             {
-                if (slot.RawDisplayName() == rawDisplayName)
+                var slotName = slot.RawDisplayName();
+                if (ignoreWhitespace)
+                    slotName = RemoveWhitespace(slotName);
+
+                if (slotName == displayName)
                     return slot;
             }
             return null;
@@ -72,6 +84,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal static string GetName(MaterialSlot slot)
         {
             return slot.RawDisplayName();
+        }
+
+        internal static TextureSamplerState GetPropertyRedirectedTextureSamplerState(
+            MaterialSlot slot, SubGraphContext sgContext)
+        {
+            var (inputSlot, outputSlot) = GetPropertyRedirectedInputOutputSlots(slot, sgContext);
+            switch (outputSlot?.owner)
+            {
+                case SamplerStateNode samplerStateNode:
+                    return ((SamplerStateShaderProperty)samplerStateNode.AsShaderProperty()).value;
+                
+                case PropertyNode propertyNode:
+                    return ((SamplerStateShaderProperty)propertyNode.property).value;
+                
+                default:
+                    return ((SamplerStateMaterialSlot)inputSlot).defaultSamplerState;
+            }
         }
 
         internal static (MaterialSlot inputSlot, MaterialSlot outputSlot) GetPropertyRedirectedInputOutputSlots(
@@ -209,7 +238,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 var index = (int)slot.channel;
                 var uvRead = graph.AddNode(name, MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
                 uvRead.AddPortValue("index", MtlxDataTypes.Integer, new float[] { index });
-                graph.AddPortAndEdge(uvRead.name, dstNodeName, dstPortName, MtlxDataTypes.Vector2);
+
+                // Flip V coordinate to get back to Unity coordinate space for processing.
+                var multiplyNode = graph.AddNode($"{name}Multiply", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2);
+                graph.AddPortAndEdge(uvRead.name, multiplyNode.name, "in1", MtlxDataTypes.Vector2);
+                multiplyNode.AddPortValue("in2",  MtlxDataTypes.Vector2, new[] { 1.0f, -1.0f });
+
+                var addNode = graph.AddNode($"{name}Add", MtlxNodeTypes.Add, MtlxDataTypes.Vector2);
+                graph.AddPortAndEdge(multiplyNode.name, addNode.name, "in1", MtlxDataTypes.Vector2);
+                addNode.AddPortValue("in2",  MtlxDataTypes.Vector2, new[] { 0.0f, 1.0f });
+
+                graph.AddPortAndEdge(addNode.name, dstNodeName, dstPortName, MtlxDataTypes.Vector2);
             }
             else
             {
@@ -387,6 +426,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 nodeData.AddPort(portName, portType);
 
             externals.AddExternalPortAndEdge(slot, nodeData.name, portName);
+        }
+
+        // Creates nodes and connections for a compound operation: that is, one that is defined in
+        // terms of simpler nodes.  The expression provided will be parsed using a limited subset of
+        // HLSL and turned into a nodeDefs map.
+        internal static void CompoundOp(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext, 
+            string hint, string expr, Dictionary<string, string> inputTypeOverrides = null)
+        {
+            CompoundOp(
+                node, graph, externals, hint, CompoundOpParser.Parse(node, sgContext, expr, inputTypeOverrides));
         }
 
         // Creates nodes and connections for a compound operation: that is, one that is defined in

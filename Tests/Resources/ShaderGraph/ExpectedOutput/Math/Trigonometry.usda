@@ -11,34 +11,31 @@ def "MaterialX"
         def Material "USD_Trigonometry"
         {
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Trigonometry/UsdPreviewSurface.outputs:surface>
-            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Trigonometry/GeometryModifier.outputs:vertex>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Trigonometry/realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Trigonometry/GeometryModifier.outputs:out>
 
-            def Shader "UsdPreviewSurface"
+            def Shader "realitykit_pbr"
             {
-                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
-                color3f inputs:diffuseColor.connect = </MaterialX/Materials/USD_Trigonometry/CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor.outputs:out>
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Trigonometry/CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrybaseColor.outputs:out>
                 float inputs:metallic = 0
-                color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:occlusion = 1
-                int inputs:useSpecularWorkflow = 0
-                color3f inputs:specularColor = (0.5, 0.5, 0.5)
+                color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_Trigonometry/CastSwizzleFromDegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54acToSR_TrigonometryemissiveColor.outputs:out>
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Trigonometry/SR_Trigonometry_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
                 float inputs:opacity = 1
-                float inputs:opacityThreshold = 0
-                float inputs:ior = 1.4
-                token outputs:surface
+                token outputs:out
             }
 
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                token outputs:vertex
+                token outputs:out
             }
 
-            def Shader "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrydiffuseColor"
+            def Shader "CastSwizzleFromArctangentNode_db95fe01a76b4cb795da70aa723a8ed7ToSR_TrigonometrybaseColor"
             {
                 uniform token info:id = "ND_swizzle_float_color3"
                 float inputs:in.connect = </MaterialX/Materials/USD_Trigonometry/ArctangentNode_db95fe01a76b4cb795da70aa723a8ed7.outputs:out>
@@ -52,6 +49,53 @@ def "MaterialX"
                 float inputs:iny = 1
                 float inputs:inx = 1
                 float outputs:out
+            }
+
+            def Shader "CastSwizzleFromDegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54acToSR_TrigonometryemissiveColor"
+            {
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Trigonometry/DegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54ac.outputs:out>
+                string inputs:channels = "xyz"
+                color3f outputs:out
+            }
+
+            def Shader "DegreesToRadians_OutNode_417fb76d584b4507ab0e9d99b00b54ac"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Trigonometry/DegreesToRadians_InNode_417fb76d584b4507ab0e9d99b00b54ac.outputs:out>
+                float inputs:in2 = 0.01745329
+                float3 outputs:out
+            }
+
+            def Shader "DegreesToRadians_InNode_417fb76d584b4507ab0e9d99b00b54ac"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Trigonometry/RadiansToDegrees_OutNode_73344cbff9624eefa56b5c3776e8c914.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "RadiansToDegrees_OutNode_73344cbff9624eefa56b5c3776e8c914"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Trigonometry/RadiansToDegrees_InNode_73344cbff9624eefa56b5c3776e8c914.outputs:out>
+                float inputs:in2 = 57.29578
+                float3 outputs:out
+            }
+
+            def Shader "RadiansToDegrees_InNode_73344cbff9624eefa56b5c3776e8c914"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Trigonometry/Vector3Node_e12f6be7dbc3438ab76e3d176a77e142.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Vector3Node_e12f6be7dbc3438ab76e3d176a77e142"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1 = 1
+                float inputs:in2 = 1
+                float inputs:in3 = 1
+                float3 outputs:out
             }
 
             def Shader "SR_Trigonometry_roughness_OnesComplement"
