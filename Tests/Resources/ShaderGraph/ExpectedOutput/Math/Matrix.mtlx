@@ -49,9 +49,13 @@
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_MatrixVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Matrix" />
     </surfacematerial>
+    <multiply name = "SR_MatrixVertex_modelPositionOffset_FlipZ" type = "vector3">
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_FlipZin1" />
+    </multiply>
     <subtract name = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_FlipZ" />
         <input name = "in2" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_Position" />
-        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" />
     </subtract>
     <position name = "SR_MatrixVertex_modelPositionOffset_Position" type = "vector3">
         <input name = "space" type = "string" value = "object" />
@@ -60,7 +64,7 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />
     </subtract>
-    <swizzle name = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+    <swizzle name = "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_FlipZin1" type = "vector3">
         <input name = "in" type = "vector4" nodename = "MultiplyNode_77bc853857ef41a88921cf44bc9220d9" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>

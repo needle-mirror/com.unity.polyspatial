@@ -47,27 +47,28 @@ def "MaterialX"
             def Shader "SR_GeometryVertex_modelPositionOffset_SubtractPosition"
             {
                 uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Geometry/SR_GeometryVertex_modelPositionOffset_FlipZ.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Geometry/SR_GeometryVertex_modelPositionOffset_Position.outputs:out>
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Geometry/CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "SR_GeometryVertex_modelPositionOffset_Position"
+            def Shader "SR_GeometryVertex_modelPositionOffset_FlipZ"
             {
-                uniform token info:id = "ND_position_vector3"
-                string inputs:space = "object"
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Geometry/CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1"
+            def Shader "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_swizzle_float_vector3"
-                float inputs:in.connect = </MaterialX/Materials/USD_Geometry/CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_Geometry/CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1.outputs:out>
                 string inputs:channels = "xxx"
                 float3 outputs:out
             }
 
-            def Shader "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1"
+            def Shader "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_convert_integer_float"
                 int inputs:in.connect = </MaterialX/Materials/USD_Geometry/VertexIDNode_ec90452928824015a445211766951f61.outputs:vertexId>
@@ -78,6 +79,13 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_geometry_modifier_vertex_id"
                 int outputs:vertexId
+            }
+
+            def Shader "SR_GeometryVertex_modelPositionOffset_Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "object"
+                float3 outputs:out
             }
         }
     }

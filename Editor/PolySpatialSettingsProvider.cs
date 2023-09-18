@@ -45,6 +45,8 @@ namespace UnityEditor.PolySpatial
         ReorderableList m_IgnoredScenesReorderableList;
         int m_SelectedTracker;
 
+        SerializedProperty m_EnableInEditorPreviewProperty;
+
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
         static readonly List<string> k_InactiveTrackers = new();
 
@@ -100,9 +102,9 @@ namespace UnityEditor.PolySpatial
 
             m_PolySpatialRecordingModeProperty = m_SerializedObject.FindProperty("PolySpatialRecordingMode");
             m_PolySpatialRecordingPathProperty = m_SerializedObject.FindProperty("RecordingPath");
+            m_EnableInEditorPreviewProperty = m_SerializedObject.FindProperty("EnableInEditorPreview");
 
             m_TransmitDebugInfoProperty = m_SerializedObject.FindProperty("m_TransmitDebugInfo");
-
 #if POLYSPATIAL_INTERNAL
             m_ForceLinkPolySpatialRuntimeProperty = m_SerializedObject.FindProperty("ForceLinkPolySpatialRuntime");
             m_PolySpatialNetworkingModeProperty = m_SerializedObject.FindProperty("m_PolySpatialNetworkingMode");
@@ -276,6 +278,8 @@ namespace UnityEditor.PolySpatial
                 m_ForceLinkPolySpatialRuntimeProperty.boolValue =
                     EditorGUILayout.ToggleLeft("Always Link PolySpatial Runtime", m_ForceLinkPolySpatialRuntimeProperty.boolValue);
 #endif
+
+                EditorGUILayout.PropertyField(m_EnableInEditorPreviewProperty);
 
                 m_SerializedObject.ApplyModifiedPropertiesWithoutUndo();
                 AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);

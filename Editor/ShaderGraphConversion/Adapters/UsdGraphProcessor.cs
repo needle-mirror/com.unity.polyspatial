@@ -488,6 +488,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case "range":
                     return GetFloatVariantNodeInfoId(node, "inlow", "inhigh", "gamma", "outlow", "outhigh");
                 
+                case "ifequal":
+                    return GetFirstInputPortType(node, "value") switch
+                    {
+                        MtlxDataTypes.Integer => $"ND_ifequal_{node.datatype}I",
+                        MtlxDataTypes.Boolean => $"ND_ifequal_{node.datatype}B",
+                        _ => GetDefaultNodeInfoId(node),
+                    };
                 case "switch":
                     return (GetFirstInputPortType(node, "which") == MtlxDataTypes.Integer) ?
                         $"ND_switch_{node.datatype}I" : GetDefaultNodeInfoId(node);
@@ -506,6 +513,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     {
                         return GetDefaultNodeInfoId(node);
                     }
+                case "transformmatrix":
+                    return (node.datatype, GetFirstInputPortType(node, "mat")) switch
+                    {
+                        (MtlxDataTypes.Vector2, MtlxDataTypes.Matrix33) => "ND_transformmatrix_vector2M3",
+                        (MtlxDataTypes.Vector3, MtlxDataTypes.Matrix44) => "ND_transformmatrix_vector3M4",
+                        _ => GetDefaultNodeInfoId(node),
+                    };
                 default:
                     switch (node.nodetype)
                     {

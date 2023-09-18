@@ -1,13 +1,53 @@
 <?xml version ="1.0"?>
 <materialx version = "1.38" colorspace = "lin_rec709">
-    <transformnormal name = "Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector3">
-        <input name = "in" type = "vector3" nodename = "BitangentNode_ed61fdd76dfb4725a46a84c4bc4ab88c" />
-        <input name = "fromspace" type = "string" value = "world" />
-        <input name = "tospace" type = "string" value = "object" />
-    </transformnormal>
+    <normalize name = "Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+    </normalize>
+    <swizzle name = "Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <transformmatrix name = "Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "mat" type = "matrix44" nodename = "Transform_Out_in_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+    </transformmatrix>
+    <combine4 name = "Transform_Out_in_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector4">
+        <input name = "in1" type = "float" nodename = "Transform_Out_in_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "in2" type = "float" nodename = "Transform_Out_in_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "in3" type = "float" nodename = "Transform_Out_in_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <swizzle name = "Transform_Out_in_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "float">
+        <input name = "in" type = "vector3" nodename = "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <dot name = "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Bitangent_OutNode_ed61fdd76dfb4725a46a84c4bc4ab88c" />
+    </dot>
+    <swizzle name = "Transform_Out_in_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "float">
+        <input name = "in" type = "vector3" nodename = "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "Transform_Out_in_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "float">
+        <input name = "in" type = "vector3" nodename = "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <transpose name = "Transform_Out_in_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "Transform_Out_in_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+    </transpose>
+    <multiply name = "Transform_Out_in_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+    </multiply>
+    <multiply name = "Transform_Out_in_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "matrix44">
+        <input name = "in1" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+        <input name = "in2" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce" />
+    </multiply>
+    <realitykit_surface_model_to_world name = "Transform_Out_in_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce" type = "matrix44">
+    </realitykit_surface_model_to_world>
     <subtract name = "SubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0" type = "vector3">
-        <input name = "in1" type = "vector3" nodename = "Node_dec72ccdfd7340acb1c406b5dc6dffce" />
-        <input name = "in2" type = "vector3" nodename = "BitangentNode_51d42932190843d498e629d5e3df84ea" />
+        <input name = "in1" type = "vector3" nodename = "Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce" />
+        <input name = "in2" type = "vector3" nodename = "Bitangent_OutNode_51d42932190843d498e629d5e3df84ea" />
     </subtract>
     <magnitude name = "LengthNode_7f31cd89a1b448019a471868bc7900f2" type = "float">
         <input name = "in" type = "vector3" nodename = "SubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0" />
@@ -30,10 +70,18 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0" />
     </ifgreater>
-    <bitangent name = "BitangentNode_ed61fdd76dfb4725a46a84c4bc4ab88c" type = "vector3">
+    <multiply name = "Bitangent_OutNode_ed61fdd76dfb4725a46a84c4bc4ab88c" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Bitangent_Out_in1Node_ed61fdd76dfb4725a46a84c4bc4ab88c" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <bitangent name = "Bitangent_Out_in1Node_ed61fdd76dfb4725a46a84c4bc4ab88c" type = "vector3">
         <input name = "space" type = "string" value = "world" />
     </bitangent>
-    <bitangent name = "BitangentNode_51d42932190843d498e629d5e3df84ea" type = "vector3">
+    <multiply name = "Bitangent_OutNode_51d42932190843d498e629d5e3df84ea" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Bitangent_Out_in1Node_51d42932190843d498e629d5e3df84ea" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <bitangent name = "Bitangent_Out_in1Node_51d42932190843d498e629d5e3df84ea" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </bitangent>
     <GeometryModification name = "SR_GeomBitangentVertex" type = "vertexshader">

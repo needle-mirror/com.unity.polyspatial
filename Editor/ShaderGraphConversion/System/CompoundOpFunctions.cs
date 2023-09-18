@@ -35,8 +35,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("/", Operator.VariantType.Default)] = CreateBinaryOpCompiler(MtlxNodeTypes.Divide, true),
             [("%", Operator.VariantType.Default)] = CreateBinaryOpCompiler(MtlxNodeTypes.Modulo, true),
             [(".", Operator.VariantType.Default)] = SwizzleCompiler,
+            [("!", Operator.VariantType.Default)] = NotCompiler,
+            [("&&", Operator.VariantType.Default)] = AndCompiler,
+            [("||", Operator.VariantType.Default)] = OrCompiler,
             [("abs", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Absolute),
             [("acos", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Arccosine),
+            [("all", Operator.VariantType.FunctionCall)] = AllCompiler,
+            [("any", Operator.VariantType.FunctionCall)] = AnyCompiler,
             [("asin", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Arcsine),
             [("atan", Operator.VariantType.FunctionCall)] = AtanCompiler,
             [("atan2", Operator.VariantType.FunctionCall)] = CreateNaryOpCompiler(
@@ -95,6 +100,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("SAMPLE_TEXTURE2D_LOD", Operator.VariantType.FunctionCall)] = SampleTexture2DLodCompiler,
         };
 
+        static FloatInputDef s_ZFlipMatrix = new(
+            MtlxDataTypes.Matrix44,
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+
+        static InlineInputDef s_ProjectionMatrix = new(
+            MtlxNodeTypes.RealityKitSurfaceViewToProjection, MtlxDataTypes.Matrix44, new(), "viewToProjection");
+
         static Dictionary<string, Compiler> s_SymbolCompilers = new()
         {
             [PolySpatialShaderGlobals.Time] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
@@ -117,6 +132,36 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [PolySpatialShaderProperties.SHBg] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderProperties.SHBb] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderProperties.SHC] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+
+#if DISABLE_MATERIALX_EXTENSIONS
+            ["unity_ObjectToWorld"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["unity_WorldToObject"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_V"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_I_V"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_P"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_I_P"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_VP"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            ["UNITY_MATRIX_I_VP"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+#else
+            ["unity_ObjectToWorld"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceModelToWorld, "modelToWorld", s_ZFlipMatrix, s_ZFlipMatrix, false),
+            ["unity_WorldToObject"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceModelToWorld, "modelToWorld", s_ZFlipMatrix, s_ZFlipMatrix, true),
+            ["UNITY_MATRIX_V"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", null, s_ZFlipMatrix, false),
+            ["UNITY_MATRIX_I_V"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", null, s_ZFlipMatrix, true),
+            ["UNITY_MATRIX_P"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceViewToProjection, "viewToProjection", null, null, false),
+            ["UNITY_MATRIX_I_P"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceProjectionToView, "projectionToView", null, null, false),
+            ["UNITY_MATRIX_VP"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", s_ProjectionMatrix, s_ZFlipMatrix, false),
+            ["UNITY_MATRIX_I_VP"] = CreateMatrixCompiler(
+                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", s_ProjectionMatrix, s_ZFlipMatrix, true),
+            ["polySpatial_TangentToWorld"] = CreateTangentMatrixCompiler(false),
+            ["polySpatial_WorldToTangent"] = CreateTangentMatrixCompiler(true),
+#endif
         };
 
         static CompoundOpFunctions()
@@ -186,17 +231,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 symbol = leftGrandchildSymbol.Span.contents;
 
-                var expectedType = op.Span.contents switch
-                {
-                    "float" => MtlxDataTypes.Float,
-                    "float2" => MtlxDataTypes.Vector2,
-                    "float3" => MtlxDataTypes.Vector3,
-                    "float4" => MtlxDataTypes.Vector4,
-                    "float2x2" => MtlxDataTypes.Matrix22,
-                    "float3x3" => MtlxDataTypes.Matrix33,
-                    "float4x4" => MtlxDataTypes.Matrix44,
-                    _ => throw new ParseException("Unknown type", op.Span),
-                };
+                var expectedType = MtlxDataTypes.GetTypeForHlsl(op.Span.contents);
+                if (expectedType == null)
+                    throw new ParseException("Unknown type", op.Span);
+                    
                 if (!TryCoerce(ref inputDef, inputs, output, expectedType))
                     throw new ParseException($"Expected {op.Span.contents} rvalue", node.Lexeme.Span);
             }
@@ -303,6 +341,137 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 ["in"] = leftInputDef,
                 ["channels"] = new StringInputDef(channels),
+            });
+        }
+
+        static InputDef NotCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["value1"] = node.Children[0].Compile(inputs, output),
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "value1", MtlxDataTypes.Float);
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, inputDefs);
+        }
+
+        static InputDef AndCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(2);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in1"] = node.Children[0].Compile(inputs, output),
+                ["in2"] = node.Children[1].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "in1", MtlxDataTypes.Float);
+            CoerceToType(node, inputs, output, inputDefs, "in2", MtlxDataTypes.Float);
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, inputDefs),
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+            });
+        }
+
+        static InputDef OrCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(2);
+
+            Dictionary<string, InputDef> leftInputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, leftInputDefs, "in", MtlxDataTypes.Float);
+
+            Dictionary<string, InputDef> rightInputDefs = new()
+            {
+                ["in"] = node.Children[1].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, rightInputDefs, "in", MtlxDataTypes.Float);
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Float, leftInputDefs),
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Float, rightInputDefs),
+                }),
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+            });
+        }
+
+        static InputDef AllCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var inputType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+
+            if (inputType != MtlxDataTypes.Float)
+            {
+                var sharedInput = GetSharedInput(inputDefs["in"], output);
+                
+                var inputLength = MtlxDataTypes.GetLength(inputType);
+                for (var i = 0; i < inputLength; ++i)
+                {
+                    var componentDef = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = sharedInput,
+                        ["channels"] = new StringInputDef("xyzw".Substring(i, 1)),
+                    });
+                    inputDefs["in"] = (i == 0) ? 
+                        componentDef : new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = inputDefs["in"],
+                        ["in2"] = componentDef,
+                    });
+                }
+            }
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = inputDefs["in"],
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+            });
+        }
+
+        static InputDef AnyCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var inputType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = inputType == MtlxDataTypes.Float ?
+                    inputDefs["in"] : new InlineInputDef(MtlxNodeTypes.Length, MtlxDataTypes.Float, inputDefs),
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
             });
         }
 
@@ -890,6 +1059,86 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 var name = node.Lexeme.Span.contents;
                 inputs[name] = new SamplerStateInput(samplerState);
                 return new ExternalInputDef(name);
+            };
+        }
+
+        // Convenience function to create space transforms more conveniently. 
+        // Returns (preMult * input * postMult) ^ (invert ? -1 : 1).
+        static Compiler CreateMatrixCompiler(
+            string nodeType, string outputName, InputDef preMult, InputDef postMult, bool invert)
+        {
+            return (node, inputs, output) =>
+            {
+                var inputDef = new InlineInputDef(nodeType, MtlxDataTypes.Matrix44, new(), outputName);
+
+                if (preMult != null)
+                {
+                    inputDef = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Matrix44, new()
+                    {
+                        ["in1"] = preMult,
+                        ["in2"] = inputDef,
+                    });
+                }
+                if (postMult != null)
+                {
+                    inputDef = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Matrix44, new()
+                    {
+                        ["in1"] = inputDef,
+                        ["in2"] = postMult,
+                    });
+                }
+                if (invert)
+                {
+                    inputDef = new InlineInputDef(MtlxNodeTypes.Inverse, MtlxDataTypes.Matrix44, new()
+                    {
+                        ["in"] = inputDef,
+                    });
+                }
+
+                return inputDef;
+            };
+        }
+
+        static Compiler CreateTangentMatrixCompiler(bool invert)
+        {
+            return (node, inputs, output) =>
+            {
+                // Local function to swap handedness.
+                InlineInputDef CreateColumn(string nodeType, bool position = false)
+                {
+                    return new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                        {
+                            ["in"] = new InlineInputDef(nodeType, MtlxDataTypes.Vector3, new()
+                            {
+                                ["space"] = new StringInputDef("world"),
+                            }),
+                        }),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 1.0f, 1.0f, -1.0f, position ? 1.0f : 0.0f),
+                    });
+                }
+
+                var inputDef = new InlineInputDef(MtlxNodeTypes.Transpose, MtlxDataTypes.Matrix44, new()
+                {
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitCombine4, MtlxDataTypes.Matrix44, new()
+                    {
+                        ["in1"] = CreateColumn(MtlxNodeTypes.GeomTangent),
+                        ["in2"] = CreateColumn(MtlxNodeTypes.GeomBitangent),
+                        ["in3"] = CreateColumn(MtlxNodeTypes.GeomNormal),
+                        ["in4"] = CreateColumn(MtlxNodeTypes.GeomPosition, true),
+                    }),
+                });
+                
+                if (invert)
+                {
+                    inputDef = new InlineInputDef(MtlxNodeTypes.Inverse, MtlxDataTypes.Matrix44, new()
+                    {
+                        ["in"] = inputDef,
+                    });
+                }
+
+                return inputDef;
             };
         }
     }

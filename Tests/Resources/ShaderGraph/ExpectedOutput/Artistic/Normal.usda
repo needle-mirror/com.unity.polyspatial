@@ -32,7 +32,7 @@ def "MaterialX"
             def Shader "GeometryModifier"
             {
                 uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
-                float3 inputs:normal.connect = </MaterialX/Materials/USD_Normal/NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 inputs:normal.connect = </MaterialX/Materials/USD_Normal/SR_NormalVertex_normal_FlipZ.outputs:out>
                 token outputs:out
             }
 
@@ -124,6 +124,14 @@ def "MaterialX"
                 float outputs:out
             }
 
+            def Shader "SR_NormalVertex_normal_FlipZ"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf.outputs:out>
+                float3 outputs:out
+            }
+
             def Shader "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
                 uniform token info:id = "ND_subtract_vector3"
@@ -151,11 +159,19 @@ def "MaterialX"
             def Shader "NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf"
             {
                 uniform token info:id = "ND_dot_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/NormalNode_1448d353c6ac46dcadb9d2494ed68ed8.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Normal/Normal_OutNode_1448d353c6ac46dcadb9d2494ed68ed8.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "NormalNode_1448d353c6ac46dcadb9d2494ed68ed8"
+            def Shader "Normal_OutNode_1448d353c6ac46dcadb9d2494ed68ed8"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Normal/Normal_Out_in1Node_1448d353c6ac46dcadb9d2494ed68ed8.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
+            }
+
+            def Shader "Normal_Out_in1Node_1448d353c6ac46dcadb9d2494ed68ed8"
             {
                 uniform token info:id = "ND_normal_vector3"
                 string inputs:space = "object"

@@ -47,19 +47,20 @@ def "MaterialX"
             def Shader "SR_MatrixVertex_modelPositionOffset_SubtractPosition"
             {
                 uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/SR_MatrixVertex_modelPositionOffset_FlipZ.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Matrix/SR_MatrixVertex_modelPositionOffset_Position.outputs:out>
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "SR_MatrixVertex_modelPositionOffset_Position"
+            def Shader "SR_MatrixVertex_modelPositionOffset_FlipZ"
             {
-                uniform token info:id = "ND_position_vector3"
-                string inputs:space = "object"
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_FlipZin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1"
+            def Shader "CastSwizzleFromMultiplyNode_77bc853857ef41a88921cf44bc9220d9ToSR_MatrixVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Matrix/MultiplyNode_77bc853857ef41a88921cf44bc9220d9.outputs:out>
@@ -100,6 +101,13 @@ def "MaterialX"
                 float inputs:in3 = 0
                 float inputs:in4 = 0
                 float4 outputs:out
+            }
+
+            def Shader "SR_MatrixVertex_modelPositionOffset_Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "object"
+                float3 outputs:out
             }
 
             def Shader "Vector4Node_a8619638241a49d3b179a3eab7077a2d"

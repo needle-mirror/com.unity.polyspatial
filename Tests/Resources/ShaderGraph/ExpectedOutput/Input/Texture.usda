@@ -85,19 +85,20 @@ def "MaterialX"
             def Shader "SR_TextureVertex_modelPositionOffset_SubtractPosition"
             {
                 uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SR_TextureVertex_modelPositionOffset_FlipZ.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SR_TextureVertex_modelPositionOffset_Position.outputs:out>
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "SR_TextureVertex_modelPositionOffset_Position"
+            def Shader "SR_TextureVertex_modelPositionOffset_FlipZ"
             {
-                uniform token info:id = "ND_position_vector3"
-                string inputs:space = "object"
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1"
+            def Shader "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_swizzle_color4_vector3"
                 color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/Node_863147e977944b3e828c0de0418dbcb8.outputs:out>
@@ -120,6 +121,13 @@ def "MaterialX"
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0
                 float2 outputs:out
+            }
+
+            def Shader "SR_TextureVertex_modelPositionOffset_Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "object"
+                float3 outputs:out
             }
         }
     }

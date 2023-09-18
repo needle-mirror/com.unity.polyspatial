@@ -60,82 +60,55 @@ namespace UnityEditor.PolySpatial.Utilities
         static Styles styles => s_Styles ?? (s_Styles = new Styles());
 
         /// <summary>
-        /// Draw a help box with the Fix button and returns whether the user clicked in the button.
+        /// Draw a help box with the Fix button, an optional link and returns whether the user clicked in the button.
         /// </summary>
         /// <param name="message">The message text.</param>
         /// <param name="messageType">The type of the message.</param>
         /// <param name="buttonLabel">The button text.</param>
         /// <param name="buttonTooltip">The button tooltip.</param>
+        /// <param name="helpText">The link title that the user will click on</param>
+        /// <param name="helpLink">The link url</param>
         /// <returns>Returns <see langword="true"/> when the user clicks the Fix button. Otherwise, returns <see langword="false"/>.</returns>
-        internal static bool DrawFixMeBox(string message, MessageType messageType, string buttonLabel, string buttonTooltip)
+        internal static bool DrawFixMeBox(string message, MessageType messageType, string buttonLabel, string buttonTooltip, string helpText, string helpLink)
         {
-            var messageContent = EditorGUIUtility.TrTextContentWithIcon(message, styles.GetMessageTypeIcon(messageType));
+            GUILayout.BeginHorizontal(EditorStyles.helpBox);
+
+            GUILayout.Label(styles.GetMessageTypeIcon(messageType), GUILayout.ExpandWidth(false));
+            GUILayout.BeginVertical();
+            GUILayout.Label(message, EditorGUIUtils.Styles.WordWrapMiniLabel);
+            if (!string.IsNullOrEmpty(helpText) && !string.IsNullOrEmpty(helpLink))
+                EditorGUIUtils.DrawLink(new GUIContent(helpText), helpLink);
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
             var buttonContent = EditorGUIUtility.TrTextContent(buttonLabel, buttonTooltip);
-            return DrawFixMeBox(messageContent, buttonContent);
-        }
+            var clicked = GUILayout.Button(buttonContent, GUILayout.MinWidth(60));
+            GUILayout.FlexibleSpace();
+            GUILayout.EndVertical();
 
-        /// <summary>
-        /// Draw a help box with the Fix button and returns whether the user clicked in the button.
-        /// </summary>
-        /// <param name="message">The message with icon if needed.</param>
-        /// <param name="buttonContent">The button content.</param>
-        /// <returns>Returns <see langword="true"/> when the user clicks the Fix button. Otherwise, returns <see langword="false"/>.</returns>
-        static bool DrawFixMeBox(GUIContent message, GUIContent buttonContent)
-        {
-            EditorGUILayout.BeginHorizontal();
-
-            var indent = EditorGUI.indentLevel * k_IndentMargin - EditorStyles.helpBox.margin.left;
-            GUILayoutUtility.GetRect(indent, EditorGUIUtility.singleLineHeight, EditorStyles.helpBox, GUILayout.ExpandWidth(false));
-
-            var leftRect = GUILayoutUtility.GetRect(buttonContent, EditorStyles.miniButton, GUILayout.MinWidth(60));
-            var rect = GUILayoutUtility.GetRect(message, EditorStyles.helpBox);
-            var boxRect = new Rect(leftRect.x, rect.y, rect.xMax - leftRect.xMin, rect.height);
-
-            var oldIndent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-            if (Event.current.type == EventType.Repaint)
-                EditorStyles.helpBox.Draw(boxRect, false, false, false, false);
-
-            var labelRect = new Rect(boxRect.x + 4, boxRect.y + 3, rect.width - 8, rect.height);
-            EditorGUI.LabelField(labelRect, message, styles.fixMeBox);
-
-            var buttonRect = leftRect;
-            buttonRect.x += rect.width - 2;
-            buttonRect.y = rect.yMin + (rect.height - EditorGUIUtility.singleLineHeight) / 2;
-            var clicked = GUI.Button(buttonRect, buttonContent);
-
-            EditorGUI.indentLevel = oldIndent;
-            EditorGUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
 
             return clicked;
         }
 
         /// <summary>
-        /// Draw a message box with the given message and type.
+        /// Draws a message box with the given message and type and adds an optional link at the end if one is passed.
         /// </summary>
         /// <param name="message">The message text, supports rich text.</param>
         /// <param name="messageType">The type of the message.</param>
-        internal static void DrawMessageBox(string message, MessageType messageType)
-        {
-            var messageContent = EditorGUIUtility.TrTextContentWithIcon(message, styles.GetMessageTypeIcon(messageType));
-            EditorGUILayout.LabelField(GUIContent.none, messageContent, styles.messageBox);
-        }
-
-        /// <summary>
-        /// Draws a message box with the given message and type, and adds a link at the end.
-        /// </summary>
-        /// <param name="message">The message text, supports rich text.</param>
-        /// <param name="messageType">The type of the message.</param>
-        /// <param name="linkTitle">The link title that the user will click on</param>
-        /// <param name="linkUrl">The link url</param>
-        internal static void DrawMessageBoxWithLink (string message, MessageType messageType, string linkTitle, string linkUrl)
+        /// <param name="linkTittle">The link title that the user will click on</param>
+        /// <param name="linkURL">The link url</param>
+        internal static void DrawMessageBox(string message, MessageType messageType, string linkTittle = "", string linkURL = "")
         {
             GUILayout.BeginHorizontal(EditorStyles.helpBox);
             GUILayout.Label(styles.GetMessageTypeIcon(messageType), GUILayout.ExpandWidth(false));
+
             GUILayout.BeginVertical();
-            GUILayout.Label(message,EditorGUIUtils.Styles.WordWrapMiniLabel);
-            EditorGUIUtils.DrawLink(new GUIContent(linkTitle), linkUrl);
+            GUILayout.Label(message, EditorGUIUtils.Styles.WordWrapMiniLabel);
+            if (!string.IsNullOrEmpty(linkTittle) && !string.IsNullOrEmpty(linkURL))
+                EditorGUIUtils.DrawLink(new GUIContent(linkTittle), linkURL);
+
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }

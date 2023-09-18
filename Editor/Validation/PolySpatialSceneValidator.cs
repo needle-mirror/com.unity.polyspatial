@@ -47,7 +47,7 @@ namespace UnityEditor.PolySpatial.Validation
         const string k_FixObjectProgressBarTitle = "Fix Object Issues";
         const string k_RuleCreatorErrorFormat = "Cannot register Rule Creators for: {0}";
 
-        delegate void RuleCreatorDelegate(List<ValueTuple<Type, IComponentRuleCreator>> ruleCreators);
+        delegate void RuleCreatorDelegate(List<ValueTuple<Type, IComponentRuleCreator>> ruleCreators, List<ValueTuple<Type, List<ITypeMessage>>> messages);
 
         internal const string RuleCategoryFormat = "PolySpatial - {0}";
 
@@ -134,25 +134,25 @@ namespace UnityEditor.PolySpatial.Validation
 
         static IEnumerable<RuleCreatorDelegate> FetchDelegatesFromAttribute()
         {
-            var methods = TypeCache.GetMethodsWithAttribute<RuleCreatorAttribute>();
+            var methods = TypeCache.GetMethodsWithAttribute<CustomValidationAttribute>();
             return methods
                 .Select(method =>
                 {
                     try
                     {
-                        var attribute = method.GetCustomAttribute<RuleCreatorAttribute>();
+                        var attribute = method.GetCustomAttribute<CustomValidationAttribute>();
                         if (attribute == null)
-                            return new ValueTuple<RuleCreatorAttribute, RuleCreatorDelegate>();
+                            return new ValueTuple<CustomValidationAttribute, RuleCreatorDelegate>();
 
                         var callback = Delegate.CreateDelegate(typeof(RuleCreatorDelegate), method) as RuleCreatorDelegate;
-                        return new ValueTuple<RuleCreatorAttribute, RuleCreatorDelegate>(attribute, callback);
+                        return new ValueTuple<CustomValidationAttribute, RuleCreatorDelegate>(attribute, callback);
                     }
                     catch (Exception e)
                     {
                         Debug.LogErrorFormat(k_RuleCreatorErrorFormat, method.Name);;
                         Debug.LogException(e);
                     }
-                    return new ValueTuple<RuleCreatorAttribute, RuleCreatorDelegate>();
+                    return new ValueTuple<CustomValidationAttribute, RuleCreatorDelegate>();
                 })
                 .Where(tuple => tuple.Item1 != null && tuple.Item2 != null)
                 .OrderBy(tuple => tuple.Item1.Priority)
@@ -163,14 +163,18 @@ namespace UnityEditor.PolySpatial.Validation
         {
             var delegates = FetchDelegatesFromAttribute();
             var ruleCreators = new List<ValueTuple<Type, IComponentRuleCreator>>();
+            var messages = new List<ValueTuple<Type, List<ITypeMessage>>>();
             foreach (var callback in delegates)
             {
                 try
                 {
                     ruleCreators.Clear();
-                    callback?.Invoke(ruleCreators);
+                    messages.Clear();
+                    callback?.Invoke(ruleCreators, messages);
                     foreach (var tuple in ruleCreators)
                         AddRuleCreator(tuple.Item1, tuple.Item2);
+                    foreach (var tuple in messages)
+                        AddMessages(tuple.Item1, tuple.Item2.ToArray());
                 }
                 catch (Exception e)
                 {
@@ -196,20 +200,18 @@ namespace UnityEditor.PolySpatial.Validation
             AddRuleCreator(typeof(Collider), new OffsetCollidersRule());
 
             // Renderers
-            var rendererMessage = new RendererShaderMessage();
             var rendererRuleCreator = new RendererRuleCreator(true);
 
-            AddMessages(typeof(SpriteRenderer), rendererMessage);
             AddRuleCreator(typeof(SpriteRenderer), rendererRuleCreator);
 
-            AddMessages(typeof(MeshRenderer), new MeshRendererSyncMessage(), rendererMessage);
+            AddMessages(typeof(MeshRenderer), new MeshRendererSyncMessage());
             AddRuleCreator(typeof(MeshRenderer), rendererRuleCreator);
 
-            AddMessages(typeof(SkinnedMeshRenderer), new SkinnedMeshRendererSyncMessage(), rendererMessage);
+            AddMessages(typeof(SkinnedMeshRenderer), new SkinnedMeshRendererSyncMessage());
             AddRuleCreator(typeof(SkinnedMeshRenderer), new SkinnedMeshRendererRuleCreator());
 
             //ParticleSystem
-            AddMessages(typeof(ParticleSystem), new ParticleSystemMessage(), new ParticleSystemShaderMessage());
+            AddMessages(typeof(ParticleSystem), new ParticleSystemMessage());
             AddRuleCreator(typeof(ParticleSystem), new ParticleRuleCreator());
 
 #if ENABLE_UGUI
@@ -291,6 +293,18 @@ namespace UnityEditor.PolySpatial.Validation
 
         static void AddMessages(Type type, params ITypeMessage[] messages)
         {
+            foreach (var pair in s_TypeMessagesList)
+            {
+                if (pair.Key == type)
+                {
+                    var list = pair.Value.ToList();
+                    list.AddRange(messages);
+                    s_TypeMessagesList.Remove(pair);
+                    s_TypeMessagesList.Add(new KeyValuePair<Type, ITypeMessage[]>(type, list.ToArray()));
+                    return;
+                }
+            }
+
             s_TypeMessagesList.Add(new KeyValuePair<Type, ITypeMessage[]>(type, messages));
         }
 

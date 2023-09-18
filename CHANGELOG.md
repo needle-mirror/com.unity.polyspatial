@@ -7,6 +7,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2023-09-18
+
+## [0.3.1] - 2023-09-15
+
+## [0.3.0] - 2023-09-13
+
 ## [0.2.2] - 2023-08-28
 
 ## [0.2.1] - 2023-08-25
@@ -37,6 +43,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - Fixes bad reference caused by inactive skinned mesh renderers
     - Fixes crash if mesh collider was disabled at scene load.
     - Other sssorted bug fixes
+
+## [0.1.2] - 2023-08-16
+
+### Added
+- `WorldTouchState.colliderObject`, which provides the GameObject targeted by input. 
+
+### Fixed
+
+- Crash when loading a scene containing a disabled mesh collider.
+- In-use skinned meshes were removed from scenes when calling `Resourced.UnloadUnusedAssets()`. 
+- Project Validation entries not displaying when targeting visionOS. These validation entries no longer appear when targeting Standalone, iOS, or Android.
+- Samples: Input now uses `worldTouch.colliderObject` to identify the hit object, fixing issues where input would occasionally miss the targeted object. 
+- Samples: Objects reset position after being manipulated. 
+- Samples: Missing script warnings resolved. 
+- Samples: Settings assets removed from samples, fixing settings-related issues. 
+- Samples: Samples now import to the Assets/Samples/ folder rather than Assets/ directly. 
+- Documentation: Fixed broken links.
+- Documentation: Component reference images displaying. 
+- Documentation: Various typo fixes and clarity improvements.
 
 ## [0.1.2] - 2023-08-16
 

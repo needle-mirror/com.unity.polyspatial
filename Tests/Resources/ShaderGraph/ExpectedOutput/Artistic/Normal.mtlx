@@ -39,7 +39,11 @@
     <clamp name = "NormalStrength_Out_in3_mixNode_17a6fb112d3145278b53cdeacbbdd8f8" type = "float">
         <input name = "in" type = "float" nodename = "NormalStrength_StrengthNode_17a6fb112d3145278b53cdeacbbdd8f8" />
     </clamp>
-    <normal name = "NormalNode_1448d353c6ac46dcadb9d2494ed68ed8" type = "vector3">
+    <multiply name = "Normal_OutNode_1448d353c6ac46dcadb9d2494ed68ed8" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Normal_Out_in1Node_1448d353c6ac46dcadb9d2494ed68ed8" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <normal name = "Normal_Out_in1Node_1448d353c6ac46dcadb9d2494ed68ed8" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </normal>
     <subtract name = "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
@@ -82,7 +86,7 @@
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
     <dot name = "NormalBlend_BNode_ccc49edcd79a472b8ad6d6b78afacaaf" type = "vector3">
-        <input name = "in" type = "vector3" nodename = "NormalNode_1448d353c6ac46dcadb9d2494ed68ed8" />
+        <input name = "in" type = "vector3" nodename = "Normal_OutNode_1448d353c6ac46dcadb9d2494ed68ed8" />
     </dot>
     <combine3 name = "NormalUnpack_OutNode_e2a62117509640d0855a7bded8f7fad1" type = "vector3">
         <input name = "in1" type = "float" nodename = "NormalUnpack_Out_in1Node_e2a62117509640d0855a7bded8f7fad1" />
@@ -166,7 +170,7 @@
         <input name = "in2" type = "vector3" nodename = "NormalUnpack_OutNode_df765cbf0c4c48ee81c51fcced774793" />
     </add>
     <GeometryModification name = "SR_NormalVertex" type = "vertexshader">
-        <input name = "normal" type = "vector3" nodename = "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+        <input name = "normal" type = "vector3" nodename = "SR_NormalVertex_normal_FlipZ" />
     </GeometryModification>
     <realitykit_pbr name = "SR_Normal" type = "surfaceshader">
         <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormalbaseColor" />
@@ -183,6 +187,10 @@
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_NormalVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Normal" />
     </surfacematerial>
+    <multiply name = "SR_NormalVertex_normal_FlipZ" type = "vector3">
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+        <input name = "in1" type = "vector3" nodename = "NormalBlend_OutNode_ccc49edcd79a472b8ad6d6b78afacaaf" />
+    </multiply>
     <subtract name = "SR_Normal_roughness_OnesComplement" type = "float">
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />

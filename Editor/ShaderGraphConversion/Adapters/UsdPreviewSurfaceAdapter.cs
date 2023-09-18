@@ -213,20 +213,39 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             portType = MtlxDataTypes.Vector3;
                             ignoreIfNotConnected = true;
 
-                            // Subtract the model space position to get the offset.
-                            externalNodeName = $"{vertexNodeName}_{portName}_SubtractPosition";
+                            // Flip the Z coordinate to convert from Unity to RealityKit space.
+                            externalNodeName = $"{vertexNodeName}_{portName}_FlipZ";
                             externalPortName = "in1";
-                            externalNode = graph.AddNode(externalNodeName, "subtract", portType);
-                            graph.AddPortAndEdge(externalNodeName, vertexNodeName, portName, portType);
+                            externalNode = graph.AddNode(externalNodeName, "multiply", portType);
+                            externalNode.AddPortValue("in2", portType, new[] { 1.0f, 1.0f, -1.0f });
+
+                            // Subtract the model space position to get the offset.
+                            var subtractNodeName = $"{vertexNodeName}_{portName}_SubtractPosition";
+                            graph.AddNode(subtractNodeName, "subtract", portType);
+                            graph.AddPortAndEdge(externalNodeName, subtractNodeName, "in1", portType);
+                            graph.AddPortAndEdge(subtractNodeName, vertexNodeName, portName, portType);
 
                             var positionNodeName = $"{vertexNodeName}_{portName}_Position";
-                            var positionNode = graph.AddNode(
-                                positionNodeName, MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3);
+                            var positionNode = graph.AddNode(positionNodeName, MtlxNodeTypes.GeomPosition, portType);
                             positionNode.AddPortString("space", MtlxDataTypes.String, "object");
-                            graph.AddPortAndEdge(positionNodeName, externalNodeName, "in2", portType);
-
+                            graph.AddPortAndEdge(positionNodeName, subtractNodeName, "in2", portType);
                             break;
                         
+                        case SpecialRules.FlipZ:
+                            if (ignoreVertexStage  || srcSlot == null)
+                                continue;
+                            
+                            portType = MtlxDataTypes.Vector3;
+                            ignoreIfNotConnected = true;
+
+                            // Flip the Z coordinate to convert from Unity to RealityKit space.
+                            externalNodeName = $"{vertexNodeName}_{portName}_FlipZ";
+                            externalPortName = "in1";
+                            externalNode = graph.AddNode(externalNodeName, "multiply", portType);
+                            graph.AddPortAndEdge(externalNodeName, vertexNodeName, portName, portType);
+                            externalNode.AddPortValue("in2", portType, new[] { 1.0f, 1.0f, -1.0f });
+                            break;
+
                         case SpecialRules.VertexStage:
                             if (ignoreVertexStage)
                                 continue;
@@ -356,6 +375,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             SpecularGrayscale,
             SubtractPosition,
             VertexStage,
+            FlipZ,
             AdditiveColor,
             AdditiveAlpha,
             EnableAlphaClip,
@@ -368,9 +388,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             blockMap.Add("Position", "modelPositionOffset");
             rulesMap.Add("Position", SpecialRules.SubtractPosition);
             blockMap.Add("Normal", "normal");
-            rulesMap.Add("Normal", SpecialRules.VertexStage);
+            rulesMap.Add("Normal", SpecialRules.FlipZ);
             blockMap.Add("Tangent", "bitangent");
-            rulesMap.Add("Tangent", SpecialRules.VertexStage);
+            rulesMap.Add("Tangent", SpecialRules.FlipZ);
 
             blockMap.Add("Color", "color");
             rulesMap.Add("Color", SpecialRules.VertexStage);

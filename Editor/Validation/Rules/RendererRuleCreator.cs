@@ -63,6 +63,10 @@ namespace UnityEditor.PolySpatial.Validation
                 FixItMessage = k_FixtItMessage,
                 SceneOnlyValidation = true,
                 OnClick = () => BuildValidator.SelectObject(instanceID),
+                HelpText = "Documentation",
+                HelpLink = component is ParticleSystem
+                    ?"https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/SupportedFeatures.html%23particle-systems"
+                    : "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/SupportedFeatures.html%23rendering-components-systems",
             };
 
             rule.CheckPredicate = () =>

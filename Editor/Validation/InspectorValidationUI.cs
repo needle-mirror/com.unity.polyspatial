@@ -192,12 +192,7 @@ namespace UnityEditor.PolySpatial.Validation
             foreach (var message in messages)
             {
                 EditorGUILayout.Space(2f);
-
-                if (string.IsNullOrEmpty(message.Link.LinkUrl))
-                    PolySpatialEditorGUIUtils.DrawMessageBox(message.Message, message.MessageType);
-                else
-                    PolySpatialEditorGUIUtils.DrawMessageBoxWithLink(message.Message, message.MessageType, message.Link.LinkTitle, message.Link.LinkUrl);
-
+                PolySpatialEditorGUIUtils.DrawMessageBox(message.Message, message.MessageType, message.Link.LinkTitle, message.Link.LinkUrl);
             }
         }
 
@@ -229,12 +224,12 @@ namespace UnityEditor.PolySpatial.Validation
             var messageType = issue.Error ? MessageType.Error : MessageType.Warning;
             if (issue.FixIt == null)
             {
-                PolySpatialEditorGUIUtils.DrawMessageBox(issue.Message, messageType);
+                PolySpatialEditorGUIUtils.DrawMessageBox(issue.Message, messageType, issue.HelpText, issue.HelpLink);
             }
             else
             {
                 var fixButtonLabel = issue.FixItAutomatic ? k_FixButtonLabel : k_EditButtonLabel;
-                if (PolySpatialEditorGUIUtils.DrawFixMeBox(issue.Message, messageType, fixButtonLabel, issue.FixItMessage))
+                if (PolySpatialEditorGUIUtils.DrawFixMeBox(issue.Message, messageType, fixButtonLabel, issue.FixItMessage, issue.HelpText, issue.HelpLink))
                 {
                     s_FixAllList.Clear();
                     s_FixAllList.Add(issue);

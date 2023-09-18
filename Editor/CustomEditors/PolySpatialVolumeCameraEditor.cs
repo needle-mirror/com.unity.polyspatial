@@ -19,6 +19,8 @@ namespace UnityEditor.PolySpatial.Internals
             }
         }
 
+        const int k_MinInspectorWidth = 212;
+
         SerializedProperty m_ModeProperty;
         SerializedProperty m_DimensionsProperty;
         SerializedProperty m_CullingMaskProperty;
@@ -47,6 +49,14 @@ namespace UnityEditor.PolySpatial.Internals
         {
             using (var changed = new EditorGUI.ChangeCheckScope())
             {
+
+                // Adjust label to avoid content spilling over
+                if (!EditorGUIUtility.wideMode)
+                {
+                    EditorGUIUtility.wideMode = true;
+                    EditorGUIUtility.labelWidth = EditorGUIUtility.currentViewWidth - k_MinInspectorWidth;
+                }
+
                 EditorGUILayout.PropertyField(m_ModeProperty, EditorGUIBridge.TextContent("Mode"));
 
                 var isUniformScale = m_IsUniformScaleProperty.boolValue;

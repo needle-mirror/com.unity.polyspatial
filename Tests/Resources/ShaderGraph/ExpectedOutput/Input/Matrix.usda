@@ -94,12 +94,27 @@ def "MaterialX"
             def Shader "SR_MatrixVertex_modelPositionOffset_SubtractPosition"
             {
                 uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/SR_MatrixVertex_modelPositionOffset_FlipZ.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Matrix/SR_MatrixVertex_modelPositionOffset_Position.outputs:out>
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_SubtractPositionin1"
+            def Shader "SR_MatrixVertex_modelPositionOffset_Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "object"
+                float3 outputs:out
+            }
+
+            def Shader "SR_MatrixVertex_modelPositionOffset_FlipZ"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Matrix/CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_FlipZin1.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "CastSwizzleFromMultiplyNode_93a4700a498545e49d6ec8dbf4e6a195ToSR_MatrixVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Matrix/MultiplyNode_93a4700a498545e49d6ec8dbf4e6a195.outputs:out>
@@ -110,7 +125,7 @@ def "MaterialX"
             def Shader "MultiplyNode_93a4700a498545e49d6ec8dbf4e6a195"
             {
                 uniform token info:id = "ND_transformmatrix_vector4"
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_Matrix/TransformViewProjectionInverse.outputs:out>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Matrix/Vector4Node_f490c91f9b2040c0ac2f02cc1ab9f90e.outputs:out>
                 float4 outputs:out
             }
@@ -125,38 +140,39 @@ def "MaterialX"
                 float4 outputs:out
             }
 
-            def Shader "TransformViewProjectionInverse"
+            def Shader "TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c"
             {
                 uniform token info:id = "ND_invertmatrix_matrix44"
-                matrix4d inputs:in.connect = </MaterialX/Materials/USD_Matrix/TransformViewProjection.outputs:out>
+                matrix4d inputs:in.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
                 matrix4d outputs:out
             }
 
-            def Shader "TransformViewProjection"
+            def Shader "TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c"
             {
                 uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformViewNode_7780a58ea00644f7be6a295a348a1d6c.outputs:worldToView>
-                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_Matrix/TransformProjectionNode_7780a58ea00644f7be6a295a348a1d6c.outputs:viewToProjection>
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
+                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
                 matrix4d outputs:out
             }
 
-            def Shader "TransformProjectionNode_7780a58ea00644f7be6a295a348a1d6c"
+            def Shader "TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
-                matrix4d outputs:viewToProjection
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:viewToProjection>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c.outputs:worldToView>
+                matrix4d outputs:out
             }
 
-            def Shader "TransformViewNode_7780a58ea00644f7be6a295a348a1d6c"
+            def Shader "TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c"
             {
                 uniform token info:id = "ND_realitykit_surface_world_to_view"
                 matrix4d outputs:worldToView
             }
 
-            def Shader "SR_MatrixVertex_modelPositionOffset_Position"
+            def Shader "TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c"
             {
-                uniform token info:id = "ND_position_vector3"
-                string inputs:space = "object"
-                float3 outputs:out
+                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                matrix4d outputs:viewToProjection
             }
 
             def Shader "CastSwizzle2FromAddNode_a0e8e2c6d59d4039b8072c060f2b5423ToSR_MatrixemissiveColor"

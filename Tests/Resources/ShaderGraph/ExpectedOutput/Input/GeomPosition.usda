@@ -67,47 +67,76 @@ def "MaterialX"
             def Shader "SubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0"
             {
                 uniform token info:id = "ND_subtract_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromCombineNode_958b0b7d0dd349aa86085486ecf76aa5ToSubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0in2.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromPosition_OutNode_958b0b7d0dd349aa86085486ecf76aa5ToSubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0in2.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "Node_dec72ccdfd7340acb1c406b5dc6dffce"
-            {
-                uniform token info:id = "ND_transformpoint_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromCombineNode_ceb0191531624f649adab3d5432c0bbcToNode_dec72ccdfd7340acb1c406b5dc6dffcein.outputs:out>
-                string inputs:fromspace = "world"
-                string inputs:tospace = "object"
-                float3 outputs:out
-            }
-
-            def Shader "CastSwizzleFromCombineNode_ceb0191531624f649adab3d5432c0bbcToNode_dec72ccdfd7340acb1c406b5dc6dffcein"
+            def Shader "Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/CombineNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
-            def Shader "CombineNode_ceb0191531624f649adab3d5432c0bbc"
+            def Shader "Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
             {
                 uniform token info:id = "ND_combine4_vector4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/XNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/YNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_GeomPosition/ZNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 float inputs:in4 = 1
                 float4 outputs:out
             }
 
-            def Shader "XNode_ceb0191531624f649adab3d5432c0bbc"
+            def Shader "Transform_Out_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 string inputs:channels = "x"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
                 float outputs:out
             }
 
-            def Shader "PositionNode_ceb0191531624f649adab3d5432c0bbc"
+            def Shader "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromPosition_OutNode_ceb0191531624f649adab3d5432c0bbcToTransform_InNode_dec72ccdfd7340acb1c406b5dc6dffcein.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "CastSwizzleFromPosition_OutNode_ceb0191531624f649adab3d5432c0bbcToTransform_InNode_dec72ccdfd7340acb1c406b5dc6dffcein"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Position_OutNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
+                string inputs:channels = "xyz"
+                float3 outputs:out
+            }
+
+            def Shader "Position_OutNode_ceb0191531624f649adab3d5432c0bbc"
+            {
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Position_Out_inNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Position_Out_inNode_ceb0191531624f649adab3d5432c0bbc"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Position_Out_in_in1Node_ceb0191531624f649adab3d5432c0bbc.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
+            }
+
+            def Shader "Position_Out_in_in1Node_ceb0191531624f649adab3d5432c0bbc"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "world"
@@ -124,68 +153,78 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_958b0b7d0dd349aa86085486ecf76aa5ToSubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0in2"
+            def Shader "CastSwizzleFromPosition_OutNode_958b0b7d0dd349aa86085486ecf76aa5ToSubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0in2"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/CombineNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Position_OutNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
                 string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
-            def Shader "CombineNode_958b0b7d0dd349aa86085486ecf76aa5"
+            def Shader "Position_OutNode_958b0b7d0dd349aa86085486ecf76aa5"
             {
-                uniform token info:id = "ND_combine4_vector4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/XNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/YNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_GeomPosition/ZNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
-                float inputs:in4 = 1
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Position_Out_inNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
                 float4 outputs:out
             }
 
-            def Shader "ZNode_958b0b7d0dd349aa86085486ecf76aa5"
+            def Shader "Position_Out_inNode_958b0b7d0dd349aa86085486ecf76aa5"
             {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                string inputs:channels = "z"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
-                float outputs:out
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Position_Out_in_in1Node_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
             }
 
-            def Shader "PositionNode_958b0b7d0dd349aa86085486ecf76aa5"
+            def Shader "Position_Out_in_in1Node_958b0b7d0dd349aa86085486ecf76aa5"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "object"
                 float3 outputs:out
             }
 
-            def Shader "YNode_958b0b7d0dd349aa86085486ecf76aa5"
+            def Shader "Transform_Out_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_invertmatrix_matrix44"
+                matrix4d inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/Transform_Out_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:modelToWorld>
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_realitykit_surface_model_to_world"
+                matrix4d outputs:modelToWorld
+            }
+
+            def Shader "Transform_Out_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 string inputs:channels = "y"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "XNode_958b0b7d0dd349aa86085486ecf76aa5"
+            def Shader "Transform_Out_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                string inputs:channels = "x"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_958b0b7d0dd349aa86085486ecf76aa5.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "YNode_ceb0191531624f649adab3d5432c0bbc"
-            {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                string inputs:channels = "y"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "ZNode_ceb0191531624f649adab3d5432c0bbc"
-            {
-                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 string inputs:channels = "z"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/PositionNode_ceb0191531624f649adab3d5432c0bbc.outputs:out>
                 float outputs:out
             }
         }

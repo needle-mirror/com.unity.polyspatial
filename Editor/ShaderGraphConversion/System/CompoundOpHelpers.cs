@@ -30,13 +30,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         internal string NodeType { get; private set; }
         internal string OutputType { get; private set; }
+        internal string OutputName { get; private set; }
         internal Dictionary<string, InputDef> Inputs { get; private set; }
-
-        internal NodeDef(string nodeType, string outputType, Dictionary<string, InputDef> inputs)
+        
+        internal NodeDef(
+            string nodeType, string outputType, Dictionary<string, InputDef> inputs, string outputName = "out")
         {
             NodeType = nodeType;
             OutputType = outputType;
             Inputs = inputs;
+            OutputName = outputName;
         }
 
         internal MtlxNodeData AddNodesAndEdges(CompoundOpContext ctx, string key)
@@ -45,6 +48,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 nodeDatum = ctx.Graph.AddNode(
                     NodeUtils.GetNodeName(ctx.Node, $"{ctx.Hint}_{key}"), NodeType, OutputType);
+                nodeDatum.outputName = OutputName;
                 ctx.NodeData.Add(key, nodeDatum);
 
                 var outputSlot = NodeUtils.GetOutputByName(ctx.Node, key);
@@ -64,6 +68,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (obj is not NodeDef other ||
                 other.NodeType != NodeType ||
                 other.OutputType != OutputType ||
+                other.OutputName != OutputName ||
                 other.Inputs.Count != Inputs.Count)
             {
                 return false;
@@ -81,6 +86,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             HashCode hashCode = new();
             hashCode.Add(NodeType);
             hashCode.Add(OutputType);
+            hashCode.Add(OutputName);
             foreach (var entry in Inputs)
             {
                 hashCode.Add(entry.Key);
@@ -326,9 +332,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         internal NodeDef Source { get; private set; }
 
-        internal InlineInputDef(string nodeType, string outputType, Dictionary<string, InputDef> inputs)
+        internal InlineInputDef(
+            string nodeType, string outputType, Dictionary<string, InputDef> inputs, string outputName = "out")
         {
-            Source = new NodeDef(nodeType, outputType, inputs);
+            Source = new NodeDef(nodeType, outputType, inputs, outputName);
         }
 
         internal override void AddPortsAndEdges(

@@ -1,11 +1,10 @@
-using System;
 
 namespace UnityEditor.PolySpatial.Validation
 {
     /// <summary>
     /// An interface that represents a message to be displayed in the Inspector view.
     /// </summary>
-    interface ITypeMessage
+    public interface ITypeMessage
     {
         /// <summary>
         /// The message text.
@@ -22,15 +21,33 @@ namespace UnityEditor.PolySpatial.Validation
         /// </summary>
         LinkData Link { get; }
 
-        struct LinkData
+        /// <summary>
+        /// The message's data for the url.
+        /// </summary>
+        public struct LinkData
         {
-            internal string LinkUrl;
-            internal string LinkTitle;
+            readonly string m_LinkURL;
+            readonly string m_linkTittle;
+            
+            /// <summary>
+            /// the Link URL
+            /// </summary>
+            public string LinkUrl => m_LinkURL;
+            
+            /// <summary>
+            /// the tittle of the Link
+            /// </summary>
+            public  string LinkTitle => m_linkTittle;
 
-            internal LinkData(string linkTitle, string linkUrl)
+            /// <summary>
+            /// Constructor for the LinkData
+            /// </summary>
+            /// <param name="linkTitle"></param>
+            /// <param name="linkUrl"></param>
+            public LinkData(string linkTitle, string linkUrl)
             {
-                LinkTitle = linkTitle;
-                LinkUrl = linkUrl;
+                m_linkTittle = linkTitle;
+                m_LinkURL = linkUrl;
             }
         }
     }

@@ -93,6 +93,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 });
             }
 
+            AddMatrix4Property(PolySpatialShaderGlobals.VolumeToWorld);
+
             switch (m_BakedLightingMode)
             {
                 case BakedLightingMode.Lightmap:
@@ -124,7 +126,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     AddVector4Property(PolySpatialShaderGlobals.SpotDirectionPrefix + i);
                     AddVector4Property(PolySpatialShaderGlobals.LightAttenPrefix + i);
                 }
-                AddMatrix4Property(PolySpatialShaderGlobals.VolumeToWorld);
             }
         }
 
@@ -153,6 +154,8 @@ float3 brdfSpecular = lerp(
             writer.WriteLine($"float roughness2MinusOne = roughness2 - 1.0;");
             writer.WriteLine("float normalizationTerm = roughness * 4.0 + 2.0;");
             writer.WriteLine("float grazingTerm = saturate(Smoothness + reflectivity);");
+            writer.WriteLine($@"
+float3 viewDirectionWS = normalize(mul({PolySpatialShaderGlobals.VolumeToWorld}, float4(ViewDirectionVS, 0.0)).xyz);");
 
             StringBuilder finalSumExpr = new("Emission");
 
@@ -197,8 +200,8 @@ float3 x2 = float3(
             if (m_BakedLightingMode != BakedLightingMode.None)
             {
                 // https://github.cds.internal.unity3d.com/unity/unity/blob/e3e09beefeb3cbd8abd8e267dd80b22e5890968c/Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl#L416
-                writer.WriteLine("float3 reflectVector = reflect(-ViewDirectionWS, normalWS);");
-                writer.WriteLine("float NoV = saturate(dot(normalWS, ViewDirectionWS));");
+                writer.WriteLine("float3 reflectVector = reflect(-viewDirectionWS, normalWS);");
+                writer.WriteLine("float NoV = saturate(dot(normalWS, viewDirectionWS));");
                 writer.WriteLine("float fresnelTerm = pow(1.0 - NoV, 4);");
                 writer.WriteLine(@"
 float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / (roughness2 + 1.0);");
@@ -236,7 +239,7 @@ float distanceAtten{i} = rcp(distanceSqr{i}) * smoothFactor{i} * smoothFactor{i}
                     writer.WriteLine($"float3 radiance{i} = {lightColor}.rgb * (atten{i} * NdotL{i});");
 
                     // https://github.cds.internal.unity3d.com/unity/unity/blob/918aac026438f350a9716ff831b1e309f2483743/Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl#L179
-                    writer.WriteLine($"float3 halfDir{i} = normalize(lightDirection{i} + ViewDirectionWS);");
+                    writer.WriteLine($"float3 halfDir{i} = normalize(lightDirection{i} + viewDirectionWS);");
                     writer.WriteLine($"float NoH{i} = saturate(dot(normalWS, halfDir{i}));");
                     writer.WriteLine($"float LoH{i} = saturate(dot(lightDirection{i}, halfDir{i}));");
                     writer.WriteLine($"float d{i} = NoH{i} * NoH{i} * roughness2MinusOne + 1.00001f;");
@@ -269,7 +272,7 @@ float distanceAtten{i} = rcp(distanceSqr{i}) * smoothFactor{i} * smoothFactor{i}
             [Slot(8, Binding.WorldSpaceBitangent, true)] Vector3 TangentFrameY,
             [Slot(9, Binding.WorldSpaceNormal, true)] Vector3 TangentFrameZ,
             [Slot(10, Binding.WorldSpacePosition, true)] Vector3 PositionVS,
-            [Slot(11, Binding.WorldSpaceViewDirection, true)] Vector3 ViewDirectionWS,
+            [Slot(11, Binding.WorldSpaceViewDirection, true)] Vector3 ViewDirectionVS,
             [Slot(12, Binding.None, ShaderStageCapability.Fragment)] out Vector3 Out)
         {
             Out = Vector3.one;

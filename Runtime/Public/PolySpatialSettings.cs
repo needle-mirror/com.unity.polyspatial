@@ -204,6 +204,9 @@ namespace Unity.PolySpatial
         [SerializeField] public bool EnableProgressiveMipStreaming;
         [SerializeField] public long MaxMipByteSizePerCycle = 128000;
         [SerializeField] public ulong RuntimeFlags = 0;
+        [Tooltip("PolySpatial creates a mirrored version of your scene on the target runtime. When previewing in the Unity Editor, " +
+            "this option will enable or disable creating these preview clones within Unity.  Changing this setting does not affect behavior of a build.")]
+        [SerializeField] public bool EnableInEditorPreview = true;
 
         [SerializeField] public LayerMask ColliderSyncLayerMask = 1;
 
@@ -294,6 +297,13 @@ namespace Unity.PolySpatial
                 return NetworkingMode.Client;
 #endif
 
+#if UNITY_EDITOR
+                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer)
+                {
+                    return NetworkingMode.LocalAndClient;
+                }
+#endif
+
                 return m_PolySpatialNetworkingMode;
             }
             set => m_PolySpatialNetworkingMode = value;
@@ -321,13 +331,27 @@ namespace Unity.PolySpatial
         readonly Lazy<List<SocketAddress>> m_ServerAddresses = new(() =>
         {
             var results = new List<SocketAddress>();
-            foreach (var address in instance.m_SerializedServerAddresses)
+            if (instance.m_PolySpatialNetworkingMode == NetworkingMode.LocalAndClient)
             {
-                if (SocketAddress.ParseAddress(address, DefaultServerPort, out var socketAddress))
+                foreach (var address in instance.m_SerializedServerAddresses)
+                {
+                    if (SocketAddress.ParseAddress(address, DefaultServerPort, out var socketAddress))
+                    {
+                        results.Add(socketAddress);
+                    }
+                }
+            }
+
+#if UNITY_EDITOR
+            if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer
+                && results.All(s => s.Host != PolySpatialUserSettings.instance.UniversalPlayerIP && s.Port != DefaultServerPort))
+            {
+                if (SocketAddress.ParseAddress(PolySpatialUserSettings.instance.UniversalPlayerIP, DefaultServerPort, out var socketAddress))
                 {
                     results.Add(socketAddress);
                 }
             }
+#endif
 
             return results;
         });
@@ -347,12 +371,39 @@ namespace Unity.PolySpatial
         string m_DemoLaunchSceneName = null;
         public static string DemoLaunchSceneName => instance.m_DemoLaunchSceneName;
 #else
-        public NetworkingMode PolySpatialNetworkingMode => NetworkingMode.Local;
+        public NetworkingMode PolySpatialNetworkingMode
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer)
+                {
+                    return NetworkingMode.LocalAndClient;
+                }
+#endif
+                return NetworkingMode.Local;
+            }
+        }
+
         public bool EnableHostCameraControl;
         static readonly HashSet<string> s_EmptyStringHash = new();
         public HashSet<string> IgnoredScenePaths => s_EmptyStringHash;
         public int ServerPort => DefaultServerPort;
-        public List<SocketAddress> ServerAddresses => new() { new SocketAddress() { Host = DefaultServerAddress, Port = DefaultServerPort} };
+        public List<SocketAddress> ServerAddresses
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer &&
+                    SocketAddress.ParseAddress(PolySpatialUserSettings.instance.UniversalPlayerIP, DefaultServerPort, out var socketAddress))
+                {
+                    return new() {socketAddress};
+                }
+#endif
+                return new() {new SocketAddress() {Host = DefaultServerAddress, Port = DefaultServerPort}};
+            }
+        }
+
         public bool EnableClipping => false;
         public bool EnableServerCameraControl => false;
 #endif

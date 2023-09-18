@@ -1,38 +1,74 @@
 <?xml version ="1.0"?>
 <materialx version = "1.38" colorspace = "lin_rec709">
-    <dot name = "Keyword_ENUMNode_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
+    <ifequal name = "Keyword_ENUM_OutNode_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
+        <input name = "value1" type = "boolean" nodename = "_ENUM_A" />
+        <input name = "value2" type = "boolean" value = "true" />
+        <input name = "in1" type = "float" nodename = "Keyword_ENUM_ANode_e7a4eb55308f4ce09c18db94440aa48a" />
+        <input name = "in2" type = "float" nodename = "Keyword_ENUM_Out_in2Node_e7a4eb55308f4ce09c18db94440aa48a" />
+    </ifequal>
+    <constant name = "_ENUM_A" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <dot name = "Keyword_ENUM_ANode_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <ifequal name = "Keyword_ENUM_Out_in2Node_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
+        <input name = "value1" type = "boolean" nodename = "_ENUM_B" />
+        <input name = "value2" type = "boolean" value = "true" />
+        <input name = "in1" type = "float" nodename = "Keyword_ENUM_BNode_e7a4eb55308f4ce09c18db94440aa48a" />
+        <input name = "in2" type = "float" nodename = "Keyword_ENUM_CNode_e7a4eb55308f4ce09c18db94440aa48a" />
+    </ifequal>
+    <constant name = "_ENUM_B" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <dot name = "Keyword_ENUM_BNode_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
         <input name = "in" type = "float" value = "1" />
     </dot>
-    <dot name = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" type = "float">
-        <input name = "in" type = "float" value = "1" />
+    <dot name = "Keyword_ENUM_CNode_e7a4eb55308f4ce09c18db94440aa48a" type = "float">
+        <input name = "in" type = "float" value = "0" />
     </dot>
-    <subtract name = "SubtractNode_19d58034154f4d7c9b45c1778bc8a0fe" type = "float">
-        <input name = "in1" type = "float" nodename = "Keyword_ENUMNode_e7a4eb55308f4ce09c18db94440aa48a" />
-        <input name = "in2" type = "float" nodename = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" />
-    </subtract>
-    <absval name = "OrANode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
-        <input name = "in" type = "float" nodename = "Keyword_ENUMNode_e7a4eb55308f4ce09c18db94440aa48a" />
-    </absval>
-    <absval name = "OrBNode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
-        <input name = "in" type = "float" nodename = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" />
-    </absval>
-    <add name = "OrSumNode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
-        <input name = "in1" type = "float" nodename = "OrANode_adaf883c5bee46a6999b05259f2c33c8" />
-        <input name = "in2" type = "float" nodename = "OrBNode_adaf883c5bee46a6999b05259f2c33c8" />
-    </add>
-    <ifgreater name = "OrCompNode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
-        <input name = "value1" type = "float" nodename = "OrSumNode_adaf883c5bee46a6999b05259f2c33c8" />
-        <input name = "value2" type = "float" value = "0" />
+    <constant name = "_BOOLEAN" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <ifequal name = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" type = "float">
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0" />
-    </ifgreater>
+        <input name = "value1" type = "boolean" nodename = "_BOOLEAN" />
+        <input name = "value2" type = "boolean" value = "true" />
+    </ifequal>
+    <subtract name = "SubtractNode_19d58034154f4d7c9b45c1778bc8a0fe" type = "float">
+        <input name = "in1" type = "float" nodename = "Keyword_ENUM_OutNode_e7a4eb55308f4ce09c18db94440aa48a" />
+        <input name = "in2" type = "float" nodename = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" />
+    </subtract>
+    <ifequal name = "Or_OutNode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "value1" type = "float" nodename = "Or_Out_value1Node_adaf883c5bee46a6999b05259f2c33c8" />
+        <input name = "value2" type = "float" value = "0" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+    </ifequal>
+    <add name = "Or_Out_value1Node_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "in1" type = "float" nodename = "Or_Out_value1_in1Node_adaf883c5bee46a6999b05259f2c33c8" />
+        <input name = "in2" type = "float" nodename = "Or_Out_value1_in2Node_adaf883c5bee46a6999b05259f2c33c8" />
+    </add>
+    <absval name = "Or_Out_value1_in1Node_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "in" type = "float" nodename = "Or_ANode_adaf883c5bee46a6999b05259f2c33c8" />
+    </absval>
+    <dot name = "Or_ANode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "in" type = "float" nodename = "Keyword_ENUM_OutNode_e7a4eb55308f4ce09c18db94440aa48a" />
+    </dot>
+    <absval name = "Or_Out_value1_in2Node_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "in" type = "float" nodename = "Or_BNode_adaf883c5bee46a6999b05259f2c33c8" />
+    </absval>
+    <dot name = "Or_BNode_adaf883c5bee46a6999b05259f2c33c8" type = "float">
+        <input name = "in" type = "float" nodename = "Keyword_BOOLEANNode_c1c79b58b6de4f7a97f7626185518dd0" />
+    </dot>
     <ifgreater name = "BranchNode_047b847a43dd4e9189de1e772389b43f" type = "float">
         <input name = "in1" type = "float" nodename = "SubtractNode_19d58034154f4d7c9b45c1778bc8a0fe" />
         <input name = "in2" type = "float" value = "1" />
         <input name = "value1" type = "float" nodename = "BranchAbsNode_047b847a43dd4e9189de1e772389b43f" />
     </ifgreater>
     <absval name = "BranchAbsNode_047b847a43dd4e9189de1e772389b43f" type = "float">
-        <input name = "in" type = "float" nodename = "OrCompNode_adaf883c5bee46a6999b05259f2c33c8" />
+        <input name = "in" type = "float" nodename = "Or_OutNode_adaf883c5bee46a6999b05259f2c33c8" />
     </absval>
     <combine4 name = "CombineNode_cd251f14fe2042b2a17838410c24fe75" type = "color4">
         <input name = "in1" type = "float" nodename = "BranchNode_b0139b1661a14dff948dc61bf3d3c48f" />
@@ -50,7 +86,7 @@
         <input name = "value1" type = "float" nodename = "BranchAbsNode_b0139b1661a14dff948dc61bf3d3c48f" />
     </ifgreater>
     <absval name = "BranchAbsNode_b0139b1661a14dff948dc61bf3d3c48f" type = "float">
-        <input name = "in" type = "float" nodename = "OrCompNode_adaf883c5bee46a6999b05259f2c33c8" />
+        <input name = "in" type = "float" nodename = "Or_OutNode_adaf883c5bee46a6999b05259f2c33c8" />
     </absval>
     <GeometryModification name = "SR_KeywordsVertex" type = "vertexshader">
     </GeometryModification>

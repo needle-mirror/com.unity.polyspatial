@@ -20,9 +20,13 @@
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_GeometryVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Geometry" />
     </surfacematerial>
+    <multiply name = "SR_GeometryVertex_modelPositionOffset_FlipZ" type = "vector3">
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1" />
+    </multiply>
     <subtract name = "SR_GeometryVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "SR_GeometryVertex_modelPositionOffset_FlipZ" />
         <input name = "in2" type = "vector3" nodename = "SR_GeometryVertex_modelPositionOffset_Position" />
-        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" />
     </subtract>
     <position name = "SR_GeometryVertex_modelPositionOffset_Position" type = "vector3">
         <input name = "space" type = "string" value = "object" />
@@ -31,11 +35,11 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />
     </subtract>
-    <convert name = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" type = "float">
+    <convert name = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1" type = "float">
         <input name = "in" type = "integer" nodename = "VertexIDNode_ec90452928824015a445211766951f61" />
     </convert>
-    <swizzle name = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
-        <input name = "in" type = "float" nodename = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_SubtractPositionin1" />
+    <swizzle name = "CastSwizzleFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1" type = "vector3">
+        <input name = "in" type = "float" nodename = "CastSrcToFloatFromVertexIDNode_ec90452928824015a445211766951f61ToSR_GeometryVertex_modelPositionOffset_FlipZin1" />
         <input name = "channels" type = "string" value = "xxx" />
     </swizzle>
 </materialx>

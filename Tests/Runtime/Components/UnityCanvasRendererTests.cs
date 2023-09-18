@@ -189,63 +189,6 @@ namespace Tests.Runtime.Functional.Components
 #endif
         }
 
-        [UnityTest]
-        public IEnumerator Test_CanvasRenderer_ChangesMeshCenter()
-        {
-            var canvas = new GameObject("Canvas", typeof(Canvas));
-
-            var button1 = new GameObject("Button 1", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            var label1 = new GameObject("Label 1", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-
-            var button2 = new GameObject("Button 2", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            var label2 = new GameObject("Label 2", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-
-            label1.GetComponent<TextMeshProUGUI>().text = "Label 1";
-            label2.GetComponent<TextMeshProUGUI>().text = "Label 2";
-
-            button1.transform.SetParent(canvas.transform);
-            label1.transform.SetParent(button1.transform);
-
-            // Parent button2 over button1 to tests multiple layers.
-            // Depths are computed from the hierarchy position as well as the sibling index.
-            // -> Canvas                   Depth: 0
-            //     -> Button 1             Depth: 1
-            //          -> Label 1         Depth: 2
-            //          -> Button 2        Depth: 3
-            //               -> Label 2    Depth: 4
-            button2.transform.SetParent(button1.transform);
-            label2.transform.SetParent(button2.transform);
-
-            canvas.transform.position = new Vector3(10, 10, 0);
-            button1.transform.position = new Vector3(-100, -100, 0.0f);
-            button2.transform.position = new Vector3(-200, -200, 0.0f);
-
-            yield return null;
-
-            var adjustedButton1Mesh = CanvasRendererTracker.AdjustedMeshForUISort(button1, button1.GetComponent<CanvasRenderer>().GetMesh());
-            var adjustedLabel1Mesh = CanvasRendererTracker.AdjustedMeshForUISort(label1, label1.GetComponent<CanvasRenderer>().GetMesh());
-
-            var adjustedButton2Mesh = CanvasRendererTracker.AdjustedMeshForUISort(button2, button2.GetComponent<CanvasRenderer>().GetMesh());
-            var adjustedLabel2Mesh = CanvasRendererTracker.AdjustedMeshForUISort(label2, label2.GetComponent<CanvasRenderer>().GetMesh());
-
-            // Once transformed, the meshes center's should match the canvas's position.
-            // Only test the (x,y) position here since the canvas will be aligned with the X/Y axis by default.
-            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)button1.transform.localToWorldMatrix.MultiplyPoint(adjustedButton1Mesh.bounds.center));
-            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)label1.transform.localToWorldMatrix.MultiplyPoint(adjustedLabel1Mesh.bounds.center));
-            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)button2.transform.localToWorldMatrix.MultiplyPoint(adjustedButton2Mesh.bounds.center));
-            Assert.AreEqual((Vector2)canvas.transform.position, (Vector2)label2.transform.localToWorldMatrix.MultiplyPoint(adjustedLabel2Mesh.bounds.center));
-
-            // The meshes should be offsets according to the depth of the control in the canvas's hierarchy.
-            Assert.Greater(adjustedButton1Mesh.bounds.center.z, adjustedLabel1Mesh.bounds.center.z);
-            Assert.Greater(adjustedLabel1Mesh.bounds.center.z, adjustedButton2Mesh.bounds.center.z);
-            Assert.Greater(adjustedButton2Mesh.bounds.center.z, adjustedLabel2Mesh.bounds.center.z);
-
-            GameObject.Destroy(label1);
-            GameObject.Destroy(button1);
-            GameObject.Destroy(label2);
-            GameObject.Destroy(button2);
-            GameObject.Destroy(canvas);
-        }
 
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_SetsMaterialAsset()
@@ -454,20 +397,20 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            Assert.IsTrue(tree1.CompareTo(tree2) == -1, "Expected tree1 to be sorted before tree2 for sibling ordering");
+            Assert.IsTrue(tree1.CompareTo(tree2) < 0, "Expected tree1 to be sorted before tree2 for sibling ordering");
 
             tree1.canvas.sortingLayerName = "PolySpatial";
 
             yield return null;
 
-            Assert.IsTrue(tree2.CompareTo(tree1) == 1, "Expected tree2 to be sorted after tree1 in layer value ordering");
+            Assert.IsTrue(tree2.CompareTo(tree1) < 0, "Expected tree2 to be sorted before tree1 in layer value ordering");
 
             tree1.canvas.sortingLayerName = "Default";
             tree2.canvas.sortingLayerName = "PolySpatial";
 
             yield return null;
 
-            Assert.IsTrue(tree1.CompareTo(tree2) == 1, "Expected tree1 to be sorted after tree2 in layer value ordering");
+            Assert.IsTrue(tree1.CompareTo(tree2) < 0, "Expected tree1 to be sorted before tree2 in layer value ordering");
 
             DestroySubtree(tree1);
             DestroySubtree(tree2);
@@ -511,21 +454,21 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) == -1, "Expected label to be sorted before button");
+            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) < 0, "Expected label to be sorted before button");
 
             tree1.button2.transform.SetSiblingIndex(0);
             tree1.label1.transform.SetSiblingIndex(1);
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.button2, tree1.label1) == -1, "Expected button to be sorted before label");
+            Assert.IsTrue(tree1.Compare(tree1.button2, tree1.label1) < 0, "Expected button to be sorted before label");
 
             tree1.label1.transform.SetSiblingIndex(0);
             tree1.button2.transform.SetSiblingIndex(1);
 
             yield return null;
 
-            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) == -1, "Expected label to be sorted before button");
+            Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) < 0, "Expected label to be sorted before button");
 
             DestroySubtree(tree1);
 

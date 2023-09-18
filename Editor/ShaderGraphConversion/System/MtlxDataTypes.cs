@@ -191,6 +191,29 @@ namespace UnityEditor.ShaderGraph.MaterialX
             _ => 1,
         };
 
+        internal static string GetHlslForType(string datatype) => datatype switch
+        {
+            Vector2 => "float2",
+            Vector3 or Color3 => "float3",
+            Vector4 or Color4 => "float4",
+            Matrix22 => "float2x2",
+            Matrix33 => "float3x3",
+            Matrix44 => "float4x4",
+            _ => "float",
+        };
+
+        internal static string GetTypeForHlsl(string hlsl) => hlsl switch
+        {
+            "float" => MtlxDataTypes.Float,
+            "float2" => MtlxDataTypes.Vector2,
+            "float3" => MtlxDataTypes.Vector3,
+            "float4" => MtlxDataTypes.Vector4,
+            "float2x2" => MtlxDataTypes.Matrix22,
+            "float3x3" => MtlxDataTypes.Matrix33,
+            "float4x4" => MtlxDataTypes.Matrix44,
+            _ => null,
+        };
+
         internal static bool IsColor(string datatype) => datatype.Contains("color");
         internal static bool IsVector(string datatype) => datatype.Contains("vector");
         internal static bool IsString(string datatype) => (datatype == MtlxDataTypes.String || datatype == MtlxDataTypes.Filename);

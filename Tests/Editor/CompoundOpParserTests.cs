@@ -462,6 +462,104 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
         }
 
         [Test]
+        public void Test_Boolean_Logic()
+        {
+            Dictionary<string, ParserInput> inputs = new()
+            {
+                ["A"] = new ExternalInput(MtlxDataTypes.Float),
+                ["B"] = new ExternalInput(MtlxDataTypes.Float),
+                ["C"] = new ExternalInput(MtlxDataTypes.Vector3),
+            };
+            Dictionary<string, NodeDef> expectedNodeDefs = new()
+            {
+                ["Out"] = new(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+                {
+                    ["value1"] = new ExternalInputDef("A"),
+                    ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                }),
+            };
+            var actualNodeDefs = CompoundOpParser.Parse(inputs, "Out = !A;");
+            Assert.AreEqual(expectedNodeDefs, actualNodeDefs);
+
+            expectedNodeDefs = new()
+            {
+                ["Out"] = new(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+                {
+                    ["value1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+                            {
+                                ["value1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                                {
+                                    ["in1"] = new ExternalInputDef("A"),
+                                    ["in2"] = new ExternalInputDef("B"),
+                                }),
+                                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                            }),
+                        }),
+                        ["in2"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+                            {
+                                ["value1"] = new InlineInputDef(MtlxNodeTypes.Length, MtlxDataTypes.Float, new()
+                                {
+                                    ["in"] = new ExternalInputDef("C"),
+                                }),
+                                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                            }),
+                        }),
+                    }),
+                    ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
+            };
+            actualNodeDefs = CompoundOpParser.Parse(inputs, "Out = A && B || any(C);");
+            Assert.AreEqual(expectedNodeDefs, actualNodeDefs);
+
+            expectedNodeDefs = new()
+            {
+                ["Out"] = new(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+                {
+                    ["value1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                        {
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = new ExternalInputDef("C"),
+                                ["channels"] = new StringInputDef("x"),
+                            }),
+                            ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = new ExternalInputDef("C"),
+                                ["channels"] = new StringInputDef("y"),
+                            }),
+                        }),
+                        ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new ExternalInputDef("C"),
+                            ["channels"] = new StringInputDef("z"),
+                        }),
+                    }),
+                    ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
+            };
+            actualNodeDefs = CompoundOpParser.Parse(inputs, "Out = all(C);");
+            Assert.AreEqual(expectedNodeDefs, actualNodeDefs);
+        }
+
+        [Test]
         public void Test_Texture_Sampling()
         {
             Dictionary<string, ParserInput> inputs = new()

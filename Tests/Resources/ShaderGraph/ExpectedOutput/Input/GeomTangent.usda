@@ -67,21 +67,68 @@ def "MaterialX"
             def Shader "SubtractNode_304c0fbf84ea4cfc8c42b6091e954ac0"
             {
                 uniform token info:id = "ND_subtract_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_GeomTangent/TangentNode_aa6c25a366cd4bffaa4d025578824fc1.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_GeomTangent/Tangent_OutNode_aa6c25a366cd4bffaa4d025578824fc1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            def Shader "Transform_OutNode_dec72ccdfd7340acb1c406b5dc6dffce"
             {
-                uniform token info:id = "ND_transformnormal_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/TangentNode_dd115f9715b44cf3b1ae56760bed5339.outputs:out>
-                string inputs:fromspace = "world"
-                string inputs:tospace = "object"
+                uniform token info:id = "ND_normalize_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "TangentNode_dd115f9715b44cf3b1ae56760bed5339"
+            def Shader "Transform_Out_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                string inputs:channels = "xyz"
+                float3 outputs:out
+            }
+
+            def Shader "Transform_Out_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_combine4_vector4"
+                float inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                float inputs:in4 = 0
+                float4 outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Tangent_OutNode_dd115f9715b44cf3b1ae56760bed5339.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Tangent_OutNode_dd115f9715b44cf3b1ae56760bed5339"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Tangent_Out_in1Node_dd115f9715b44cf3b1ae56760bed5339.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
+            }
+
+            def Shader "Tangent_Out_in1Node_dd115f9715b44cf3b1ae56760bed5339"
             {
                 uniform token info:id = "ND_tangent_vector3"
                 string inputs:space = "world"
@@ -98,11 +145,64 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "TangentNode_aa6c25a366cd4bffaa4d025578824fc1"
+            def Shader "Tangent_OutNode_aa6c25a366cd4bffaa4d025578824fc1"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Tangent_Out_in1Node_aa6c25a366cd4bffaa4d025578824fc1.outputs:out>
+                float3 inputs:in2 = (1, 1, -1)
+                float3 outputs:out
+            }
+
+            def Shader "Tangent_Out_in1Node_aa6c25a366cd4bffaa4d025578824fc1"
             {
                 uniform token info:id = "ND_tangent_vector3"
                 string inputs:space = "object"
                 float3 outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_matNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_transpose_matrix44"
+                matrix4d inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_mat_inNode_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_mat_in_in1Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_GeomTangent/Transform_Out_in_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce.outputs:modelToWorld>
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_mat_in_in1_in2Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_realitykit_surface_model_to_world"
+                matrix4d outputs:modelToWorld
+            }
+
+            def Shader "Transform_Out_in_in_in_in2Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "Transform_Out_in_in_in_in3Node_dec72ccdfd7340acb1c406b5dc6dffce"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomTangent/Transform_InNode_dec72ccdfd7340acb1c406b5dc6dffce.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
             }
         }
     }

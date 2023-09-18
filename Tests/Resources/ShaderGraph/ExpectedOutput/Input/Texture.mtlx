@@ -95,9 +95,13 @@
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_TextureVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Texture" />
     </surfacematerial>
+    <multiply name = "SR_TextureVertex_modelPositionOffset_FlipZ" type = "vector3">
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1" />
+    </multiply>
     <subtract name = "SR_TextureVertex_modelPositionOffset_SubtractPosition" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "SR_TextureVertex_modelPositionOffset_FlipZ" />
         <input name = "in2" type = "vector3" nodename = "SR_TextureVertex_modelPositionOffset_Position" />
-        <input name = "in1" type = "vector3" nodename = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1" />
     </subtract>
     <position name = "SR_TextureVertex_modelPositionOffset_Position" type = "vector3">
         <input name = "space" type = "string" value = "object" />
@@ -106,7 +110,7 @@
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" value = "0.5" />
     </subtract>
-    <swizzle name = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_SubtractPositionin1" type = "vector3">
+    <swizzle name = "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1" type = "vector3">
         <input name = "in" type = "color4" nodename = "Node_863147e977944b3e828c0de0418dbcb8" />
         <input name = "channels" type = "string" value = "rgb" />
     </swizzle>

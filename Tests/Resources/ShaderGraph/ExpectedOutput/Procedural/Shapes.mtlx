@@ -49,19 +49,194 @@
     <dot name = "Ellipse_HeightNode_11b8ca005bdf4cc89a2d1e431df2f68c" type = "float">
         <input name = "in" type = "float" value = "0.5" />
     </dot>
+    <splitlr name = "Rectangle_OutNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "valuel" type = "float" value = "1" />
+        <input name = "valuer" type = "float" value = "0" />
+        <input name = "center" type = "float" value = "0" />
+        <input name = "texcoord" type = "vector2" nodename = "Rectangle_Out_texcoordNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+    </splitlr>
+    <combine2 name = "Rectangle_Out_texcoordNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Rectangle_Out_texcoord_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "float" value = "0" />
+    </combine2>
+    <max name = "Rectangle_Out_texcoord_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "in1" type = "float" nodename = "Rectangle_Out_texcoord_in1_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "float" nodename = "Rectangle_Out_texcoord_in1_in2Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+    </max>
+    <swizzle name = "Rectangle_Out_texcoord_in1_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "in" type = "vector2" nodename = "Rectangle_dNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <subtract name = "Rectangle_dNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Rectangle_d_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "vector2" nodename = "Rectangle_d_in2Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+    </subtract>
+    <absval name = "Rectangle_d_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Rectangle_d_in1_inNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+    </absval>
+    <subtract name = "Rectangle_d_in1_inNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Rectangle_d_in1_in_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "Rectangle_d_in1_in_in1Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "float" value = "2" />
+    </multiply>
+    <dot name = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbAdd" />
+    </dot>
+    <texcoord name = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbUV" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbMultiply" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbUV" />
+        <input name = "in2" type = "vector2" value = "1,-1" />
+    </multiply>
+    <add name = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbAdd" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Rectangle_UVNode_3fb1d487692f4628b0ad18c019e8ecfbMultiply" />
+        <input name = "in2" type = "vector2" value = "0,1" />
+    </add>
+    <combine2 name = "Rectangle_d_in2Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Rectangle_WidthNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in2" type = "float" nodename = "Rectangle_HeightNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+    </combine2>
+    <dot name = "Rectangle_WidthNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <dot name = "Rectangle_HeightNode_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <swizzle name = "Rectangle_Out_texcoord_in1_in2Node_3fb1d487692f4628b0ad18c019e8ecfb" type = "float">
+        <input name = "in" type = "vector2" nodename = "Rectangle_dNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <splitlr name = "Polygon_OutNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "valuel" type = "float" value = "1" />
+        <input name = "valuer" type = "float" value = "0" />
+        <input name = "center" type = "float" value = "1" />
+        <input name = "texcoord" type = "vector2" nodename = "Polygon_Out_texcoordNode_e509d8683f6b42e59036726da07752e8" />
+    </splitlr>
+    <combine2 name = "Polygon_Out_texcoordNode_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Polygon_distanceNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" value = "0" />
+    </combine2>
+    <multiply name = "Polygon_distanceNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" nodename = "Polygon_distance_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_distance_in2Node_e509d8683f6b42e59036726da07752e8" />
+    </multiply>
+    <cos name = "Polygon_distance_in1Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" nodename = "Polygon_distance_in1_inNode_e509d8683f6b42e59036726da07752e8" />
+    </cos>
+    <subtract name = "Polygon_distance_in1_inNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" nodename = "Polygon_distance_in1_in_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_pCoordNode_e509d8683f6b42e59036726da07752e8" />
+    </subtract>
+    <multiply name = "Polygon_distance_in1_in_in1Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" nodename = "Polygon_distance_in1_in_in1_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_rNode_e509d8683f6b42e59036726da07752e8" />
+    </multiply>
+    <floor name = "Polygon_distance_in1_in_in1_in1Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" nodename = "Polygon_distance_in1_in_in1_in1_inNode_e509d8683f6b42e59036726da07752e8" />
+    </floor>
+    <add name = "Polygon_distance_in1_in_in1_in1_inNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" value = "0.5" />
+        <input name = "in2" type = "float" nodename = "Polygon_distance_in1_in_in1_in1_in_in2Node_e509d8683f6b42e59036726da07752e8" />
+    </add>
+    <divide name = "Polygon_distance_in1_in_in1_in1_in_in2Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" nodename = "Polygon_pCoordNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_rNode_e509d8683f6b42e59036726da07752e8" />
+    </divide>
+    <atan2 name = "Polygon_pCoordNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "iny" type = "float" nodename = "Polygon_pCoord_inyNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "inx" type = "float" nodename = "Polygon_pCoord_inxNode_e509d8683f6b42e59036726da07752e8" />
+    </atan2>
+    <swizzle name = "Polygon_pCoord_inyNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "vector2" nodename = "Polygon_uvNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <divide name = "Polygon_uvNode_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_uv_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "vector2" nodename = "Polygon_uv_in2Node_e509d8683f6b42e59036726da07752e8" />
+    </divide>
+    <subtract name = "Polygon_uv_in1Node_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_uv_in1_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "Polygon_uv_in1_in1Node_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" value = "2" />
+    </multiply>
+    <dot name = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8Add" />
+    </dot>
+    <texcoord name = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8UV" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8Multiply" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8UV" />
+        <input name = "in2" type = "vector2" value = "1,-1" />
+    </multiply>
+    <add name = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8Add" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_UVNode_e509d8683f6b42e59036726da07752e8Multiply" />
+        <input name = "in2" type = "vector2" value = "0,1" />
+    </add>
+    <multiply name = "Polygon_uv_in2Node_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "Polygon_uv_in2_in1Node_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_uv_in2_in2Node_e509d8683f6b42e59036726da07752e8" />
+    </multiply>
+    <combine2 name = "Polygon_uv_in2_in1Node_e509d8683f6b42e59036726da07752e8" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Polygon_WidthNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in2" type = "float" nodename = "Polygon_uv_in2_in1_in2Node_e509d8683f6b42e59036726da07752e8" />
+    </combine2>
+    <dot name = "Polygon_WidthNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <subtract name = "Polygon_uv_in2_in1_in2Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in2" type = "float" nodename = "Polygon_HeightNode_e509d8683f6b42e59036726da07752e8" />
+    </subtract>
+    <dot name = "Polygon_HeightNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <cos name = "Polygon_uv_in2_in2Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" nodename = "Polygon_uv_in2_in2_inNode_e509d8683f6b42e59036726da07752e8" />
+    </cos>
+    <divide name = "Polygon_uv_in2_in2_inNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" value = "3.141593" />
+        <input name = "in2" type = "float" nodename = "Polygon_SidesNode_e509d8683f6b42e59036726da07752e8" />
+    </divide>
+    <dot name = "Polygon_SidesNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "float" value = "6" />
+    </dot>
+    <swizzle name = "Polygon_pCoord_inxNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "vector2" nodename = "Polygon_uvNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <divide name = "Polygon_rNode_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in1" type = "float" value = "6.283185" />
+        <input name = "in2" type = "float" nodename = "Polygon_SidesNode_e509d8683f6b42e59036726da07752e8" />
+    </divide>
+    <magnitude name = "Polygon_distance_in2Node_e509d8683f6b42e59036726da07752e8" type = "float">
+        <input name = "in" type = "vector2" nodename = "Polygon_uvNode_e509d8683f6b42e59036726da07752e8" />
+    </magnitude>
+    <combine4 name = "CombineNode_7903779d99244da79024823f86ca9144" type = "color4">
+        <input name = "in1" type = "float" nodename = "Ellipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
+        <input name = "in2" type = "float" nodename = "Rectangle_OutNode_3fb1d487692f4628b0ad18c019e8ecfb" />
+        <input name = "in3" type = "float" nodename = "Polygon_OutNode_e509d8683f6b42e59036726da07752e8" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
     <GeometryModification name = "SR_ShapesVertex" type = "vertexshader">
     </GeometryModification>
     <realitykit_unlit name = "SR_Shapes" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
-        <input name = "color" type = "color3" nodename = "CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_7903779d99244da79024823f86ca9144ToSR_Shapescolor" />
         <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Shapes" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_ShapesVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Shapes" />
     </surfacematerial>
-    <swizzle name = "CastSwizzleFromEllipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68cToSR_Shapescolor" type = "color3">
-        <input name = "in" type = "float" nodename = "Ellipse_OutNode_11b8ca005bdf4cc89a2d1e431df2f68c" />
-        <input name = "channels" type = "string" value = "xxx" />
+    <swizzle name = "CastSwizzleFromCombineNode_7903779d99244da79024823f86ca9144ToSR_Shapescolor" type = "color3">
+        <input name = "in" type = "color4" nodename = "CombineNode_7903779d99244da79024823f86ca9144" />
+        <input name = "channels" type = "string" value = "rgb" />
     </swizzle>
 </materialx>

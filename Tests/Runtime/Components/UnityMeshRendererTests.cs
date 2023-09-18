@@ -251,16 +251,17 @@ namespace Tests.Runtime.Functional.Components
             var data = PolySpatialComponentUtils.GetMeshRendererTrackingData(mriid);
             Assert.IsTrue(data.ValidateTrackingFlags());
             var cacheData = data.customData;
+            var cacheMaterials = cacheData.materials;
             var cacheDataBackend = cacheData;
             Assert.IsNotNull(PolySpatialCore.LocalAssetManager.GetRegisteredResource(cacheData.meshId));
-            Assert.IsTrue(cacheData.materialIds[0].IsValid());
-            Assert.IsNotNull(PolySpatialCore.LocalAssetManager.GetRegisteredResource(cacheData.materialIds[0]));
-            Assert.IsFalse(cacheData.hasExternalMaterials);
+            Assert.IsTrue(cacheMaterials.materialIds[0].IsValid());
+            Assert.IsNotNull(PolySpatialCore.LocalAssetManager.GetRegisteredResource(cacheMaterials.materialIds[0]));
+            Assert.IsFalse(cacheMaterials.hasExternalMaterials);
 
             yield return null;
 
             PolySpatialMaterialData cacheQmd;
-            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(cacheData.materialIds[0], out cacheQmd);
+            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(cacheMaterials.materialIds[0], out cacheQmd);
             Assert.IsTrue(cacheQmd.baseColorMap.assetId.IsValid());
             Assert.IsNotNull(PolySpatialCore.LocalAssetManager.GetRegisteredResource(cacheQmd.baseColorMap.assetId));
 
@@ -282,7 +283,7 @@ namespace Tests.Runtime.Functional.Components
             data = PolySpatialComponentUtils.GetMeshRendererTrackingData(mriid);
             Assert.IsTrue(data.ValidateTrackingFlags());
             Assert.IsFalse(data.customData.meshId.IsValid());
-            foreach (var materialId in data.customData.materialIds)
+            foreach (var materialId in data.customData.materials.materialIds)
             {
                 Assert.IsFalse(materialId.IsValid());
             }
@@ -298,7 +299,7 @@ namespace Tests.Runtime.Functional.Components
                 }
             }
 
-            Assert.AreEqual(1, cacheData.materialIds.Length);
+            Assert.AreEqual(1, cacheMaterials.materialIds.Length);
 
             // OnAfterAssetsDeleteCalled is technically wrong -- that function can be called
             // multiple times per frame, and there's no guarantee that all assets will have been
@@ -308,19 +309,19 @@ namespace Tests.Runtime.Functional.Components
             m_TestPlatformWrapper.OnAfterAssetsDeletedCalled = (assetIds) =>
             {
                 ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cacheData.meshId);
-                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cacheData.materialIds.ElementAt(0));
+                ClearIfDeleted(PolySpatialCore.LocalAssetManager, ref cacheMaterials.materialIds.ElementAt(0));
 
                 // Assert that meshes and materials have been properly removed from the Platform Asset Manager.
                 ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cacheDataBackend.meshId);
-                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cacheDataBackend.materialIds.ElementAt(0));
+                ClearIfDeleted(UnitySceneGraphAssetManager.Shared, ref cacheDataBackend.materials.materialIds.ElementAt(0));
             };
 
             yield return null;
 
             Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheData.meshId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheData.materialIds[0]);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheMaterials.materialIds[0]);
             Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheDataBackend.meshId);
-            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheDataBackend.materialIds[0]);
+            Assert.AreEqual(PolySpatialAssetID.InvalidAssetID, cacheDataBackend.materials.materialIds[0]);
         }
 
         [UnityTest]
@@ -336,12 +337,12 @@ namespace Tests.Runtime.Functional.Components
 
             var data1 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data1.ValidateTrackingFlags());
-            Assert.AreEqual(1, data1.customData.materialIds.Length);
-            Assert.IsTrue(data1.customData.materialIds[0].IsValid());
-            Assert.AreEqual(data1.customData.materialIds[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
-            Assert.AreEqual(material1, PolySpatialCore.LocalAssetManager.GetRegisteredResource(data1.customData.materialIds[0]));
+            Assert.AreEqual(1, data1.customData.materials.materialIds.Length);
+            Assert.IsTrue(data1.customData.materials.materialIds[0].IsValid());
+            Assert.AreEqual(data1.customData.materials.materialIds[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
+            Assert.AreEqual(material1, PolySpatialCore.LocalAssetManager.GetRegisteredResource(data1.customData.materials.materialIds[0]));
 
-            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data1.customData.materialIds[0], out var materialData1);
+            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data1.customData.materials.materialIds[0], out var materialData1);
             // this isn't a complete verification of material conversion, that needs a separate suite
             Assert.AreEqual(PolySpatialMaterialType.Unlit, materialData1.materialType);
             Assert.IsTrue(materialData1.baseColorMap.isEnabled);
@@ -356,11 +357,11 @@ namespace Tests.Runtime.Functional.Components
             // The AssetID shouldn't change
             var data2 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data2.ValidateTrackingFlags());
-            Assert.AreEqual(data1.customData.materialIds[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
-            Assert.AreEqual(data1.customData.materialIds[0], data2.customData.materialIds[0]);
+            Assert.AreEqual(data1.customData.materials.materialIds[0], PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(material1));
+            Assert.AreEqual(data1.customData.materials.materialIds[0], data2.customData.materials.materialIds[0]);
 
             // but the data should
-            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data1.customData.materialIds[0], out var materialData2);
+            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data1.customData.materials.materialIds[0], out var materialData2);
             Assert.AreEqual(Color.blue, materialData2.baseColorMap.color);
         }
 
@@ -375,10 +376,10 @@ namespace Tests.Runtime.Functional.Components
 
             var data1 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data1.ValidateTrackingFlags());
-            Assert.AreEqual(0, data1.customData.materialIds.Length);
-            Assert.IsFalse(data1.customData.hasExternalMaterials);
+            Assert.AreEqual(0, data1.customData.materials.materialIds.Length);
+            Assert.IsFalse(data1.customData.materials.hasExternalMaterials);
 
-            int maxMaterialsInFixedBuffer = data1.customData.materialIds.Capacity;
+            int maxMaterialsInFixedBuffer = data1.customData.materials.materialIds.Capacity;
             var materials = new Material[maxMaterialsInFixedBuffer + 1];
             for (int i=0; i<maxMaterialsInFixedBuffer + 1; i++)
                 materials[i] = PolySpatialComponentUtils.CreateUnlitMaterial(Color.red);
@@ -389,8 +390,8 @@ namespace Tests.Runtime.Functional.Components
 
             var data2 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data2.ValidateTrackingFlags());
-            Assert.AreEqual(1, data2.customData.materialIds.Length);
-            Assert.IsFalse(data2.customData.hasExternalMaterials);
+            Assert.AreEqual(1, data2.customData.materials.materialIds.Length);
+            Assert.IsFalse(data2.customData.materials.hasExternalMaterials);
 
             m_TestMeshRenderer.sharedMaterials = materials;
 
@@ -398,13 +399,13 @@ namespace Tests.Runtime.Functional.Components
 
             var data3 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data3.ValidateTrackingFlags());
-            Assert.AreEqual(0, data3.customData.materialIds.Length);
+            Assert.AreEqual(0, data3.customData.materials.materialIds.Length);
 
             var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestMeshRenderer.gameObject));
             if (backingGO != null)
                 Assert.AreEqual(materials.Length, backingGO.GetComponent<MeshRenderer>().sharedMaterials.Length);
 
-            Assert.IsTrue(data3.customData.hasExternalMaterials);
+            Assert.IsTrue(data3.customData.materials.hasExternalMaterials);
 
             m_TestMeshRenderer.sharedMaterials = new[] {materials[0]};
 
@@ -412,8 +413,8 @@ namespace Tests.Runtime.Functional.Components
 
             var data4 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
             Assert.IsTrue(data4.ValidateTrackingFlags());
-            Assert.AreEqual(1, data4.customData.materialIds.Length);
-            Assert.IsFalse(data4.customData.hasExternalMaterials);
+            Assert.AreEqual(1, data4.customData.materials.materialIds.Length);
+            Assert.IsFalse(data4.customData.materials.hasExternalMaterials);
         }
 
         [UnityTest]
