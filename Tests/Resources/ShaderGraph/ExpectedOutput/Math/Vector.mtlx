@@ -94,18 +94,18 @@
         <input name = "in1" type = "float" nodename = "SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175" />
         <input name = "in2" type = "float" nodename = "SphereMask_RadiusNode_d5ab9a6a1ce34c2783a6ba455590a175" />
     </subtract>
-    <absval name = "SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
-        <input name = "in" type = "float" nodename = "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175" />
-    </absval>
-    <subtract name = "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
-        <input name = "in1" type = "float" nodename = "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175" />
-        <input name = "in2" type = "float" nodename = "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175" />
+    <magnitude name = "SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
+        <input name = "in" type = "vector3" nodename = "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175" />
+    </magnitude>
+    <subtract name = "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175" />
+        <input name = "in2" type = "vector3" nodename = "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175" />
     </subtract>
-    <dot name = "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
-        <input name = "in" type = "float" value = "0" />
+    <dot name = "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Projection_OutNode_1249c628453a4e799cd3e316373306b7" />
     </dot>
-    <dot name = "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
-        <input name = "in" type = "float" value = "0.5" />
+    <dot name = "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Rejection_OutNode_7bc12286254a492fa1b0dd570fffc168" />
     </dot>
     <dot name = "SphereMask_RadiusNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
         <input name = "in" type = "float" value = "0.1" />
@@ -117,6 +117,59 @@
     <dot name = "SphereMask_HardnessNode_d5ab9a6a1ce34c2783a6ba455590a175" type = "float">
         <input name = "in" type = "float" value = "0.8" />
     </dot>
+    <divide name = "Projection_OutNode_1249c628453a4e799cd3e316373306b7" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Projection_Out_in1Node_1249c628453a4e799cd3e316373306b7" />
+        <input name = "in2" type = "float" nodename = "Projection_Out_in2Node_1249c628453a4e799cd3e316373306b7" />
+    </divide>
+    <multiply name = "Projection_Out_in1Node_1249c628453a4e799cd3e316373306b7" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Projection_BNode_1249c628453a4e799cd3e316373306b7" />
+        <input name = "in2" type = "float" nodename = "Projection_Out_in1_in2Node_1249c628453a4e799cd3e316373306b7" />
+    </multiply>
+    <dot name = "Projection_BNode_1249c628453a4e799cd3e316373306b7" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40" />
+    </dot>
+    <dotproduct name = "Projection_Out_in1_in2Node_1249c628453a4e799cd3e316373306b7" type = "float">
+        <input name = "in1" type = "vector3" nodename = "Projection_ANode_1249c628453a4e799cd3e316373306b7" />
+        <input name = "in2" type = "vector3" nodename = "Projection_BNode_1249c628453a4e799cd3e316373306b7" />
+    </dotproduct>
+    <dot name = "Projection_ANode_1249c628453a4e799cd3e316373306b7" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40" />
+    </dot>
+    <dotproduct name = "Projection_Out_in2Node_1249c628453a4e799cd3e316373306b7" type = "float">
+        <input name = "in1" type = "vector3" nodename = "Projection_BNode_1249c628453a4e799cd3e316373306b7" />
+        <input name = "in2" type = "vector3" nodename = "Projection_BNode_1249c628453a4e799cd3e316373306b7" />
+    </dotproduct>
+    <subtract name = "Rejection_OutNode_7bc12286254a492fa1b0dd570fffc168" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Rejection_ANode_7bc12286254a492fa1b0dd570fffc168" />
+        <input name = "in2" type = "vector3" nodename = "Rejection_Out_in2Node_7bc12286254a492fa1b0dd570fffc168" />
+    </subtract>
+    <dot name = "Rejection_ANode_7bc12286254a492fa1b0dd570fffc168" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40" />
+    </dot>
+    <divide name = "Rejection_Out_in2Node_7bc12286254a492fa1b0dd570fffc168" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Rejection_Out_in2_in1Node_7bc12286254a492fa1b0dd570fffc168" />
+        <input name = "in2" type = "float" nodename = "Rejection_Out_in2_in2Node_7bc12286254a492fa1b0dd570fffc168" />
+    </divide>
+    <multiply name = "Rejection_Out_in2_in1Node_7bc12286254a492fa1b0dd570fffc168" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168" />
+        <input name = "in2" type = "float" nodename = "Rejection_Out_in2_in1_in2Node_7bc12286254a492fa1b0dd570fffc168" />
+    </multiply>
+    <dot name = "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40" />
+    </dot>
+    <dotproduct name = "Rejection_Out_in2_in1_in2Node_7bc12286254a492fa1b0dd570fffc168" type = "float">
+        <input name = "in1" type = "vector3" nodename = "Rejection_ANode_7bc12286254a492fa1b0dd570fffc168" />
+        <input name = "in2" type = "vector3" nodename = "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168" />
+    </dotproduct>
+    <dotproduct name = "Rejection_Out_in2_in2Node_7bc12286254a492fa1b0dd570fffc168" type = "float">
+        <input name = "in1" type = "vector3" nodename = "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168" />
+        <input name = "in2" type = "vector3" nodename = "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168" />
+    </dotproduct>
+    <combine3 name = "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40" type = "vector3">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" value = "1" />
+    </combine3>
     <GeometryModification name = "SR_VectorVertex" type = "vertexshader">
     </GeometryModification>
     <realitykit_pbr name = "SR_Vector" type = "surfaceshader">

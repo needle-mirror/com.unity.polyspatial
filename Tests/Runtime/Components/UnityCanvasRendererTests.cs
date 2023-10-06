@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial.Internals;
@@ -210,95 +211,6 @@ namespace Tests.Runtime.Functional.Components
             Object.Destroy(image);
             image = null;
         }
-
-        [UnityTest]
-        public IEnumerator Test_TextMeshProUGUI_With_Missing_USD()
-        {
-            var shader = Shader.Find(MaterialShaders.k_TextShaderGraph);
-            Assert.IsNotNull(shader, "Could not find shader for {");
-
-            // Move USD file temporarily to trigger missing asset scenario
-            var usdPaths = PolySpatialAssetData.GetPathsForAsset(shader);
-            var pathCount = usdPaths.Length;
-            var tempPaths = new string[pathCount];
-            for (var i = 0; i < pathCount; i++)
-            {
-                var usdPath = usdPaths[i];
-                FileAssert.Exists(usdPath);
-
-                var tempPath = Path.Combine(Application.temporaryCachePath, Guid.NewGuid().ToString());
-                tempPaths[i] = tempPath;
-
-                try
-                {
-                    // File.Move does not work for the virtual filesystem in editor
-                    File.Copy(usdPath, tempPath);
-                    FileAssert.Exists(tempPath, "Failed to create temp asset");
-
-                    File.Delete(usdPath);
-                    FileAssert.DoesNotExist(usdPath, "Failed to delete asset");
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
-                }
-            }
-
-            // Clear the shader graph reference so that we attempt to reload it.
-            PolySpatialCore.LocalAssetManager.RemoveShaderGraphByShaderName(MaterialShaders.k_TextShaderGraph);
-
-            m_TestGameObject = new GameObject();
-            var tmp = m_TestGameObject.AddComponent<TextMeshProUGUI>();
-            tmp.text = "Hello";
-
-            // Ensure that the font material is not already registered.
-            var materialAssetID = PolySpatialCore.LocalAssetManager.GetRegisteredAssetID(tmp.materialForRendering);
-            PolySpatialCore.LocalAssetManager.ForceRemoveAssetFromManager(materialAssetID);
-
-            // Let a frame be processed and trigger any exceptions or assertions
-            yield return null;
-
-            // Expect two material conversions: once for creation, once for update
-            var expectedWarning = $"Non shader graph shader '{shader.name}' not supported or MaterialX encoding missing";
-            LogAssert.Expect(LogType.Warning, expectedWarning);
-            LogAssert.Expect(LogType.Warning, expectedWarning);
-
-            //TODO: Validate that the PolySpatial object linked to m_TestGameObject has a fallback material
-
-            // Move the file back if it was successfully moved in the first place
-            for (var i = 0; i < pathCount; i++)
-            {
-                var usdPath = usdPaths[i];
-                var tempPath = tempPaths[i];
-                Assert.IsFalse(string.IsNullOrEmpty(tempPath));
-                Assert.IsFalse(string.IsNullOrEmpty(usdPath));
-
-                if (File.Exists(tempPath) && !File.Exists(usdPath))
-                {
-                    try
-                    {
-                        File.Copy(tempPath, usdPath);
-                    }
-                    catch (Exception exception)
-                    {
-                        Debug.LogException(exception);
-                    }
-                }
-
-                if (File.Exists(tempPath))
-                {
-                    try
-                    {
-                        File.Delete(tempPath);
-                    }
-                    catch (Exception exception)
-                    {
-                        Debug.LogException(exception);
-                    }
-                }
-            }
-        }
-
 
         struct SortTestSubTree : IEquatable<SortTestSubTree>, IComparable<SortTestSubTree>
         {

@@ -31,6 +31,7 @@ namespace UnityEditor.PolySpatial
         SerializedProperty m_EnableMacRealityKitPreviewInPlayMode;
         SerializedProperty m_EnableProgressiveMipStreamingProperty;
         SerializedProperty m_MaxMipByteSizePerCycleProperty;
+        SerializedProperty m_DefaultVolumeCameraConfigurationProperty;
         SerializedProperty m_EnableDefaultVolumeCamera;
         SerializedProperty m_HidePolySpatialPreviewObjectsInScene;
         SerializedProperty m_RuntimeFlags;
@@ -46,6 +47,7 @@ namespace UnityEditor.PolySpatial
         int m_SelectedTracker;
 
         SerializedProperty m_EnableInEditorPreviewProperty;
+        SerializedProperty m_ForceValidationForCurrentBuildTargetProperty;
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
         static readonly List<string> k_InactiveTrackers = new();
@@ -88,6 +90,7 @@ namespace UnityEditor.PolySpatial
             m_EnablePolySpatialRuntimeProperty = m_SerializedObject.FindProperty("EnablePolySpatialRuntime");
             m_EnableStatisticsProperty = m_SerializedObject.FindProperty("EnableStatistics");
             m_EnableTransformVerificationProperty = m_SerializedObject.FindProperty("EnableTransformVerification");
+            m_DefaultVolumeCameraConfigurationProperty = m_SerializedObject.FindProperty("m_DefaultVolumeCameraConfiguration");
             m_EnableDefaultVolumeCamera = m_SerializedObject.FindProperty("EnableDefaultVolumeCamera");
             m_HidePolySpatialPreviewObjectsInScene = m_SerializedObject.FindProperty("HidePolySpatialPreviewObjectsInScene");
 
@@ -103,6 +106,7 @@ namespace UnityEditor.PolySpatial
             m_PolySpatialRecordingModeProperty = m_SerializedObject.FindProperty("PolySpatialRecordingMode");
             m_PolySpatialRecordingPathProperty = m_SerializedObject.FindProperty("RecordingPath");
             m_EnableInEditorPreviewProperty = m_SerializedObject.FindProperty("EnableInEditorPreview");
+            m_ForceValidationForCurrentBuildTargetProperty = m_SerializedObject.FindProperty("m_ForceValidationForCurrentBuildTarget");
 
             m_TransmitDebugInfoProperty = m_SerializedObject.FindProperty("m_TransmitDebugInfo");
 #if POLYSPATIAL_INTERNAL
@@ -172,6 +176,13 @@ namespace UnityEditor.PolySpatial
 #endif
                     EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
                     EditorGUILayout.PropertyField(m_EnableTransformVerificationProperty);
+                    EditorGUILayout.PropertyField(m_DefaultVolumeCameraConfigurationProperty);
+                    if (m_DefaultVolumeCameraConfigurationProperty.objectReferenceValue == null)
+                    {
+                        m_DefaultVolumeCameraConfigurationProperty.objectReferenceValue =
+                            Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
+                    }
+
                     EditorGUILayout.PropertyField(m_EnableDefaultVolumeCamera);
                     EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene);
                     EditorGUILayout.PropertyField(m_EnableProgressiveMipStreamingProperty);
@@ -280,6 +291,16 @@ namespace UnityEditor.PolySpatial
 #endif
 
                 EditorGUILayout.PropertyField(m_EnableInEditorPreviewProperty);
+
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    EditorGUILayout.PropertyField(m_ForceValidationForCurrentBuildTargetProperty);
+
+                    if (check.changed)
+                    {
+                        EditorUtility.RequestScriptReload();
+                    }
+                }
 
                 m_SerializedObject.ApplyModifiedPropertiesWithoutUndo();
                 AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);

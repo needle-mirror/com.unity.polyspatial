@@ -38,6 +38,10 @@ def "MaterialX"
             asset inputs:polySpatial_Lightmap = @placeholder.png@ (colorSpace = "srgb_texture")
             float4 inputs:polySpatial_LightmapST = (0, 0, 0, 0)
             asset inputs:polySpatial_LightmapInd = @placeholder.png@ (colorSpace = "srgb_texture")
+            asset inputs:polySpatial_SpecCube0 = @placeholder.png@ (colorSpace = "srgb_texture")
+            float inputs:polySpatial_SpecCubeWeight0 = 0
+            asset inputs:polySpatial_SpecCube1 = @placeholder.png@ (colorSpace = "srgb_texture")
+            float inputs:polySpatial_SpecCubeWeight1 = 0
 
             token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Utility/realitykit_pbr.outputs:out>
             token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Utility/GeometryModifier.outputs:out>
@@ -184,7 +188,7 @@ def "MaterialX"
             def Shader "PolySpatialLighting_BaseColorNode_b8043f58f0084f4bbf5634b3be8a003a"
             {
                 uniform token info:id = "ND_dot_color3"
-                color3f inputs:in = (0.5, 0.5, 0.5)
+                color3f inputs:in = (0.2140411, 0.2140411, 0.2140411)
                 color3f outputs:out
             }
 
@@ -2410,7 +2414,7 @@ def "MaterialX"
             def Shader "PolySpatialLighting_bakedContribution_in2Node_b8043f58f0084f4bbf5634b3be8a003a"
             {
                 uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_bakedContribution_in2_in1Node_b8043f58f0084f4bbf5634b3be8a003a.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColorNode_b8043f58f0084f4bbf5634b3be8a003a.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentBrdfSpecularNode_b8043f58f0084f4bbf5634b3be8a003a.outputs:out>
                 float3 outputs:out
             }
@@ -2501,7 +2505,7 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "PolySpatialLighting_bakedContribution_in2_in1Node_b8043f58f0084f4bbf5634b3be8a003a"
+            def Shader "PolySpatialLighting_environmentColorNode_b8043f58f0084f4bbf5634b3be8a003a"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_GlossyEnvironmentColor>
@@ -2680,7 +2684,7 @@ def "MaterialX"
             def Shader "PolySpatialLighting_bakedContribution_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
             {
                 uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_bakedContribution_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentBrdfSpecularNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
                 float3 outputs:out
             }
@@ -3049,16 +3053,663 @@ def "MaterialX"
             def Shader "PolySpatialLighting_BaseColorNode_b0ebbb9d1dd84952ab627a76c4627d5e"
             {
                 uniform token info:id = "ND_dot_color3"
-                color3f inputs:in = (0.5, 0.5, 0.5)
+                color3f inputs:in = (0.2140411, 0.2140411, 0.2140411)
                 color3f outputs:out
             }
 
-            def Shader "PolySpatialLighting_bakedContribution_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            def Shader "PolySpatialLighting_environmentColorNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_SpecCubeWeight1>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2 = 4.59
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_GlossyEnvironmentColor>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
                 string inputs:channels = "xyz"
                 float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_convert_color4_vector4"
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_realitykit_image_lod_color4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_SpecCube1>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:level.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:s_address = "clamp_to_edge"
+                string inputs:t_address = "clamp_to_edge"
+                string inputs:mag_filter = "linear"
+                string inputs:min_filter = "linear"
+                string inputs:mip_filter = "linear"
+                color4f outputs:out
+            }
+
+            def Shader "PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_perceptualRoughnessNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_mip_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_mip_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 10.2
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_mip_in2_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_mip_in2_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1 = 4.2
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_perceptualRoughnessNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp44Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp36Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp44_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.9166667)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp44_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp43Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (-0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp43Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp43_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp43_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_realitykit_reflect_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVector_inNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 inputs:normal.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_normalWSNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_reflectVector_inNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_viewDirectionWSNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp44_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.75)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp44_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp43Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp36Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp35Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.5833333)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp42Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp42Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp42_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp42_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "xz"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.4166667)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp42Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp35Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp37Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp37Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_absval_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp44Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp34Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.25)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp41_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp41_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "zy"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (-0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp34Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp37Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp37Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_SpecCubeWeight0>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2 = 4.59
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "xyz"
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_convert_color4_vector4"
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_realitykit_image_lod_color4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Utility.inputs:polySpatial_SpecCube0>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:level.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:s_address = "clamp_to_edge"
+                string inputs:t_address = "clamp_to_edge"
+                string inputs:mag_filter = "linear"
+                string inputs:min_filter = "linear"
+                string inputs:mip_filter = "linear"
+                color4f outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp33Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp25Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp33_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.9166667)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp33_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp32Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (-0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp32Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp32_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp32_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp33_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.75)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp33_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp32Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp25Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp24Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.5833333)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp31Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp31Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp31_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp31_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "xz"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.4166667)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp31Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp24Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp26Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp26Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_absval_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp33Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_ifgreater_vector2"
+                float inputs:value1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp23Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:value2 = 0
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.25)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_divide_vector2FA"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp30_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp30_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "zy"
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (0.5, 0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                float2 inputs:in2 = (-0.5, -0.08333334)
+                float2 outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp23Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp26Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Utility/PolySpatialLighting___Tmp26Node_b0ebbb9d1dd84952ab627a76c4627d5e.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
             }
 
             def Shader "PolySpatialLighting_brdfDiffuseNode_b0ebbb9d1dd84952ab627a76c4627d5e"

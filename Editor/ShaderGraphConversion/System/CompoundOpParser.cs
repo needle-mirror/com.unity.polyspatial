@@ -187,7 +187,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 "*" or "/" or "%" => 3,
                 "<<" or ">>" => 5,
                 "<" or "<=" or ">" or ">=" => 6,
-                "==" or "!==" => 7,
+                "==" or "!=" => 7,
                 "&" => 8,
                 "^" => 9,
                 "|" => 10,
@@ -272,8 +272,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 Children = children
                     .SelectMany<SyntaxNode, SyntaxNode>(child =>
                     {
-                        // Collapse contents of brackets, separators.
-                        if (child.Lexeme is Operator childOp && "({[,;".Contains(childOp.Span.contents))
+                        // Collapse contents of parentheses, separators.
+                        if (child.Lexeme is Operator childOp && "(,;".Contains(childOp.Span.contents))
                             return child.Children;
                         else
                             return new[] { child };

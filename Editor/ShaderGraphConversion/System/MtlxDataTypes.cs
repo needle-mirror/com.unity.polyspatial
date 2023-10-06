@@ -179,7 +179,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             4 => Vector4,
             9 => Matrix33,
             16 => Matrix44,
-            _ => throw new ArgumentException($"No type known of length {length}"),
+            _ => null,
         };
 
         internal static int GetElementLength(string datatype) => datatype switch

@@ -444,13 +444,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
         private static void InitSurfaceDescription()
         {
 #if DISABLE_MATERIALX_EXTENSIONS
-            SetupLitInput("diffuseColor",         MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
-            SetupLitInput("specularColor",        MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
+            // Color values are (0.5, 0.5, 0.5) converted to linear (raised to the power of 2.2)
+            SetupLitInput("diffuseColor",         MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
+            SetupLitInput("specularColor",        MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
             SetupLitInput("useSpecularWorkflow",  MtlxDataTypes.Integer,  new float[] { 0 });
             SetupLitInput("ior",                  MtlxDataTypes.Float,    new float[] { 1.4f });
             SetupLitInput("occlusion",            MtlxDataTypes.Float,    new float[] { 1 });
 #else
-            SetupLitInput("baseColor",            MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
+            SetupLitInput("baseColor",            MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
             SetupLitInput("specular",             MtlxDataTypes.Float,    new float[] { .5f });
             SetupLitInput("ambientOcclusion",     MtlxDataTypes.Float,    new float[] { 1 });
 #endif
@@ -462,7 +463,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             SetupLitInput("opacity",              MtlxDataTypes.Float,    new float[] { 1 });
             SetupLitInput("opacityThreshold",     MtlxDataTypes.Float,    new float[] { 0 });
             
-            SetupUnlitInput("color",              MtlxDataTypes.Color3,   new float[] { .5f, .5f, .5f });
+            SetupUnlitInput("color",              MtlxDataTypes.Color3,   new float[] { .218f, .218f, .218f });
             SetupUnlitInput("opacity",            MtlxDataTypes.Float,    new float[] { 1 });
             SetupUnlitInput("opacityThreshold",   MtlxDataTypes.Float,    new float[] { 0 });
         }

@@ -293,12 +293,33 @@
     <clamp name = "SaturateNode_0961bf8f24c743c0b59554010c6c2f7a" type = "vector2">
         <input name = "in" type = "vector2" nodename = "AddNode_f70cdec27f294523b79163244ae1e67a" />
     </clamp>
-    <combine4 name = "CombineNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "color4">
-        <input name = "in1" type = "float" value = "0" />
-        <input name = "in2" type = "float" nodename = "SwizzleNode_acd8b1aa1dcd49a896e75fa9b607dc26" />
-        <input name = "in3" type = "float" value = "0" />
-        <input name = "in4" type = "float" value = "0" />
+    <combine4 name = "Combine_RGBANode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "vector4">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in3" type = "float" nodename = "Combine_BNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in4" type = "float" nodename = "Combine_ANode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
     </combine4>
+    <dot name = "Combine_RNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "Combine_GNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "float">
+        <input name = "in" type = "float" nodename = "SwizzleNode_acd8b1aa1dcd49a896e75fa9b607dc26" />
+    </dot>
+    <dot name = "Combine_BNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "Combine_ANode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <combine3 name = "Combine_RGBNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "vector3">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in3" type = "float" nodename = "Combine_BNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+    </combine3>
+    <combine2 name = "Combine_RGNode_20b279cfd07345e7b4ae7ba5c1dc08bd" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+    </combine2>
     <swizzle name = "SwizzleNode_acd8b1aa1dcd49a896e75fa9b607dc26" type = "float">
         <input name = "in" type = "vector2" nodename = "SaturateNode_0961bf8f24c743c0b59554010c6c2f7a" />
         <input name = "channels" type = "string" value = "x" />
@@ -307,7 +328,7 @@
     </GeometryModification>
     <realitykit_unlit name = "SR_Blend" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
-        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" />
         <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Blend" type = "material">
@@ -350,8 +371,8 @@
         <input name = "in" type = "vector3" nodename = "Vector3Node_551f6b815f984a8eb586d31c77d4444f" />
         <input name = "channels" type = "string" value = "xy" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromCombineNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" type = "color3">
-        <input name = "in" type = "color4" nodename = "CombineNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
-        <input name = "channels" type = "string" value = "rgb" />
+    <swizzle name = "CastSwizzleFromCombine_RGBNode_20b279cfd07345e7b4ae7ba5c1dc08bdToSR_Blendcolor" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Combine_RGBNode_20b279cfd07345e7b4ae7ba5c1dc08bd" />
+        <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
 </materialx>

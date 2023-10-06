@@ -18,7 +18,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_unlit_surfaceshader"
                 bool inputs:applyPostProcessToneMap = 0
-                color3f inputs:color.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromCombineNode_4a10d2fcd9564cd091d90d06a990d009ToSR_GeomPositioncolor.outputs:out>
+                color3f inputs:color.connect = </MaterialX/Materials/USD_GeomPosition/CastSwizzleFromCombine_RGBNode_4a10d2fcd9564cd091d90d06a990d009ToSR_GeomPositioncolor.outputs:out>
                 float inputs:opacity = 1
                 token outputs:out
             }
@@ -29,22 +29,28 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_4a10d2fcd9564cd091d90d06a990d009ToSR_GeomPositioncolor"
+            def Shader "CastSwizzleFromCombine_RGBNode_4a10d2fcd9564cd091d90d06a990d009ToSR_GeomPositioncolor"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/CombineNode_4a10d2fcd9564cd091d90d06a990d009.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/Combine_RGBNode_4a10d2fcd9564cd091d90d06a990d009.outputs:out>
+                string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "CombineNode_4a10d2fcd9564cd091d90d06a990d009"
+            def Shader "Combine_RGBNode_4a10d2fcd9564cd091d90d06a990d009"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/ComparisonNode_ea00dcd875bf44c5bb411d56fbb8ea92.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/ComparisonNode_142c69d359494f2c84122785f4ca0b26.outputs:out>
-                float inputs:in3 = 0
-                float inputs:in4 = 0
-                color4f outputs:out
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_GeomPosition/Combine_RNode_4a10d2fcd9564cd091d90d06a990d009.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_GeomPosition/Combine_GNode_4a10d2fcd9564cd091d90d06a990d009.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_GeomPosition/Combine_BNode_4a10d2fcd9564cd091d90d06a990d009.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Combine_RNode_4a10d2fcd9564cd091d90d06a990d009"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/ComparisonNode_ea00dcd875bf44c5bb411d56fbb8ea92.outputs:out>
+                float outputs:out
             }
 
             def Shader "ComparisonNode_ea00dcd875bf44c5bb411d56fbb8ea92"
@@ -143,6 +149,13 @@ def "MaterialX"
                 float3 outputs:out
             }
 
+            def Shader "Combine_GNode_4a10d2fcd9564cd091d90d06a990d009"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_GeomPosition/ComparisonNode_142c69d359494f2c84122785f4ca0b26.outputs:out>
+                float outputs:out
+            }
+
             def Shader "ComparisonNode_142c69d359494f2c84122785f4ca0b26"
             {
                 uniform token info:id = "ND_ifgreater_float"
@@ -150,6 +163,13 @@ def "MaterialX"
                 float inputs:value2 = 0.1
                 float inputs:in1 = 0
                 float inputs:in2 = 1
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_4a10d2fcd9564cd091d90d06a990d009"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
                 float outputs:out
             }
 

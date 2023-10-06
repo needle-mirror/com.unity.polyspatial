@@ -17,7 +17,7 @@ def "MaterialX"
             def Shader "realitykit_pbr"
             {
                 uniform token info:id = "ND_realitykit_pbr_surfaceshader"
-                color3f inputs:baseColor = (0.5, 0.5, 0.5)
+                color3f inputs:baseColor = (0.2140411, 0.2140411, 0.2140411)
                 float inputs:metallic = 0
                 color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_Matrix/CastConvertFinalFromAddNode_a0e8e2c6d59d4039b8072c060f2b5423ToSR_MatrixemissiveColor.outputs:out>
                 float inputs:ambientOcclusion = 1

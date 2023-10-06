@@ -154,6 +154,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     ConcreteSlotValueType.Matrix3 => MtlxDataTypes.Matrix33,
                     ConcreteSlotValueType.Matrix4 => MtlxDataTypes.Matrix44,
                     ConcreteSlotValueType.Texture2D => MtlxDataTypes.Filename,
+                    ConcreteSlotValueType.Texture3D => MtlxDataTypes.Filename,
+                    ConcreteSlotValueType.Cubemap => MtlxDataTypes.Filename,
                     ConcreteSlotValueType.Gradient => MtlxDataTypes.Color4Array,
                     _ => null
                 }
@@ -180,48 +182,92 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             switch (slot)
             {
+                case ColorRGBMaterialSlot c3:
+                {
+                    var linearValue = ((Color)(Vector4)c3.value).linear;
+                    return new[] { linearValue.r, linearValue.g, linearValue.b };
+                }
+                case ColorRGBAMaterialSlot c4:
+                {
+                    var linearValue = ((Color)c4.value).linear;
+                    return new[] { linearValue.r, linearValue.g, linearValue.b, linearValue.a };
+                }
+                case BooleanMaterialSlot b:
+                    return new[] { b.value ? 1f : 0f };
 
-                case ColorRGBMaterialSlot c3:       return new float[3] { c3.value.x, c3.value.y, c3.value.z};
-                case ColorRGBAMaterialSlot c4:      return new float[4] { c4.value.x, c4.value.y, c4.value.z, c4.value.w };
-                case BooleanMaterialSlot b:         return new float[1] { b.value ? 1f : 0f };
-                case Vector1MaterialSlot f:         return new float[1] { f.value };
-                case Vector2MaterialSlot v2:        return new float[2] { v2.value.x, v2.value.y };
-                case Vector3MaterialSlot v3:        return new float[3] { v3.value.x, v3.value.y, v3.value.z };
-                case DynamicVectorMaterialSlot vd:  return new float[4] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
-                case Vector4MaterialSlot v4:        return new float[4] { v4.value.x, v4.value.y, v4.value.z, v4.value.w };
+                case Vector1MaterialSlot f:
+                    return new[] { f.value };
+
+                case Vector2MaterialSlot v2:
+                    return new[] { v2.value.x, v2.value.y };
+
+                case Vector3MaterialSlot v3:
+                    return new[] { v3.value.x, v3.value.y, v3.value.z };
+
+                case DynamicVectorMaterialSlot vd:
+                    return new[] { vd.value.x, vd.value.y, vd.value.z, vd.value.w };
+
+                case Vector4MaterialSlot v4:
+                    return new[] { v4.value.x, v4.value.y, v4.value.z, v4.value.w };
+
+                case Matrix2MaterialSlot m2:
+                    return GetMatrix2Value(m2.value);
+
                 case Matrix3MaterialSlot m3:
-                    return new float[9]
-                    {
-                        m3.value.m00, m3.value.m01, m3.value.m02,
-                        m3.value.m10, m3.value.m11, m3.value.m12,
-                        m3.value.m20, m3.value.m21, m3.value.m22,
-                    };
+                    return GetMatrix3Value(m3.value);
+
                 case Matrix4MaterialSlot m4:
-                    return new float[16]
-                    {
-                        m4.value.m00, m4.value.m01, m4.value.m02, m4.value.m03,
-                        m4.value.m10, m4.value.m11, m4.value.m12, m4.value.m13,
-                        m4.value.m20, m4.value.m21, m4.value.m22,m4.value.m23,
-                        m4.value.m30, m4.value.m31, m4.value.m32,m4.value.m33,
-                    };
+                    return GetMatrix4Value(m4.value);
+
                 case DynamicMatrixMaterialSlot md:
-                    return new float[16]
-                    {
-                        md.value.m00, md.value.m01, md.value.m02, md.value.m03,
-                        md.value.m10, md.value.m11, md.value.m12, md.value.m13,
-                        md.value.m20, md.value.m21, md.value.m22, md.value.m23,
-                        md.value.m30, md.value.m31, md.value.m32, md.value.m33,
-                    };
+                    return GetConcreteValue(md.concreteValueType, md.value);
+                    
                 case DynamicValueMaterialSlot dv:
-                    return new float[16]
-                    {
-                        dv.value.m00, dv.value.m01, dv.value.m02, dv.value.m03,
-                        dv.value.m10, dv.value.m11, dv.value.m12, dv.value.m13,
-                        dv.value.m20, dv.value.m21, dv.value.m22, dv.value.m23,
-                        dv.value.m30, dv.value.m31, dv.value.m32, dv.value.m33,
-                    };
-                default: return null;
+                    return GetConcreteValue(dv.concreteValueType, dv.value);
+
+                default:
+                    return null;
             }
+        }
+
+        static float[] GetConcreteValue(ConcreteSlotValueType concreteType, Matrix4x4 matrix)
+        {
+            return concreteType switch
+            {
+                ConcreteSlotValueType.Matrix2 => GetMatrix2Value(matrix),
+                ConcreteSlotValueType.Matrix3 => GetMatrix3Value(matrix),
+                _ => GetMatrix4Value(matrix),
+            };
+        }
+
+        static float[] GetMatrix2Value(Matrix4x4 matrix)
+        {
+            return new[]
+            {
+                matrix.m00, matrix.m01,
+                matrix.m10, matrix.m11,
+            };
+        }
+
+        static float[] GetMatrix3Value(Matrix4x4 matrix)
+        {
+            return new[]
+            {
+                matrix.m00, matrix.m01, matrix.m02,
+                matrix.m10, matrix.m11, matrix.m12,
+                matrix.m20, matrix.m21, matrix.m22,
+            };
+        }
+
+        static float[] GetMatrix4Value(Matrix4x4 matrix)
+        {
+            return new[]
+            {
+                matrix.m00, matrix.m01, matrix.m02, matrix.m03,
+                matrix.m10, matrix.m11, matrix.m12, matrix.m13,
+                matrix.m20, matrix.m21, matrix.m22, matrix.m23,
+                matrix.m30, matrix.m31, matrix.m32, matrix.m33,
+            };
         }
     }
 

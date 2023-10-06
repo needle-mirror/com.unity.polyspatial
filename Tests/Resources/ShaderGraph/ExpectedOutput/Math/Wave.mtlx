@@ -1,11 +1,32 @@
 <?xml version ="1.0"?>
 <materialx version = "1.38" colorspace = "lin_rec709">
-    <combine4 name = "CombineNode_1fb04e6723f043a4bb449a33439084cc" type = "color4">
-        <input name = "in1" type = "float" nodename = "SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979" />
-        <input name = "in2" type = "float" nodename = "SawtoothWave_OutNode_3c75885595874ba5ac2117c392e79f5c" />
-        <input name = "in3" type = "float" nodename = "NoiseSineWave_OutNode_7ba6f499cd184ac48504324d70f30c06" />
-        <input name = "in4" type = "float" value = "0" />
+    <combine4 name = "Combine_RGBANode_1fb04e6723f043a4bb449a33439084cc" type = "vector4">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in3" type = "float" nodename = "Combine_BNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in4" type = "float" nodename = "Combine_ANode_1fb04e6723f043a4bb449a33439084cc" />
     </combine4>
+    <dot name = "Combine_RNode_1fb04e6723f043a4bb449a33439084cc" type = "float">
+        <input name = "in" type = "float" nodename = "SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979" />
+    </dot>
+    <dot name = "Combine_GNode_1fb04e6723f043a4bb449a33439084cc" type = "float">
+        <input name = "in" type = "float" nodename = "SawtoothWave_OutNode_3c75885595874ba5ac2117c392e79f5c" />
+    </dot>
+    <dot name = "Combine_BNode_1fb04e6723f043a4bb449a33439084cc" type = "float">
+        <input name = "in" type = "float" nodename = "NoiseSineWave_OutNode_7ba6f499cd184ac48504324d70f30c06" />
+    </dot>
+    <dot name = "Combine_ANode_1fb04e6723f043a4bb449a33439084cc" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <combine3 name = "Combine_RGBNode_1fb04e6723f043a4bb449a33439084cc" type = "vector3">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in3" type = "float" nodename = "Combine_BNode_1fb04e6723f043a4bb449a33439084cc" />
+    </combine3>
+    <combine2 name = "Combine_RGNode_1fb04e6723f043a4bb449a33439084cc" type = "vector2">
+        <input name = "in1" type = "float" nodename = "Combine_RNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "in2" type = "float" nodename = "Combine_GNode_1fb04e6723f043a4bb449a33439084cc" />
+    </combine2>
     <subtract name = "SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979" type = "float">
         <input name = "in1" type = "float" value = "1" />
         <input name = "in2" type = "float" nodename = "SquareWave_Out_in2Node_cca0ea3aed1148c3b12967a5c58f2979" />
@@ -103,15 +124,15 @@
     </GeometryModification>
     <realitykit_unlit name = "SR_Wave" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
-        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombineNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor" />
         <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Wave" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_WaveVertex" />
         <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Wave" />
     </surfacematerial>
-    <swizzle name = "CastSwizzleFromCombineNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor" type = "color3">
-        <input name = "in" type = "color4" nodename = "CombineNode_1fb04e6723f043a4bb449a33439084cc" />
-        <input name = "channels" type = "string" value = "rgb" />
+    <swizzle name = "CastSwizzleFromCombine_RGBNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Combine_RGBNode_1fb04e6723f043a4bb449a33439084cc" />
+        <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
 </materialx>

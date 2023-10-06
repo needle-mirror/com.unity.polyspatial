@@ -18,7 +18,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_unlit_surfaceshader"
                 bool inputs:applyPostProcessToneMap = 0
-                color3f inputs:color.connect = </MaterialX/Materials/USD_hsv/CastSwizzleFromCombineNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor.outputs:out>
+                color3f inputs:color.connect = </MaterialX/Materials/USD_hsv/CastSwizzleFromCombine_RGBNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor.outputs:out>
                 float inputs:opacity = 1
                 token outputs:out
             }
@@ -29,22 +29,28 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor"
+            def Shader "CastSwizzleFromCombine_RGBNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_hsv/CombineNode_00f72d4538b64277b273c0ce08329809.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_hsv/Combine_RGBNode_00f72d4538b64277b273c0ce08329809.outputs:out>
+                string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "CombineNode_00f72d4538b64277b273c0ce08329809"
+            def Shader "Combine_RGBNode_00f72d4538b64277b273c0ce08329809"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/ComparisonNode_1365ee0e2a124a4697cfc5799cabb153.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/ComparisonNode_53195a756ed74b958e82d133020d3c80.outputs:out>
-                float inputs:in3 = 0
-                float inputs:in4 = 0
-                color4f outputs:out
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Combine_RNode_00f72d4538b64277b273c0ce08329809.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Combine_GNode_00f72d4538b64277b273c0ce08329809.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_hsv/Combine_BNode_00f72d4538b64277b273c0ce08329809.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Combine_RNode_00f72d4538b64277b273c0ce08329809"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_hsv/ComparisonNode_1365ee0e2a124a4697cfc5799cabb153.outputs:out>
+                float outputs:out
             }
 
             def Shader "ComparisonNode_1365ee0e2a124a4697cfc5799cabb153"
@@ -126,6 +132,13 @@ def "MaterialX"
                 float3 outputs:out
             }
 
+            def Shader "Combine_GNode_00f72d4538b64277b273c0ce08329809"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_hsv/ComparisonNode_53195a756ed74b958e82d133020d3c80.outputs:out>
+                float outputs:out
+            }
+
             def Shader "ComparisonNode_53195a756ed74b958e82d133020d3c80"
             {
                 uniform token info:id = "ND_ifequal_float"
@@ -133,6 +146,13 @@ def "MaterialX"
                 float inputs:value2 = 1
                 float inputs:in1 = 1
                 float inputs:in2 = 0
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_00f72d4538b64277b273c0ce08329809"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
                 float outputs:out
             }
 
@@ -208,50 +228,27 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "Hue_hsv_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            def Shader "Hue_hsv_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_subtract_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_D_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_D_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
                 float outputs:out
             }
 
-            def Shader "Hue_hsv_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_absval_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_inNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_inNode_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            def Shader "Hue_D_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_swizzle_vector4_float"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                string inputs:channels = "z"
+                string inputs:channels = "x"
                 float outputs:out
             }
 
@@ -332,6 +329,69 @@ def "MaterialX"
                 float3 outputs:out
             }
 
+            def Shader "Hue_hsv_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hsv_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_realitykit_step_float"
+                float inputs:edge = 1
+                float inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_inNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_inNode_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                string inputs:channels = "z"
+                float outputs:out
+            }
+
+            def Shader "Hue_hsv_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in1_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hsv_in1_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_realitykit_step_float"
+                float inputs:edge.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in = 0
+                float outputs:out
+            }
+
             def Shader "Hue_Out_in2_fgNode_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_clamp_vector3"
@@ -363,6 +423,14 @@ def "MaterialX"
                 float inputs:in3.connect = </MaterialX/Materials/USD_hsv/Hue_K2_in3Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
                 float inputs:in4 = 3
                 float4 outputs:out
+            }
+
+            def Shader "Hue_K2_in3Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1 = 1
+                float inputs:in2 = 3
+                float outputs:out
             }
 
             def Shader "Hue_K2_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
@@ -497,11 +565,11 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "Hue_hsv_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            def Shader "Hue_hsv_in3Node_75a552a90b6a4d0187b82c8683fcfcef"
             {
-                uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hsv_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                string inputs:channels = "x"
                 float outputs:out
             }
 
@@ -528,14 +596,6 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_subtract_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_D_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_D_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
             def Shader "Hue_D_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_min_float"
@@ -553,101 +613,6 @@ def "MaterialX"
             }
 
             def Shader "Hue_D_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                string inputs:channels = "w"
-                float outputs:out
-            }
-
-            def Shader "Hue_D_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                string inputs:channels = "x"
-                float outputs:out
-            }
-
-            def Shader "Hue_hsv_in3Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                string inputs:channels = "x"
-                float outputs:out
-            }
-
-            def Shader "Hue_hsv_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_realitykit_step_float"
-                float inputs:edge = 1
-                float inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hsv_in1_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_realitykit_step_float"
-                float inputs:edge.connect = </MaterialX/Materials/USD_hsv/Hue_hueNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in = 0
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_OffsetNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2 = 360
-                float outputs:out
-            }
-
-            def Shader "Hue_OffsetNode_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_dot_float"
-                float inputs:in = 90
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_ENode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_multiply_float"
-                float inputs:in1 = 6
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_subtract_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
-                string inputs:channels = "y"
-                float outputs:out
-            }
-
-            def Shader "Hue_hue_in1_in_in2_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_swizzle_vector4_float"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
@@ -893,11 +858,66 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "Hue_K2_in3Node_75a552a90b6a4d0187b82c8683fcfcef"
+            def Shader "Hue_hue_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
             {
                 uniform token info:id = "ND_divide_float"
-                float inputs:in1 = 1
-                float inputs:in2 = 3
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_OffsetNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2 = 360
+                float outputs:out
+            }
+
+            def Shader "Hue_OffsetNode_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 90
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2_in1_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                string inputs:channels = "w"
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </MaterialX/Materials/USD_hsv/Hue_hue_in1_in_in2_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_ENode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2_in2_in1Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1 = 6
+                float inputs:in2.connect = </MaterialX/Materials/USD_hsv/Hue_DNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Hue_hue_in1_in_in2_in1_in2Node_75a552a90b6a4d0187b82c8683fcfcef"
+            {
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_hsv/Hue_QNode_75a552a90b6a4d0187b82c8683fcfcef.outputs:out>
+                string inputs:channels = "y"
                 float outputs:out
             }
         }

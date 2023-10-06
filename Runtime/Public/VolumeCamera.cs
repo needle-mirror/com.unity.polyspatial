@@ -6,7 +6,7 @@ using Unity.PolySpatial.InternalBridge;
 #endif
 using Unity.PolySpatial.Internals;
 using UnityEngine;
-using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Unity.PolySpatial
@@ -24,20 +24,25 @@ namespace Unity.PolySpatial
     {
         internal static string PolySpatialLayerName => "PolySpatial";
 
-        [SerializeField]
-        [Tooltip("Whether the camera should restrict the rendered content to objects within its bounding box or be unbounded.")]
-        PolySpatialVolumeCameraMode m_Mode = PolySpatialVolumeCameraMode.Bounded;
+        internal const PolySpatialVolumeCameraMode k_DefaultMode = PolySpatialVolumeCameraMode.Bounded;
+
+        internal static readonly Vector3 k_DefaultDimensions = new Vector3(0.25f, 0.25f, 0.25f);
 
         [SerializeField]
-        [Tooltip("The dimensions that are mapped to a unit cube in the destination view.")]
-        Vector3 m_Dimensions = Vector3.one;
+        [Tooltip("The dimensions in Unity's world space of the volume camera's bounding box. Ignored if the volume camera is displayed in an Unbounded output.")]
+        Vector3 m_Dimensions = k_DefaultDimensions;
+
+        // This will lock the current ratio and scale the camera uniformly.
+        // ReSharper disable once NotAccessedField.Local
+        [SerializeField]
+        bool m_IsUniformScale;
+
+        [SerializeField]
+        [Tooltip("The output configuration object for this volume camera, or None for default. Create new output configurations via VolumeCameraConfiguration scriptable objects.")]
+        VolumeCameraConfiguration m_OutputConfiguration = null;
 
         [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
         public LayerMask CullingMask = ~0x0;
-
-        // This will lock the current ratio and scale the camera uniformly.
-        [SerializeField]
-        bool m_IsUniformScale;
 
         bool m_MatricesValid = false;
 
@@ -68,40 +73,63 @@ namespace Unity.PolySpatial
             Unbounded = 1,
         }
 
-        public PolySpatialVolumeCameraMode Mode
+        public VolumeCameraConfiguration OutputConfiguration
         {
-            get => m_Mode;
+            get => m_OutputConfiguration;
             set
             {
-                if (m_Mode != value)
+                m_OutputConfiguration = value;
+                SetDirty();
+            }
+        }
+
+        VolumeCameraConfiguration ResolvedOutputConfiguration {
+            get
+            {
+                if (m_OutputConfiguration != null)
+                    return m_OutputConfiguration;
+                return PolySpatialSettings.instance.DefaultVolumeCameraConfiguration;
+            }
+        }
+
+        /// <summary>
+        /// The mode this volume camera will display its content in, Bounded or Unbounded.
+        /// </summary>
+        public PolySpatialVolumeCameraMode OutputMode => ResolvedOutputConfiguration.Mode;
+
+        /// <summary>
+        /// The dimensions in meters of the actual output size of the volume camera. May be different than Dimensions,
+        /// in which case the space described by Dimensions is scaled to fit the OutputDimensions.
+        /// </summary>
+        public Vector3 OutputDimensions => ResolvedOutputConfiguration.Dimensions;
+
+        public Vector3 Dimensions
+        {
+            get
+            {
+                if (OutputMode == PolySpatialVolumeCameraMode.Unbounded)
+                    return Vector3.one;
+                return m_Dimensions;
+            }
+            set
+            {
+                if (!ValidateDimensions(value, out var errorMsg))
                 {
-                    m_Mode = value;
-
-                    if (m_Mode == PolySpatialVolumeCameraMode.Unbounded)
-                        m_BackingCamera.enabled = false;
-
-                    m_IsHostCameraAvailable = false;
-                    SetDirty();
+                    Debug.LogError(errorMsg);
                 }
+                else
+                {
+                    m_Dimensions = value;
+                }
+
+                UpdateMatrices();
+                UpdateConfiguration();
             }
         }
 
         public Camera BackingCamera => m_BackingCamera.enabled ? m_BackingCamera : null;
 
         public bool IsHostCameraAvailable => m_IsHostCameraAvailable;
-
-        public Vector3 Dimensions
-        {
-            get => m_Dimensions;
-            set
-            {
-                value.x = Math.Max(value.x, 0.0f);
-                value.y = Math.Max(value.y, 0.0f);
-                value.z = Math.Max(value.z, 0.0f);
-                m_Dimensions = value;
-                SetDirty();
-            }
-        }
 
         // A matrix that translates from the unit cube at origin canonical volume space
         // back into the world space of the volume camera.
@@ -126,7 +154,7 @@ namespace Unity.PolySpatial
 
         internal void CalculateWorldToVolumeTRS(out Vector3 pos, out Quaternion rot, out Vector3 scale)
         {
-            CalculateWorldToVolumeTRS(transform.localPosition, transform.localRotation, transform.localScale, m_Dimensions,
+            CalculateWorldToVolumeTRS(transform.localPosition, transform.localRotation, transform.localScale, Dimensions,
                 out pos, out rot, out scale);
         }
 
@@ -157,7 +185,7 @@ namespace Unity.PolySpatial
                 return;
 
             CalculateWorldToVolumeTRS(transform.position, transform.rotation, transform.lossyScale,
-                m_Dimensions, out var pos, out var rot, out var scale);
+                Dimensions, out var pos, out var rot, out var scale);
 
             m_WorldToVolume = Matrix4x4.TRS(pos, rot, scale);
             m_VolumeToWorld = m_WorldToVolume.inverse;
@@ -221,11 +249,17 @@ namespace Unity.PolySpatial
             }
         }
 
+        internal void UpdateConfiguration()
+        {
+            UpdateBoundedCullingCamera();
+            SetDirty();
+        }
+
         // TODO -- save all these values, so that we stop re-setting the camera values every frame!
 
         internal void UpdateBoundedCullingCamera()
         {
-            if (Mode != PolySpatialVolumeCameraMode.Bounded)
+            if (OutputMode != PolySpatialVolumeCameraMode.Bounded)
                 return;
 
             if (m_BackingCamera == null)
@@ -304,23 +338,30 @@ namespace Unity.PolySpatial
             cam.enabled = true;
         }
 
-        [Conditional("UNITY_EDITOR")]
-        void OnValidate()
+        internal static bool ValidateDimensions(Vector3 dim, out string errorMsg)
         {
-            Dimensions = m_Dimensions;
+            var ok = true;
+            errorMsg = "";
+
+            ok = dim.x > 0.0f && dim.y > 0.0f && dim.z > 0.0f;
+            if (!ok)
+            {
+                errorMsg = $"Dimensions must be greater than 0.";
+                return ok;
+            }
+
+            return ok;
         }
 
         [Conditional("UNITY_EDITOR")]
         internal void OnDrawGizmosSelected()
         {
             // Draw a green box that shows what will be included in 1x1x1 units of canonical space
-            if (Mode == PolySpatialVolumeCameraMode.Bounded)
+            if (OutputMode == PolySpatialVolumeCameraMode.Bounded)
             {
                 Gizmos.matrix = gameObject.transform.localToWorldMatrix;
                 Gizmos.color = new Color(0, 0.5f, 0, 0.2f);
                 Gizmos.DrawCube(Vector3.zero, Dimensions);
-                Gizmos.color = new Color(0, 0.1f, 0, 0.7f);
-                Gizmos.DrawWireCube(Vector3.zero, Dimensions);
             }
         }
     }

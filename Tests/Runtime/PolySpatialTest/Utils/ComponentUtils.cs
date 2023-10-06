@@ -110,12 +110,10 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return GetParticleSystemData(ps.GetInstanceID());
         }
 
-#if VIDEO_MODULE_EXISTS
         internal static DefaultTrackingData GetTrackingData(PolySpatialVideoComponent player)
         {
             return GetVideoPlayerData(player.GetInstanceID());
         }
-#endif
 
         internal static DefaultTrackingData GetTrackingData(UnityEngine.Object qvc)
         {
@@ -162,12 +160,10 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return ParticleSystemTracker.GetTrackingData(iid);
         }
 
-#if VIDEO_MODULE_EXISTS
         internal static DefaultTrackingData GetVideoPlayerData(int iid)
         {
             return VideoPlayerTracker.GetTrackingData(iid);
         }
-#endif
 
         internal static DefaultTrackingData GetPolySpatialVolumeCameraTrackingData(int iid)
         {

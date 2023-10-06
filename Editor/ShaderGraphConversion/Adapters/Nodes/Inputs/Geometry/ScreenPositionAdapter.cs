@@ -195,12 +195,127 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 return;
 
 #if DISABLE_MATERIALX_EXTENSIONS
-                var nodeData = SetupScreenSpace(snode.screenSpaceType, graph);
-                externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
+            var nodeData = SetupScreenSpace(snode.screenSpaceType, graph);
+            externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
 #else
-            var nodeData = QuickNode.NaryOp(
-                MtlxNodeTypes.RealityKitSurfaceScreenPosition, node, graph, externals, "ScreenPosition");
-            nodeData.outputName = "screenPosition";
+            // For pixel coordinates, RealityKit provides a custom node.
+            if (snode.screenSpaceType == ScreenSpaceType.Pixel)
+            {
+                var nodeData = QuickNode.NaryOp(
+                    MtlxNodeTypes.RealityKitSurfaceScreenPosition, node, graph, externals, "ScreenPosition");
+                nodeData.outputName = "screenPosition";
+                return;
+            }
+            
+            // Start with the base screen position: the object position transformed by model/view/projection.
+            NodeDef baseDef = new(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
+            {
+                ["in"] = new InlineInputDef(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
+                {
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                        {
+                            ["in"] = new InlineInputDef(MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3, new()
+                            {
+                                ["space"] = new StringInputDef("object"),
+                            }),
+                        }),
+                        ["mat"] = new InlineInputDef(
+                            MtlxNodeTypes.RealityKitSurfaceModelToWorld,
+                            MtlxDataTypes.Matrix44, new(), "modelToWorld"),
+                    }),
+                    ["mat"] = new InlineInputDef(
+                        MtlxNodeTypes.RealityKitSurfaceWorldToView, MtlxDataTypes.Matrix44, new(), "worldToView"),
+                }),
+                ["mat"] = new InlineInputDef(
+                    MtlxNodeTypes.RealityKitSurfaceViewToProjection,
+                    MtlxDataTypes.Matrix44, new(), "viewToProjection"),
+            });
+            if (snode.screenSpaceType == ScreenSpaceType.Raw)
+            {
+                // Refer to:
+                // https://github.cds.internal.unity3d.com/unity/unity/blob/c70d8d41fa33940eff956ece3020687378e5be1a/Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl#L20
+                QuickNode.CompoundOp(node, graph, externals, "ScreenPosition", new()
+                {
+                    ["Base"] = baseDef,
+                    ["BaseW"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = new InternalInputDef("Base"),
+                        ["channels"] = new StringInputDef("w"),
+                    }),
+                    ["OutXY"] = new(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                        {
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                            {
+                                ["in"] = new InternalInputDef("Base"),
+                                ["channels"] = new StringInputDef("xy"),
+                            }),
+                            ["in2"] = new InternalInputDef("BaseW"),
+                        }),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+                    }),
+                    ["Out"] = new(MtlxNodeTypes.Combine4, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("OutXY"),
+                            ["channels"] = new StringInputDef("x"),
+                        }),
+                        ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("OutXY"),
+                            ["channels"] = new StringInputDef("y"),
+                        }),
+                        ["in3"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("Base"),
+                            ["channels"] = new StringInputDef("z"),
+                        }),
+                        ["in4"] = new InternalInputDef("BaseW"),
+                    }),
+                });
+                return;
+            }
+
+            // Divide by w (and clear zw) to get the Center position.
+            var scale = (snode.screenSpaceType == ScreenSpaceType.Default) ? 0.5f : 1.0f;
+            NodeDef centerDef = new(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector4, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector4, new()
+                {
+                    ["in1"] = new InternalInputDef("Base"),
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = new InternalInputDef("Base"),
+                        ["channels"] = new StringInputDef("w"),
+                    }),
+                }),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, scale, scale, 0.0f, 0.0f),
+            });
+
+            QuickNode.CompoundOp(node, graph, externals, "ScreenPosition", new()
+            {
+                ["Base"] = baseDef,
+                ["Out"] = snode.screenSpaceType switch
+                {
+                    // Take the fraction of Center to get the Tiled position.
+                    ScreenSpaceType.Tiled => new(MtlxNodeTypes.RealityKitFractional, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in"] = new InlineInputDef(centerDef),
+                    }),
+                    // Remap Center to [0, 1] to get the Default position.
+                    ScreenSpaceType.Default => new(MtlxNodeTypes.Add, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in1"] = new InlineInputDef(centerDef),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 0.5f, 0.5f, 0.0f, 0.0f),
+                    }),
+                    ScreenSpaceType.Center => centerDef,
+                    _ => throw new NotSupportedException($"Unknown screen space type {snode.screenSpaceType}"),
+                },
+            });
 #endif
         }
     }

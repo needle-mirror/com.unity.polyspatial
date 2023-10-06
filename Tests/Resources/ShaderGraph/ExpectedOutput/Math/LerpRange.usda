@@ -18,7 +18,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_unlit_surfaceshader"
                 bool inputs:applyPostProcessToneMap = 0
-                color3f inputs:color.connect = </MaterialX/Materials/USD_LerpRange/CastSwizzleFromCombineNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor.outputs:out>
+                color3f inputs:color.connect = </MaterialX/Materials/USD_LerpRange/CastSwizzleFromCombine_RGBNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor.outputs:out>
                 float inputs:opacity = 1
                 token outputs:out
             }
@@ -29,22 +29,28 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor"
+            def Shader "CastSwizzleFromCombine_RGBNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_LerpRange/CombineNode_1afcd9d457ec4d49aae482c231abe6ce.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_LerpRange/Combine_RGBNode_1afcd9d457ec4d49aae482c231abe6ce.outputs:out>
+                string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "CombineNode_1afcd9d457ec4d49aae482c231abe6ce"
+            def Shader "Combine_RGBNode_1afcd9d457ec4d49aae482c231abe6ce"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_LerpRange/ComparisonNode_6f2c64e5bcf24eb68abf021295d5a39c.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_LerpRange/ComparisonNode_27a007f7b72447d4a9c149b3395ffabe.outputs:out>
-                float inputs:in3 = 0
-                float inputs:in4 = 0
-                color4f outputs:out
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_LerpRange/Combine_RNode_1afcd9d457ec4d49aae482c231abe6ce.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_LerpRange/Combine_GNode_1afcd9d457ec4d49aae482c231abe6ce.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_LerpRange/Combine_BNode_1afcd9d457ec4d49aae482c231abe6ce.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Combine_RNode_1afcd9d457ec4d49aae482c231abe6ce"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_LerpRange/ComparisonNode_6f2c64e5bcf24eb68abf021295d5a39c.outputs:out>
+                float outputs:out
             }
 
             def Shader "ComparisonNode_6f2c64e5bcf24eb68abf021295d5a39c"
@@ -103,7 +109,7 @@ def "MaterialX"
                 float inputs:inhigh.connect = </MaterialX/Materials/USD_LerpRange/RemapNode_b0fa5b058c614dab893030d897235083InMax.outputs:out>
                 float inputs:outlow.connect = </MaterialX/Materials/USD_LerpRange/RemapNode_b0fa5b058c614dab893030d897235083OutMin.outputs:out>
                 float inputs:outhigh.connect = </MaterialX/Materials/USD_LerpRange/RemapNode_b0fa5b058c614dab893030d897235083OutMax.outputs:out>
-                float3 inputs:in.connect = </MaterialX/Materials/USD_LerpRange/CastSwizzleFromCombineNode_4c1405f4c8044d2b849ffbc1871e792eToRemapNode_b0fa5b058c614dab893030d897235083in.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_LerpRange/Combine_RGBNode_4c1405f4c8044d2b849ffbc1871e792e.outputs:out>
                 float3 outputs:out
             }
 
@@ -122,6 +128,13 @@ def "MaterialX"
                 float2 outputs:out
             }
 
+            def Shader "Combine_GNode_1afcd9d457ec4d49aae482c231abe6ce"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_LerpRange/ComparisonNode_27a007f7b72447d4a9c149b3395ffabe.outputs:out>
+                float outputs:out
+            }
+
             def Shader "ComparisonNode_27a007f7b72447d4a9c149b3395ffabe"
             {
                 uniform token info:id = "ND_ifequal_float"
@@ -129,6 +142,13 @@ def "MaterialX"
                 float inputs:value2 = 1
                 float inputs:in1 = 1
                 float inputs:in2 = 0
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_1afcd9d457ec4d49aae482c231abe6ce"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
                 float outputs:out
             }
 
@@ -171,22 +191,20 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_4c1405f4c8044d2b849ffbc1871e792eToRemapNode_b0fa5b058c614dab893030d897235083in"
+            def Shader "Combine_RGBNode_4c1405f4c8044d2b849ffbc1871e792e"
             {
-                uniform token info:id = "ND_swizzle_color4_vector3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_LerpRange/CombineNode_4c1405f4c8044d2b849ffbc1871e792e.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_LerpRange/Combine_RNode_4c1405f4c8044d2b849ffbc1871e792e.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_LerpRange/Combine_GNode_4c1405f4c8044d2b849ffbc1871e792e.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_LerpRange/Combine_BNode_4c1405f4c8044d2b849ffbc1871e792e.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CombineNode_4c1405f4c8044d2b849ffbc1871e792e"
+            def Shader "Combine_RNode_4c1405f4c8044d2b849ffbc1871e792e"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_LerpRange/FractionNode_ba8b16ddab0c45d882c6e562336ecb20.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_LerpRange/LerpNode_d6ee02ab1cbb41c0911480e900aab2be.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_LerpRange/SmoothStepNode_84ad55dbbca0499ca26ff4a033936002.outputs:out>
-                float inputs:in4 = 0
-                color4f outputs:out
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_LerpRange/FractionNode_ba8b16ddab0c45d882c6e562336ecb20.outputs:out>
+                float outputs:out
             }
 
             def Shader "FractionNode_ba8b16ddab0c45d882c6e562336ecb20"
@@ -212,12 +230,26 @@ def "MaterialX"
                 float outputs:out
             }
 
+            def Shader "Combine_GNode_4c1405f4c8044d2b849ffbc1871e792e"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_LerpRange/LerpNode_d6ee02ab1cbb41c0911480e900aab2be.outputs:out>
+                float outputs:out
+            }
+
             def Shader "LerpNode_d6ee02ab1cbb41c0911480e900aab2be"
             {
                 uniform token info:id = "ND_mix_float"
                 float inputs:bg = 0
                 float inputs:fg = 1
                 float inputs:mix = 0.5
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_4c1405f4c8044d2b849ffbc1871e792e"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_LerpRange/SmoothStepNode_84ad55dbbca0499ca26ff4a033936002.outputs:out>
                 float outputs:out
             }
 

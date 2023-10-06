@@ -90,7 +90,7 @@ namespace UnityEditor.PolySpatial.Analytics
                     var volumeCamera = PolySpatialCore.UnitySimulation.Camera;
                     if (volumeCamera != null)
                     {
-                        switch (volumeCamera.Mode)
+                        switch (volumeCamera.OutputMode)
                         {
                             case VolumeCamera.PolySpatialVolumeCameraMode.Bounded:
                                 payload.BoundedVolumes++;

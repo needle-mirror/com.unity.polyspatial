@@ -19,7 +19,7 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_unlit_surfaceshader"
                 bool inputs:applyPostProcessToneMap = 0
-                color3f inputs:color.connect = </MaterialX/Materials/USD_Wave/CastSwizzleFromCombineNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor.outputs:out>
+                color3f inputs:color.connect = </MaterialX/Materials/USD_Wave/CastSwizzleFromCombine_RGBNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor.outputs:out>
                 float inputs:opacity = 1
                 token outputs:out
             }
@@ -30,22 +30,28 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor"
+            def Shader "CastSwizzleFromCombine_RGBNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Wave/CombineNode_1fb04e6723f043a4bb449a33439084cc.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Wave/Combine_RGBNode_1fb04e6723f043a4bb449a33439084cc.outputs:out>
+                string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "CombineNode_1fb04e6723f043a4bb449a33439084cc"
+            def Shader "Combine_RGBNode_1fb04e6723f043a4bb449a33439084cc"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Wave/SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Wave/SawtoothWave_OutNode_3c75885595874ba5ac2117c392e79f5c.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_Wave/NoiseSineWave_OutNode_7ba6f499cd184ac48504324d70f30c06.outputs:out>
-                float inputs:in4 = 0
-                color4f outputs:out
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_Wave/Combine_RNode_1fb04e6723f043a4bb449a33439084cc.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Wave/Combine_GNode_1fb04e6723f043a4bb449a33439084cc.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_Wave/Combine_BNode_1fb04e6723f043a4bb449a33439084cc.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Combine_RNode_1fb04e6723f043a4bb449a33439084cc"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Wave/SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979.outputs:out>
+                float outputs:out
             }
 
             def Shader "SquareWave_OutNode_cca0ea3aed1148c3b12967a5c58f2979"
@@ -93,6 +99,13 @@ def "MaterialX"
                 float outputs:out
             }
 
+            def Shader "Combine_GNode_1fb04e6723f043a4bb449a33439084cc"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Wave/SawtoothWave_OutNode_3c75885595874ba5ac2117c392e79f5c.outputs:out>
+                float outputs:out
+            }
+
             def Shader "SawtoothWave_OutNode_3c75885595874ba5ac2117c392e79f5c"
             {
                 uniform token info:id = "ND_multiply_float"
@@ -128,6 +141,13 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_dot_float"
                 float inputs:in.connect = </MaterialX/Materials/USD_Wave/_TimeyNode_8a9a3a20401349b4bbfe72dd809477d5.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_1fb04e6723f043a4bb449a33439084cc"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Wave/NoiseSineWave_OutNode_7ba6f499cd184ac48504324d70f30c06.outputs:out>
                 float outputs:out
             }
 

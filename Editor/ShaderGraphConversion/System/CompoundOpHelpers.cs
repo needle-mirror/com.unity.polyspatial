@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.ShaderGraph.Internal;
 
 namespace UnityEditor.ShaderGraph.MaterialX
@@ -26,7 +27,20 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
     }
 
-    internal class NodeDef
+    internal static class DictionaryExtensions
+    {
+        public static string ToContentsString<V>(this Dictionary<string, V> nodeDefs)
+            where V : AbstractDef
+        {
+            return string.Join(", ", nodeDefs.Select(entry => $"[\"{entry.Key}\"] = {entry.Value}"));
+        }    
+    }
+
+    internal abstract class AbstractDef
+    {
+    }
+
+    internal class NodeDef : AbstractDef
     {
         internal string NodeType { get; private set; }
         internal string OutputType { get; private set; }
@@ -94,9 +108,19 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
             return hashCode.ToHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"NodeDef({ToRawString()})";
+        }
+
+        internal string ToRawString()
+        {
+            return $"\"{NodeType}\", \"{OutputType}\", \"{OutputName}\", {{{Inputs.ToContentsString()}}}";
+        }
     }
 
-    internal abstract class InputDef
+    internal abstract class InputDef : AbstractDef
     {
         internal abstract void AddPortsAndEdges(
             CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey);
@@ -144,6 +168,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
             return hashCode.ToHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"FloatInputDef(\"{PortType}\", {string.Join(", ", Values)})";
+        }
     }
 
     // An input that resolves to a constant string value.
@@ -170,6 +199,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"StringInputDef(\"{Value}\")";
         }
     }
 
@@ -199,6 +233,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             return Source.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"InternalInputDef(\"{Source}\")";
+        }
     }
 
     // An input that resolves to one of the inputs of the original shader graph node.
@@ -222,13 +261,22 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 // "Dot" is the identity function, not a dot product; we create a new node to represent
                 // the external input because ExternalEdgeMap can only map a slot to a single port, but we
                 // assume that this will be optimized out in the final shader code.
-                dotNode = ctx.Graph.AddNode(
-                    NodeUtils.GetNodeName(ctx.Node, $"{ctx.Hint}_{Source}"), MtlxNodeTypes.Dot, dataType);
+                var dotNodeType = MtlxNodeTypes.Dot;
+                var dotNodeInput = "in";
+                if (dataType == MtlxDataTypes.Matrix22)
+                {
+                    // The RealityKit MaterialX node defs seem to have omitted a "dot" node for Matrix22,
+                    // so use a constant node instead.
+                    dotNodeType = MtlxNodeTypes.Constant;
+                    dotNodeInput = "value";
+                }
+                dotNode = ctx.Graph.AddNode(NodeUtils.GetNodeName(
+                    ctx.Node, $"{ctx.Hint}_{Source}"), dotNodeType, dataType);
                 ctx.ExternalDotNodes.Add(Source, dotNode);
                 
                 if (slot.isConnected)
                 {
-                    QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, "in", dataType);
+                    QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, dotNodeInput, dataType);
                 }
                 else
                 {
@@ -250,15 +298,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             ctx.Graph.AddPortAndEdge(multiplyNode.name, addNode.name, "in1", dataType);
                             addNode.AddPortValue("in2", dataType, new[] { 0.0f, 1.0f });
 
-                            ctx.Graph.AddPortAndEdge(addNode.name, dotNode.name, "in", dataType);
+                            ctx.Graph.AddPortAndEdge(addNode.name, dotNode.name, dotNodeInput, dataType);
                             break;
                         }
                         case Texture2DInputMaterialSlot:
+                        case Texture3DInputMaterialSlot:
+                        case CubemapInputMaterialSlot:
                         {
                             // Unconnected texture inputs need an implicit property
                             var variableName = ctx.Node.GetVariableNameForSlot(slot.id);
                             QuickNode.EnsureImplicitProperty(variableName, MtlxDataTypes.Filename, ctx.Graph);
-                            ctx.Graph.AddPortAndEdge(variableName, dotNode.name, "in", MtlxDataTypes.Filename);
+                            ctx.Graph.AddPortAndEdge(variableName, dotNode.name, dotNodeInput, MtlxDataTypes.Filename);
                             break;
                         }
                         case ViewDirectionMaterialSlot:
@@ -269,12 +319,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
                                 $"{dotNode.name}Flip", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3);
                             ctx.Graph.AddPortAndEdge(geomNode.name, flipNode.name, "in1", MtlxDataTypes.Vector3);
                             flipNode.AddPortValue("in2", MtlxDataTypes.Vector3, new[] { 1.0f, 1.0f, -1.0f });
-                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, "in", MtlxDataTypes.Vector3);
+                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, dotNodeInput, MtlxDataTypes.Vector3);
                             break;
                         }
                         case NormalMaterialSlot normalSlot and { space: CoordinateSpace.Tangent }:
                             // RealityKit doesn't accept tangent space normals, but we know that they're (0, 0, 1).
-                            dotNode.AddPortValue("in", MtlxDataTypes.Vector3, new[] { 0.0f, 0.0f, 1.0f });
+                            dotNode.AddPortValue(dotNodeInput, MtlxDataTypes.Vector3, new[] { 0.0f, 0.0f, 1.0f });
                             break;
 
                         case SpaceMaterialSlot spaceMaterialSlot:
@@ -303,12 +353,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             ctx.Graph.AddPortAndEdge(geomNode.name, flipNode.name, "in1", MtlxDataTypes.Vector3);
                             flipNode.AddPortValue("in2", MtlxDataTypes.Vector3, new[] { 1.0f, 1.0f, -1.0f });
 
-                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, "in", MtlxDataTypes.Vector3);
+                            ctx.Graph.AddPortAndEdge(flipNode.name, dotNode.name, dotNodeInput, MtlxDataTypes.Vector3);
                             break;
                         }
                         default:
                             // Other unconnected inputs just use the default value.
-                            QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, "in", dataType);
+                            QuickNode.AddInputPortAndEdge(ctx.Externals, dotNode, slot, dotNodeInput, dataType);
                             break;
                     }
                 }
@@ -325,6 +375,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             return Source.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"ExternalInputDef(\"{Source}\")";
+        }
     }
 
     // An input that resolves to the output of an unmapped node described inline in the constructor.
@@ -336,6 +391,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
             string nodeType, string outputType, Dictionary<string, InputDef> inputs, string outputName = "out")
         {
             Source = new NodeDef(nodeType, outputType, inputs, outputName);
+        }
+
+        internal InlineInputDef(NodeDef source)
+        {
+            Source = source;
         }
 
         internal override void AddPortsAndEdges(
@@ -353,6 +413,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override int GetHashCode()
         {
             return Source.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"InlineInputDef({Source.ToRawString()})";
         }
     }
 
@@ -385,6 +450,41 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override int GetHashCode()
         {
             return HashCode.Combine(NodeName, DataType);
+        }
+
+        public override string ToString()
+        {
+            return $"ImplicitInputDef(\"{NodeName}\", \"{DataType}\")";
+        }
+    }
+
+    // An input that resolves to the texture size property associated with a texture.
+    // The texture must be supplied as an input to the original shader graph node.
+    internal class TextureSizeInputDef : InputDef
+    {
+        internal string Source { get; private set; }
+
+        internal TextureSizeInputDef(string source)
+        {
+            Source = source;
+        }
+
+        internal override void AddPortsAndEdges(
+            CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
+        {
+            var slot = NodeUtils.GetInputByName(ctx.Node, Source, true);
+            var sizeNodeName = TextureSizeAdapter.EnsureTextureSizeProperty(slot, ctx.Graph);
+            ctx.Graph.AddPortAndEdge(sizeNodeName, nodeDatum.name, inputKey, MtlxDataTypes.Vector3);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is TextureSizeInputDef other && other.Source == Source;
+        }
+
+        public override int GetHashCode()
+        {
+            return Source.GetHashCode();
         }
     }
 }

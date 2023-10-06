@@ -3,6 +3,7 @@ using System;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.PolySpatial;
 using Unity.PolySpatial.InputDevices;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
@@ -86,12 +87,20 @@ namespace Tests.Runtime.Functional.Input
             primaryAction.performed += OnActionChange;
             primaryAction.Enable();
 
-            SendEvents(1, SpatialPointerPhase.Began, Vector3.one * 10, 10);
+            Vector3 testPosition = Vector3.one * 10.0f;
+            int testColliderId = 10;
+
+            SendEvents(1, SpatialPointerPhase.Began, testPosition, testColliderId);
             InputSystem.Update();
 
+            // TODO -- this test depends on whatever the current opened scene is and its volume camera.
+            // It should ensure a specific scene is open!
+            var curVolCam = UnityObject.FindObjectOfType<VolumeCamera>();
+            var expectedPosition = curVolCam.VolumeSpaceToWorldSpaceMatrix.MultiplyPoint3x4(testPosition);
+
             Assert.IsNotNull(state, "Expected to receive a SpatialPointerState.");
-            Assert.AreEqual(state.Value.interactionPosition, Vector3.one * 10, "Expected interactionPosition to be Vector3.one * 10");
-            Assert.AreEqual(state.Value.targetId, 10 , "Expected targetId to be 10");
+            Assert.AreEqual(expectedPosition, state.Value.interactionPosition, "Expected correct interactionPosition");
+            Assert.AreEqual(testColliderId, state.Value.targetId, "Expected correct targetId");
 
             primaryAction.Disable();
         }

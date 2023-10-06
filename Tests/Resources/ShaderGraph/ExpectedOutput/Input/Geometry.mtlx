@@ -6,7 +6,7 @@
         <input name = "modelPositionOffset" type = "vector3" nodename = "SR_GeometryVertex_modelPositionOffset_SubtractPosition" />
     </GeometryModification>
     <realitykit_pbr name = "SR_Geometry" type = "surfaceshader">
-        <input name = "baseColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "baseColor" type = "color3" value = "0.2140411,0.2140411,0.2140411" />
         <input name = "metallic" type = "float" value = "0" />
         <input name = "emissiveColor" type = "color3" value = "0,0,0" />
         <input name = "ambientOcclusion" type = "float" value = "1" />

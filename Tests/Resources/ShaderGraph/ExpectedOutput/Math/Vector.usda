@@ -182,31 +182,101 @@ def "MaterialX"
 
             def Shader "SphereMask_Out_in2_in_in1_in1Node_d5ab9a6a1ce34c2783a6ba455590a175"
             {
-                uniform token info:id = "ND_absval_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                uniform token info:id = "ND_magnitude_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
                 float outputs:out
             }
 
             def Shader "SphereMask_Out_in2_in_in1_in1_inNode_d5ab9a6a1ce34c2783a6ba455590a175"
             {
-                uniform token info:id = "ND_subtract_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Vector/SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
-                float outputs:out
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175.outputs:out>
+                float3 outputs:out
             }
 
             def Shader "SphereMask_CenterNode_d5ab9a6a1ce34c2783a6ba455590a175"
             {
-                uniform token info:id = "ND_dot_float"
-                float inputs:in = 0.5
-                float outputs:out
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Rejection_OutNode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Rejection_OutNode_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Rejection_ANode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Rejection_Out_in2Node_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Rejection_ANode_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1 = 0
+                float inputs:in2 = 0
+                float inputs:in3 = 1
+                float3 outputs:out
             }
 
             def Shader "SphereMask_CoordsNode_d5ab9a6a1ce34c2783a6ba455590a175"
             {
-                uniform token info:id = "ND_dot_float"
-                float inputs:in = 0
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Projection_OutNode_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Projection_OutNode_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_divide_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Projection_Out_in1Node_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/Projection_Out_in2Node_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Projection_Out_in2Node_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Projection_BNode_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Projection_BNode_1249c628453a4e799cd3e316373306b7.outputs:out>
                 float outputs:out
+            }
+
+            def Shader "Projection_BNode_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Projection_Out_in1Node_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Projection_BNode_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/Projection_Out_in1_in2Node_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Projection_Out_in1_in2Node_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Projection_ANode_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Projection_BNode_1249c628453a4e799cd3e316373306b7.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Projection_ANode_1249c628453a4e799cd3e316373306b7"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40.outputs:out>
+                float3 outputs:out
             }
 
             def Shader "SR_Vector_roughness_OnesComplement"
@@ -310,6 +380,45 @@ def "MaterialX"
                 float inputs:in2 = 1
                 float inputs:in3 = 0
                 float3 outputs:out
+            }
+
+            def Shader "Rejection_Out_in2Node_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_divide_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Rejection_Out_in2_in1Node_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/Rejection_Out_in2_in2Node_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Rejection_Out_in2_in1Node_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Rejection_BNode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Vector/Rejection_Out_in2_in1_in2Node_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Rejection_BNode_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Vector/Vector3Node_caf21f291f5a4c2c911bd1cc9d06da40.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "Rejection_Out_in2_in2Node_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Rejection_BNode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Rejection_BNode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "Rejection_Out_in2_in1_in2Node_7bc12286254a492fa1b0dd570fffc168"
+            {
+                uniform token info:id = "ND_dotproduct_vector3"
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Vector/Rejection_ANode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_Vector/Rejection_BNode_7bc12286254a492fa1b0dd570fffc168.outputs:out>
+                float outputs:out
             }
         }
     }

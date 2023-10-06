@@ -17,6 +17,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
         LightProbes,
     }
 
+    enum ReflectionProbeMode
+    {
+        None,
+        Simple,
+        Blended,
+    }
+
     [Title("Utility", "PolySpatial Lighting")]
     class PolySpatialLightingNode : CodeFunctionNode
     {
@@ -38,6 +45,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     return;
 
                 m_BakedLightingMode = value;
+                Dirty(ModificationScope.Graph);
+            }
+        }
+
+        [SerializeField]
+        private ReflectionProbeMode m_ReflectionProbeMode = ReflectionProbeMode.None;
+
+        [EnumControl("Reflection Probes")]
+        public ReflectionProbeMode reflectionProbeMode
+        {
+            get { return m_ReflectionProbeMode; }
+            set
+            {
+                if (m_ReflectionProbeMode == value)
+                    return;
+
+                m_ReflectionProbeMode = value;
                 Dirty(ModificationScope.Graph);
             }
         }
@@ -65,12 +89,30 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             base.CollectShaderProperties(properties, generationMode);
 
-            void AddTextureProperty(string referenceName)
+            void AddTexture2DProperty(string referenceName)
             {
                 properties.AddShaderProperty(new Texture2DShaderProperty()
                 {
                     overrideReferenceName = referenceName,
                     defaultType = Texture2DShaderProperty.DefaultType.Black,
+                    generatePropertyBlock = false,
+                });
+            }
+
+            void AddCubemapProperty(string referenceName)
+            {
+                properties.AddShaderProperty(new CubemapShaderProperty()
+                {
+                    overrideReferenceName = referenceName,
+                    generatePropertyBlock = false,
+                });
+            }
+
+            void AddFloatProperty(string referenceName)
+            {
+                properties.AddShaderProperty(new Vector1ShaderProperty()
+                {
+                    overrideReferenceName = referenceName,
                     generatePropertyBlock = false,
                 });
             }
@@ -98,8 +140,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             switch (m_BakedLightingMode)
             {
                 case BakedLightingMode.Lightmap:
-                    AddTextureProperty(PolySpatialShaderProperties.Lightmap);
-                    AddTextureProperty(PolySpatialShaderProperties.LightmapInd);
+                    AddTexture2DProperty(PolySpatialShaderProperties.Lightmap);
+                    AddTexture2DProperty(PolySpatialShaderProperties.LightmapInd);
                     AddVector4Property(PolySpatialShaderProperties.LightmapST);
                     break;
 
@@ -115,7 +157,26 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
 
             if (m_BakedLightingMode != BakedLightingMode.None)
-                AddVector4Property(PolySpatialShaderGlobals.GlossyEnvironmentColor);
+            {
+                switch (m_ReflectionProbeMode)
+                {
+                    case ReflectionProbeMode.None:
+                        AddVector4Property(PolySpatialShaderGlobals.GlossyEnvironmentColor);
+                        break;
+                    
+                    case ReflectionProbeMode.Simple:
+                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0");
+                        break;
+                    
+                    case ReflectionProbeMode.Blended:
+                        for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+                        {
+                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i);
+                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i);
+                        }
+                        break;
+                }
+            }
 
             if (m_DynamicLighting)
             {
@@ -197,7 +258,7 @@ float3 x2 = float3(
                     writer.WriteLine("float3 bakedGI = max(float3(0, 0, 0), x1 + x2 + x3);");
                     break;
             }
-            if (m_BakedLightingMode != BakedLightingMode.None)
+            if (m_BakedLightingMode != BakedLightingMode.None || m_ReflectionProbeMode != ReflectionProbeMode.None)
             {
                 // https://github.cds.internal.unity3d.com/unity/unity/blob/e3e09beefeb3cbd8abd8e267dd80b22e5890968c/Packages/com.unity.render-pipelines.universal/ShaderLibrary/GlobalIllumination.hlsl#L416
                 writer.WriteLine("float3 reflectVector = reflect(-viewDirectionWS, normalWS);");
@@ -205,9 +266,48 @@ float3 x2 = float3(
                 writer.WriteLine("float fresnelTerm = pow(1.0 - NoV, 4);");
                 writer.WriteLine(@"
 float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / (roughness2 + 1.0);");
-                writer.WriteLine($@"
-float3 bakedContribution = bakedGI * brdfDiffuse +
-    {PolySpatialShaderGlobals.GlossyEnvironmentColor}.rgb * environmentBrdfSpecular;");
+                if (m_ReflectionProbeMode == ReflectionProbeMode.None)
+                {
+                    writer.WriteLine(
+                        $"float3 environmentColor = {PolySpatialShaderGlobals.GlossyEnvironmentColor}.rgb;");
+                }
+                else
+                {
+                    // https://github.cds.internal.unity3d.com/unity/unity/blob/5d88a17c0c2ef08e18187e62c5d6b08fa4463ab1/Packages/com.unity.render-pipelines.core/ShaderLibrary/ImageBasedLighting.hlsl#L27
+                    writer.WriteLine("float mip = perceptualRoughness * (10.2 - 4.2 * perceptualRoughness);");
+                    
+                    string GetReflectionProbeContribution(int index)
+                    {
+                        // Note: this only supports the dLDR encoding (which appears to be the default).
+                        const float kReflectionProbeHdrMultiplier = 4.59f;
+                        var textureProperty = PolySpatialShaderProperties.ReflectionProbeTexturePrefix + index;
+                        return $@"
+SAMPLE_TEXTURECUBE_LOD({textureProperty}, sampler{textureProperty}, reflectVector, mip).rgb *
+    {kReflectionProbeHdrMultiplier}";
+                    }
+
+                    writer.Write("float3 environmentColor = ");
+                    if (m_ReflectionProbeMode == ReflectionProbeMode.Simple)
+                    {
+                        writer.Write(GetReflectionProbeContribution(0));
+                    }
+                    else
+                    {
+                        for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+                        {
+                            if (i > 0)
+                                writer.Write(" + ");
+                            
+                            writer.Write($@"
+{GetReflectionProbeContribution(i)} * {PolySpatialShaderProperties.ReflectionProbeWeightPrefix}{i}");
+                        }
+                    }
+                    writer.WriteLine(";");
+                }
+                writer.Write("float3 bakedContribution = ");
+                if (m_BakedLightingMode != BakedLightingMode.None)
+                    writer.Write("bakedGI * brdfDiffuse + ");
+                writer.WriteLine("environmentColor * environmentBrdfSpecular;");
                 finalSumExpr.Append(" + bakedContribution * AmbientOcclusion");
             }
             

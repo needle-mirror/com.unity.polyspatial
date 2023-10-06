@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Unity.PolySpatial;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
+    using ExternalInput = CompoundOpParser.ExternalInput;
     using Operator = CompoundOpParser.Operator;
     using ParseException = CompoundOpParser.ParseException;
     using ParserInput = CompoundOpParser.ParserInput;
@@ -36,8 +38,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("%", Operator.VariantType.Default)] = CreateBinaryOpCompiler(MtlxNodeTypes.Modulo, true),
             [(".", Operator.VariantType.Default)] = SwizzleCompiler,
             [("!", Operator.VariantType.Default)] = NotCompiler,
+            [("==", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfEqual, 1.0f),
+            [("!=", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfEqual, 0.0f),
+            [("<=", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfGreater, 0.0f),
+            [(">=", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfGreaterOrEqual, 1.0f),
+            [(">", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfGreater, 1.0f),
+            [("<", Operator.VariantType.Default)] = CreateComparisonCompiler(MtlxNodeTypes.IfGreaterOrEqual, 0.0f),
             [("&&", Operator.VariantType.Default)] = AndCompiler,
             [("||", Operator.VariantType.Default)] = OrCompiler,
+            [("?", Operator.VariantType.Default)] = ConditionalCompiler,
+            [("{", Operator.VariantType.Default)] = CreateConstructorCompiler(),
             [("abs", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Absolute),
             [("acos", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Arccosine),
             [("all", Operator.VariantType.FunctionCall)] = AllCompiler,
@@ -50,6 +60,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("clamp", Operator.VariantType.FunctionCall)] = CreateNaryOpCompiler(
                 MtlxNodeTypes.Clamp, "in", "low", "high"),
             [("cos", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Cosine),
+            [("cosh", Operator.VariantType.FunctionCall)] = HyperbolicCosineCompiler,
             [("cross", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(MtlxNodeTypes.CrossProduct),
             [("degrees", Operator.VariantType.FunctionCall)] = CreateBinaryConstantOpCompiler(
                 MtlxNodeTypes.Multiply, Mathf.Rad2Deg),
@@ -57,18 +68,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("dot", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(
                 MtlxNodeTypes.DotProduct, false, MtlxDataTypes.Float),
             [("exp", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Exponential),
-            [("float2", Operator.VariantType.FunctionCall)] = CreateVectorConstructorCompiler(MtlxDataTypes.Vector2),
-            [("float2x2", Operator.VariantType.FunctionCall)] = CreateMatrixConstructorCompiler(
-                MtlxDataTypes.Matrix22),
-            [("float3", Operator.VariantType.FunctionCall)] = CreateVectorConstructorCompiler(MtlxDataTypes.Vector3),
-            [("float3x3", Operator.VariantType.FunctionCall)] = CreateMatrixConstructorCompiler(
-                MtlxDataTypes.Matrix33),
-            [("float4", Operator.VariantType.FunctionCall)] = CreateVectorConstructorCompiler(MtlxDataTypes.Vector4),
-            [("float4x4", Operator.VariantType.FunctionCall)] = CreateMatrixConstructorCompiler(
-                MtlxDataTypes.Matrix44),
+            [("float2", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector2),
+            [("float2x2", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix22),
+            [("float3", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector3),
+            [("float3x3", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix33),
+            [("float4", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector4),
+            [("float4x4", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix44),
             [("floor", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Floor),
             [("fmod", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(MtlxNodeTypes.Modulo, true),
             [("frac", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.RealityKitFractional),
+            [("isinf", Operator.VariantType.FunctionCall)] = IsInfCompiler,
+            [("isnan", Operator.VariantType.FunctionCall)] = IsNanCompiler,
             [("length", Operator.VariantType.FunctionCall)] = LengthCompiler,
             [("lerp", Operator.VariantType.FunctionCall)] = LerpCompiler,
             [("log", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.NaturalLog),
@@ -88,6 +98,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("saturate", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Clamp),
             [("sign", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Sign),
             [("sin", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Sine),
+            [("sinh", Operator.VariantType.FunctionCall)] = HyperbolicSineCompiler,
             [("smoothstep", Operator.VariantType.FunctionCall)] = CreateNaryOpCompiler(
                 MtlxNodeTypes.SmoothStep, "low", "high", "in"),
             [("splitlr", Operator.VariantType.FunctionCall)] = SplitLRCompiler,
@@ -95,9 +106,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("step", Operator.VariantType.FunctionCall)] = CreateNaryOpCompiler(
                 MtlxNodeTypes.RealityKitStep, "edge", "in"),
             [("tan", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Tangent),
+            [("tanh", Operator.VariantType.FunctionCall)] = HyperbolicTangentCompiler,
             [("transpose", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Transpose),
+            [("trunc", Operator.VariantType.FunctionCall)] = TruncCompiler,
             [("SAMPLE_TEXTURE2D", Operator.VariantType.FunctionCall)] = SampleTexture2DCompiler,
             [("SAMPLE_TEXTURE2D_LOD", Operator.VariantType.FunctionCall)] = SampleTexture2DLodCompiler,
+            [("SAMPLE_TEXTURE3D", Operator.VariantType.FunctionCall)] = SampleTexture3DCompiler,
+            [("SAMPLE_TEXTURE3D_LOD", Operator.VariantType.FunctionCall)] = SampleTexture3DLodCompiler,
+            [("SAMPLE_TEXTURECUBE_LOD", Operator.VariantType.FunctionCall)] = SampleTextureCubeLodCompiler,
         };
 
         static FloatInputDef s_ZFlipMatrix = new(
@@ -176,6 +192,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     PolySpatialShaderGlobals.SpotDirectionPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
                 s_SymbolCompilers.Add(
                     PolySpatialShaderGlobals.LightAttenPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
+            }
+            for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+            {
+                var reflectionProbeTextureProperty = PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i;
+                s_SymbolCompilers.Add(reflectionProbeTextureProperty, CreateImplicitCompiler(MtlxDataTypes.Filename));
+                s_SymbolCompilers.Add(
+                    $"sampler{reflectionProbeTextureProperty}",
+                    CreateSamplerCompiler(new() { wrap = TextureSamplerState.WrapMode.Clamp }));
+                s_SymbolCompilers.Add(
+                    PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i,
+                    CreateImplicitCompiler(MtlxDataTypes.Float));
             }
         }
 
@@ -413,6 +440,33 @@ namespace UnityEditor.ShaderGraph.MaterialX
             });
         }
 
+        static InputDef ConditionalCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(2);
+
+            var rightChild = node.Children[1];
+            if (rightChild.Lexeme is not Operator rightOp || rightOp.Span.contents != ":")
+                throw new ParseException("Expected ':'", node.Lexeme.Span);
+            
+            rightChild.RequireChildCount(2);
+            
+            var valueDef = node.Children[0].Compile(inputs, output);
+            var trueDef = rightChild.Children[0].Compile(inputs, output);
+            var falseDef = rightChild.Children[1].Compile(inputs, output);
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["value1"] = valueDef,
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = falseDef,
+                ["in2"] = trueDef,
+            };
+            CoerceToType(node, inputs, output, inputDefs, "value1", MtlxDataTypes.Float);
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in1", "in2");
+
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, matchedType, inputDefs);
+        }
+
         static InputDef AllCompiler(
             SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
         {
@@ -491,6 +545,70 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return new InlineInputDef(lengthNodeType, MtlxDataTypes.Float, new()
             {
                 ["in"] = new InlineInputDef(MtlxNodeTypes.Subtract, matchedType, inputDefs),
+            });
+        }
+
+        static InputDef IsInfCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+            
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "in", MtlxDataTypes.Float);
+
+            // 1/0 == float.PositiveInfinity
+            // (see https://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html)
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Float, inputDefs),
+                ["value2"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
+                {
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                }),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+            });
+        }
+
+        static InputDef IsNanCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+            
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "in", MtlxDataTypes.Float);
+
+            // If the input is NaN, then both step(in, 0) and step(0, in) will return 0; otherwise, one
+            // or both will return 1.  So, we add them together and compare the result to zero.
+            // I arrived at this approach after failing to get other methods to work in visionOS, perhaps
+            // because of NaN-ignoring optimizations in the Metal shader compiler.  For instance, in == in
+            // should be false for NaN, but it evaluates to true in visionOS (and may simply be optimized out).
+            var sharedIn = GetSharedInput(inputDefs["in"], output);
+            return new InlineInputDef(MtlxNodeTypes.IfEqual, MtlxDataTypes.Float, new()
+            {
+                ["value1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.RealityKitStep, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = sharedIn,
+                        ["edge"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                    }),
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.RealityKitStep, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                        ["edge"] = sharedIn,
+                    }),
+                }),
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
             });
         }
 
@@ -629,6 +747,35 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return new InlineInputDef(MtlxNodeTypes.SplitLR, matchedType, inputDefs);
         }
 
+        static InputDef TruncCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+            var sharedIn = GetSharedInput(inputDefs["in"], output);
+
+            // trunc(in) = floor(abs(in)) * sign(in)
+            return new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Floor, matchedType, new()
+                {
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.Absolute, matchedType, new()
+                    {
+                        ["in"] = sharedIn,
+                    }),
+                }),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Sign, matchedType, new()
+                {
+                    ["in"] = sharedIn,
+                }),
+            });
+        }
+
         static InputDef SampleTexture2DCompiler(
             SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
         {
@@ -686,6 +833,633 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
             {
                 ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
+            });
+        }
+
+        static InputDef SampleTexture3DCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(3);
+
+            var fileInputDef = node.Children[0].Compile(inputs, output);
+            var file = RequireExternalTexture(node, inputs, fileInputDef);
+
+            var samplerInputDef = node.Children[1].Compile(inputs, output);
+            var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["texcoord"] = node.Children[2].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
+
+            var texCoords3D = CompileWrappedTexCoords3D(output, inputDefs["texcoord"], samplerState);
+            var filterType = new StringInputDef(SampleTexture2DAdapter.GetFilterType(samplerState));
+            var addressMode = new StringInputDef(SampleTexture2DAdapter.GetAddressMode(samplerState));
+
+            return CompileSampleTexture3D(output, texCoords3D, file, samplerState, texCoords2D =>
+            {
+                Dictionary<string, InputDef> inputDefs = new()
+                {
+                    ["file"] = file,
+                    ["texcoord"] = texCoords2D,
+                    ["filtertype"] = filterType,
+                    ["uaddressmode"] = addressMode,
+                    ["vaddressmode"] = addressMode,
+                };
+                FlipTexCoordInput(inputDefs);
+                return new InlineInputDef(MtlxNodeTypes.Image, MtlxDataTypes.Vector4, inputDefs);
+            });
+        }
+
+        static InputDef SampleTexture3DLodCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(4);
+
+            var fileInputDef = node.Children[0].Compile(inputs, output);
+            var file = RequireExternalTexture(node, inputs, fileInputDef);
+
+            var samplerInputDef = node.Children[1].Compile(inputs, output);
+            var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["texcoord"] = node.Children[2].Compile(inputs, output),
+                ["level"] = node.Children[3].Compile(inputs, output),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
+            CoerceToType(node, inputs, output, inputDefs, "level", MtlxDataTypes.Float);
+            
+            var texCoords3D = CompileWrappedTexCoords3D(output, inputDefs["texcoord"], samplerState);
+            var level = inputDefs["level"];
+            var filterType = new StringInputDef(SampleTexture2DLODAdapter.GetFilterType(samplerState));
+            var addressMode = new StringInputDef(SampleTexture2DLODAdapter.GetAddressMode(samplerState));
+
+            return CompileSampleTexture3D(output, texCoords3D, file, samplerState, texCoords2D =>
+            {
+                Dictionary<string, InputDef> inputDefs = new()
+                {
+                    ["file"] = file,
+                    ["texcoord"] = texCoords2D,
+                    ["level"] = level,
+                    ["mag_filter"] = filterType,
+                    ["min_filter"] = filterType,
+                    ["mip_filter"] = filterType,
+                    ["s_address"] = addressMode,
+                    ["t_address"] = addressMode,
+                };
+                FlipTexCoordInput(inputDefs);
+                return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                {
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
+                });
+            });
+        }
+
+        // As a helper for SampleTexture3DCompiler and SampleTexture3DLodCompiler, this method converts raw 3D texture
+        // coordinates to wrapped coordinates in [0, 1) according to the wrap mode.  Keeping the range open-ended helps
+        // to avoid exceeding the boundaries of each slice later on, when we map 3D coordinates to 2D ones.  
+        static InputDef CompileWrappedTexCoords3D(
+            Dictionary<string, NodeDef> output, InputDef texCoords3D, TextureSamplerState samplerState)
+        {
+            const float kOneMinusEpsilon = 1.0f - Vector3.kEpsilon;
+            const float kTwoMinusEpsilon = 2.0f - Vector3.kEpsilon;
+            switch (samplerState.wrap)
+            {
+                case TextureSamplerState.WrapMode.Repeat:
+                    // For repeat mode, we can simply take the fraction, which will be in [0, 1).
+                    return new InlineInputDef(MtlxNodeTypes.RealityKitFractional, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in"] = texCoords3D,
+                    });
+
+                case TextureSamplerState.WrapMode.Clamp:
+                    // Clamp to [0, 1) to prevent overflow into next slice.
+                    return new InlineInputDef(MtlxNodeTypes.Clamp, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in"] = texCoords3D,
+                        ["low"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                        ["high"] = new FloatInputDef(MtlxDataTypes.Float, kOneMinusEpsilon),
+                    });
+
+                case TextureSamplerState.WrapMode.Mirror:
+                    // Start with 2 * fract(uvw / 2), which repeats 0 -> 1.999... every two units.
+                    var sharedFraction = GetSharedInput(
+                        new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.RealityKitFractional, MtlxDataTypes.Vector3, new()
+                        {
+                            ["in"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector3, new()
+                            {
+                                ["in1"] = texCoords3D,
+                                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                            }),
+                        }),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                    }), output);
+                    // Then take the smaller of the result and (1.999... - result),
+                    // which repeats 0 -> 0.999... -> 0 every two units.
+                    return new InlineInputDef(MtlxNodeTypes.Minimum, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in1"] = sharedFraction,
+                        ["in2"] = new InlineInputDef(MtlxNodeTypes.Subtract, MtlxDataTypes.Vector3, new()
+                        {
+                            ["in1"] = new FloatInputDef(
+                                MtlxDataTypes.Vector3, kTwoMinusEpsilon, kTwoMinusEpsilon, kTwoMinusEpsilon),
+                            ["in2"] = sharedFraction,
+                        }),
+                    });
+
+                case TextureSamplerState.WrapMode.MirrorOnce:
+                    // Taking the absolute value mirrors the function; clamp the result to [0, 1).
+                    return new InlineInputDef(MtlxNodeTypes.Clamp, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Vector3, new()
+                        {
+                            ["in"] = texCoords3D,
+                        }),
+                        ["low"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                        ["high"] = new FloatInputDef(MtlxDataTypes.Float, kOneMinusEpsilon),
+                    });
+                
+                default:
+                    throw new NotSupportedException($"Unknown wrap mode {samplerState.wrap}");
+            }
+        }
+
+        delegate InputDef CompileSampleTexture2D(InputDef texCoords2D);
+
+        // As a helper for SampleTexture3DCompiler and SampleTexture3DLodCompiler, this method simulates a 3D texture
+        // sample by sampling a 2D texture containing vertically stacked slices once (for point sampling) or twice
+        // (for linear sampling, with the two samples being blended according to the fraction).  
+        static InputDef CompileSampleTexture3D(
+            Dictionary<string, NodeDef> output, InputDef texCoords3D, ExternalInputDef file,
+            TextureSamplerState samplerState, CompileSampleTexture2D compileSampleTexture2D)
+        {
+            var sharedDepth = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            {
+                ["in"] = new TextureSizeInputDef(file.Source),
+                ["channels"] = new StringInputDef("z"),
+            }), output);
+            var sharedTexCoords3D = GetSharedInput(texCoords3D, output);
+
+            if (samplerState.filter == TextureSamplerState.FilterMode.Point)
+            {
+                return compileSampleTexture2D(new InlineInputDef(MtlxNodeTypes.Combine2, MtlxDataTypes.Vector2, new()
+                {
+                    // U' = U
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = sharedTexCoords3D,
+                        ["channels"] = new StringInputDef("x"),
+                    }),
+                    // V' = (floor(W * depth) + V) / depth
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                        {
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Floor, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                                {
+                                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                                    {
+                                        ["in"] = sharedTexCoords3D,
+                                        ["channels"] = new StringInputDef("z"),
+                                    }),
+                                    ["in2"] = sharedDepth,
+                                }),
+                            }),
+                            ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = sharedTexCoords3D,
+                                ["channels"] = new StringInputDef("y"),
+                            }),
+                        }),
+                        ["in2"] = sharedDepth,
+                    }),
+                }));
+            }
+            var sharedU = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedTexCoords3D,
+                ["channels"] = new StringInputDef("x"),
+            }), output);
+
+            var sharedV = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedTexCoords3D,
+                ["channels"] = new StringInputDef("y"),
+            }), output);
+
+            var sharedWD = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Subtract, MtlxDataTypes.Float, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Float, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = sharedTexCoords3D,
+                        ["channels"] = new StringInputDef("z"),
+                    }),
+                    ["in2"] = sharedDepth,
+                }),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+            }), output);
+
+            var sharedFloorWD = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Floor, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedWD,
+            }), output);
+
+            var sharedCeilWD = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Ceil, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedWD,
+            }), output);
+
+            var depthMinusOne = new InlineInputDef(MtlxNodeTypes.Subtract, MtlxDataTypes.Float, new()
+            {
+                ["in1"] = sharedDepth,
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+            });
+
+            return new InlineInputDef(MtlxNodeTypes.Mix, MtlxDataTypes.Vector4, new()
+            {
+                ["bg"] = compileSampleTexture2D(new InlineInputDef(MtlxNodeTypes.Combine2, MtlxDataTypes.Vector2, new()
+                {
+                    // U' = U
+                    ["in1"] = sharedU,
+                    // V' = (floor(W * depth - 0.5) + V) / depth
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                        {
+                            // If floor == -1, we either wrap around to depth - 1 or clamp to zero. 
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.IfGreaterOrEqual, MtlxDataTypes.Float, new()
+                            {
+                                ["value1"] = sharedFloorWD,
+                                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                ["in1"] = sharedFloorWD,
+                                ["in2"] = samplerState.wrap switch
+                                {
+                                    TextureSamplerState.WrapMode.Repeat => depthMinusOne,
+                                    _ => new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                },
+                            }),
+                            ["in2"] = sharedV,
+                        }),
+                        ["in2"] = sharedDepth,
+                    }),
+                })),
+                ["fg"] = compileSampleTexture2D(new InlineInputDef(MtlxNodeTypes.Combine2, MtlxDataTypes.Vector2, new()
+                {
+                    // U' = U
+                    ["in1"] = sharedU,
+                    // V' = (ceil(W * depth - 0.5) + V) / depth
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Float, new()
+                        {
+                            // If ceil == depth, we either wrap around to zero or clamp to depth - 1. 
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.IfGreaterOrEqual, MtlxDataTypes.Float, new()
+                            {
+                                ["value1"] = sharedCeilWD,
+                                ["value2"] = sharedDepth,
+                                ["in1"] = samplerState.wrap switch
+                                {
+                                    TextureSamplerState.WrapMode.Repeat => new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                                    _ => depthMinusOne,
+                                },
+                                ["in2"] = sharedCeilWD,
+                            }),
+                            ["in2"] = sharedV,
+                        }),
+                        ["in2"] = sharedDepth,
+                    }),
+                })),
+                // Final color = lerp(BG, FG, fract(W * depth - 0.5))
+                ["mix"] = new InlineInputDef(MtlxNodeTypes.RealityKitFractional, MtlxDataTypes.Float, new()
+                {
+                    ["in"] = sharedWD,
+                }),
+            });
+        }
+
+        static InputDef SampleTextureCubeLodCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(4);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["file"] = node.Children[0].Compile(inputs, output),
+                ["texcoord"] = node.Children[2].Compile(inputs, output),
+                ["level"] = node.Children[3].Compile(inputs, output),
+                ["s_address"] = new StringInputDef("clamp_to_edge"),
+                ["t_address"] = new StringInputDef("clamp_to_edge"),
+            };
+            CoerceToType(node, inputs, output, inputDefs, "file", MtlxDataTypes.Filename);
+            CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
+            CoerceToType(node, inputs, output, inputDefs, "level", MtlxDataTypes.Float);
+
+            // Create shared intermediate values for the texcoord direction and its
+            // components so that we can reference them in multiple places.
+            var sharedDir = GetSharedInput(inputDefs["texcoord"], output);
+            var sharedDirComps = "xyz".Select(comp =>
+                GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedDir,
+                ["channels"] = new StringInputDef(comp.ToString()),
+            }), output)).ToArray();
+            
+            // Likewise, create shared values for the absolute value of the direction and its components.
+            var sharedAbsDir = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Absolute, MtlxDataTypes.Vector3, new()
+            {
+                ["in"] = sharedDir,
+            }), output);
+            var sharedAbsDirComps = "xyz".Select(comp =>
+                GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            {
+                ["in"] = sharedAbsDir,
+                ["channels"] = new StringInputDef(comp.ToString()),
+            }), output)).ToArray();
+
+            // Create a shared vector2 for the ZY/X component pair (with range [-1, 1]), used for the +X/-X faces.
+            var sharedZY = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                {
+                    ["in"] = sharedDir,
+                    ["channels"] = new StringInputDef("zy"),
+                }),
+                ["in2"] = sharedAbsDirComps[0]
+            }), output);
+
+            // Create a shared vector2 for the XZ/Y component pair (with range [-1, 1]), used for the +Y/-Y faces.
+            var sharedXZ = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                {
+                    ["in"] = sharedDir,
+                    ["channels"] = new StringInputDef("xz"),
+                }),
+                ["in2"] = sharedAbsDirComps[1]
+            }), output);
+
+            // Create a shared vector2 for the XY/Z component pair (with range [-1, 1]), used for the +Z/-Z faces.
+            var sharedXY = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                {
+                    ["in"] = sharedDir,
+                    ["channels"] = new StringInputDef("xy"),
+                }),
+                ["in2"] = sharedAbsDirComps[2]
+            }), output);
+
+            // Create the value for the +X/-X faces.
+            var valueX = new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+            {
+                ["value1"] = sharedDirComps[0],
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                // dir.x > 0: +X
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedZY,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, -0.5f, -0.5f / 6.0f),
+                    }),
+                    // Translate to center of +X face: (0.5, 0.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 0.5f / 6.0f),
+                }),
+                // dir.x <= 0: -X
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedZY,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, -0.5f / 6.0f),
+                    }),
+                    // Translate to center of -X face: (0.5, 1.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 1.5f / 6.0f),
+                }),
+            });
+
+            // Create the value for the +Y/-Y faces.
+            var valueY = new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+            {
+                ["value1"] = sharedDirComps[1],
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                // dir.y > 0: +Y
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedXZ,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 0.5f / 6.0f),
+                    }),
+                    // Translate to center of +Y face: (0.5, 2.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 2.5f / 6.0f),
+                }),
+                // dir.y <= 0: -Y 
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedXZ,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, -0.5f / 6.0f),
+                    }),
+                    // Translate to center of -Y face: (0.5, 3.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 3.5f / 6.0f),
+                }),
+            });
+
+            // Create the shared value for the +Z/-Z faces (shared because used in two places).
+            var sharedValueZ = GetSharedInput(new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+            {
+                ["value1"] = sharedDirComps[2],
+                ["value2"] = new FloatInputDef(MtlxDataTypes.Float, 0.0f),
+                // dir.z > 0: +Z
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedXY,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, -0.5f / 6.0f),
+                    }),
+                    // Translate to center of +Z face: (0.5, 4.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 4.5f / 6.0f),
+                }),
+                // dir.z <= 0: -Z
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                {
+                    // Scale from size (2, 2) to size (1, 1/6) (with sign changes to align with reference image).
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = sharedXY,
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, -0.5f, -0.5f / 6.0f),
+                    }),
+                    // Translate to center of -Z face: (0.5, 5.5 / 6.0)
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 5.5f / 6.0f),
+                }),
+            }), output);
+
+            // Choose the final texcoord value based on the component with the greatest absolute value.
+            inputDefs["texcoord"] = new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+            {
+                ["value1"] = sharedAbsDirComps[0],
+                ["value2"] = sharedAbsDirComps[1],
+                // dir.x > dir.y
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+                {
+                    ["value1"] = sharedAbsDirComps[0],
+                    ["value2"] = sharedAbsDirComps[2],
+                    // dir.x > dir.z: +X/-X
+                    ["in1"] = valueX,
+                    // dir.x <= dir.z: +Z/-Z
+                    ["in2"] = sharedValueZ,
+                }),
+                // dir.x <= dir.y
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.IfGreater, MtlxDataTypes.Vector2, new()
+                {
+                    ["value1"] = sharedAbsDirComps[1],
+                    ["value2"] = sharedAbsDirComps[2],
+                    // dir.y > dir.z: +Y/-Y
+                    ["in1"] = valueY,
+                    // dir.y <= dir.z: +Z/-Z
+                    ["in2"] = sharedValueZ,
+                }),
+            });
+
+            var samplerInputDef = node.Children[1].Compile(inputs, output);
+            var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
+            var filterType = new StringInputDef(SampleTexture2DLODAdapter.GetFilterType(samplerState));
+            
+            inputDefs.Add("mag_filter", filterType);
+            inputDefs.Add("min_filter", filterType);
+            inputDefs.Add("mip_filter", filterType);
+
+            return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+            {
+                ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
+            });
+        }
+
+        static InputDef HyperbolicSineCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+            var sharedInput = GetSharedInput(inputDefs["in"], output);
+
+            // See https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+            return new InlineInputDef(MtlxNodeTypes.Divide, matchedType, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Subtract, matchedType, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Exponential, matchedType, new()
+                    {
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+                        {
+                            ["in1"] = sharedInput,
+                            ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                        }),
+                    }),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Exponential, matchedType, new()
+                    {
+                        ["in"] = sharedInput,
+                    }),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                }),
+            });
+        }
+
+        static InputDef HyperbolicCosineCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+            var sharedInput = GetSharedInput(inputDefs["in"], output);
+
+            // See https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+            return new InlineInputDef(MtlxNodeTypes.Divide, matchedType, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, matchedType, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Exponential, matchedType, new()
+                    {
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+                        {
+                            ["in1"] = sharedInput,
+                            ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                        }),
+                    }),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Exponential, matchedType, new()
+                    {
+                        ["in"] = sharedInput,
+                    }),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                }),
+            });
+        }
+
+        static InputDef HyperbolicTangentCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(1);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+            };
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in");
+
+            // See https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+            var sharedExpInput2 = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Exponential, matchedType, new()
+            {
+                ["in"] = new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+                {
+                    ["in1"] = inputDefs["in"],
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                }),
+            }), output);
+
+            return new InlineInputDef(MtlxNodeTypes.Divide, matchedType, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Subtract, matchedType, new()
+                {
+                    ["in1"] = sharedExpInput2,
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Add, matchedType, new()
+                {
+                    ["in1"] = sharedExpInput2,
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                }),
             });
         }
 
@@ -762,6 +1536,26 @@ namespace UnityEditor.ShaderGraph.MaterialX
             };
         }
 
+        static Compiler CreateComparisonCompiler(string nodeType, float trueValue)
+        {
+            return (node, inputs, output) =>
+            {
+                node.RequireChildCount(2);
+
+                Dictionary<string, InputDef> inputDefs = new()
+                {
+                    ["value1"] = node.Children[0].Compile(inputs, output),
+                    ["value2"] = node.Children[1].Compile(inputs, output),
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, trueValue),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f - trueValue),
+                };
+                CoerceToType(node, inputs, output, inputDefs, "value1", MtlxDataTypes.Float);
+                CoerceToType(node, inputs, output, inputDefs, "value2", MtlxDataTypes.Float);
+
+                return new InlineInputDef(nodeType, MtlxDataTypes.Float, inputDefs);
+            };
+        }
+
         static TextureSamplerState RequireTextureSampler(
             SyntaxNode node, Dictionary<string, ParserInput> inputs, InputDef inputDef)
         {
@@ -774,6 +1568,19 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 }
             }
             throw new ParseException($"Expected texture sampler argument", node.Lexeme.Span);
+        }
+
+        static ExternalInputDef RequireExternalTexture(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, InputDef inputDef)
+        {
+            if (inputDef is ExternalInputDef externalInputDef &&
+                inputs.TryGetValue(externalInputDef.Source, out var input) &&
+                input is ExternalInput externalInput &&
+                externalInput.InputType == MtlxDataTypes.Filename)
+            {
+                return externalInputDef;
+            }
+            throw new ParseException($"Expected texture argument", node.Lexeme.Span);
         }
 
         /// <summary>
@@ -854,6 +1661,29 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 return true;
             }
 
+            // Handle the conversion between vector4s and matrix22s as a special case; it's the one
+            // case where we can't distinguish between types by their length.
+            // This is specifically for the case of compiling "float2x2 foo = {<four scalars or two vector2s>};",
+            // since the right side will be initially compiled as a vector4 (simply because it has four elements).
+            if (outputType == MtlxDataTypes.Vector4 && expectedType == MtlxDataTypes.Matrix22)
+            {
+                var sharedInputDef = GetSharedInput(inputDef, output);
+                inputDef = new InlineInputDef(MtlxNodeTypes.RealityKitCombine2, MtlxDataTypes.Matrix22, new()
+                {
+                    ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in"] = sharedInputDef,
+                        ["channels"] = new StringInputDef("xy"),
+                    }),
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in"] = sharedInputDef,
+                        ["channels"] = new StringInputDef("zw"),
+                    }),
+                });
+                return true;
+            } 
+
             // The conversion nodes can convert a float to anything and
             // can convert between colors and vectors of the same size.
             if (outputLength == 1 || outputLength == expectedLength)
@@ -881,9 +1711,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
             });
         }
 
-        static Compiler CreateVectorConstructorCompiler(string dataType)
+        // Creates a compiler to construct the specified data type
+        // (or null to infer the type from the number of elements).
+        static Compiler CreateConstructorCompiler(string fixedDataType = null)
         {
-            var length = MtlxDataTypes.GetLength(dataType);
             return (node, inputs, output) =>
             {
                 List<InputDef> inputDefs = new();
@@ -899,8 +1730,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     outputTypes.Add(GetOutputType(inputDef, inputs, output));
                 }
                 var totalLength = outputTypes.Select(MtlxDataTypes.GetLength).Sum();
-                if (totalLength != length)
-                    throw new ParseException($"Expected {length} components, found {totalLength}", node.Lexeme.Span);
+                string dataType;
+                if (fixedDataType == null)
+                {
+                    dataType = MtlxDataTypes.GetTypeOfLength(totalLength);
+                    if (dataType == null)
+                        throw new ParseException($"No type known of length {totalLength}", node.Lexeme.Span);
+                }
+                else 
+                {
+                    var expectedLength = MtlxDataTypes.GetLength(fixedDataType);
+                    if (totalLength != expectedLength)
+                    {
+                        throw new ParseException(
+                            $"Expected {expectedLength} components, found {totalLength}", node.Lexeme.Span);
+                    }
+                    dataType = fixedDataType;
+                }
 
                 if (inputDefs.Count == 1)
                 {
@@ -912,100 +1758,122 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     return new FloatInputDef(dataType, values);
                 }
 
-                Dictionary<string, InputDef> inputDefsMap = new();
-                var inIndex = 1;
-                for (var i = 0; i < inputDefs.Count; ++i)
-                {
-                    var inputLength = MtlxDataTypes.GetLength(outputTypes[i]);
-                    if (inputLength == 1)
-                    {
-                        inputDefsMap[$"in{inIndex++}"] = inputDefs[i];
-                        continue;
-                    }
-                    var sharedInput = GetSharedInput(inputDefs[i], output);
-                    for (var j = 0; j < inputLength; ++j)
-                    {
-                        inputDefsMap[$"in{inIndex++}"] = new InlineInputDef(
-                            MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
-                            {
-                                ["in"] = sharedInput,
-                                ["channels"] = new StringInputDef("xyzw".Substring(j, 1)),
-                            });
-                    }
-                }
-
-                return new InlineInputDef($"combine{length}", dataType, inputDefsMap);
+                if (MtlxDataTypes.IsVector(dataType))
+                    return CompileVectorConstructor(output, dataType, inputDefs, outputTypes);
+                else if (MtlxDataTypes.IsMatrix(dataType))
+                    return CompileMatrixConstructor(output, dataType, inputDefs, outputTypes);
+                else
+                    throw new ParseException($"Cannot construct type {dataType}", node.Lexeme.Span);
             };
         }
-
-        static Compiler CreateMatrixConstructorCompiler(string dataType)
+        
+        static InputDef CompileVectorConstructor(
+            Dictionary<string, NodeDef> output, string dataType, List<InputDef> inputDefs, List<string> outputTypes)
         {
-            var length = MtlxDataTypes.GetLength(dataType);
-            var elementLength = MtlxDataTypes.GetElementLength(dataType);
-            return (node, inputs, output) =>
+            Assert.IsTrue(MtlxDataTypes.IsVector(dataType));
+            var dataTypeLength = MtlxDataTypes.GetLength(dataType);
+
+            Dictionary<string, InputDef> inputDefsMap = new();
+            var inIndex = 1;
+
+            void AddScalar(InputDef inputDef)
             {
-                List<InputDef> inputDefs = new();
-                List<string> outputTypes = new();
-                var allFloatInputDefs = true;
-                foreach (var child in node.Children)
-                {
-                    var inputDef = child.Compile(inputs, output);
-                    if (inputDef is not FloatInputDef)
-                        allFloatInputDefs = false;
+                Assert.IsTrue(inIndex <= dataTypeLength);
+                inputDefsMap[$"in{inIndex++}"] = inputDef;
+            }
 
-                    inputDefs.Add(inputDef);
-                    outputTypes.Add(GetOutputType(inputDef, inputs, output));
+            for (var i = 0; i < inputDefs.Count; ++i)
+            {
+                var inputLength = MtlxDataTypes.GetLength(outputTypes[i]);
+                Assert.AreNotEqual(inputLength, 0);
+                if (inputLength == 1)
+                {
+                    AddScalar(inputDefs[i]);
+                    continue;
                 }
-                var totalLength = outputTypes.Select(MtlxDataTypes.GetLength).Sum();
-                if (totalLength != length)
-                    throw new ParseException($"Expected {length} components, found {totalLength}", node.Lexeme.Span);
-
-                if (inputDefs.Count == 1)
+                var inputDef = inputDefs[i];
+                if (inputDef is FloatInputDef floatInputDef)
                 {
-                    return inputDefs[0];
-                }
-                else if (allFloatInputDefs)
-                {
-                    var values = inputDefs.SelectMany(inputDef => ((FloatInputDef)inputDef).Values).ToArray();
-                    return new FloatInputDef(dataType, values);
-                }
-
-                Dictionary<string, InputDef> inputDefsMap = new();
-                var inIndex = 1;
-                var vectorType = MtlxDataTypes.GetTypeOfLength(elementLength);
-                Dictionary<string, InputDef> vectorInputDefsMap = null;
-                var vectorInIndex = 1;
-
-                void AddScalar(InputDef inputDef)
-                {
-                    if (vectorInputDefsMap == null)
+                    foreach (var value in floatInputDef.Values)
                     {
-                        inputDefsMap[$"in{inIndex++}"] = new InlineInputDef(
-                            $"combine{elementLength}", vectorType, vectorInputDefsMap = new());
-                    }
-                    vectorInputDefsMap[$"in{vectorInIndex++}"] = inputDef;
-                    if (vectorInIndex > elementLength)
-                    {
-                        vectorInputDefsMap = null;
-                        vectorInIndex = 1;
+                        AddScalar(new FloatInputDef(MtlxDataTypes.Float, value));
                     }
                 }
-
-                for (var i = 0; i < inputDefs.Count; ++i)
+                else
                 {
-                    var outputType = outputTypes[i];
-                    if (outputType == vectorType && vectorInputDefsMap == null)
+                    var sharedInput = GetSharedInput(inputDef, output);
+                    for (var j = 0; j < inputLength; ++j)
                     {
-                        inputDefsMap[$"in{inIndex++}"] = inputDefs[i];
-                        continue;
+                        AddScalar(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = sharedInput,
+                            ["channels"] = new StringInputDef("xyzw".Substring(j, 1)),
+                        }));
                     }
-                    var outputLength = MtlxDataTypes.GetLength(outputType);
-                    if (outputLength == 1)
+                }
+            }
+
+            return new InlineInputDef($"combine{dataTypeLength}", dataType, inputDefsMap);
+        }
+
+        static InputDef CompileMatrixConstructor(
+            Dictionary<string, NodeDef> output, string dataType, List<InputDef> inputDefs, List<string> outputTypes)
+        {
+            Assert.IsTrue(MtlxDataTypes.IsMatrix(dataType));
+
+            Dictionary<string, InputDef> inputDefsMap = new();
+            var inIndex = 1;
+            var elementLength = MtlxDataTypes.GetElementLength(dataType);
+            var vectorType = MtlxDataTypes.GetTypeOfLength(elementLength);
+            Dictionary<string, InputDef> vectorInputDefsMap = null;
+            var vectorInIndex = 1;
+
+            void AddVector(InputDef inputDef)
+            {
+                Assert.IsTrue(inIndex <= elementLength);
+                inputDefsMap[$"in{inIndex++}"] = inputDef;
+            }
+
+            void AddScalar(InputDef inputDef)
+            {
+                if (vectorInputDefsMap == null)
+                    AddVector(new InlineInputDef($"combine{elementLength}", vectorType, vectorInputDefsMap = new()));
+                
+                Assert.IsTrue(vectorInIndex <= elementLength);
+                vectorInputDefsMap[$"in{vectorInIndex++}"] = inputDef;
+                if (vectorInIndex > elementLength)
+                {
+                    vectorInputDefsMap = null;
+                    vectorInIndex = 1;
+                }
+            }
+
+            for (var i = 0; i < inputDefs.Count; ++i)
+            {
+                var outputType = outputTypes[i];
+                if (outputType == vectorType && vectorInputDefsMap == null)
+                {
+                    AddVector(inputDefs[i]);
+                    continue;
+                }
+                var outputLength = MtlxDataTypes.GetLength(outputType);
+                Assert.AreNotEqual(outputLength, 0);
+                if (outputLength == 1)
+                {
+                    AddScalar(inputDefs[i]);
+                    continue;
+                }
+                var inputDef = inputDefs[i];
+                if (inputDef is FloatInputDef floatInputDef)
+                {
+                    foreach (var value in floatInputDef.Values)
                     {
-                        AddScalar(inputDefs[i]);
-                        continue;
+                        AddScalar(new FloatInputDef(MtlxDataTypes.Float, value));
                     }
-                    var sharedInput = GetSharedInput(inputDefs[i], output);
+                }
+                else
+                {
+                    var sharedInput = GetSharedInput(inputDef, output);
                     for (var j = 0; j < outputLength; ++j)
                     {
                         AddScalar(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
@@ -1015,12 +1883,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         }));
                     }
                 }
+            }
 
-                return new InlineInputDef(MtlxNodeTypes.Transpose, dataType, new()
-                {
-                    ["in"] = new InlineInputDef($"realitykit_combine{elementLength}", dataType, inputDefsMap),
-                });
-            };
+            return new InlineInputDef(MtlxNodeTypes.Transpose, dataType, new()
+            {
+                ["in"] = new InlineInputDef($"realitykit_combine{elementLength}", dataType, inputDefsMap),
+            });
         }
 
         static InputDef GetSharedInput(InputDef inputDef, Dictionary<string, NodeDef> output)

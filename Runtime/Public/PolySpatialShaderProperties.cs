@@ -18,6 +18,10 @@ namespace Unity.PolySpatial
         public const string SHBb = "polySpatial_SHBb";
         public const string SHC = "polySpatial_SHC";
 
+        public const int ReflectionProbeCount = 2;
+        public const string ReflectionProbeTexturePrefix = "polySpatial_SpecCube";
+        public const string ReflectionProbeWeightPrefix = "polySpatial_SpecCubeWeight";
+
         internal static readonly int LightmapID = Shader.PropertyToID(Lightmap);
         internal static readonly int LightmapIndID = Shader.PropertyToID(LightmapInd);
         internal static readonly int LightmapSTID = Shader.PropertyToID(LightmapST);
@@ -29,5 +33,20 @@ namespace Unity.PolySpatial
         internal static readonly int SHBgID = Shader.PropertyToID(SHBg);
         internal static readonly int SHBbID = Shader.PropertyToID(SHBb);
         internal static readonly int SHCID = Shader.PropertyToID(SHC);
+
+        internal static readonly int[] ReflectionProbeTextureIDs =
+            GetReflectionProbePropertyIDs(ReflectionProbeTexturePrefix);
+        internal static readonly int[] ReflectionProbeWeightIDs =
+            GetReflectionProbePropertyIDs(ReflectionProbeWeightPrefix);
+        
+        static int[] GetReflectionProbePropertyIDs(string prefix)
+        {
+            var propertyIDs = new int[ReflectionProbeCount];
+            for (var i = 0; i < ReflectionProbeCount; ++i)
+            {
+                propertyIDs[i] = Shader.PropertyToID(prefix + i);
+            }
+            return propertyIDs;
+        }
     }
 }

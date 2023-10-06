@@ -27,12 +27,6 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [
-        {
-            "name": "com.unity.modules.video",
-            "expression": "1.0.0",
-            "define": "VIDEO_MODULE_EXISTS"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

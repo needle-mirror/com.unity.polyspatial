@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.PolySpatial;
 using Unity.XR.CoreUtils;
 using Unity.XR.CoreUtils.Capabilities;
 using Unity.XR.CoreUtils.Capabilities.Editor;
@@ -197,8 +198,6 @@ namespace UnityEditor.PolySpatial.Validation
         {
             AddMessages(typeof(Light), new LightSyncMessage());
 
-            AddRuleCreator(typeof(Collider), new OffsetCollidersRule());
-
             // Renderers
             var rendererRuleCreator = new RendererRuleCreator(true);
 
@@ -213,6 +212,8 @@ namespace UnityEditor.PolySpatial.Validation
             //ParticleSystem
             AddMessages(typeof(ParticleSystem), new ParticleSystemMessage());
             AddRuleCreator(typeof(ParticleSystem), new ParticleRuleCreator());
+
+            AddRuleCreator(typeof(VolumeCamera), new VolumeCameraSettingsRuleCreator());
 
 #if ENABLE_UGUI
             // UGUI
@@ -462,13 +463,11 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_ComponentRules.Count == 0)
                 return;
 
-#if POLYSPATIAL_INTERNAL
-            BuildValidator.AddRules(BuildTargetGroup.Standalone, s_ComponentRules);
-            BuildValidator.AddRules(BuildTargetGroup.Android, s_ComponentRules);
-
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.Standalone, s_ComponentRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.Android, s_ComponentRules);
-#endif
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            {
+                BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
+                s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
+            }
 
             BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
@@ -492,13 +491,11 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_GameObjectRules.Count == 0)
                 return;
 
-#if POLYSPATIAL_INTERNAL
-            BuildValidator.AddRules(BuildTargetGroup.Standalone, s_GameObjectRules);
-            BuildValidator.AddRules(BuildTargetGroup.Android, s_GameObjectRules);
-
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.Standalone, s_GameObjectRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.Android, s_GameObjectRules);
-#endif
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            {
+                BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
+                s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
+            }
 
             BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
             s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);

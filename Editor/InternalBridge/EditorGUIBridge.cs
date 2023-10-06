@@ -17,8 +17,6 @@ namespace UnityEditor.PolySpatial.InternalBridge
             get => EditorGUIUtility.s_LastControlID;
             set => EditorGUIUtility.s_LastControlID = value;
         }
-        internal static void BeginChangeCheck() => EditorGUI.BeginChangeCheck();
-        internal static bool EndChangeCheck() => EditorGUI.EndChangeCheck();
         internal static GUIContent BeginPropertyInternal(Rect totalPosition, GUIContent label, SerializedProperty property) =>
             EditorGUI.BeginPropertyInternal(totalPosition, label, property);
         internal static Rect MultiFieldPrefixLabel(Rect totalPosition, int id, GUIContent label, int columns, float labelWidthIndent, bool setWideMode) =>

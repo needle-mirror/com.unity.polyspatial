@@ -27,10 +27,10 @@ namespace UnityEditor.PolySpatial.Validation
             rules.Add(CreatePolySpatialLayerExistRule());
             rules.Add(CreateCollisionMatrixRule());
 
-#if POLYSPATIAL_INTERNAL
-            BuildValidator.AddRules(BuildTargetGroup.Standalone, rules);
-            BuildValidator.AddRules(BuildTargetGroup.Android, rules);
-#endif
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            {
+                BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, rules);
+            }
 
             BuildValidator.AddRules(BuildTargetGroup.VisionOS, rules);
         }

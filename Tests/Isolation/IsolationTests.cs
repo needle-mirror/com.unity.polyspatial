@@ -39,7 +39,7 @@ namespace Tests.Isolation
             Assert.IsFalse(enableMacRealityKitPreviewInPlayMode, "PolySpatial Settings - Mac RK preview in PlayMode enabled by default");
 
             var disabledTrackers = PolySpatialSettings.instance.DisabledTrackers;
-            Assert.IsNull(disabledTrackers, "PolySpatial Settings - disabled trackers are not empty by default");
+            Assert.IsFalse(disabledTrackers != null && disabledTrackers.Length != 0, "PolySpatial Settings - disabled trackers are not empty by default");
 
             var runtimeFlags = PolySpatialSettings.instance.RuntimeFlags;
             Assert.AreEqual(0, runtimeFlags, $"PolySpatial Settings - Runtime flags are not empty. ulong value: {runtimeFlags}");

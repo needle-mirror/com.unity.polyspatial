@@ -382,5 +382,80 @@ namespace Tests.Runtime.Functional.Components
             Assert.AreEqual(1, data4.customData.meshRendererTrackingData.materials.materialIds.Length);
             Assert.IsFalse(data4.customData.meshRendererTrackingData.materials.hasExternalMaterials);
         }
+
+        [UnityTest]
+        public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenEnableDisable()
+        {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
+            var shouldUpdateSkeleton = true;
+
+            void AssertUpdateSkeleton(bool actualValue)
+            {
+                UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
+                // shouldUpdateSkeleton should be true the first time a valid change is detected,
+                // then false from then on.
+                shouldUpdateSkeleton = false;
+            }
+            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
+
+            CreateTestObjects();
+            yield return null;
+
+            m_SkinnedMeshRenderer.gameObject.SetActive(false);
+            shouldUpdateSkeleton = false;
+            yield return null;
+
+            m_SkinnedMeshRenderer.gameObject.SetActive(true);
+            shouldUpdateSkeleton = true;
+            yield return null;
+
+            // Should ignore the fact that a mesh was changed since
+            // skinned mesh is still inactive.
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
+            m_SkinnedMeshRenderer.gameObject.SetActive(false);
+            shouldUpdateSkeleton = false;
+            yield return null;
+
+            m_SkinnedMeshRenderer.gameObject.SetActive(true);
+            shouldUpdateSkeleton = true;
+            yield return null;
+
+            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenChangeMesh()
+        {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
+            var shouldUpdateSkeleton = false;
+
+            void AssertUpdateSkeleton(bool actualValue)
+            {
+                UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
+                // shouldUpdateSkeleton should be true the first time a valid change is detected,
+                // then false from then on.
+                shouldUpdateSkeleton = false;
+            }
+            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
+
+            // Attempt to start off with a disabled skinned mesh renderer, before enabling it.
+            CreateTestObjects();
+            m_SkinnedMeshRenderer.enabled = false;
+            yield return null;
+
+            m_SkinnedMeshRenderer.enabled = true;
+            shouldUpdateSkeleton = true;
+            yield return null;
+
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
+            shouldUpdateSkeleton = true;
+            yield return null;
+
+            SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
+#endif
+        }
     }
 }

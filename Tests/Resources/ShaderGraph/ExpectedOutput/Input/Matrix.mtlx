@@ -58,7 +58,7 @@
         <input name = "modelPositionOffset" type = "vector3" nodename = "SR_MatrixVertex_modelPositionOffset_SubtractPosition" />
     </GeometryModification>
     <realitykit_pbr name = "SR_Matrix" type = "surfaceshader">
-        <input name = "baseColor" type = "color3" value = "0.5,0.5,0.5" />
+        <input name = "baseColor" type = "color3" value = "0.2140411,0.2140411,0.2140411" />
         <input name = "metallic" type = "float" value = "0" />
         <input name = "emissiveColor" type = "color3" nodename = "CastConvertFinalFromAddNode_a0e8e2c6d59d4039b8072c060f2b5423ToSR_MatrixemissiveColor" />
         <input name = "ambientOcclusion" type = "float" value = "1" />

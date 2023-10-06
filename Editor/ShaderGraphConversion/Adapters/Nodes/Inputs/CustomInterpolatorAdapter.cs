@@ -12,12 +12,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return true;
 #endif
         }
-        
+
         public override string SupportDetails(AbstractMaterialNode node)
         {
             if (node is not CustomInterpolatorNode customInterpolatorNode)
                 return "";
-            
+
             switch (customInterpolatorNode.customBlockNodeName)
             {
                 case "Color":
@@ -25,10 +25,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 case "UV1":
                 case "UserAttribute":
                     return "";
-                
+
                 default:
                     return $"Custom interpolator '{customInterpolatorNode.customBlockNodeName}' not supported.";
-            };
+            }
         }
 
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)

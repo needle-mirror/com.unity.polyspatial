@@ -47,42 +47,25 @@ def "MaterialX"
             def Shader "MultiplyNode_4f37b1c4abe342b3821578ef3daec19a"
             {
                 uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_AllIO/CastSwizzleFromCombineNode_96f18c31122f4bafa4ffd6a1bf3ba250ToMultiplyNode_4f37b1c4abe342b3821578ef3daec19ain1.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_AllIO/Combine_RGBNode_96f18c31122f4bafa4ffd6a1bf3ba250.outputs:out>
                 float3 inputs:in2.connect = </MaterialX/Materials/USD_AllIO/LerpNode_cfddfbc1bcb54fc0883e78e4cc3de7bc.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromCombineNode_96f18c31122f4bafa4ffd6a1bf3ba250ToMultiplyNode_4f37b1c4abe342b3821578ef3daec19ain1"
+            def Shader "Combine_RGBNode_96f18c31122f4bafa4ffd6a1bf3ba250"
             {
-                uniform token info:id = "ND_swizzle_color4_vector3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_AllIO/CombineNode_96f18c31122f4bafa4ffd6a1bf3ba250.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </MaterialX/Materials/USD_AllIO/Combine_RNode_96f18c31122f4bafa4ffd6a1bf3ba250.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_AllIO/Combine_GNode_96f18c31122f4bafa4ffd6a1bf3ba250.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_AllIO/Combine_BNode_96f18c31122f4bafa4ffd6a1bf3ba250.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CombineNode_96f18c31122f4bafa4ffd6a1bf3ba250"
+            def Shader "Combine_RNode_96f18c31122f4bafa4ffd6a1bf3ba250"
             {
-                uniform token info:id = "ND_combine4_color4"
-                float inputs:in1.connect = </MaterialX/Materials/USD_AllIO.inputs:_Float>
-                float inputs:in2.connect = </MaterialX/Materials/USD_AllIO.inputs:_Boolean>
-                float inputs:in3.connect = </MaterialX/Materials/USD_AllIO/SplitNode_60835ad1510d464fb3f75ee3d38e82d1R.outputs:out>
-                float inputs:in4.connect = </MaterialX/Materials/USD_AllIO/SplitNode_60835ad1510d464fb3f75ee3d38e82d1G.outputs:out>
-                color4f outputs:out
-            }
-
-            def Shader "SplitNode_60835ad1510d464fb3f75ee3d38e82d1R"
-            {
-                uniform token info:id = "ND_extract_vector2"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_AllIO/SplitNode_60835ad1510d464fb3f75ee3d38e82d1.outputs:out>
-                int inputs:index = 0
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_AllIO.inputs:_Float>
                 float outputs:out
-            }
-
-            def Shader "SplitNode_60835ad1510d464fb3f75ee3d38e82d1"
-            {
-                uniform token info:id = "ND_dot_vector2"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_AllIO.inputs:_Vector2>
-                float2 outputs:out
             }
 
             def Shader "CastSwizzleFromMultiplyNode_4f37b1c4abe342b3821578ef3daec19aToSR_AllIOmetallic"
@@ -222,12 +205,33 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "SplitNode_60835ad1510d464fb3f75ee3d38e82d1G"
+            def Shader "Combine_GNode_96f18c31122f4bafa4ffd6a1bf3ba250"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_AllIO.inputs:_Boolean>
+                float outputs:out
+            }
+
+            def Shader "Combine_BNode_96f18c31122f4bafa4ffd6a1bf3ba250"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_AllIO/SplitNode_60835ad1510d464fb3f75ee3d38e82d1R.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SplitNode_60835ad1510d464fb3f75ee3d38e82d1R"
             {
                 uniform token info:id = "ND_extract_vector2"
                 float2 inputs:in.connect = </MaterialX/Materials/USD_AllIO/SplitNode_60835ad1510d464fb3f75ee3d38e82d1.outputs:out>
-                int inputs:index = 1
+                int inputs:index = 0
                 float outputs:out
+            }
+
+            def Shader "SplitNode_60835ad1510d464fb3f75ee3d38e82d1"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_AllIO.inputs:_Vector2>
+                float2 outputs:out
             }
         }
     }

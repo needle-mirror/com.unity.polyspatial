@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Unity.PolySpatial.Networking;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using UnityObject = UnityEngine.Object;
 
@@ -259,7 +260,16 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        [Tooltip("When enabled, a fallback unbounded Volume Camera will be created on startup if none is found in the scene. Disable this to be able to create the initial Volume Camera from script.")]
+        VolumeCameraConfiguration m_DefaultVolumeCameraConfiguration;
+
+        [Tooltip("Default Volume Camera camera configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.")]
+        public VolumeCameraConfiguration DefaultVolumeCameraConfiguration
+        {
+            get => m_DefaultVolumeCameraConfiguration;
+            set => m_DefaultVolumeCameraConfiguration = value;
+        }
+
+        [Tooltip("When enabled, if there is no Volume Camera after scene load, one will be automatically created using the default settings. Disable this to be able to create the initial Volume Camera from script.")]
         public bool EnableDefaultVolumeCamera = true;
 
 #if UNITY_EDITOR
@@ -277,6 +287,12 @@ namespace Unity.PolySpatial
         {
             get => m_TransmitDebugInfo;
             set => m_TransmitDebugInfo = value;
+        }
+
+        void Awake()
+        {
+            if (m_DefaultVolumeCameraConfiguration == null)
+                m_DefaultVolumeCameraConfiguration = Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
         }
 
 #if POLYSPATIAL_INTERNAL
@@ -406,6 +422,15 @@ namespace Unity.PolySpatial
 
         public bool EnableClipping => false;
         public bool EnableServerCameraControl => false;
+#endif
+
+#if UNITY_EDITOR
+        [Tooltip("Validations are always enabled when targeting PolySpatial platforms, but turning this option will enable validation on the current build " +
+                 "target. This is useful to run validation when developing on Windows, for example.")]
+        [SerializeField]
+        bool m_ForceValidationForCurrentBuildTarget = true;
+
+        internal bool ForceValidationForCurrentBuildTarget => m_ForceValidationForCurrentBuildTarget;
 #endif
     }
 }

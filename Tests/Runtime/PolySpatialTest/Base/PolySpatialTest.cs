@@ -1,8 +1,16 @@
+using System;
 using System.Collections;
+using NUnit.Framework.Interfaces;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial;
 using UnityEngine;
+using UnityEngine.TestRunner;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
+
+#if !UNITY_EDITOR
+[assembly: TestRunCallback(typeof(Tests.Runtime.PolySpatialTest.Base.PlayerLogTestReporter))]
+#endif
 
 namespace Tests.Runtime.PolySpatialTest.Base
 {
@@ -20,12 +28,10 @@ namespace Tests.Runtime.PolySpatialTest.Base
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            Debug.Log("Called TearDown from PolySpatialTest");
             if (m_TestGameObject)
             {
                 // skip a frame in case there is any pending action on the GameObject
                 yield return null;
-                Debug.Log("Destroying Test GameObject from PolySpatialTest");
                 Object.Destroy(m_TestGameObject);
             }
 
@@ -58,6 +64,44 @@ namespace Tests.Runtime.PolySpatialTest.Base
         protected void DisableFailOnErrorMessages()
         {
             LogAssert.ignoreFailingMessages = true;
+        }
+    }
+
+    // This class gets set up in the player only via the assembly: attribute mechanism at the
+    // top of this file, but this is not protected with ifdefs to make sure we don't introduce
+    // compilation issues.
+    public class PlayerLogTestReporter : ITestRunCallback
+    {
+        DateTime m_StartTime;
+        StackTraceLogType m_oldLogEnabled;
+
+        public void RunStarted(ITest testsToRun)
+        {
+            m_oldLogEnabled = Application.GetStackTraceLogType(LogType.Log);
+        }
+
+        public void RunFinished(ITestResult testResults)
+        {
+        }
+
+        public void TestStarted(ITest test)
+        {
+            m_StartTime = DateTime.Now;
+
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            Debug.Log($"##>>>> Test started: {test.Name}");
+            if (m_oldLogEnabled != StackTraceLogType.None)
+                Application.SetStackTraceLogType(LogType.Log, m_oldLogEnabled);
+        }
+
+        public void TestFinished(ITestResult result)
+        {
+            var duration = DateTime.Now - m_StartTime;
+
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            Debug.Log($"##<<<< Test finished: {result.Test.Name} {result.ResultState.Label} ({duration.TotalMilliseconds}ms)");
+            if (m_oldLogEnabled != StackTraceLogType.None)
+                Application.SetStackTraceLogType(LogType.Log, m_oldLogEnabled);
         }
     }
 }
