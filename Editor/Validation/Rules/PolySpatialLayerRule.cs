@@ -63,7 +63,7 @@ namespace UnityEditor.PolySpatial.Validation
 
                 // Update the rule messages to keep it synced with the game object name.
                 UpdateRuleMessages(rule, go.name);
-                return go.layer != LayerMask.NameToLayer(PolySpatialCore.PolySpatialLayerName);
+                return go.layer != PolySpatialCore.PolySpatialLayer;
             };
 
             UpdateRuleMessages(rule, gameObject.name);

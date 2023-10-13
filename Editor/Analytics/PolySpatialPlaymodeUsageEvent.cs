@@ -1,6 +1,8 @@
 #if ENABLE_CLOUD_SERVICES_ANALYTICS
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
@@ -18,7 +20,7 @@ namespace UnityEditor.PolySpatial.Analytics
     class PolySpatialPlaymodeUsageEvent : PolySpatialEditorAnalyticsEvent<PolySpatialPlaymodeUsageEvent.Payload>
     {
         const string k_EventName = "polyspatial_playmode_usage";
-        const int k_EventVersion = 1;
+        const int k_EventVersion = 2;
 
         /// <summary>
         /// The event parameter.
@@ -59,6 +61,52 @@ namespace UnityEditor.PolySpatial.Analytics
 
             [SerializeField]
             internal string ConfiguredMode;
+
+            [SerializeField]
+            internal List<AppNetworkPayload> AppNetworkConnections;
+        }
+
+        [Serializable]
+        internal struct AppNetworkPayload
+        {
+            internal const string UnknownAppName = "Unknown";
+            internal const string UnityPlayToDeviceName = "UnityPlayToDevice";
+
+            [SerializeField]
+            internal bool IsConnected;
+
+            [SerializeField]
+            internal string AppName;
+        }
+
+        static List<AppNetworkPayload> GetLocalAppNetworkConnections()
+        {
+            var localAppNetwork = new List<AppNetworkPayload>();
+            if (!PolySpatialSettings.instance.EnablePolySpatialRuntime)
+                return localAppNetwork;
+
+            var localAppNetworkConnection = PolySpatialCore.LocalAppNetworkConnection;
+            var universalPlayerIP = IPAddress.TryParse(PolySpatialUserSettings.instance.UniversalPlayerIP, out var ipAddress) ? ipAddress : null;
+
+            if (localAppNetworkConnection != null && localAppNetworkConnection.Connected)
+            {
+                localAppNetwork.Add(new AppNetworkPayload()
+                {
+                    IsConnected = true,
+                    AppName = localAppNetworkConnection.Address.Equals(universalPlayerIP) ?
+                        AppNetworkPayload.UnityPlayToDeviceName : AppNetworkPayload.UnknownAppName
+                });
+            }
+            else if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer && universalPlayerIP != null)
+            {
+                localAppNetwork.Add(new AppNetworkPayload()
+                {
+                    IsConnected = false,
+                    AppName = AppNetworkPayload.UnityPlayToDeviceName
+                });
+            }
+
+            return localAppNetwork;
         }
 
         internal PolySpatialPlaymodeUsageEvent() : base(k_EventName, k_EventVersion)
@@ -133,6 +181,8 @@ namespace UnityEditor.PolySpatial.Analytics
                 else
                     payload.ConfiguredMode = Payload.WindowedMode;
             }
+
+            payload.AppNetworkConnections = GetLocalAppNetworkConnections();
 
             Send(payload);
         }

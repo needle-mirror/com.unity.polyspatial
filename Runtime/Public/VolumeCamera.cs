@@ -55,7 +55,7 @@ namespace Unity.PolySpatial
         GameObject m_BackingCameraGO;
         Camera m_BackingCamera;
 
-        internal int m_PolySpatialLayerMask;
+        internal int m_PolySpatialLayerIndex;
 
         // Due to environment limitations, the host camera may not be available (returns null) in all modes, but
         // when present, the host camera serves as a kind of volume-specific "main camera." It reflects the position,
@@ -202,11 +202,11 @@ namespace Unity.PolySpatial
 
         void OnEnable()
         {
-            m_PolySpatialLayerMask = LayerMask.NameToLayer(PolySpatialLayerName);
+            m_PolySpatialLayerIndex = LayerMask.NameToLayer(PolySpatialLayerName);
 
             m_BackingCameraGO = new GameObject("Culling Camera");
             m_BackingCameraGO.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
-            m_BackingCameraGO.layer = m_PolySpatialLayerMask;
+            m_BackingCameraGO.layer = m_PolySpatialLayerIndex;
             m_BackingCameraGO.transform.SetParent(transform);
 
             m_BackingCamera = m_BackingCameraGO.AddComponent<Camera>();
@@ -288,7 +288,7 @@ namespace Unity.PolySpatial
             m_BackingCamera.orthographicSize = worldSpaceDimensions.y / 2;
             m_BackingCamera.nearClipPlane = 1;
             m_BackingCamera.farClipPlane = 1 + worldSpaceDimensions.z;
-            m_BackingCamera.cullingMask = CullingMask & ~m_PolySpatialLayerMask;
+            m_BackingCamera.cullingMask = CullingMask & ~(1 << m_PolySpatialLayerIndex);
 
             m_BackingCamera.enabled = true;
         }
@@ -296,9 +296,8 @@ namespace Unity.PolySpatial
         // We need a copy because we can't reference the type inside PolySpatial.Core
         internal struct PolySpatialCameraDataExternal
         {
-            public UnityEngine.Vector3 position;
-            public UnityEngine.Quaternion rotation;
-            public UnityEngine.Vector3 scale;
+            public UnityEngine.Vector3 worldPosition;
+            public UnityEngine.Quaternion worldRotation;
             public bool isOrthographic;
             public float orthographicHalfSize;
             public float aspectRatio;
@@ -307,6 +306,7 @@ namespace Unity.PolySpatial
             public float nearClip;
             public float farClip;
             public int cullingMask;
+            public Color backgroundColor;
         }
 
         // Keep the HostCamera in sync with the "main camera" of the host app
@@ -316,11 +316,8 @@ namespace Unity.PolySpatial
             var camx = m_BackingCameraGO.transform;
             var cam = m_BackingCamera;
 
-            var lossyScale = transform.lossyScale;
-
-            camx.position = hostData.position;
-            camx.rotation = hostData.rotation;
-            camx.localScale = Vector3.Scale(hostData.scale, new Vector3(1.0f / lossyScale.x, 1.0f / lossyScale.y, 1.0f / lossyScale.z));
+            camx.position = hostData.worldPosition;
+            camx.rotation = hostData.worldRotation;
 
             cam.orthographic = hostData.isOrthographic;
             cam.orthographicSize = hostData.orthographicHalfSize;
@@ -329,7 +326,7 @@ namespace Unity.PolySpatial
             cam.focalLength = hostData.focalLength;
             cam.nearClipPlane = hostData.nearClip;
             cam.farClipPlane = hostData.farClip;
-            cam.cullingMask = hostData.cullingMask & ~m_PolySpatialLayerMask;
+            cam.cullingMask = hostData.cullingMask & ~(1 << m_PolySpatialLayerIndex);
 
             // The host is not required to invoke this function, but once it has done so, the host camera is assumed to
             // be in sync until the volume camera's mode changes.
