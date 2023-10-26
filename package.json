@@ -1,7 +1,7 @@
 {
   "name": "com.unity.polyspatial",
   "displayName": "PolySpatial",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "unity": "2022.3",
   "unityRelease": "9f1",
   "description": "The Unity PolySpatial runtime includes platform-agnostic code required to build and deploy apps for supported platforms.",
@@ -21,16 +21,16 @@
     "changelog": ""
   },
   "_upm": {
-    "changelog": ""
+    "changelog": "### Added\n- \"Disable Tracking Mask\" in PolySpatial settings allows omitting objects from tracking based on their layer at creation.\n- Added support for new shader graph nodes: Channel Mixer, Replace Color, White Balance, Fade Transition, Channel Mask, Color Mask, Flip\n- Added Trail support for BakeToMesh Particle Systems.\n- Added support for RGB/linear conversions to shader graph Colorspace Conversion node.\n\n### Changed\n- Fixed a typo in PolySpatialPointerKind: `indDirectPinch` -> `indirectPinch`\n- Fixed an issue accessing UV1 in shader graphs.\n- Changed the access modifier of the serialized fields in the PolySpatial settings (class `PolySpatialSettings`) from public to private and renamed these members to include the `m_` prefix.\n- Renamed the PolySpatial settings `Enable Default Volume Camera` to `Auto-Create Volume Camera`.\n\n### Deprecated\n\n### Removed\n\n### Fixed\n- Fixed an issue where deleting a canvas renderer instance at runtime could cause an OOB exception in the tracker.\n- Fixed an issue causing incorrect mesh index buffer sizes.\n- Fixed shader graph world position node outputs for output volumes with heights greater than 2.\n- Fixed inconsistent RGB/HSV conversion in shader graph Colorspace Conversion node.\n- Fixed an issue with updating texture contents.\n- Fixed invalid transforms for shader graph Transform and Transformation Matrix nodes used in vertex stage.\n- Fixed issue with sprite textures wrapping at edges.\n- Fixed an issue where `SpatialPointerDevice` events reported the Began phase for more than one frame in a row.\n\n### Security"
   },
   "upmCi": {
-    "footprint": "ac05db0fe2cfe28cbd193a9e08594df7f95d67ae"
+    "footprint": "530fed8d99d365e72c7dfb666bfae72350800f1d"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@0.4/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@0.5/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/quantum.git",
     "type": "git",
-    "revision": "0c7b27fe28631de8dddbbb4e6babb05fc0f8a85c"
+    "revision": "563b6ef49598724e6c4f624b194447d1cb537faf"
   },
   "samples": [
     {

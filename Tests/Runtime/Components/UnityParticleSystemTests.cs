@@ -3,6 +3,7 @@ using System.Collections;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.Collections;
+using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -20,6 +21,25 @@ namespace Tests.Runtime.Functional.Components
 
         const string k_TestMaterialName = "ParticleTestMaterial";
         const string k_TestMeshName = "ParticleTestMesh";
+
+        PolySpatialSettings.ParticleReplicationMode m_previousParticleMode;
+
+        // This test is designed to test ReplicateProperties; always entre that mode before running the test and
+        // restore the prior state when exiting.
+        internal override void InternalSetup()
+        {
+            m_previousParticleMode = PolySpatialSettings.instance.ParticleMode;
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.ReplicateProperties;
+            base.InternalSetup();
+        }
+
+        GameObject GetBackingGameObjectForParticleSystem(ParticleSystem ps)
+        {
+            if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
+                return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
+
+            return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem));
+        }
 
         private void CreateTestParticleSystem()
         {
@@ -249,6 +269,7 @@ namespace Tests.Runtime.Functional.Components
                 Object.Destroy(m_TestGameObject);
 
             yield return base.InternalUnityTearDown();
+            PolySpatialSettings.instance.ParticleMode = m_previousParticleMode;
         }
 
         [UnityTest]
@@ -293,7 +314,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
             if (backingGO != null)
             {
                 var main = m_ParticleSystem.main;
@@ -370,7 +391,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
             if (backingGO != null)
             {
                 var backingParticleSystem = backingGO.GetComponent<ParticleSystem>();
@@ -419,7 +440,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
             if (backingGO != null)
             {
                 var backingParticleSystem = backingGO.GetComponent<ParticleSystem>();
@@ -499,6 +520,25 @@ namespace Tests.Runtime.Functional.Components
             }
 
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_BakeToMeshParticlesWithTrail()
+        {
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            CreateTestParticleSystem();
+
+            yield return null;
+
+            var material = PolySpatialComponentUtils.CreateUnlitParticleMaterial(Color.blue);
+            var particleSystemTrails = m_ParticleSystem.trails;
+            particleSystemTrails.enabled = true;
+            var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
+            particleRenderer.trailMaterial = material;
+            yield return null;
+
+            var go = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            Object.Destroy(go);
         }
     }
 }

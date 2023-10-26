@@ -72,7 +72,6 @@ namespace Tests.Runtime.Functional
                 out var unregisteredRendererAssets);
 
             var diffState = stateValidator.GenerateStateDiff(simState, rendererState);
-
             Assert.IsEmpty(diffState.ToString(), $"Found state diff: {diffState}");
             var stateEntries = simState.Count;
 
@@ -303,6 +302,42 @@ namespace Tests.Runtime.Functional
             stateEntries -= 4;
             yield return null;
             HasMatchingState(stateValidator, stateEntries);
+        }
+
+        [UnityTest]
+        public IEnumerator Test_GameObjectTracker_DisableTrackingMask()
+        {
+            PolySpatialStateValidator stateValidator = new();
+            stateValidator.GetState(
+                out var simState,
+                out var rendererState,
+                out var unregisteredSimAssets,
+                out var unregisteredRendererAssets);
+            var baselineStateEntries = simState.Count;
+
+            GameObject trackedObject = new("Tracked");
+            GameObject untrackedObject = new("Untracked");
+
+            var restoreDisableTrackingMask = PolySpatialSettings.instance.DisableTrackingMask;
+            try
+            {
+                PolySpatialSettings.instance.DisableTrackingMask = 1 << 2;
+
+                trackedObject.layer = 1;
+                untrackedObject.layer = 2;
+
+                yield return null;
+
+                // We should only see the tracked object; not the untracked one.
+                HasMatchingState(stateValidator, baselineStateEntries + 1);
+            }
+            finally
+            {
+                PolySpatialSettings.instance.DisableTrackingMask = restoreDisableTrackingMask;
+
+                GameObject.Destroy(trackedObject);
+                GameObject.Destroy(untrackedObject);
+            }
         }
 
         bool RandomBool()

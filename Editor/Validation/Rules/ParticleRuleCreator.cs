@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.PolySpatial;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
 using Unity.PolySpatial.Capabilities;
@@ -48,7 +49,8 @@ namespace UnityEditor.PolySpatial.Validation
 
             var rule = new BuildValidationRule
             {
-                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile),
+                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile)
+                                      && PolySpatialSettings.instance.ParticleMode != PolySpatialSettings.ParticleReplicationMode.BakeToMesh,
                 Category = string.Format(PolySpatialSceneValidator.RuleCategoryFormat, component.GetType().Name),
                 Message = string.Format(k_MessageFormat, PolySpatialSceneValidator.CachedCapabilityProfileNames,
                     string.Join(", ", propertyRules.Where(rule => !rule.CheckPredicate()).Select(rule => rule.Name))),
@@ -299,7 +301,7 @@ namespace UnityEditor.PolySpatial.Validation
             //Trails
             var trails = particleSystem.trails;
             propertyRules.Add(new PropertyRule("Trails",
-                () => !trails.enabled,
+                () => !trails.enabled || PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.BakeToMesh,
                 () => trails.enabled = false));
 
             //Custom Data

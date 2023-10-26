@@ -1,20 +1,29 @@
 <?xml version ="1.0"?>
 <materialx version = "1.38" colorspace = "lin_rec709">
-    <invertmatrix name = "TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    <dot name = "TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
         <input name = "in" type = "matrix44" nodename = "TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c" />
+    </dot>
+    <invertmatrix name = "TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "TransformationMatrix_Out_in_inNode_7780a58ea00644f7be6a295a348a1d6c" />
     </invertmatrix>
-    <multiply name = "TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
-        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c" />
+    <multiply name = "TransformationMatrix_Out_in_inNode_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1Node_7780a58ea00644f7be6a295a348a1d6c" />
+        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in2Node_7780a58ea00644f7be6a295a348a1d6c" />
+    </multiply>
+    <multiply name = "TransformationMatrix_Out_in_in_in1Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c" />
+        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c" />
+    </multiply>
+    <realitykit_geometry_modifier_view_to_projection name = "TransformationMatrix_Out_in_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "TransformationMatrix_Out_in_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <multiply name = "TransformationMatrix_Out_in_in_in2Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in2_in1Node_7780a58ea00644f7be6a295a348a1d6c" />
         <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
     </multiply>
-    <multiply name = "TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
-        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c" />
-        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c" />
-    </multiply>
-    <realitykit_surface_view_to_projection name = "TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
-    </realitykit_surface_view_to_projection>
-    <realitykit_surface_world_to_view name = "TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
-    </realitykit_surface_world_to_view>
+    <realitykit_geometry_modifier_world_to_model name = "TransformationMatrix_Out_in_in_in2_in1Node_7780a58ea00644f7be6a295a348a1d6c" type = "matrix44">
+    </realitykit_geometry_modifier_world_to_model>
     <transformmatrix name = "MultiplyNode_93a4700a498545e49d6ec8dbf4e6a195" type = "vector4">
         <input name = "mat" type = "matrix44" nodename = "TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c" />
         <input name = "in" type = "vector4" nodename = "Vector4Node_f490c91f9b2040c0ac2f02cc1ab9f90e" />

@@ -5,6 +5,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
     internal static class MtlxNodeTypes // TODO: Maybe enum.
     {
         internal const string UsdPreviewSurface = "UsdPreviewSurface";
+        internal const string UsdPrimvarReader = "UsdPrimvarReader";
 
         internal const string Material = "surfacematerial";
 
@@ -117,10 +118,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitCombine4 = "realitykit_combine4";
         internal const string RealityKitFractional = "realitykit_fractional";
         internal const string RealityKitSurfaceModelToWorld = "realitykit_surface_model_to_world";
+        internal const string RealityKitSurfaceModelToView = "realitykit_surface_model_to_view";
         internal const string RealityKitSurfaceWorldToView = "realitykit_surface_world_to_view";
         internal const string RealityKitSurfaceViewToProjection = "realitykit_surface_view_to_projection";
         internal const string RealityKitSurfaceProjectionToView = "realitykit_surface_projection_to_view";
         internal const string RealityKitSurfaceScreenPosition = "realitykit_surface_screen_position";
+        internal const string RealityKitGeometryModifierModelToWorld = "realitykit_geometry_modifier_model_to_world";
+        internal const string RealityKitGeometryModifierWorldToModel = "realitykit_geometry_modifier_world_to_model";
+        internal const string RealityKitGeometryModifierModelToView = "realitykit_geometry_modifier_model_to_view";
+        internal const string RealityKitGeometryModifierViewToProjection = "realitykit_geometry_modifier_view_to_projection";
+        internal const string RealityKitGeometryModifierProjectionToView = "realitykit_geometry_modifier_projection_to_view";
         internal const string RealityKitGeometryModifierVertexID = "realitykit_geometry_modifier_vertex_id";
         internal const string RealityKitSurfaceCustomAttribute = "realitykit_surface_custom_attribute";
         internal const string RealityKitUnlit = "realitykit_unlit";

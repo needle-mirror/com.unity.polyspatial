@@ -45,16 +45,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                 case "UV0":
                 {
-                    var nodeData = QuickNode.NaryOp(
-                        MtlxNodeTypes.GeomTexCoord, node, graph, externals, "UV0", null, null, MtlxDataTypes.Vector2);
-                    nodeData.AddPortValue("index", MtlxDataTypes.Integer, new[] { 0.0f });
+                    var nodeData = QuickNode.CreateUVNode(graph, NodeUtils.GetNodeName(node, "UV0"), 0);
+                    externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
                     break;
                 }
                 case "UV1":
                 {
-                    var nodeData = QuickNode.NaryOp(
-                        MtlxNodeTypes.GeomTexCoord, node, graph, externals, "UV1", null, null, MtlxDataTypes.Vector2);
-                    nodeData.AddPortValue("index", MtlxDataTypes.Integer, new[] { 1.0f });
+                    var nodeData = QuickNode.CreateUVNode(graph, NodeUtils.GetNodeName(node, "UV1"), 1);
+                    externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, nodeData.name);
                     break;
                 }
                 case "UserAttribute":

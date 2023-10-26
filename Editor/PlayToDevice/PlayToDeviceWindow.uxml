@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Packages/com.unity.polyspatial/Editor/UniversalPlayer/UniversalPlayerWindow.uss?fileID=7433441132597879392&amp;guid=a882e690f2642fd41b82babf6557875b&amp;type=3#UniversalPlayerWindow" />
+    <Style src="project://database/Packages/com.unity.polyspatial/Editor/PlayToDevice/PlayToDeviceWindow.uss?fileID=7433441132597879392&amp;guid=a882e690f2642fd41b82babf6557875b&amp;type=3#PlayToDeviceWindow" />
     <ui:VisualElement name="InfoBoxSeparator" style="height: 1px;" />
     <ui:Box name="InfoBox" style="padding-left: 3px; padding-right: 3px; padding-top: 1px; padding-bottom: 3px;">
         <ui:Label text="Info Text" name="InfoTextLabel" style="white-space: normal;" />

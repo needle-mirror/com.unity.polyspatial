@@ -105,7 +105,7 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return GetSpriteMaskData(sm.GetInstanceID());
         }
 
-        internal static TrackingData<PolySpatialParticleSystemTrackingData> GetTrackingData(ParticleSystem ps)
+        internal static TrackingData<PolySpatialParticleRendererTrackingData> GetTrackingData(ParticleSystem ps)
         {
             return GetParticleSystemData(ps.GetInstanceID());
         }
@@ -155,7 +155,7 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return SpriteMaskTracker.GetTrackingData(iid);
         }
 
-        internal static TrackingData<PolySpatialParticleSystemTrackingData> GetParticleSystemData(int iid)
+        internal static TrackingData<PolySpatialParticleRendererTrackingData> GetParticleSystemData(int iid)
         {
             return ParticleSystemTracker.GetTrackingData(iid);
         }

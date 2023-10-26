@@ -16,8 +16,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             var uvSlot = (UVMaterialSlot)NodeUtils.GetSlotByName(node, "UV");
             if (!uvSlot.isConnected)
             {
-                var uvNode = graph.AddNode(NodeUtils.GetNodeName(node, "GradientNoiseUV"), MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
-                uvNode.AddPortValue("index", MtlxDataTypes.Integer, new float[] { (int)uvSlot.channel });
+                var uvNode = QuickNode.CreateUVNode(
+                    graph, NodeUtils.GetNodeName(node, "GradientNoiseUV"), (int)uvSlot.channel);
                 graph.AddEdge(uvNode.name, outputNode.name, "texcoord");
             }
             else

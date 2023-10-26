@@ -282,8 +282,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (!slot.isConnected)
             {
                 var index = (int)slot.channel;
-                var uvRead = graph.AddNode(name, MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
-                uvRead.AddPortValue("index", MtlxDataTypes.Integer, new float[] { index });
+                var uvRead = CreateUVNode(graph, name, index);
 
                 // Flip V coordinate to get back to Unity coordinate space for processing.
                 var multiplyNode = graph.AddNode($"{name}Multiply", MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2);
@@ -304,6 +303,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     dstNode.AddPort(dstPortName, MtlxDataTypes.Vector2);
                 externals.AddExternalPortAndEdge(slot, dstNodeName, dstPortName);
             }
+        }
+
+        internal static MtlxNodeData CreateUVNode(MtlxGraphData graph, string name, int index)
+        {
+            MtlxNodeData uvRead;
+            if (index == 0)
+            {
+                uvRead = graph.AddNode(name, MtlxNodeTypes.GeomTexCoord, MtlxDataTypes.Vector2);
+                uvRead.AddPortValue("index", MtlxDataTypes.Integer, new float[] { index });
+            }
+            else
+            {
+                // Apple recommends using a primvar reader for UV1.
+                uvRead = graph.AddNode(name, MtlxNodeTypes.UsdPrimvarReader, MtlxDataTypes.Vector2);
+                uvRead.AddPortString("varname", MtlxDataTypes.String, $"vertexUV{index}");
+            }
+            return uvRead;
         }
 
         internal static string GetUVSupportDetails(UVMaterialSlot slot)

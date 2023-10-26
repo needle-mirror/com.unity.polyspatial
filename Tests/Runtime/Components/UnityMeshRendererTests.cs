@@ -420,6 +420,9 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityMeshRenderer_SupportedShader([ValueSource(nameof(k_ShadersToTest))] string shaderName)
         {
+            if (shaderName.Equals(String.Empty))
+                yield break;
+
             CreateTestObjects();
             m_TestMeshFilter.sharedMesh = CreateTestMesh();
             var shader = Shader.Find(shaderName);

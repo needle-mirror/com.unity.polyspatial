@@ -86,18 +86,18 @@ namespace UnityEditor.PolySpatial.Analytics
                 return localAppNetwork;
 
             var localAppNetworkConnection = PolySpatialCore.LocalAppNetworkConnection;
-            var universalPlayerIP = IPAddress.TryParse(PolySpatialUserSettings.instance.UniversalPlayerIP, out var ipAddress) ? ipAddress : null;
+            var playToDeviceIP = IPAddress.TryParse(PolySpatialUserSettings.instance.PlayToDeviceIP, out var ipAddress) ? ipAddress : null;
 
             if (localAppNetworkConnection != null && localAppNetworkConnection.Connected)
             {
                 localAppNetwork.Add(new AppNetworkPayload()
                 {
                     IsConnected = true,
-                    AppName = localAppNetworkConnection.Address.Equals(universalPlayerIP) ?
+                    AppName = localAppNetworkConnection.Address.Equals(playToDeviceIP) ?
                         AppNetworkPayload.UnityPlayToDeviceName : AppNetworkPayload.UnknownAppName
                 });
             }
-            else if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer && universalPlayerIP != null)
+            else if (PolySpatialUserSettings.instance.ConnectToPlayToDevice && playToDeviceIP != null)
             {
                 localAppNetwork.Add(new AppNetworkPayload()
                 {

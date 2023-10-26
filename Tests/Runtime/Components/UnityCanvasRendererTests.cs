@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Reflection;
 using System;
 using System.Collections;
 using System.IO;
@@ -220,7 +222,7 @@ namespace Tests.Runtime.Functional.Components
             public CanvasRenderer button2;
             public CanvasRenderer label2;
 
-            int SortIndexFor(CanvasRenderer item)
+            internal int SortIndexFor(CanvasRenderer item)
             {
                 var data = CanvasRendererTracker.GetTrackingData(item.GetInstanceID());
                 return data.customData.globalSortIndex;
@@ -381,6 +383,42 @@ namespace Tests.Runtime.Functional.Components
             yield return null;
 
             Assert.IsTrue(tree1.Compare(tree1.label1, tree1.button2) < 0, "Expected label to be sorted before button");
+
+            DestroySubtree(tree1);
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Test_CanvasRenderer_DeletingItem_ResetsSortIndices()
+        {
+            var tree1 = CreateSortTestSubTree("One", "Default", 0);
+
+            var canvas = tree1.canvas;
+            var image1 = new GameObject("Image 1", new[] { typeof(RectTransform), typeof(Image) });
+            image1.transform.SetParent(canvas.transform);
+            var image2 = new GameObject("Image 2", new[] { typeof(RectTransform), typeof(Image) });
+            image2.transform.SetParent(canvas.transform);
+            var image3 = new GameObject("Image 3", new[] { typeof(RectTransform), typeof(Image) });
+            image3.transform.SetParent(canvas.transform);
+
+            yield return null;
+
+            var i1Sid = tree1.SortIndexFor(image1.GetComponent<CanvasRenderer>());
+            var i2Sid = tree1.SortIndexFor(image2.GetComponent<CanvasRenderer>());
+            var i3Sid = tree1.SortIndexFor(image3.GetComponent<CanvasRenderer>());
+            Assert.IsTrue(i1Sid < i2Sid);
+            Assert.IsTrue(i2Sid < i3Sid);
+
+            GameObject.Destroy(image2);
+
+            yield return null;
+
+            var i1NewSid = tree1.SortIndexFor(image1.GetComponent<CanvasRenderer>());
+            var i3NewSid = tree1.SortIndexFor(image3.GetComponent<CanvasRenderer>());
+            Assert.AreEqual(i1Sid, i1NewSid);
+            Assert.AreNotEqual(i3Sid, i3NewSid);
+            Assert.IsTrue(i1Sid < i3Sid);
 
             DestroySubtree(tree1);
 

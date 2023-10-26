@@ -5,9 +5,9 @@
     <texcoord name = "UV0Node_242540854003437db2c7c3755dd997bd" type = "vector2">
         <input name = "index" type = "integer" value = "0" />
     </texcoord>
-    <texcoord name = "UV1Node_fc6391de8216422ebcfea8a3e701e118" type = "vector2">
-        <input name = "index" type = "integer" value = "1" />
-    </texcoord>
+    <UsdPrimvarReader name = "UV1Node_fc6391de8216422ebcfea8a3e701e118" type = "vector2">
+        <input name = "varname" type = "string" value = "vertexUV1" />
+    </UsdPrimvarReader>
     <realitykit_surface_custom_attribute name = "UserAttributeNode_21cc81d420b04b6f8275572c801c089d" type = "vector4">
     </realitykit_surface_custom_attribute>
     <convert name = "Position_OutNode_191e1be95d0149628013efe6e7795eec" type = "vector4">
@@ -35,9 +35,9 @@
         <input name = "in1" type = "vector4" nodename = "CastConvertFinalFromAddNode_d35c1e499ee54103b47e1db7df3d383cToMultiplyNode_0ff6b46f94424fdcb902d63c99274507in1" />
         <input name = "in2" type = "vector4" value = "-1,-1,0,0" />
     </multiply>
-    <texcoord name = "UVNode_c8cd919ab4f34506a0e8f64581ab53ae" type = "vector2">
-        <input name = "index" type = "integer" value = "1" />
-    </texcoord>
+    <UsdPrimvarReader name = "UVNode_c8cd919ab4f34506a0e8f64581ab53ae" type = "vector2">
+        <input name = "varname" type = "string" value = "vertexUV1" />
+    </UsdPrimvarReader>
     <multiply name = "MultiplyNode_c8cd919ab4f34506a0e8f64581ab53ae" type = "vector2">
         <input name = "in1" type = "vector2" value = "1,-1" />
         <input name = "in2" type = "vector2" nodename = "UVNode_c8cd919ab4f34506a0e8f64581ab53ae" />

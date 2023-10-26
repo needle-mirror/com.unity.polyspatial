@@ -7,6 +7,35 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2023-10-26
+
+### Added
+- "Disable Tracking Mask" in PolySpatial settings allows omitting objects from tracking based on their layer at creation.
+- Added support for new shader graph nodes: Channel Mixer, Replace Color, White Balance, Fade Transition, Channel Mask, Color Mask, Flip
+- Added Trail support for BakeToMesh Particle Systems.
+- Added support for RGB/linear conversions to shader graph Colorspace Conversion node.
+
+### Changed
+- Fixed a typo in PolySpatialPointerKind: `indDirectPinch` -> `indirectPinch`
+- Fixed an issue accessing UV1 in shader graphs.
+- Changed the access modifier of the serialized fields in the PolySpatial settings (class `PolySpatialSettings`) from public to private and renamed these members to include the `m_` prefix.
+- Renamed the PolySpatial settings `Enable Default Volume Camera` to `Auto-Create Volume Camera`.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fixed an issue where deleting a canvas renderer instance at runtime could cause an OOB exception in the tracker.
+- Fixed an issue causing incorrect mesh index buffer sizes.
+- Fixed shader graph world position node outputs for output volumes with heights greater than 2.
+- Fixed inconsistent RGB/HSV conversion in shader graph Colorspace Conversion node.
+- Fixed an issue with updating texture contents.
+- Fixed invalid transforms for shader graph Transform and Transformation Matrix nodes used in vertex stage.
+- Fixed issue with sprite textures wrapping at edges.
+- Fixed an issue where `SpatialPointerDevice` events reported the Began phase for more than one frame in a row.
+
+### Security
 
 ## [0.4.3] - 2023-10-13
 
@@ -18,6 +47,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Fixed
 - Build error if trying to build for Simulator SDK in Unity prior to 2022.3.11f1.
 - Fixed an issue causing incorrect negative scales.
+- Sprite performance improvements.
+- Improved CanvasRenderer/UI performance. Best performance metrices will only be attained with Unity 2022.3.12f1 or later.
 
 ## [0.4.1] - 2023-10-06
 
@@ -33,6 +64,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Native texture pointers for RenderTextures no longer cached, which may fix issues with RenderTextures that are released and recreated.
+- Sprite performance improvements.
 
 ## [0.3.2] - 2023-09-18
 
@@ -56,6 +88,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - Adds limited support for the custom funtion node in Unity ShaderGraph (see documentation for details)
     - Additional materialX nodes are now supported (see documentation for details)
     - Unity PBR materials now map to the RealityKitPBR shader node rather than the UsdPreviewSurface shader node, as the RealityKitPBR supports additional useful features
+
 
 ### Fixed
 - Input

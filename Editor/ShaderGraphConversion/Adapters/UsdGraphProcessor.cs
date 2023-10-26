@@ -524,10 +524,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     switch (node.nodetype)
                     {
                         case MtlxNodeTypes.RealityKitSurfaceModelToWorld:
+                        case MtlxNodeTypes.RealityKitSurfaceModelToView:
                         case MtlxNodeTypes.RealityKitSurfaceWorldToView:
                         case MtlxNodeTypes.RealityKitSurfaceViewToProjection:
                         case MtlxNodeTypes.RealityKitSurfaceProjectionToView:
                         case MtlxNodeTypes.RealityKitSurfaceScreenPosition:
+                        case MtlxNodeTypes.RealityKitGeometryModifierModelToWorld:
+                        case MtlxNodeTypes.RealityKitGeometryModifierWorldToModel:
+                        case MtlxNodeTypes.RealityKitGeometryModifierModelToView:
+                        case MtlxNodeTypes.RealityKitGeometryModifierViewToProjection:
+                        case MtlxNodeTypes.RealityKitGeometryModifierProjectionToView:
                         case MtlxNodeTypes.RealityKitGeometryModifierVertexID:
                         case MtlxNodeTypes.RealityKitSurfaceCustomAttribute:
                             return $"ND_{node.nodetype}";

@@ -285,10 +285,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         case UVMaterialSlot uvSlot:
                         {
                             // Unconnected UV inputs need a GeomTexCoord node (flipping the v coord)
-                            var texCoordNode = ctx.Graph.AddNode(
-                                $"{dotNode.name}UV", MtlxNodeTypes.GeomTexCoord, dataType);
-                            texCoordNode.AddPortValue("index", MtlxDataTypes.Integer, new[] { (float)uvSlot.channel });
-                            
+                            var texCoordNode = QuickNode.CreateUVNode(
+                                ctx.Graph, $"{dotNode.name}UV", (int)uvSlot.channel);
+
                             var multiplyNode = ctx.Graph.AddNode(
                                 $"{dotNode.name}Multiply", MtlxNodeTypes.Multiply, dataType);
                             ctx.Graph.AddPortAndEdge(texCoordNode.name, multiplyNode.name, "in1", dataType);
@@ -485,6 +484,57 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override int GetHashCode()
         {
             return Source.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"TextureSizeInputDef(\"{Source}\")";
+        }
+    }
+
+    // An input that resolves to a different result depending on which stage the original shader graph
+    // node's outputs are targeting.  Both stages must have the same type.
+    internal class PerStageInputDef : InputDef
+    {
+        internal InputDef Vertex { get; private set; }
+        internal InputDef Fragment { get; private set; }
+
+        internal PerStageInputDef(InputDef vertex, InputDef fragment)
+        {
+            Vertex = vertex;
+            Fragment = fragment;
+        }
+
+        internal override void AddPortsAndEdges(
+            CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
+        {
+            var outputs = new List<MaterialSlot>();
+            ctx.Node.GetOutputSlots(outputs);
+            foreach (var output in outputs)
+            {
+                // Fragment is the default stage, so any occurrence of Vertex means that's the only one we can use.
+                if (UnityEditor.Graphing.NodeUtils.GetEffectiveShaderStage(output, false) == ShaderStage.Vertex)
+                {
+                    Vertex.AddPortsAndEdges(ctx, nodeDatum, nodeKey, inputKey);
+                    return;
+                }
+            }
+            Fragment.AddPortsAndEdges(ctx, nodeDatum, nodeKey, inputKey);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is PerStageInputDef other && other.Vertex.Equals(Vertex) && other.Fragment.Equals(Fragment);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Vertex, Fragment);
+        }
+
+        public override string ToString()
+        {
+            return $"PerStageInputDef({Vertex}, {Fragment})";
         }
     }
 }

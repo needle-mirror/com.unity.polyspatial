@@ -12,27 +12,27 @@ namespace Unity.PolySpatial
     class PolySpatialUserSettings : ScriptableSingleton<PolySpatialUserSettings>
     {
         [SerializeField]
-        bool m_ConnectToUniversalPlayer;
+        bool connectToPlayToDevice;
 
-        internal bool ConnectToUniversalPlayer
+        internal bool ConnectToPlayToDevice
         {
-            get => m_ConnectToUniversalPlayer;
+            get => connectToPlayToDevice;
             set
             {
-                m_ConnectToUniversalPlayer = value;
+                connectToPlayToDevice = value;
                 Save(true);
             }
         }
 
         [SerializeField]
-        string m_UniversalPlayerIP = PolySpatialSettings.DefaultServerAddress;
+        string playToDeviceIP = PolySpatialSettings.DefaultServerAddress;
 
-        internal string UniversalPlayerIP
+        internal string PlayToDeviceIP
         {
-            get => m_UniversalPlayerIP;
+            get => playToDeviceIP;
             set
             {
-                m_UniversalPlayerIP = value;
+                playToDeviceIP = value;
                 Save(true);
             }
         }

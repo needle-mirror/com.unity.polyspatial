@@ -136,8 +136,8 @@ def "MaterialX"
 
             def Shader "UVNode_476f598b9880427591331bf70fec9a45"
             {
-                uniform token info:id = "ND_texcoord_vector2"
-                int inputs:index = 1
+                uniform token info:id = "ND_UsdPrimvarReader_vector2"
+                string inputs:varname = "vertexUV1"
                 float2 outputs:out
             }
 

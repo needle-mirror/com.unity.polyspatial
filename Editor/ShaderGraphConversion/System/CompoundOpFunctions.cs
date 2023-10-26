@@ -123,8 +123,21 @@ namespace UnityEditor.ShaderGraph.MaterialX
             0.0f, 0.0f, -1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f);
 
-        static InlineInputDef s_ProjectionMatrix = new(
-            MtlxNodeTypes.RealityKitSurfaceViewToProjection, MtlxDataTypes.Matrix44, new(), "viewToProjection");
+        static InlineInputDef s_GeometryModifierFlippedWorldToModel = new(
+            MtlxNodeTypes.Multiply, MtlxDataTypes.Matrix44, new()
+        {
+            ["in1"] = new InlineInputDef(
+                MtlxNodeTypes.RealityKitGeometryModifierWorldToModel, MtlxDataTypes.Matrix44, new(), "worldToModel"),
+            ["in2"] = s_ZFlipMatrix,
+        });
+
+        static InlineInputDef s_GeometryModifierViewToProjection = new(
+            MtlxNodeTypes.RealityKitGeometryModifierViewToProjection,
+            MtlxDataTypes.Matrix44, new(), "viewToProjection");
+
+        static InlineInputDef s_SurfaceViewToProjection = new(
+            MtlxNodeTypes.RealityKitSurfaceViewToProjection,
+            MtlxDataTypes.Matrix44, new(), "viewToProjection");
 
         static Dictionary<string, Compiler> s_SymbolCompilers = new()
         {
@@ -160,21 +173,49 @@ namespace UnityEditor.ShaderGraph.MaterialX
             ["UNITY_MATRIX_I_VP"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
 #else
             ["unity_ObjectToWorld"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceModelToWorld, "modelToWorld", s_ZFlipMatrix, s_ZFlipMatrix, false),
-            ["unity_WorldToObject"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceModelToWorld, "modelToWorld", s_ZFlipMatrix, s_ZFlipMatrix, true),
-            ["UNITY_MATRIX_V"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", null, s_ZFlipMatrix, false),
-            ["UNITY_MATRIX_I_V"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", null, s_ZFlipMatrix, true),
+                s_ZFlipMatrix, MtlxNodeTypes.RealityKitGeometryModifierModelToWorld,
+                MtlxNodeTypes.RealityKitSurfaceModelToWorld, "modelToWorld", s_ZFlipMatrix, false),
+            ["unity_WorldToObject"] = CreatePerStageCompiler(
+                CreateMatrixCompiler(
+                    s_ZFlipMatrix, MtlxNodeTypes.RealityKitGeometryModifierWorldToModel,
+                    "worldToModel", s_ZFlipMatrix, false),
+                CreateMatrixCompiler(
+                    s_ZFlipMatrix, MtlxNodeTypes.RealityKitSurfaceModelToWorld,
+                    "modelToWorld", s_ZFlipMatrix, true)),
+            ["UNITY_MATRIX_V"] = CreatePerStageCompiler(
+                CreateMatrixCompiler(
+                    null, MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                    "modelToView", s_GeometryModifierFlippedWorldToModel, false),
+                CreateMatrixCompiler(
+                    null, MtlxNodeTypes.RealityKitSurfaceWorldToView,
+                    "worldToView", s_ZFlipMatrix, false)),
+            ["UNITY_MATRIX_I_V"] = CreatePerStageCompiler(
+                CreateMatrixCompiler(
+                    null, MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                    "modelToView", s_GeometryModifierFlippedWorldToModel, true),
+                CreateMatrixCompiler(
+                    null, MtlxNodeTypes.RealityKitSurfaceWorldToView,
+                    "worldToView", s_ZFlipMatrix, true)),
             ["UNITY_MATRIX_P"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceViewToProjection, "viewToProjection", null, null, false),
+                null, MtlxNodeTypes.RealityKitGeometryModifierViewToProjection,
+                MtlxNodeTypes.RealityKitSurfaceViewToProjection, "viewToProjection", null, false),
             ["UNITY_MATRIX_I_P"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceProjectionToView, "projectionToView", null, null, false),
-            ["UNITY_MATRIX_VP"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", s_ProjectionMatrix, s_ZFlipMatrix, false),
-            ["UNITY_MATRIX_I_VP"] = CreateMatrixCompiler(
-                MtlxNodeTypes.RealityKitSurfaceWorldToView, "worldToView", s_ProjectionMatrix, s_ZFlipMatrix, true),
+                null, MtlxNodeTypes.RealityKitGeometryModifierProjectionToView,
+                MtlxNodeTypes.RealityKitSurfaceProjectionToView, "projectionToView", null, false),
+            ["UNITY_MATRIX_VP"] = CreatePerStageCompiler(
+                CreateMatrixCompiler(
+                    s_GeometryModifierViewToProjection, MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                    "modelToView", s_GeometryModifierFlippedWorldToModel, false),
+                CreateMatrixCompiler(
+                    s_SurfaceViewToProjection, MtlxNodeTypes.RealityKitSurfaceWorldToView,
+                    "worldToView", s_ZFlipMatrix, false)),
+            ["UNITY_MATRIX_I_VP"] = CreatePerStageCompiler(
+                CreateMatrixCompiler(
+                    s_GeometryModifierViewToProjection, MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                    "modelToView", s_GeometryModifierFlippedWorldToModel, true),
+                CreateMatrixCompiler(
+                    s_SurfaceViewToProjection, MtlxNodeTypes.RealityKitSurfaceWorldToView,
+                    "worldToView", s_ZFlipMatrix, true)),
             ["polySpatial_TangentToWorld"] = CreateTangentMatrixCompiler(false),
             ["polySpatial_WorldToTangent"] = CreateTangentMatrixCompiler(true),
 #endif
@@ -1904,6 +1945,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
         static string GetOutputType(
             InputDef inputDef, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
         {
+            if (inputDef is PerStageInputDef perStageInputDef)
+            {
+                // Ensure that both stages have the same type.
+                var vertexType = GetOutputType(perStageInputDef.Vertex, inputs, output);
+                var fragmentType = GetOutputType(perStageInputDef.Fragment, inputs, output);
+                Assert.AreEqual(vertexType, fragmentType);
+                return vertexType;
+            }
             return inputDef switch
             {
                 FloatInputDef floatInputDef => floatInputDef.PortType,
@@ -1911,6 +1960,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 ExternalInputDef externalInputDef => inputs[externalInputDef.Source].InputType,
                 InlineInputDef inlineInputDef => inlineInputDef.Source.OutputType,
                 ImplicitInputDef implicitInputDef => implicitInputDef.DataType,
+                TextureSizeInputDef => MtlxDataTypes.Vector3,
                 _ => MtlxDataTypes.String,
             };
         }
@@ -1931,9 +1981,28 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
 
         // Convenience function to create space transforms more conveniently. 
+        // Returns (preMult * input * postMult) ^ (invert ? -1 : 1), using either the vertex node type
+        // or the fragment node type for the input depending on the active stage.
+        static Compiler CreateMatrixCompiler(
+            InputDef preMult, string vertexNodeType, string fragmentNodeType,
+            string outputName, InputDef postMult, bool invert)
+        {
+            return CreatePerStageCompiler(
+                CreateMatrixCompiler(preMult, vertexNodeType, outputName, postMult, invert),
+                CreateMatrixCompiler(preMult, fragmentNodeType, outputName, postMult, invert));
+        }
+
+        // Convenience function to create separate compilers for each shader stage.
+        static Compiler CreatePerStageCompiler(Compiler vertexCompiler, Compiler fragmentCompiler)
+        {
+            return (node, inputs, output) => new PerStageInputDef(
+                vertexCompiler(node, inputs, output), fragmentCompiler(node, inputs, output));
+        }
+
+        // Convenience function to create space transforms more conveniently. 
         // Returns (preMult * input * postMult) ^ (invert ? -1 : 1).
         static Compiler CreateMatrixCompiler(
-            string nodeType, string outputName, InputDef preMult, InputDef postMult, bool invert)
+            InputDef preMult, string nodeType, string outputName, InputDef postMult, bool invert)
         {
             return (node, inputs, output) =>
             {

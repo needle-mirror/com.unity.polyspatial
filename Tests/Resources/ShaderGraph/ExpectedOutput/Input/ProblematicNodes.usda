@@ -126,30 +126,37 @@ def "MaterialX"
 
             def Shader "TransformationMatrix_OutNode_c0b49c74bcd84ed6be420c03185b0cf5"
             {
-                uniform token info:id = "ND_invertmatrix_matrix44"
+                uniform token info:id = "ND_dot_matrix44"
                 matrix4d inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_inNode_c0b49c74bcd84ed6be420c03185b0cf5.outputs:out>
                 matrix4d outputs:out
             }
 
             def Shader "TransformationMatrix_Out_inNode_c0b49c74bcd84ed6be420c03185b0cf5"
             {
-                uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:out>
-                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                uniform token info:id = "ND_invertmatrix_matrix44"
+                matrix4d inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_inNode_c0b49c74bcd84ed6be420c03185b0cf5.outputs:out>
                 matrix4d outputs:out
             }
 
-            def Shader "TransformationMatrix_Out_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            def Shader "TransformationMatrix_Out_in_inNode_c0b49c74bcd84ed6be420c03185b0cf5"
             {
                 uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:viewToProjection>
-                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:worldToView>
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:out>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in_in2Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:out>
                 matrix4d outputs:out
             }
 
-            def Shader "TransformationMatrix_Out_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            def Shader "TransformationMatrix_Out_in_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:viewToProjection>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:modelToView>
+                matrix4d outputs:out
+            }
+
+            def Shader "TransformationMatrix_Out_in_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 
@@ -797,15 +804,29 @@ def "MaterialX"
             def Shader "Transform_inWS_in_in_mat_inNode_e4e8032223904ec7b132675ede25586b"
             {
                 uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b.outputs:worldToView>
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b.outputs:modelToView>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_ProblematicNodes/Transform_inWS_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "Transform_inWS_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/Transform_inWS_in_in_mat_in_in2_in1Node_e4e8032223904ec7b132675ede25586b.outputs:worldToModel>
                 matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
                 matrix4d outputs:out
             }
 
+            def Shader "Transform_inWS_in_in_mat_in_in2_in1Node_e4e8032223904ec7b132675ede25586b"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_world_to_model"
+                matrix4d outputs:worldToModel
+            }
+
             def Shader "Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
             def Shader "Transform_inWS_in_in_inNode_e4e8032223904ec7b132675ede25586b"
@@ -903,10 +924,24 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "TransformationMatrix_Out_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            def Shader "TransformationMatrix_Out_in_in_in2Node_c0b49c74bcd84ed6be420c03185b0cf5"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_ProblematicNodes/TransformationMatrix_Out_in_in_in2_in1Node_c0b49c74bcd84ed6be420c03185b0cf5.outputs:worldToModel>
+                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d outputs:out
+            }
+
+            def Shader "TransformationMatrix_Out_in_in_in2_in1Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_world_to_model"
+                matrix4d outputs:worldToModel
+            }
+
+            def Shader "TransformationMatrix_Out_in_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
             def Shader "Combine_BNode_fca738e426504445b748e7f704d8a65f"
@@ -1179,26 +1214,18 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_transformmatrix_vector4"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_inNode_34938cb79f12402e8721ffe89072b995.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995.outputs:worldToView>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995.outputs:modelToView>
                 float4 outputs:out
             }
 
             def Shader "ScreenPosition_Base_in_inNode_34938cb79f12402e8721ffe89072b995"
             {
-                uniform token info:id = "ND_transformmatrix_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_matNode_34938cb79f12402e8721ffe89072b995.outputs:modelToWorld>
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995.outputs:out>
                 float4 outputs:out
             }
 
             def Shader "ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995"
-            {
-                uniform token info:id = "ND_convert_vector3_vector4"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_in_inNode_34938cb79f12402e8721ffe89072b995.outputs:out>
-                float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_in_inNode_34938cb79f12402e8721ffe89072b995"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "object"
@@ -1326,7 +1353,7 @@ def "MaterialX"
 
             def Shader "ScreenPosition_Base_matNode_91b9beb4e5224f6090554fe88b69846e"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 
@@ -1334,38 +1361,24 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_transformmatrix_vector4"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_inNode_91b9beb4e5224f6090554fe88b69846e.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e.outputs:worldToView>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e.outputs:modelToView>
                 float4 outputs:out
             }
 
             def Shader "ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
             def Shader "ScreenPosition_Base_in_inNode_91b9beb4e5224f6090554fe88b69846e"
             {
-                uniform token info:id = "ND_transformmatrix_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_matNode_91b9beb4e5224f6090554fe88b69846e.outputs:modelToWorld>
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e.outputs:out>
                 float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_matNode_91b9beb4e5224f6090554fe88b69846e"
-            {
-                uniform token info:id = "ND_realitykit_surface_model_to_world"
-                matrix4d outputs:modelToWorld
             }
 
             def Shader "ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e"
-            {
-                uniform token info:id = "ND_convert_vector3_vector4"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_in_inNode_91b9beb4e5224f6090554fe88b69846e.outputs:out>
-                float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_in_inNode_91b9beb4e5224f6090554fe88b69846e"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "object"
@@ -1420,7 +1433,7 @@ def "MaterialX"
 
             def Shader "ScreenPosition_Base_matNode_239c5498aa3a45518ab4cead327fac25"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 
@@ -1428,38 +1441,24 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_transformmatrix_vector4"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_inNode_239c5498aa3a45518ab4cead327fac25.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25.outputs:worldToView>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25.outputs:modelToView>
                 float4 outputs:out
             }
 
             def Shader "ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
             def Shader "ScreenPosition_Base_in_inNode_239c5498aa3a45518ab4cead327fac25"
             {
-                uniform token info:id = "ND_transformmatrix_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_matNode_239c5498aa3a45518ab4cead327fac25.outputs:modelToWorld>
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25.outputs:out>
                 float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_matNode_239c5498aa3a45518ab4cead327fac25"
-            {
-                uniform token info:id = "ND_realitykit_surface_model_to_world"
-                matrix4d outputs:modelToWorld
             }
 
             def Shader "ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25"
-            {
-                uniform token info:id = "ND_convert_vector3_vector4"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_in_inNode_239c5498aa3a45518ab4cead327fac25.outputs:out>
-                float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_in_inNode_239c5498aa3a45518ab4cead327fac25"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "object"
@@ -1514,7 +1513,7 @@ def "MaterialX"
 
             def Shader "ScreenPosition_Base_matNode_d53555b1000745279d8cb653289aa776"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 
@@ -1522,38 +1521,24 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_transformmatrix_vector4"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_inNode_d53555b1000745279d8cb653289aa776.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776.outputs:worldToView>
+                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776.outputs:modelToView>
                 float4 outputs:out
             }
 
             def Shader "ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
             def Shader "ScreenPosition_Base_in_inNode_d53555b1000745279d8cb653289aa776"
             {
-                uniform token info:id = "ND_transformmatrix_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776.outputs:out>
-                matrix4d inputs:mat.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_matNode_d53555b1000745279d8cb653289aa776.outputs:modelToWorld>
+                uniform token info:id = "ND_convert_vector3_vector4"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776.outputs:out>
                 float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_matNode_d53555b1000745279d8cb653289aa776"
-            {
-                uniform token info:id = "ND_realitykit_surface_model_to_world"
-                matrix4d outputs:modelToWorld
             }
 
             def Shader "ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776"
-            {
-                uniform token info:id = "ND_convert_vector3_vector4"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ProblematicNodes/ScreenPosition_Base_in_in_in_inNode_d53555b1000745279d8cb653289aa776.outputs:out>
-                float4 outputs:out
-            }
-
-            def Shader "ScreenPosition_Base_in_in_in_inNode_d53555b1000745279d8cb653289aa776"
             {
                 uniform token info:id = "ND_position_vector3"
                 string inputs:space = "object"
@@ -1586,20 +1571,14 @@ def "MaterialX"
 
             def Shader "ScreenPosition_Base_matNode_34938cb79f12402e8721ffe89072b995"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 
             def Shader "ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
-            }
-
-            def Shader "ScreenPosition_Base_in_in_matNode_34938cb79f12402e8721ffe89072b995"
-            {
-                uniform token info:id = "ND_realitykit_surface_model_to_world"
-                matrix4d outputs:modelToWorld
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
         }
     }

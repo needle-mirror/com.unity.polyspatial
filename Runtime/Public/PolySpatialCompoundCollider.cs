@@ -60,6 +60,7 @@ namespace Unity.PolySpatial.Internals
             internal Vector3 center;
             internal UnityColliderShape shape;
             internal Mesh sharedMesh;
+            internal bool convex;
         }
 
         private static void DestroyAppropriately(UnityEngine.Object obj)
@@ -114,6 +115,11 @@ namespace Unity.PolySpatial.Internals
                     break;
                 case UnityColliderShape.Mesh:
                     var meshCollider = GetOrAddBackingCollider<MeshCollider>(colliderInfo.colliderId);
+                    // The setters for both isTrigger and convex report an error if (isTrigger && !convex).
+                    // Avoid that error if we are setting both at once to a valid state.
+                    if (!colliderInfo.convex && meshCollider.isTrigger)
+                        meshCollider.isTrigger = false;
+                    meshCollider.convex = colliderInfo.convex;
                     meshCollider.isTrigger = colliderInfo.isTrigger;
                     meshCollider.sharedMesh = colliderInfo.sharedMesh;
                     break;

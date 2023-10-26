@@ -263,6 +263,8 @@ namespace Tests.Runtime.Functional.Components
             Assert.IsTrue(data.ValidateTrackingFlags());
             Assert.IsTrue(customData.meshId.IsValid(), "Original mesh is valid.");
             Mesh oldMesh = PolySpatialCore.LocalAssetManager.GetRegisteredResource<Mesh>(customData.meshId);
+            var oldFlipX = data.customData.flipX;
+            var oldFlipY = data.customData.flipY;
             Assert.IsNotNull(oldMesh, "Missing asset for original mesh id.");
             var oldVertices = oldMesh.vertices;
             var oldTriangles = oldMesh.triangles;
@@ -288,12 +290,19 @@ namespace Tests.Runtime.Functional.Components
 
             Assert.IsNotNull(newMesh, "Missing asset for new mesh asset id.");
 
-            Assert.AreEqual(oldMesh, newMesh, "Mesh should stay be the same asset, just with updated vertices");
+            if (oldFlipX == data.customData.flipX && oldFlipY == data.customData.flipY)
+            {
+                Assert.AreEqual(oldMesh, newMesh, "Mesh should be the same asset.");
+            }
+            else
+            {
+                Assert.AreNotEqual(oldMesh, newMesh, "Mesh should not be the same asset.");
+            }
 
             for (int i = 0; i < oldMesh.vertexCount; i++)
             {
-                FlipCheck("Y", m_TestComponent.flipY, oldVertices[i].y, newMesh.vertices[i].y);
-                FlipCheck("X", m_TestComponent.flipX, oldVertices[i].x, newMesh.vertices[i].x);
+                FlipCheck("Y", m_TestComponent.flipY, oldVertices[i].x, newMesh.vertices[i].x);
+                FlipCheck("X", m_TestComponent.flipX, oldVertices[i].y, newMesh.vertices[i].y);
             }
 
             if (flipMode.Item1 != flipMode.Item2)

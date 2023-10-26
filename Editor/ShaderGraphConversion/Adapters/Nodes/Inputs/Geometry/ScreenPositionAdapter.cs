@@ -207,30 +207,33 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 return;
             }
             
-            // Start with the base screen position: the object position transformed by model/view/projection.
+            // Start with the base screen position: the object position transformed by model-view/projection.
             NodeDef baseDef = new(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
             {
                 ["in"] = new InlineInputDef(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
                 {
-                    ["in"] = new InlineInputDef(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
                     {
-                        ["in"] = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3, new()
                         {
-                            ["in"] = new InlineInputDef(MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3, new()
-                            {
-                                ["space"] = new StringInputDef("object"),
-                            }),
+                            ["space"] = new StringInputDef("object"),
                         }),
-                        ["mat"] = new InlineInputDef(
-                            MtlxNodeTypes.RealityKitSurfaceModelToWorld,
-                            MtlxDataTypes.Matrix44, new(), "modelToWorld"),
                     }),
-                    ["mat"] = new InlineInputDef(
-                        MtlxNodeTypes.RealityKitSurfaceWorldToView, MtlxDataTypes.Matrix44, new(), "worldToView"),
+                    ["mat"] = new PerStageInputDef(
+                        new InlineInputDef(
+                            MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                            MtlxDataTypes.Matrix44, new(), "modelToView"),
+                        new InlineInputDef(
+                            MtlxNodeTypes.RealityKitSurfaceModelToView,
+                            MtlxDataTypes.Matrix44, new(), "modelToView")),
                 }),
-                ["mat"] = new InlineInputDef(
-                    MtlxNodeTypes.RealityKitSurfaceViewToProjection,
-                    MtlxDataTypes.Matrix44, new(), "viewToProjection"),
+                ["mat"] = new PerStageInputDef(
+                    new InlineInputDef(
+                        MtlxNodeTypes.RealityKitGeometryModifierViewToProjection,
+                        MtlxDataTypes.Matrix44, new(), "viewToProjection"),
+                    new InlineInputDef(
+                        MtlxNodeTypes.RealityKitSurfaceViewToProjection,
+                        MtlxDataTypes.Matrix44, new(), "viewToProjection")),
             });
             if (snode.screenSpaceType == ScreenSpaceType.Raw)
             {

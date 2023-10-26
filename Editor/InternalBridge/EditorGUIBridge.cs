@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.InternalBridge
@@ -24,5 +25,6 @@ namespace UnityEditor.PolySpatial.InternalBridge
         internal static void EndProperty() => EditorGUI.EndProperty();
         internal static GUIContent TextContent(string s) => EditorGUIUtility.TextContent(s);
         internal static float CalcPrefixLabelWidth(GUIContent subLabel) => EditorGUI.CalcPrefixLabelWidth(subLabel);
+        internal static IDisposable CreateSettingsWindowGUIScope() => new SettingsWindow.GUIScope();
     }
 }

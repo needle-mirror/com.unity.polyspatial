@@ -48,11 +48,11 @@ namespace Tests.Runtime.Functional.Components
             PolySpatialSettings.instance.ColliderSyncLayerMask = m_InitialLayerMask;
         }
 
-        (GameObject, Collider) CreateTestObjects<T>() where T : Collider
+        (GameObject, T) CreateTestObjects<T>() where T : Collider
         {
             m_TestGameObject = new GameObject("Collider Test Object");
             m_TestCollider = m_TestGameObject.AddComponent<T>();
-            return (m_TestGameObject, m_TestCollider);
+            return (m_TestGameObject, (T)m_TestCollider);
         }
 
         [UnityTest]
@@ -239,6 +239,26 @@ namespace Tests.Runtime.Functional.Components
                 // Collider should not be null as it was only disabled!
                 Assert.IsTrue(backingGO.GetComponent<Collider>() != null);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator Test_MeshCollider_Convex()
+        {
+            var (_, collider) = CreateTestObjects<MeshCollider>();
+            collider.sharedMesh = new Mesh();
+
+            // Non-convex, not a trigger: should be fine.
+            yield return null;
+
+            // Convex, is trigger: should be fine.
+            collider.convex = true;
+            collider.isTrigger = true;
+            yield return null;
+
+            // Non-convex, is trigger: not supported.
+            collider.convex = false;
+            LogAssert.Expect(LogType.Error, "Triggers on concave MeshColliders are not supported");
+            yield return null;
         }
     }
 }

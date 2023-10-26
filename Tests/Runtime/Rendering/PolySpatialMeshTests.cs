@@ -242,6 +242,23 @@ namespace Tests.Runtime.Functional.Rendering
             ConvertAndCheckMesh(mesh);
         }
 
+        [Test]
+        public void Test_Mesh_With_Partial_Index_Coverage_Converts_To_PolySpatialMesh()
+        {
+            m_Mesh = new Mesh();
+            m_Mesh.vertices = s_PlaneVertices;
+            
+            // Use an index buffer of size 100, but only use the six elements at the end.
+            const int kIndexBufferSize = 100;
+            m_Mesh.SetIndexBufferParams(kIndexBufferSize, IndexFormat.UInt32);
+            var indices = s_TriangleIndices[0][0];
+            var indexStart = kIndexBufferSize - indices.Length;
+            m_Mesh.SetIndexBufferData(indices, 0, indexStart, indices.Length, MeshUpdateFlags.Default);
+            m_Mesh.SetSubMesh(0, new(indexStart, indices.Length, MeshTopology.Triangles), MeshUpdateFlags.Default);
+
+            ConvertAndCheckMesh(m_Mesh);
+        }
+
         [UnityTest]
         public IEnumerator Test_Mesh_With_Null_UV0_Converts_To_UnitySceneGraph()
         {

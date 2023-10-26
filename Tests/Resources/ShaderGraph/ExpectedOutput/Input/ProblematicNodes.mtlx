@@ -37,22 +37,16 @@
         <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_inNode_d53555b1000745279d8cb653289aa776" />
         <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776" />
     </transformmatrix>
-    <transformmatrix name = "ScreenPosition_Base_in_inNode_d53555b1000745279d8cb653289aa776" type = "vector4">
-        <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776" />
-        <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_in_matNode_d53555b1000745279d8cb653289aa776" />
-    </transformmatrix>
-    <convert name = "ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_in_inNode_d53555b1000745279d8cb653289aa776" />
+    <convert name = "ScreenPosition_Base_in_inNode_d53555b1000745279d8cb653289aa776" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776" />
     </convert>
-    <position name = "ScreenPosition_Base_in_in_in_inNode_d53555b1000745279d8cb653289aa776" type = "vector3">
+    <position name = "ScreenPosition_Base_in_in_inNode_d53555b1000745279d8cb653289aa776" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </position>
-    <realitykit_surface_model_to_world name = "ScreenPosition_Base_in_in_matNode_d53555b1000745279d8cb653289aa776" type = "matrix44">
-    </realitykit_surface_model_to_world>
-    <realitykit_surface_world_to_view name = "ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776" type = "matrix44">
-    </realitykit_surface_world_to_view>
-    <realitykit_surface_view_to_projection name = "ScreenPosition_Base_matNode_d53555b1000745279d8cb653289aa776" type = "matrix44">
-    </realitykit_surface_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "ScreenPosition_Base_in_matNode_d53555b1000745279d8cb653289aa776" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <realitykit_geometry_modifier_view_to_projection name = "ScreenPosition_Base_matNode_d53555b1000745279d8cb653289aa776" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
     <swizzle name = "ScreenPosition_Out_in_in1_in2Node_d53555b1000745279d8cb653289aa776" type = "float">
         <input name = "in" type = "vector4" nodename = "ScreenPosition_BaseNode_d53555b1000745279d8cb653289aa776" />
         <input name = "channels" type = "string" value = "w" />
@@ -73,22 +67,16 @@
         <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_inNode_91b9beb4e5224f6090554fe88b69846e" />
         <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e" />
     </transformmatrix>
-    <transformmatrix name = "ScreenPosition_Base_in_inNode_91b9beb4e5224f6090554fe88b69846e" type = "vector4">
-        <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" />
-        <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_in_matNode_91b9beb4e5224f6090554fe88b69846e" />
-    </transformmatrix>
-    <convert name = "ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" />
+    <convert name = "ScreenPosition_Base_in_inNode_91b9beb4e5224f6090554fe88b69846e" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" />
     </convert>
-    <position name = "ScreenPosition_Base_in_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" type = "vector3">
+    <position name = "ScreenPosition_Base_in_in_inNode_91b9beb4e5224f6090554fe88b69846e" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </position>
-    <realitykit_surface_model_to_world name = "ScreenPosition_Base_in_in_matNode_91b9beb4e5224f6090554fe88b69846e" type = "matrix44">
-    </realitykit_surface_model_to_world>
-    <realitykit_surface_world_to_view name = "ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e" type = "matrix44">
-    </realitykit_surface_world_to_view>
-    <realitykit_surface_view_to_projection name = "ScreenPosition_Base_matNode_91b9beb4e5224f6090554fe88b69846e" type = "matrix44">
-    </realitykit_surface_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "ScreenPosition_Base_in_matNode_91b9beb4e5224f6090554fe88b69846e" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <realitykit_geometry_modifier_view_to_projection name = "ScreenPosition_Base_matNode_91b9beb4e5224f6090554fe88b69846e" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
     <swizzle name = "ScreenPosition_Out_in1_in2Node_91b9beb4e5224f6090554fe88b69846e" type = "float">
         <input name = "in" type = "vector4" nodename = "ScreenPosition_BaseNode_91b9beb4e5224f6090554fe88b69846e" />
         <input name = "channels" type = "string" value = "w" />
@@ -123,22 +111,16 @@
         <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_inNode_34938cb79f12402e8721ffe89072b995" />
         <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995" />
     </transformmatrix>
-    <transformmatrix name = "ScreenPosition_Base_in_inNode_34938cb79f12402e8721ffe89072b995" type = "vector4">
-        <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995" />
-        <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_in_matNode_34938cb79f12402e8721ffe89072b995" />
-    </transformmatrix>
-    <convert name = "ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_in_inNode_34938cb79f12402e8721ffe89072b995" />
+    <convert name = "ScreenPosition_Base_in_inNode_34938cb79f12402e8721ffe89072b995" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995" />
     </convert>
-    <position name = "ScreenPosition_Base_in_in_in_inNode_34938cb79f12402e8721ffe89072b995" type = "vector3">
+    <position name = "ScreenPosition_Base_in_in_inNode_34938cb79f12402e8721ffe89072b995" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </position>
-    <realitykit_surface_model_to_world name = "ScreenPosition_Base_in_in_matNode_34938cb79f12402e8721ffe89072b995" type = "matrix44">
-    </realitykit_surface_model_to_world>
-    <realitykit_surface_world_to_view name = "ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995" type = "matrix44">
-    </realitykit_surface_world_to_view>
-    <realitykit_surface_view_to_projection name = "ScreenPosition_Base_matNode_34938cb79f12402e8721ffe89072b995" type = "matrix44">
-    </realitykit_surface_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "ScreenPosition_Base_in_matNode_34938cb79f12402e8721ffe89072b995" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <realitykit_geometry_modifier_view_to_projection name = "ScreenPosition_Base_matNode_34938cb79f12402e8721ffe89072b995" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
     <swizzle name = "ScreenPosition_BaseWNode_34938cb79f12402e8721ffe89072b995" type = "float">
         <input name = "in" type = "vector4" nodename = "ScreenPosition_BaseNode_34938cb79f12402e8721ffe89072b995" />
         <input name = "channels" type = "string" value = "w" />
@@ -171,41 +153,44 @@
         <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_inNode_239c5498aa3a45518ab4cead327fac25" />
         <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25" />
     </transformmatrix>
-    <transformmatrix name = "ScreenPosition_Base_in_inNode_239c5498aa3a45518ab4cead327fac25" type = "vector4">
-        <input name = "in" type = "vector4" nodename = "ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25" />
-        <input name = "mat" type = "matrix44" nodename = "ScreenPosition_Base_in_in_matNode_239c5498aa3a45518ab4cead327fac25" />
-    </transformmatrix>
-    <convert name = "ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_in_inNode_239c5498aa3a45518ab4cead327fac25" />
+    <convert name = "ScreenPosition_Base_in_inNode_239c5498aa3a45518ab4cead327fac25" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25" />
     </convert>
-    <position name = "ScreenPosition_Base_in_in_in_inNode_239c5498aa3a45518ab4cead327fac25" type = "vector3">
+    <position name = "ScreenPosition_Base_in_in_inNode_239c5498aa3a45518ab4cead327fac25" type = "vector3">
         <input name = "space" type = "string" value = "object" />
     </position>
-    <realitykit_surface_model_to_world name = "ScreenPosition_Base_in_in_matNode_239c5498aa3a45518ab4cead327fac25" type = "matrix44">
-    </realitykit_surface_model_to_world>
-    <realitykit_surface_world_to_view name = "ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25" type = "matrix44">
-    </realitykit_surface_world_to_view>
-    <realitykit_surface_view_to_projection name = "ScreenPosition_Base_matNode_239c5498aa3a45518ab4cead327fac25" type = "matrix44">
-    </realitykit_surface_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "ScreenPosition_Base_in_matNode_239c5498aa3a45518ab4cead327fac25" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <realitykit_geometry_modifier_view_to_projection name = "ScreenPosition_Base_matNode_239c5498aa3a45518ab4cead327fac25" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
     <swizzle name = "ScreenPosition_Out_in1_in1_in2Node_239c5498aa3a45518ab4cead327fac25" type = "float">
         <input name = "in" type = "vector4" nodename = "ScreenPosition_BaseNode_239c5498aa3a45518ab4cead327fac25" />
         <input name = "channels" type = "string" value = "w" />
     </swizzle>
-    <invertmatrix name = "TransformationMatrix_OutNode_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+    <dot name = "TransformationMatrix_OutNode_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
         <input name = "in" type = "matrix44" nodename = "TransformationMatrix_Out_inNode_c0b49c74bcd84ed6be420c03185b0cf5" />
+    </dot>
+    <invertmatrix name = "TransformationMatrix_Out_inNode_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "TransformationMatrix_Out_in_inNode_c0b49c74bcd84ed6be420c03185b0cf5" />
     </invertmatrix>
-    <multiply name = "TransformationMatrix_Out_inNode_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
-        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" />
+    <multiply name = "TransformationMatrix_Out_in_inNode_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" />
+        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" />
+    </multiply>
+    <multiply name = "TransformationMatrix_Out_in_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" />
+        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" />
+    </multiply>
+    <realitykit_geometry_modifier_view_to_projection name = "TransformationMatrix_Out_in_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+    </realitykit_geometry_modifier_view_to_projection>
+    <realitykit_geometry_modifier_model_to_view name = "TransformationMatrix_Out_in_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <multiply name = "TransformationMatrix_Out_in_in_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in_in2_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" />
         <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
     </multiply>
-    <multiply name = "TransformationMatrix_Out_in_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
-        <input name = "in1" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" />
-        <input name = "in2" type = "matrix44" nodename = "TransformationMatrix_Out_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" />
-    </multiply>
-    <realitykit_surface_view_to_projection name = "TransformationMatrix_Out_in_in1_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
-    </realitykit_surface_view_to_projection>
-    <realitykit_surface_world_to_view name = "TransformationMatrix_Out_in_in1_in2Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
-    </realitykit_surface_world_to_view>
+    <realitykit_geometry_modifier_world_to_model name = "TransformationMatrix_Out_in_in_in2_in1Node_c0b49c74bcd84ed6be420c03185b0cf5" type = "matrix44">
+    </realitykit_geometry_modifier_world_to_model>
     <constant name = "polySpatial_LightPosition0" type = "vector4">
         <input name = "value" type = "vector4" value = "0,0,0,0" />
     </constant>
@@ -346,10 +331,16 @@
     </invertmatrix>
     <multiply name = "Transform_inWS_in_in_mat_inNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
         <input name = "in1" type = "matrix44" nodename = "Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "matrix44" nodename = "Transform_inWS_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b" />
+    </multiply>
+    <realitykit_geometry_modifier_model_to_view name = "Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_view>
+    <multiply name = "Transform_inWS_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "Transform_inWS_in_in_mat_in_in2_in1Node_e4e8032223904ec7b132675ede25586b" />
         <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
     </multiply>
-    <realitykit_surface_world_to_view name = "Transform_inWS_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "matrix44">
-    </realitykit_surface_world_to_view>
+    <realitykit_geometry_modifier_world_to_model name = "Transform_inWS_in_in_mat_in_in2_in1Node_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_world_to_model>
     <swizzle name = "Transform_Out_in_in_in_in2Node_e4e8032223904ec7b132675ede25586b" type = "float">
         <input name = "in" type = "vector3" nodename = "Transform_inWSNode_e4e8032223904ec7b132675ede25586b" />
         <input name = "channels" type = "string" value = "y" />

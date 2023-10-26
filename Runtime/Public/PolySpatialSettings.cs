@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using Unity.PolySpatial.Networking;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using UnityObject = UnityEngine.Object;
 
@@ -15,6 +14,17 @@ using UnityEditor;
 
 namespace Unity.PolySpatial
 {
+    public static class PolySpatialSettingsExtensions
+    {
+        public static bool ShouldDisableParticleRendering(this PolySpatialSettings.ParticleReplicationMode mode)
+        {
+            return (mode != PolySpatialSettings.ParticleReplicationMode.ReplicateProperties);
+        }
+    }
+
+    /// <summary>
+    /// Class containing the PolySpatial settings asset.
+    /// </summary>
     public class PolySpatialSettings : ScriptableObject
 #if UNITY_EDITOR
         ,ISerializationCallbackReceiver
@@ -45,6 +55,15 @@ namespace Unity.PolySpatial
             Playback
         };
 
+        public enum ParticleReplicationMode
+        {
+            ReplicateProperties,
+            BakeToMesh,
+#if POLYSPATIAL_INTERNAL
+            ExperimentalBakeToTexture
+#endif
+        };
+
 #if UNITY_EDITOR
         const string k_DefaultAssetPath = "Assets/Resources/PolySpatialSettings.asset";
         const string k_SessionRecordingModeKey = "PolySpatial.Session.Recording.Mode";
@@ -53,8 +72,13 @@ namespace Unity.PolySpatial
         const string k_SessionRecordingFrameLimit = "PolySpatial.Session.Recording.FrameLimit";
 #endif
 
+        const int k_DefaultMaxMipByteSizePerCycle = 128000;
+
         static PolySpatialSettings s_Instance;
 
+        /// <summary>
+        /// Gets a reference for an instance of the PolySpatial settings asset in the project.
+        /// </summary>
         public static PolySpatialSettings instance {
             get {
                 InitializeInstance();
@@ -116,7 +140,6 @@ namespace Unity.PolySpatial
             get => SessionState.GetInt(k_SessionRecordingFrameRateKey, 0);
             set => SessionState.SetInt(k_SessionRecordingFrameRateKey, value);
         }
-
 
         internal static bool SessionLimitFramerateWhenRecording
         {
@@ -198,20 +221,60 @@ namespace Unity.PolySpatial
         public const int DefaultServerPort = 9876;
         public const string DefaultServerAddress = "127.0.0.1";
 
-        [SerializeField] public bool EnablePolySpatialRuntime;
-        [SerializeField] public bool EnableStatistics;
-        [SerializeField] public bool EnableTransformVerification;
-        [SerializeField] public bool EnableMacRealityKitPreviewInPlayMode;
-        [SerializeField] public bool EnableProgressiveMipStreaming;
-        [SerializeField] public long MaxMipByteSizePerCycle = 128000;
-        [SerializeField] public ulong RuntimeFlags = 0;
-        [Tooltip("PolySpatial creates a mirrored version of your scene on the target runtime. When previewing in the Unity Editor, " +
-            "this option will enable or disable creating these preview clones within Unity.  Changing this setting does not affect behavior of a build.")]
-        [SerializeField] public bool EnableInEditorPreview = true;
+        [SerializeField]
+        bool m_EnablePolySpatialRuntime;
 
-        [SerializeField] public LayerMask ColliderSyncLayerMask = 1;
+        /// <summary>
+        /// whether PolySpatial is enabled in this project.
+        /// </summary>
+        public bool EnablePolySpatialRuntime
+        {
+            get => m_EnablePolySpatialRuntime;
+            set => m_EnablePolySpatialRuntime = value;
+        }
 
-        public string[] DisabledTrackers;
+        [SerializeField]
+        [Tooltip("When enabled, PolySpatial will collect information about its tracked objects. You can see this data in the PolySpatial Statistics windows.")]
+        bool m_EnableStatistics;
+
+        internal bool EnableStatistics => m_EnableStatistics;
+
+        [SerializeField]
+        [Tooltip("Only objects in these layers are tracked by PolySpatial.")]
+        LayerMask m_ColliderSyncLayerMask = 1;
+
+        internal LayerMask ColliderSyncLayerMask
+        {
+            get => m_ColliderSyncLayerMask;
+            set => m_ColliderSyncLayerMask = value;
+        }
+
+        [SerializeField]
+        [Tooltip("The technique used to translate particle data to Reality Kit. Replicate Properties: Unity Particle System Properties will be mapped to " +
+                 "RealityKit Particle System Properties. BakeToMesh: Particle Systems will be baked to a mesh every frame and rendered in RealityKit.")]
+        ParticleReplicationMode m_ParticleMode;
+
+        internal ParticleReplicationMode ParticleMode
+        {
+            get => m_ParticleMode;
+            set => m_ParticleMode = value;
+        }
+
+        [SerializeField]
+        [Tooltip("GameObjects created in these layers will have tracking completely disabled.")]
+        LayerMask m_DisableTrackingMask;
+
+        internal LayerMask DisableTrackingMask
+        {
+            get => m_DisableTrackingMask;
+            set => m_DisableTrackingMask = value;
+        }
+
+        [SerializeField]
+        [Tooltip("PolySpatial tracker type names to disable. When a tracker is disabled, PolySpatial won't track their respective Unity object types.")]
+        string[] m_DisabledTrackers;
+
+        internal string[] DisabledTrackers => m_DisabledTrackers;
 
         // Additional texture formats to be produced by the PolySpatialTextureImporter.
         // This cannot be a simple serialized field on the PolySpatialSettings ScriptableObject,
@@ -222,15 +285,16 @@ namespace Unity.PolySpatial
         // So, why have a serialized field here at all then? Because it makes the settings UI in the
         // PolySpatialSettingsProvider "just work". So we have a field backed by the static property using
         // ISerializationCallbackReceiver.
-        [SerializeField] public PolySpatialTextureCompressionFormat[] m_AdditionalTextureFormats;
+        [SerializeField]
+        PolySpatialTextureCompressionFormat[] m_AdditionalTextureFormats;
 
 #if UNITY_EDITOR
-        public void OnBeforeSerialize()
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             m_AdditionalTextureFormats = AdditionalTextureFormats;
         }
 
-        public void OnAfterDeserialize()
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             AdditionalTextureFormats = m_AdditionalTextureFormats;
         }
@@ -260,27 +324,38 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
+        [Tooltip("Default Volume Camera camera configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.")]
         VolumeCameraConfiguration m_DefaultVolumeCameraConfiguration;
 
-        [Tooltip("Default Volume Camera camera configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.")]
+        /// <summary>
+        /// Default Volume Camera camera configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.
+        /// </summary>
         public VolumeCameraConfiguration DefaultVolumeCameraConfiguration
         {
             get => m_DefaultVolumeCameraConfiguration;
             set => m_DefaultVolumeCameraConfiguration = value;
         }
 
+        [SerializeField]
         [Tooltip("When enabled, if there is no Volume Camera after scene load, one will be automatically created using the default settings. Disable this to be able to create the initial Volume Camera from script.")]
-        public bool EnableDefaultVolumeCamera = true;
+        bool m_AutoCreateVolumeCamera = true;
+
+        internal bool AutoCreateVolumeCamera
+        {
+            get => m_AutoCreateVolumeCamera;
+            set => m_AutoCreateVolumeCamera = value;
+        }
 
 #if UNITY_EDITOR
         [SerializeField]
         [Tooltip("When enabled, GameObjects created to support PolySpatial preview will be hidden in the Scene view.")]
-        internal bool HidePolySpatialPreviewObjectsInScene = true;
+        bool m_HidePolySpatialPreviewObjectsInScene = true;
+
+        internal bool HidePolySpatialPreviewObjectsInScene => m_HidePolySpatialPreviewObjectsInScene;
 #endif
 
-        [SerializeField] public string MaterialXExtensionNamespace = "mtlxextension";
-
         [SerializeField]
+        [Tooltip("When enabled, PolySpatial tracks preview object names and display them in the Hierarchy view.")]
         bool m_TransmitDebugInfo;
 
         internal bool TransmitDebugInfo
@@ -289,17 +364,57 @@ namespace Unity.PolySpatial
             set => m_TransmitDebugInfo = value;
         }
 
-        void Awake()
-        {
-            if (m_DefaultVolumeCameraConfiguration == null)
-                m_DefaultVolumeCameraConfiguration = Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
-        }
+#if UNITY_EDITOR
+        [Tooltip("Validations are always enabled when targeting PolySpatial platforms, but turning this option will enable validation on the current build " +
+                 "target. This is useful to run validation when developing on Windows, for example.")]
+        [SerializeField]
+        bool m_ForceValidationForCurrentBuildTarget = true;
 
-#if POLYSPATIAL_INTERNAL
-        [SerializeField] public bool ForceLinkPolySpatialRuntime;
+        internal bool ForceValidationForCurrentBuildTarget => m_ForceValidationForCurrentBuildTarget;
 #endif
 
 #if POLYSPATIAL_INTERNAL
+        [SerializeField]
+        bool m_EnableTransformVerification;
+
+        internal bool EnableTransformVerification => m_EnableTransformVerification;
+
+        [SerializeField]
+        bool m_EnableProgressiveMipStreaming;
+
+        internal bool EnableProgressiveMipStreaming => m_EnableProgressiveMipStreaming;
+
+        [SerializeField]
+        long m_MaxMipByteSizePerCycle = k_DefaultMaxMipByteSizePerCycle;
+
+        internal long MaxMipByteSizePerCycle => m_MaxMipByteSizePerCycle;
+
+        [SerializeField]
+        bool m_EnableMacRealityKitPreviewInPlayMode;
+
+        internal bool EnableMacRealityKitPreviewInPlayMode => m_EnableMacRealityKitPreviewInPlayMode;
+
+        [SerializeField]
+        ulong m_RuntimeFlags = 0;
+
+        internal ulong RuntimeFlags => m_RuntimeFlags;
+
+        [Tooltip("PolySpatial creates a mirrored version of your scene on the target runtime. When previewing in the Unity Editor, " +
+                 "this option will enable or disable creating these preview clones within Unity.  Changing this setting does not affect behavior of a build.")]
+        [SerializeField]
+        bool m_EnableInEditorPreview = true;
+
+        internal bool EnableInEditorPreview => m_EnableInEditorPreview;
+
+        [SerializeField]
+        [Tooltip("Always links the PolySpatial runtime when making a build.")]
+        bool m_AlwaysLinkPolySpatialRuntime;
+
+        public bool AlwaysLinkPolySpatialRuntime => m_AlwaysLinkPolySpatialRuntime;
+
+        [SerializeField]
+        NetworkingMode m_PolySpatialNetworkingMode;
+
         public NetworkingMode PolySpatialNetworkingMode
         {
             get
@@ -314,7 +429,7 @@ namespace Unity.PolySpatial
 #endif
 
 #if UNITY_EDITOR
-                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer)
+                if (PolySpatialUserSettings.instance.ConnectToPlayToDevice)
                 {
                     return NetworkingMode.LocalAndClient;
                 }
@@ -326,21 +441,18 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        NetworkingMode m_PolySpatialNetworkingMode;
+        bool m_EnableHostCameraControl;
 
-        public bool EnableHostCameraControl
+        internal bool EnableHostCameraControl
         {
             get => m_EnableHostCameraControl;
-            internal set => m_EnableHostCameraControl = value;
+            set => m_EnableHostCameraControl = value;
         }
 
         [SerializeField]
-        bool m_EnableHostCameraControl;
+        bool m_EnableClipping;
 
         public bool EnableClipping => m_EnableClipping;
-
-        [SerializeField]
-        bool m_EnableClipping;
 
         public List<SocketAddress> ServerAddresses => m_ServerAddresses.Value;
 
@@ -359,10 +471,10 @@ namespace Unity.PolySpatial
             }
 
 #if UNITY_EDITOR
-            if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer
-                && results.All(s => s.Host != PolySpatialUserSettings.instance.UniversalPlayerIP && s.Port != DefaultServerPort))
+            if (PolySpatialUserSettings.instance.ConnectToPlayToDevice
+                && results.All(s => s.Host != PolySpatialUserSettings.instance.PlayToDeviceIP && s.Port != DefaultServerPort))
             {
-                if (SocketAddress.ParseAddress(PolySpatialUserSettings.instance.UniversalPlayerIP, DefaultServerPort, out var socketAddress))
+                if (SocketAddress.ParseAddress(PolySpatialUserSettings.instance.PlayToDeviceIP, DefaultServerPort, out var socketAddress))
                 {
                     results.Add(socketAddress);
                 }
@@ -387,12 +499,19 @@ namespace Unity.PolySpatial
         string m_DemoLaunchSceneName = null;
         public static string DemoLaunchSceneName => instance.m_DemoLaunchSceneName;
 #else
+        internal bool EnableTransformVerification => false;
+        internal bool EnableProgressiveMipStreaming => false;
+        internal long MaxMipByteSizePerCycle => k_DefaultMaxMipByteSizePerCycle;
+        internal bool EnableMacRealityKitPreviewInPlayMode => false;
+        internal ulong RuntimeFlags => 0;
+        internal bool EnableInEditorPreview => true;
+
         public NetworkingMode PolySpatialNetworkingMode
         {
             get
             {
 #if UNITY_EDITOR
-                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer)
+                if (PolySpatialUserSettings.instance.ConnectToPlayToDevice)
                 {
                     return NetworkingMode.LocalAndClient;
                 }
@@ -401,7 +520,7 @@ namespace Unity.PolySpatial
             }
         }
 
-        public bool EnableHostCameraControl;
+        internal bool EnableHostCameraControl => false;
         static readonly HashSet<string> s_EmptyStringHash = new();
         public HashSet<string> IgnoredScenePaths => s_EmptyStringHash;
         public int ServerPort => DefaultServerPort;
@@ -410,8 +529,8 @@ namespace Unity.PolySpatial
             get
             {
 #if UNITY_EDITOR
-                if (PolySpatialUserSettings.instance.ConnectToUniversalPlayer &&
-                    SocketAddress.ParseAddress(PolySpatialUserSettings.instance.UniversalPlayerIP, DefaultServerPort, out var socketAddress))
+                if (PolySpatialUserSettings.instance.ConnectToPlayToDevice &&
+                    SocketAddress.ParseAddress(PolySpatialUserSettings.instance.PlayToDeviceIP, DefaultServerPort, out var socketAddress))
                 {
                     return new() {socketAddress};
                 }
@@ -424,13 +543,10 @@ namespace Unity.PolySpatial
         public bool EnableServerCameraControl => false;
 #endif
 
-#if UNITY_EDITOR
-        [Tooltip("Validations are always enabled when targeting PolySpatial platforms, but turning this option will enable validation on the current build " +
-                 "target. This is useful to run validation when developing on Windows, for example.")]
-        [SerializeField]
-        bool m_ForceValidationForCurrentBuildTarget = true;
-
-        internal bool ForceValidationForCurrentBuildTarget => m_ForceValidationForCurrentBuildTarget;
-#endif
+        void Awake()
+        {
+            if (m_DefaultVolumeCameraConfiguration == null)
+                m_DefaultVolumeCameraConfiguration = Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
+        }
     }
 }

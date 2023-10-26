@@ -22,7 +22,7 @@ namespace UnityEditor.PolySpatial.Validation
 
         static RendererRuleCreator()
         {
-            foreach (var shader in MaterialShaders.k_ShadersToTest)
+            foreach (var shader in MaterialShaders.k_SupportedShaders)
                 s_SupportedShaderNames.Add(shader);
         }
 

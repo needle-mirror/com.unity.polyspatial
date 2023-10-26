@@ -11,9 +11,9 @@
         <input name = "in1" type = "vector2" value = "0,1" />
         <input name = "in2" type = "vector2" nodename = "MultiplyNode_1ca5757bb5df448ba9164cb22a2b07d7" />
     </add>
-    <texcoord name = "UVNode_476f598b9880427591331bf70fec9a45" type = "vector2">
-        <input name = "index" type = "integer" value = "1" />
-    </texcoord>
+    <UsdPrimvarReader name = "UVNode_476f598b9880427591331bf70fec9a45" type = "vector2">
+        <input name = "varname" type = "string" value = "vertexUV1" />
+    </UsdPrimvarReader>
     <multiply name = "MultiplyNode_476f598b9880427591331bf70fec9a45" type = "vector2">
         <input name = "in1" type = "vector2" value = "1,-1" />
         <input name = "in2" type = "vector2" nodename = "UVNode_476f598b9880427591331bf70fec9a45" />

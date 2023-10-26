@@ -142,36 +142,57 @@ def "MaterialX"
 
             def Shader "TransformationMatrix_OutNode_7780a58ea00644f7be6a295a348a1d6c"
             {
-                uniform token info:id = "ND_invertmatrix_matrix44"
+                uniform token info:id = "ND_dot_matrix44"
                 matrix4d inputs:in.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
                 matrix4d outputs:out
             }
 
             def Shader "TransformationMatrix_Out_inNode_7780a58ea00644f7be6a295a348a1d6c"
             {
+                uniform token info:id = "ND_invertmatrix_matrix44"
+                matrix4d inputs:in.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_inNode_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "TransformationMatrix_Out_in_inNode_7780a58ea00644f7be6a295a348a1d6c"
+            {
                 uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in_in2Node_7780a58ea00644f7be6a295a348a1d6c.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "TransformationMatrix_Out_in_in_in2Node_7780a58ea00644f7be6a295a348a1d6c"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in_in2_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:worldToModel>
                 matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
                 matrix4d outputs:out
             }
 
-            def Shader "TransformationMatrix_Out_in_in1Node_7780a58ea00644f7be6a295a348a1d6c"
+            def Shader "TransformationMatrix_Out_in_in_in2_in1Node_7780a58ea00644f7be6a295a348a1d6c"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_world_to_model"
+                matrix4d outputs:worldToModel
+            }
+
+            def Shader "TransformationMatrix_Out_in_in_in1Node_7780a58ea00644f7be6a295a348a1d6c"
             {
                 uniform token info:id = "ND_multiply_matrix44"
-                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:viewToProjection>
-                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c.outputs:worldToView>
+                matrix4d inputs:in1.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c.outputs:viewToProjection>
+                matrix4d inputs:in2.connect = </MaterialX/Materials/USD_Matrix/TransformationMatrix_Out_in_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c.outputs:modelToView>
                 matrix4d outputs:out
             }
 
-            def Shader "TransformationMatrix_Out_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c"
+            def Shader "TransformationMatrix_Out_in_in_in1_in2Node_7780a58ea00644f7be6a295a348a1d6c"
             {
-                uniform token info:id = "ND_realitykit_surface_world_to_view"
-                matrix4d outputs:worldToView
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
             }
 
-            def Shader "TransformationMatrix_Out_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c"
+            def Shader "TransformationMatrix_Out_in_in_in1_in1Node_7780a58ea00644f7be6a295a348a1d6c"
             {
-                uniform token info:id = "ND_realitykit_surface_view_to_projection"
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
                 matrix4d outputs:viewToProjection
             }
 

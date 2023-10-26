@@ -697,8 +697,8 @@ def "MaterialX"
 
             def Shader "PolySpatialLighting_LightmapUVNode_b0ebbb9d1dd84952ab627a76c4627d5eUV"
             {
-                uniform token info:id = "ND_texcoord_vector2"
-                int inputs:index = 1
+                uniform token info:id = "ND_UsdPrimvarReader_vector2"
+                string inputs:varname = "vertexUV1"
                 float2 outputs:out
             }
 
