@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Unity.PolySpatial;
+using Unity.PolySpatial.Internals;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -52,7 +53,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         internal MtlxGraphData(string name, string path)
         {
-            this.name = NodeUtils.RemoveWhitespace(name);
+            this.name = PolySpatialShaderGraph.SanitizeName(name);
             this.path = path;
             nodes = new();
             edges = new();

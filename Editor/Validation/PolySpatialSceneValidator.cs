@@ -225,7 +225,7 @@ namespace UnityEditor.PolySpatial.Validation
             AddRuleCreator(typeof(BaseRaycaster), null);
 
             AddRuleCreator(typeof(EventSystem), null);
-            AddRuleCreator(typeof(PointerInputModule), null);
+            AddRuleCreator(typeof(BaseInputModule), null);
 
             AddRuleCreator(typeof(Canvas), new CanvasComponentRule());
 

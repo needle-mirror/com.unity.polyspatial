@@ -4,7 +4,8 @@
     "references": [
         "Unity.ShaderGraph.Editor",
         "Unity.PolySpatial",
-        "Unity.PolySpatial.Editor"
+        "Unity.PolySpatial.Editor",
+        "Unity.PolySpatial.Core"
     ],
     "includePlatforms": [
         "Editor"

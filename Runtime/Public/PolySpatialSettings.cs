@@ -220,6 +220,7 @@ namespace Unity.PolySpatial
 
         public const int DefaultServerPort = 9876;
         public const string DefaultServerAddress = "127.0.0.1";
+        public const uint DefaultConnectionTimeOut = 5;
 
         [SerializeField]
         bool m_EnablePolySpatialRuntime;
@@ -441,6 +442,22 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
+        [Tooltip("How long (in seconds) to try connecting to a remote host before timing out.")]
+        uint m_ConnectionTimeOut = DefaultConnectionTimeOut;
+        internal uint ConnectionTimeOut
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (PolySpatialUserSettings.instance.ConnectToPlayToDevice)
+                    return PolySpatialUserSettings.instance.ConnectionTimeout;
+#endif
+                return m_ConnectionTimeOut;
+            }
+            set => m_ConnectionTimeOut = value;
+        }
+
+        [SerializeField]
         bool m_EnableHostCameraControl;
 
         internal bool EnableHostCameraControl
@@ -517,6 +534,18 @@ namespace Unity.PolySpatial
                 }
 #endif
                 return NetworkingMode.Local;
+            }
+        }
+
+        public uint ConnectionTimeOut
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (PolySpatialUserSettings.instance.ConnectToPlayToDevice)
+                    return PolySpatialUserSettings.instance.ConnectionTimeout;
+#endif
+                return DefaultConnectionTimeOut;
             }
         }
 

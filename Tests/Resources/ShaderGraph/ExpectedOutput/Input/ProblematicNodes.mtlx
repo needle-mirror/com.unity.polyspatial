@@ -2,11 +2,7 @@
 <materialx version = "1.38" colorspace = "lin_rec709">
     <geomcolor name = "VertexColorNode_7db138b9cc484771a5b356efffd2c8b8" type = "color4">
     </geomcolor>
-    <multiply name = "ViewDirection_OutNode_0b37ebfdb0374ffd859c8af1c4e5b7af" type = "vector3">
-        <input name = "in1" type = "vector3" nodename = "ViewDirection_Out_in1Node_0b37ebfdb0374ffd859c8af1c4e5b7af" />
-        <input name = "in2" type = "vector3" value = "1,1,-1" />
-    </multiply>
-    <realitykit_viewdirection name = "ViewDirection_Out_in1Node_0b37ebfdb0374ffd859c8af1c4e5b7af" type = "vector3">
+    <realitykit_viewdirection name = "ViewDirection_OutNode_0b37ebfdb0374ffd859c8af1c4e5b7af" type = "vector3">
         <input name = "space" type = "string" value = "tangent" />
     </realitykit_viewdirection>
     <multiply name = "ViewDirection_OutNode_bb05909988544b62a58276ff2251f9f3" type = "vector3">
@@ -352,55 +348,97 @@
     <invertmatrix name = "Transform_Out_in_in_matNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
         <input name = "in" type = "matrix44" nodename = "Transform_Out_in_in_mat_inNode_e4e8032223904ec7b132675ede25586b" />
     </invertmatrix>
-    <transpose name = "Transform_Out_in_in_mat_inNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
-        <input name = "in" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_inNode_e4e8032223904ec7b132675ede25586b" />
-    </transpose>
-    <realitykit_combine4 name = "Transform_Out_in_in_mat_in_inNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
-        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in1Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in2" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in2Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in3" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in3Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in4" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in4Node_e4e8032223904ec7b132675ede25586b" />
+    <realitykit_combine4 name = "Transform_Out_in_in_mat_inNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in3" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in3Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in4" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in4Node_e4e8032223904ec7b132675ede25586b" />
     </realitykit_combine4>
-    <multiply name = "Transform_Out_in_in_mat_in_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in1_in1Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in2" type = "vector4" value = "1,1,-1,0" />
-    </multiply>
-    <convert name = "Transform_Out_in_in_mat_in_in_in1_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in_in1_in1_inNode_e4e8032223904ec7b132675ede25586b" />
-    </convert>
-    <tangent name = "Transform_Out_in_in_mat_in_in_in1_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
-        <input name = "space" type = "string" value = "world" />
-    </tangent>
-    <multiply name = "Transform_Out_in_in_mat_in_in_in2Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in2_in1Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in2" type = "vector4" value = "1,1,-1,0" />
-    </multiply>
-    <convert name = "Transform_Out_in_in_mat_in_in_in2_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in_in2_in1_inNode_e4e8032223904ec7b132675ede25586b" />
-    </convert>
-    <bitangent name = "Transform_Out_in_in_mat_in_in_in2_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
-        <input name = "space" type = "string" value = "world" />
-    </bitangent>
-    <multiply name = "Transform_Out_in_in_mat_in_in_in3Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in3_in1Node_e4e8032223904ec7b132675ede25586b" />
-        <input name = "in2" type = "vector4" value = "1,1,-1,0" />
-    </multiply>
-    <convert name = "Transform_Out_in_in_mat_in_in_in3_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in_in3_in1_inNode_e4e8032223904ec7b132675ede25586b" />
-    </convert>
-    <normal name = "Transform_Out_in_in_mat_in_in_in3_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
-        <input name = "space" type = "string" value = "world" />
-    </normal>
-    <multiply name = "Transform_Out_in_in_mat_in_in_in4Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in_in4_in1Node_e4e8032223904ec7b132675ede25586b" />
+    <normalize name = "Transform_Out_in_in_mat_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+    </normalize>
+    <multiply name = "Transform_Out_in_in_mat_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" />
         <input name = "in2" type = "vector4" value = "1,1,-1,1" />
     </multiply>
-    <convert name = "Transform_Out_in_in_mat_in_in_in4_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in_in4_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+    <transformmatrix name = "Transform_Out_in_in_mat_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+        <input name = "mat" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in1_in_in1_matNode_e4e8032223904ec7b132675ede25586b" />
+    </transformmatrix>
+    <multiply name = "Transform_Out_in_in_mat_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in1_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "Transform_Out_in_in_mat_in_in1_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in1_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
     </convert>
-    <position name = "Transform_Out_in_in_mat_in_in_in4_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
-        <input name = "space" type = "string" value = "world" />
+    <tangent name = "Transform_Out_in_in_mat_in_in1_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </tangent>
+    <realitykit_geometry_modifier_model_to_world name = "Transform_Out_in_in_mat_in_in1_in_in1_matNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_world>
+    <normalize name = "Transform_Out_in_in_mat_in_in2Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in2_inNode_e4e8032223904ec7b132675ede25586b" />
+    </normalize>
+    <multiply name = "Transform_Out_in_in_mat_in_in2_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in2_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "Transform_Out_in_in_mat_in_in2_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in2_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+        <input name = "mat" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in2_in_in1_matNode_e4e8032223904ec7b132675ede25586b" />
+    </transformmatrix>
+    <multiply name = "Transform_Out_in_in_mat_in_in2_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in2_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "Transform_Out_in_in_mat_in_in2_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in2_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+    </convert>
+    <bitangent name = "Transform_Out_in_in_mat_in_in2_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </bitangent>
+    <realitykit_geometry_modifier_model_to_world name = "Transform_Out_in_in_mat_in_in2_in_in1_matNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_world>
+    <normalize name = "Transform_Out_in_in_mat_in_in3Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in3_inNode_e4e8032223904ec7b132675ede25586b" />
+    </normalize>
+    <multiply name = "Transform_Out_in_in_mat_in_in3_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in3_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "Transform_Out_in_in_mat_in_in3_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in3_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+        <input name = "mat" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in3_in_in1_matNode_e4e8032223904ec7b132675ede25586b" />
+    </transformmatrix>
+    <multiply name = "Transform_Out_in_in_mat_in_in3_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in3_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "Transform_Out_in_in_mat_in_in3_in_in1_in_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in3_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+    </convert>
+    <normal name = "Transform_Out_in_in_mat_in_in3_in_in1_in_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </normal>
+    <realitykit_geometry_modifier_model_to_world name = "Transform_Out_in_in_mat_in_in3_in_in1_matNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_world>
+    <multiply name = "Transform_Out_in_in_mat_in_in4Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in4_in1Node_e4e8032223904ec7b132675ede25586b" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "Transform_Out_in_in_mat_in_in4_in1Node_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "Transform_Out_in_in_mat_in_in4_in1_inNode_e4e8032223904ec7b132675ede25586b" />
+        <input name = "mat" type = "matrix44" nodename = "Transform_Out_in_in_mat_in_in4_in1_matNode_e4e8032223904ec7b132675ede25586b" />
+    </transformmatrix>
+    <convert name = "Transform_Out_in_in_mat_in_in4_in1_inNode_e4e8032223904ec7b132675ede25586b" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "Transform_Out_in_in_mat_in_in4_in1_in_inNode_e4e8032223904ec7b132675ede25586b" />
+    </convert>
+    <position name = "Transform_Out_in_in_mat_in_in4_in1_in_inNode_e4e8032223904ec7b132675ede25586b" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
     </position>
+    <realitykit_geometry_modifier_model_to_world name = "Transform_Out_in_in_mat_in_in4_in1_matNode_e4e8032223904ec7b132675ede25586b" type = "matrix44">
+    </realitykit_geometry_modifier_model_to_world>
     <mix name = "LerpNode_a928c634e2cb4b6f8c340ee500afafa8" type = "vector4">
         <input name = "bg" type = "vector4" nodename = "ScreenPosition_OutNode_239c5498aa3a45518ab4cead327fac25" />
         <input name = "fg" type = "vector4" nodename = "ScreenPositionNode_79eff7183be54c2ea03e8d6cbcc5bf24" />
@@ -615,160 +653,67 @@
         <input name = "fromspace" type = "string" value = "world" />
         <input name = "tospace" type = "string" value = "tangent" />
     </transformnormal>
-    <transformmatrix name = "ClipPosition" type = "vector4">
-        <input name = "in" type = "vector4" nodename = "WorldSpacePosition4" />
-        <input name = "mat" type = "matrix44" nodename = "ViewProjection" />
-    </transformmatrix>
-    <position name = "WorldSpacePosition3" type = "vector3">
-        <input name = "space" type = "string" value = "world" />
-    </position>
-    <convert name = "WorldSpacePosition4" type = "vector4">
-        <input name = "in" type = "vector3" nodename = "WorldSpacePosition3" />
-    </convert>
-    <multiply name = "ViewProjection" type = "matrix44">
-        <input name = "in1" type = "matrix44" nodename = "UNITY_MATRIX_V" />
-        <input name = "in2" type = "matrix44" nodename = "UNITY_MATRIX_P" />
-    </multiply>
-    <constant name = "UNITY_MATRIX_V" type = "matrix44">
-        <input name = "value" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1" />
-    </constant>
-    <constant name = "UNITY_MATRIX_P" type = "matrix44">
-        <input name = "value" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1" />
-    </constant>
-    <swizzle name = "ScreenWidth" type = "float">
-        <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector4" nodename = "_ScreenParams" />
-    </swizzle>
-    <swizzle name = "ScreenHeight" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector4" nodename = "_ScreenParams" />
-    </swizzle>
-    <divide name = "NDCPosition" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "ClipPosition" />
-        <input name = "in2" type = "vector4" nodename = "ScreenDimension4" />
-    </divide>
-    <combine4 name = "ScreenDimension4" type = "vector4">
-        <input name = "in1" type = "float" nodename = "ScreenWidth" />
-        <input name = "in2" type = "float" nodename = "ScreenHeight" />
-        <input name = "in3" type = "float" value = "1" />
-        <input name = "in4" type = "float" value = "1" />
-    </combine4>
-    <subtract name = "ScreenPositionCenter" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "ScreenPositionCenteredPreMult" />
-        <input name = "in2" type = "float" value = "1" />
+    <subtract name = "Dither_OutNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in1" type = "float" nodename = "Dither_InNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "in2" type = "float" nodename = "Dither_Out_in2Node_757ba7213e054b3183b3908a30a8522c" />
     </subtract>
-    <multiply name = "ScreenPositionCenteredPreMult" type = "vector4">
-        <input name = "in1" type = "vector4" nodename = "NDCPosition" />
-        <input name = "in2" type = "float" value = "2" />
-    </multiply>
-    <combine4 name = "ScreenPositionTiled" type = "vector4">
-        <input name = "in1" type = "float" nodename = "ScreenPositionTiledX" />
-        <input name = "in2" type = "float" nodename = "ScreenPositionTiledY" />
-        <input name = "in3" type = "float" nodename = "ScreenPositionTiledZ" />
-        <input name = "in4" type = "float" nodename = "ScreenPositionTiledW" />
-    </combine4>
-    <swizzle name = "ScreenPositionCenterX" type = "float">
+    <dot name = "Dither_InNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "float" nodename = "_SinTimewNode_c5cb396b8fdf49e28bf229266cabd530" />
+    </dot>
+    <switch name = "Dither_Out_in2Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in1" type = "float" nodename = "Dither_Out_in2_in1Node_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "in2" type = "float" nodename = "Dither_Out_in2_in2Node_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "in3" type = "float" nodename = "Dither_Out_in2_in3Node_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "in4" type = "float" nodename = "Dither_Out_in2_in4Node_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "which" type = "float" nodename = "Dither_Out_in2_whichNode_757ba7213e054b3183b3908a30a8522c" />
+    </switch>
+    <swizzle name = "Dither_Out_in2_in1Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_RowNode_757ba7213e054b3183b3908a30a8522c" />
         <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector4" nodename = "ScreenPositionCenter" />
     </swizzle>
-    <swizzle name = "ScreenPositionCenterY" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector4" nodename = "ScreenPositionCenter" />
-    </swizzle>
-    <swizzle name = "ScreenPositionCenterZW" type = "vector2">
-        <input name = "channels" type = "string" value = "xy" />
-        <input name = "in" type = "vector4" nodename = "ScreenPositionCenter" />
-    </swizzle>
-    <divide name = "ScreenPositionAspectRatio" type = "float">
-        <input name = "in1" type = "float" nodename = "ScreenWidth" />
-        <input name = "in2" type = "float" nodename = "ScreenHeight" />
-    </divide>
-    <multiply name = "ScreenPositionCenterScaledX" type = "float">
-        <input name = "in1" type = "float" nodename = "ScreenPositionCenterX" />
-        <input name = "in2" type = "float" nodename = "ScreenPositionAspectRatio" />
-    </multiply>
-    <combine2 name = "ScreenPositionCenterScaledXY" type = "vector2">
-        <input name = "in1" type = "float" nodename = "ScreenPositionCenterScaledX" />
-        <input name = "in2" type = "float" nodename = "ScreenPositionCenterY" />
-    </combine2>
-    <floor name = "ScreenPositionCenterFloorXY" type = "vector2">
-        <input name = "in" type = "vector2" nodename = "ScreenPositionCenterScaledXY" />
+    <switch name = "Dither_RowNode_757ba7213e054b3183b3908a30a8522c" type = "vector4">
+        <input name = "in1" type = "vector4" value = "0.05882353,0.5294118,0.1764706,0.6470588" />
+        <input name = "in2" type = "vector4" value = "0.7647059,0.2941177,0.8823529,0.4117647" />
+        <input name = "in3" type = "vector4" value = "0.2352941,0.7058824,0.1176471,0.5882353" />
+        <input name = "in4" type = "vector4" value = "0.2352941,0.7058824,0.1176471,0.5882353" />
+        <input name = "which" type = "float" nodename = "Dither_Row_whichNode_757ba7213e054b3183b3908a30a8522c" />
+    </switch>
+    <floor name = "Dither_Row_whichNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "float" nodename = "Dither_Row_which_inNode_757ba7213e054b3183b3908a30a8522c" />
     </floor>
-    <subtract name = "ScreenPositionCenterSubXY" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "ScreenPositionCenterScaledXY" />
-        <input name = "in2" type = "vector2" nodename = "ScreenPositionCenterFloorXY" />
-    </subtract>
-    <swizzle name = "ScreenPositionTiledX" type = "float">
-        <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector2" nodename = "ScreenPositionCenterSubXY" />
-    </swizzle>
-    <swizzle name = "ScreenPositionTiledY" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector2" nodename = "ScreenPositionCenterSubXY" />
-    </swizzle>
-    <swizzle name = "ScreenPositionTiledZ" type = "float">
-        <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector2" nodename = "ScreenPositionCenterZW" />
-    </swizzle>
-    <swizzle name = "ScreenPositionTiledW" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector2" nodename = "ScreenPositionCenterZW" />
-    </swizzle>
-    <swizzle name = "DitherScreenPositionXNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector4" nodename = "ScreenPositionTiled" />
-    </swizzle>
-    <swizzle name = "DitherScreenPositionYNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector4" nodename = "ScreenPositionTiled" />
-    </swizzle>
-    <swizzle name = "ScreenWidthNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "channels" type = "string" value = "x" />
-        <input name = "in" type = "vector4" nodename = "_ScreenParams" />
-    </swizzle>
-    <multiply name = "DitherUNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherScreenPositionXNode_757ba7213e054b3183b3908a30a8522c" />
-        <input name = "in2" type = "float" nodename = "ScreenWidthNode_757ba7213e054b3183b3908a30a8522c" />
-    </multiply>
-    <swizzle name = "ScreenHeightNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "channels" type = "string" value = "y" />
-        <input name = "in" type = "vector4" nodename = "_ScreenParams" />
-    </swizzle>
-    <multiply name = "DitherVNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherScreenPositionYNode_757ba7213e054b3183b3908a30a8522c" />
-        <input name = "in2" type = "float" nodename = "ScreenHeightNode_757ba7213e054b3183b3908a30a8522c" />
-    </multiply>
-    <floor name = "DitherFloorUNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in" type = "float" nodename = "DitherUNode_757ba7213e054b3183b3908a30a8522c" />
-    </floor>
-    <modulo name = "DitherModUNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherFloorUNode_757ba7213e054b3183b3908a30a8522c" />
+    <modulo name = "Dither_Row_which_inNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in1" type = "float" nodename = "Dither_Row_which_in_in1Node_757ba7213e054b3183b3908a30a8522c" />
         <input name = "in2" type = "float" value = "4" />
     </modulo>
-    <multiply name = "DitherMulUNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherModUNode_757ba7213e054b3183b3908a30a8522c" />
-        <input name = "in2" type = "float" value = "4" />
-    </multiply>
-    <floor name = "DitherFloorVNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in" type = "float" nodename = "DitherVNode_757ba7213e054b3183b3908a30a8522c" />
+    <swizzle name = "Dither_Row_which_in_in1Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_UVNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <realitykit_surface_screen_position name = "Dither_UVNode_757ba7213e054b3183b3908a30a8522c" type = "vector4">
+    </realitykit_surface_screen_position>
+    <swizzle name = "Dither_Out_in2_in2Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_RowNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "Dither_Out_in2_in3Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_RowNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <swizzle name = "Dither_Out_in2_in4Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_RowNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "channels" type = "string" value = "w" />
+    </swizzle>
+    <floor name = "Dither_Out_in2_whichNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "float" nodename = "Dither_Out_in2_which_inNode_757ba7213e054b3183b3908a30a8522c" />
     </floor>
-    <modulo name = "DitherModVNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherFloorVNode_757ba7213e054b3183b3908a30a8522c" />
+    <modulo name = "Dither_Out_in2_which_inNode_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in1" type = "float" nodename = "Dither_Out_in2_which_in_in1Node_757ba7213e054b3183b3908a30a8522c" />
         <input name = "in2" type = "float" value = "4" />
     </modulo>
-    <add name = "DitherIndexNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "DitherMulUNode_757ba7213e054b3183b3908a30a8522c" />
-        <input name = "in2" type = "float" nodename = "DitherModVNode_757ba7213e054b3183b3908a30a8522c" />
-    </add>
-    <curvelookup name = "DitherLookupNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in" type = "float" nodename = "DitherIndexNode_757ba7213e054b3183b3908a30a8522c" />
-        <input name = "knots" type = "floatarray" value = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" />
-        <input name = "knotvalues" type = "floatarray" value = "0.05882353,0.5294118,0.1764706,0.6470588,0.7647059,0.2941177,0.8823529,0.4117647,0.2352941,0.7058824,0.1176471,0.5882353,0.9411765,0.4705882,0.8235294,0.3529412" />
-    </curvelookup>
-    <subtract name = "DitherNode_757ba7213e054b3183b3908a30a8522c" type = "float">
-        <input name = "in1" type = "float" nodename = "_SinTimewNode_c5cb396b8fdf49e28bf229266cabd530" />
-        <input name = "in2" type = "float" nodename = "DitherLookupNode_757ba7213e054b3183b3908a30a8522c" />
-    </subtract>
+    <swizzle name = "Dither_Out_in2_which_in_in1Node_757ba7213e054b3183b3908a30a8522c" type = "float">
+        <input name = "in" type = "vector4" nodename = "Dither_UVNode_757ba7213e054b3183b3908a30a8522c" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
     <constant name = "_SinTime" type = "vector4">
         <input name = "value" type = "vector4" value = "0,0,0,0" />
     </constant>
@@ -790,7 +735,7 @@
     </GeometryModification>
     <realitykit_unlit name = "SR_ProblematicNodes" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
-        <input name = "color" type = "color3" nodename = "CastSwizzleFromDitherNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor" />
+        <input name = "color" type = "color3" nodename = "CastSwizzleFromDither_OutNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor" />
         <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_ProblematicNodes" type = "material">
@@ -905,8 +850,8 @@
         <input name = "in" type = "vector4" nodename = "MultiplyNode_c7d009e1ece54b839399345528b5e226" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <swizzle name = "CastSwizzleFromDitherNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor" type = "color3">
-        <input name = "in" type = "float" nodename = "DitherNode_757ba7213e054b3183b3908a30a8522c" />
+    <swizzle name = "CastSwizzleFromDither_OutNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor" type = "color3">
+        <input name = "in" type = "float" nodename = "Dither_OutNode_757ba7213e054b3183b3908a30a8522c" />
         <input name = "channels" type = "string" value = "xxx" />
     </swizzle>
     <swizzle name = "CastSwizzleFromunity_DeltaTimezNode_c5cb396b8fdf49e28bf229266cabd530ToSR_ProblematicNodesVertex_bitangent_FlipZin1" type = "vector3">

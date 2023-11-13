@@ -92,6 +92,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("rcp", Operator.VariantType.FunctionCall)] = CreateBinaryConstantOpCompiler(MtlxNodeTypes.Power, -1.0f),
             [("reflect", Operator.VariantType.FunctionCall)] = CreateNaryOpCompiler(
                 MtlxNodeTypes.RealityKitReflect, "in", "normal"),
+            [("refract", Operator.VariantType.FunctionCall)] = RefractCompiler,
             [("round", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Round),
             [("rsqrt", Operator.VariantType.FunctionCall)] = CreateBinaryConstantOpCompiler(
                 MtlxNodeTypes.Power, -0.5f),
@@ -1392,6 +1393,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
             });
         }
 
+        static InputDef RefractCompiler(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
+        {
+            node.RequireChildCount(3);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["in"] = node.Children[0].Compile(inputs, output),
+                ["normal"] = node.Children[1].Compile(inputs, output),
+                ["eta"] = node.Children[2].Compile(inputs, output),
+            };
+            var matchedType = CoerceToMatchedType(node, inputs, output, inputDefs, "in", "normal");
+            CoerceToType(node, inputs, output, inputDefs, "eta", MtlxDataTypes.Float);
+
+            return new InlineInputDef(MtlxNodeTypes.RealityKitRefract, matchedType, inputDefs);
+        }
+
         static InputDef HyperbolicSineCompiler(
             SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
         {
@@ -2040,33 +2058,63 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             return (node, inputs, output) =>
             {
-                // Local function to swap handedness.
+                // Local function to create column from geometry position/vector.
                 InlineInputDef CreateColumn(string nodeType, bool position = false)
                 {
-                    return new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector4, new()
+                    // Start with the object space geometry converted to a vector4: (x, y, z, 1)
+                    var columnDef = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
                     {
-                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                        ["in"] = new InlineInputDef(nodeType, MtlxDataTypes.Vector3, new()
                         {
-                            ["in"] = new InlineInputDef(nodeType, MtlxDataTypes.Vector3, new()
-                            {
-                                ["space"] = new StringInputDef("world"),
-                            }),
+                            ["space"] = new StringInputDef("object"),
                         }),
-                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 1.0f, 1.0f, -1.0f, position ? 1.0f : 0.0f),
+                    });
+
+                    // For vectors, clear the w component before transforming.
+                    if (!position)
+                    {
+                        columnDef = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector4, new()
+                        {
+                            ["in1"] = columnDef,
+                            ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 1.0f, 1.0f, 1.0f, 0.0f),
+                        });
+                    }
+
+                    // Transform by the model-to-world matrix and invert the resulting z to convert to Unity space.
+                    columnDef = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, new()
+                        {
+                            ["in"] = columnDef,
+                            ["mat"] = new PerStageInputDef(
+                                new InlineInputDef(
+                                    MtlxNodeTypes.RealityKitGeometryModifierModelToWorld,
+                                    MtlxDataTypes.Matrix44, new(), "modelToWorld"),
+                                new InlineInputDef(
+                                    MtlxNodeTypes.RealityKitSurfaceModelToWorld,
+                                    MtlxDataTypes.Matrix44, new(), "modelToWorld")),
+                        }),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 1.0f, 1.0f, -1.0f, 1.0f),
+                    });
+
+                    if (position)
+                        return columnDef;
+                    
+                    // Normalize vectors after transformation.
+                    return new InlineInputDef(MtlxNodeTypes.Normalize, MtlxDataTypes.Vector4, new()
+                    {
+                        ["in"] = columnDef,
                     });
                 }
 
-                var inputDef = new InlineInputDef(MtlxNodeTypes.Transpose, MtlxDataTypes.Matrix44, new()
+                var inputDef = new InlineInputDef(MtlxNodeTypes.RealityKitCombine4, MtlxDataTypes.Matrix44, new()
                 {
-                    ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitCombine4, MtlxDataTypes.Matrix44, new()
-                    {
-                        ["in1"] = CreateColumn(MtlxNodeTypes.GeomTangent),
-                        ["in2"] = CreateColumn(MtlxNodeTypes.GeomBitangent),
-                        ["in3"] = CreateColumn(MtlxNodeTypes.GeomNormal),
-                        ["in4"] = CreateColumn(MtlxNodeTypes.GeomPosition, true),
-                    }),
+                    ["in1"] = CreateColumn(MtlxNodeTypes.GeomTangent),
+                    ["in2"] = CreateColumn(MtlxNodeTypes.GeomBitangent),
+                    ["in3"] = CreateColumn(MtlxNodeTypes.GeomNormal),
+                    ["in4"] = CreateColumn(MtlxNodeTypes.GeomPosition, true),
                 });
-                
+
                 if (invert)
                 {
                     inputDef = new InlineInputDef(MtlxNodeTypes.Inverse, MtlxDataTypes.Matrix44, new()

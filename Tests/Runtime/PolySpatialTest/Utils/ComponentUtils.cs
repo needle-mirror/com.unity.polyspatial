@@ -8,6 +8,7 @@ using Tests.Runtime.Functional;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
+using UnityEditor;
 using UnityEngine;
 
 namespace Tests.Runtime.PolySpatialTest.Utils
@@ -115,6 +116,11 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return GetVideoPlayerData(player.GetInstanceID());
         }
 
+        internal static TrackingData<PolySpatialPlatformTextComponentTrackingData> GetTrackingData(UnityPolySpatialPlatformText text)
+        {
+            return GetTextData(text.GetInstanceID());
+        }
+
         internal static DefaultTrackingData GetTrackingData(UnityEngine.Object qvc)
         {
             return GetPolySpatialVolumeCameraTrackingData(qvc.GetInstanceID());
@@ -163,6 +169,11 @@ namespace Tests.Runtime.PolySpatialTest.Utils
         internal static DefaultTrackingData GetVideoPlayerData(int iid)
         {
             return VideoPlayerTracker.GetTrackingData(iid);
+        }
+
+        internal static TrackingData<PolySpatialPlatformTextComponentTrackingData> GetTextData(int iid)
+        {
+            return PlatformTextTracker.GetTrackingData(iid);
         }
 
         internal static DefaultTrackingData GetPolySpatialVolumeCameraTrackingData(int iid)

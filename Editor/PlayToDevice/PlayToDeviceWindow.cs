@@ -7,15 +7,16 @@ namespace UnityEditor.PolySpatial.PlayToDevice
 {
     class PlayToDeviceWindow : EditorWindow
     {
-        const string k_DownloadURL = "https://unity.com/";
         const string k_VisionOSSimulatorURL = "https://developer.apple.com/documentation/visionOS/interacting-with-your-app-in-the-visionos-simulator";
-        const string k_PlayToDeviceURL = "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/PlayToDevice.html";
 
-        const string k_InfoTextFormat = "The <a href=\"{0}\">Play To Device</a> allows you to play your Apple's <a href=\"{1}\">visionOS Simulator</a> and Vision Pro device " +
-                                        "without the need to build and deploy. Information regarding installation can be found below.";
+        const string k_InfoTextFormat = "<b>Play to Device</b> is a powerful feature that allows you to iterate and preview your content across "
+            + "the Unity editor, the visionOS simulator and the Apple Vision Pro device easily, without the need to build and deploy.";
 
-        const string k_DownloadTextFormat = "<a href=\"{0}\">Download the TestFlight App</a>";
-        const string k_ConnectionHelpBoxText = "In order to stream your content, Play To Device app needs to be open in the visionOS simulator or on " +
+        const string k_DocumentationLinkFormat = "Refer to <a href=\"{0}\">this post</a> or the <a href=\"{1}\">package documentation</a> for comprehensive instructions about Play to Device.";
+        const string k_DiscussionsURL = "https://discussions.unity.com/t/play-to-device/309359";
+        const string k_PlayToDeviceDocsURL = "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/PlayToDevice.html";
+
+        const string k_ConnectionHelpBoxText = "In order to connect & stream your content, the Play To Device Host must be installed and running within the visionOS simulator and/or on " +
                                                "your visionPro device.";
 
         const string k_InvalidIPHelpBoxText = "Invalid IP Address";
@@ -26,11 +27,13 @@ namespace UnityEditor.PolySpatial.PlayToDevice
         const string k_PlayToDeviceAssetTreePath = "Packages/com.unity.polyspatial/Editor/PlayToDevice/PlayToDeviceWindow.uxml";
 
         const string k_InfoBox = "InfoBox";
+
         const string k_InfoTextLabel = "InfoTextLabel";
-        const string k_DownloadLinkLabel = "DownloadLinkLabel";
-        const string k_InfoBoxSeparator = "InfoBoxSeparator";
+        const string k_DocumentationLinkLabel = "DocumentationLinkLabel";
+
         const string k_ConnectionHelpBox = "ConnectionHelpBox";
         const string k_ConnectToPlayerToggle = "ConnectToPlayerToggle";
+        const string k_ConnectionTimeoutField = "ConnectionTimeoutField";
         const string k_PlayerIPField = "PlayerIPField";
         const string k_InvalidIPHelpBox = "InvalidIPHelpBox";
 
@@ -74,11 +77,14 @@ namespace UnityEditor.PolySpatial.PlayToDevice
         {
             VisualElement uxmlElements = m_VisualTreeAsset.Instantiate();
 
-            uxmlElements.Q<Box>(k_InfoBox).style.backgroundColor = EditorGUIUtility.isProSkin ? k_InfoBoxDarkColor : k_InfoBoxLightColor;
-            uxmlElements.Query<VisualElement>(k_InfoBoxSeparator).
-                ForEach(s => s.style.backgroundColor = EditorGUIUtility.isProSkin ? k_InfoBoxSeparatorDarkColor : k_InfoBoxSeparatorLightColor);
-            uxmlElements.Q<Label>(k_InfoTextLabel).text = string.Format(k_InfoTextFormat, k_PlayToDeviceURL, k_VisionOSSimulatorURL);
-            uxmlElements.Q<Label>(k_DownloadLinkLabel).text = string.Format(k_DownloadTextFormat, k_DownloadURL);
+            var infoBox = uxmlElements.Q<Box>(k_InfoBox);
+            infoBox.style.backgroundColor = EditorGUIUtility.isProSkin ? k_InfoBoxDarkColor : k_InfoBoxLightColor;
+            infoBox.style.borderTopColor = EditorGUIUtility.isProSkin ? k_InfoBoxSeparatorDarkColor : k_InfoBoxSeparatorLightColor;
+            infoBox.style.borderBottomColor = EditorGUIUtility.isProSkin ? k_InfoBoxSeparatorDarkColor : k_InfoBoxSeparatorLightColor;
+
+            uxmlElements.Q<Label>(k_InfoTextLabel).text =k_InfoTextFormat;
+            uxmlElements.Q<Label>(k_DocumentationLinkLabel).text = string.Format(k_DocumentationLinkFormat, k_DiscussionsURL, k_PlayToDeviceDocsURL);
+
             uxmlElements.Q<HelpBox>(k_ConnectionHelpBox).text = k_ConnectionHelpBoxText;
 
             var connectToPlayerToggle = uxmlElements.Q<Toggle>(k_ConnectToPlayerToggle);
@@ -96,6 +102,10 @@ namespace UnityEditor.PolySpatial.PlayToDevice
                 PolySpatialUserSettings.instance.PlayToDeviceIP = evt.newValue;
                 invalidIPHelpBox.style.display = IsValidIPAddress(evt.newValue) ? DisplayStyle.None : DisplayStyle.Flex;
             });
+
+            var connectionTimeoutField = uxmlElements.Q<UnsignedIntegerField>(k_ConnectionTimeoutField);
+            connectionTimeoutField.value = PolySpatialUserSettings.instance.ConnectionTimeout;
+            connectionTimeoutField.RegisterValueChangedCallback(evt => PolySpatialUserSettings.instance.ConnectionTimeout = evt.newValue);
 
             rootVisualElement.Add(uxmlElements);
         }

@@ -170,13 +170,231 @@
         <input name = "in2" type = "float" value = "0" />
         <input name = "in3" type = "float" value = "1" />
     </combine3>
+    <realitykit_refract name = "Refract_RefractedNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "Refract_IncidentNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "normal" type = "vector3" nodename = "Refract_NormalNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "eta" type = "float" nodename = "Refract_etaNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </realitykit_refract>
+    <dot name = "Refract_IncidentNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "vector3">
+        <input name = "in" type = "vector3" value = "0,0,1" />
+    </dot>
+    <dot name = "Refract_NormalNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "vector3">
+        <input name = "in" type = "vector3" value = "0,0,-1" />
+    </dot>
+    <divide name = "Refract_etaNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </divide>
+    <max name = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_IORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" value = "1" />
+    </max>
+    <dot name = "Refract_IORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in" type = "float" value = "1" />
+    </dot>
+    <max name = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_IORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" value = "1" />
+    </max>
+    <dot name = "Refract_IORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in" type = "float" value = "1.5" />
+    </dot>
+    <ifequal name = "Refract_IntensityNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "value1" type = "float" nodename = "Refract_Intensity_value1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "value2" type = "float" value = "0" />
+        <input name = "in1" type = "float" nodename = "Refract_Intensity_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_Intensity_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </ifequal>
+    <ifgreater name = "Refract_Intensity_value1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "value1" type = "float" nodename = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "value2" type = "float" nodename = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+    </ifgreater>
+    <ifequal name = "Refract_Intensity_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "value1" type = "float" nodename = "Refract_Intensity_in1_value1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "value2" type = "float" value = "0" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" nodename = "Refract_FresnelDielectricNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </ifequal>
+    <ifgreatereq name = "Refract_Intensity_in1_value1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "value1" type = "float" nodename = "Refract_kNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "value2" type = "float" value = "0" />
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+    </ifgreatereq>
+    <subtract name = "Refract_kNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_k_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_k_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_k_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_k_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <multiply name = "Refract_k_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_etaNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_etaNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <subtract name = "Refract_k_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_k_in2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_k_in2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <dotproduct name = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "vector3" nodename = "Refract_IncidentNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "vector3" nodename = "Refract_NormalNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </dotproduct>
+    <subtract name = "Refract_FresnelDielectricNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_FresnelDielectric_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <clamp name = "Refract_FresnelDielectric_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in" type = "float" nodename = "Refract_FresnelDielectric_in2_inNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </clamp>
+    <subtract name = "Refract_FresnelDielectric_in2_inNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_FresnelDielectric_in2_in_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_FresnelDielectric_in2_in_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_FresnelDielectric_in2_in_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_FresnelDielectric_in2_in_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <multiply name = "Refract_FresnelDielectric_in2_in_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_FresnelDielectric_in2_in_in2_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_t1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <multiply name = "Refract_FresnelDielectric_in2_in_in2_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "0.5" />
+        <input name = "in2" type = "float" nodename = "Refract_t1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <divide name = "Refract_t1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_t1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </divide>
+    <add name = "Refract_t1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_gNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
+    <sqrt name = "Refract_gNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in" type = "float" nodename = "Refract_g_inNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </sqrt>
+    <subtract name = "Refract_g_inNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_g_in_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <add name = "Refract_g_in_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_g_in_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_g_in_in1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
+    <multiply name = "Refract_g_in_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_iorNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_iorNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <divide name = "Refract_iorNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </divide>
+    <multiply name = "Refract_g_in_in1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <subtract name = "Refract_t1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_gNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <add name = "Refract_FresnelDielectric_in2_in_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_FresnelDielectric_in2_in_in2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
+    <multiply name = "Refract_FresnelDielectric_in2_in_in2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_t2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <divide name = "Refract_t2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_t2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </divide>
+    <subtract name = "Refract_t2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t2_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" value = "1" />
+    </subtract>
+    <multiply name = "Refract_t2_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t2_in1_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <subtract name = "Refract_t2_in1_in1_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_gNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <subtract name = "Refract_t2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_t2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_t2_in2_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_t2_in2_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <add name = "Refract_t2_in2_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_gNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
+    <clamp name = "Refract_Intensity_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in" type = "float" nodename = "Refract_Transm_SchlickNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </clamp>
+    <multiply name = "Refract_Transm_SchlickNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_Transm_Schlick_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_Transm_Schlick_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <subtract name = "Refract_Transm_Schlick_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_Transm_Schlick_in1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_Transm_Schlick_in1_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_Transm_Schlick_in1_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_x2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <multiply name = "Refract_Transm_Schlick_in1_in2_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_xNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_x2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <add name = "Refract_xNode_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_cos0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
+    <multiply name = "Refract_x2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_xNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_xNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <subtract name = "Refract_Transm_Schlick_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" nodename = "Refract_IorToFresnel0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <multiply name = "Refract_IorToFresnel0Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_SqrtIorToFresnel0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_SqrtIorToFresnel0Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </multiply>
+    <divide name = "Refract_SqrtIorToFresnel0Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_SqrtIorToFresnel0_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_SqrtIorToFresnel0_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </divide>
+    <subtract name = "Refract_SqrtIorToFresnel0_in1Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </subtract>
+    <add name = "Refract_SqrtIorToFresnel0_in2Node_441e3b0bb3c4451bbef26cd0d13265ca" type = "float">
+        <input name = "in1" type = "float" nodename = "Refract_internalIORMediumNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "in2" type = "float" nodename = "Refract_internalIORSourceNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+    </add>
     <GeometryModification name = "SR_VectorVertex" type = "vertexshader">
     </GeometryModification>
     <realitykit_pbr name = "SR_Vector" type = "surfaceshader">
         <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectorbaseColor" />
         <input name = "metallic" type = "float" nodename = "SphereMask_OutNode_d5ab9a6a1ce34c2783a6ba455590a175" />
-        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
-        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "emissiveColor" type = "color3" nodename = "CastSwizzleFromRefract_RefractedNode_441e3b0bb3c4451bbef26cd0d13265caToSR_VectoremissiveColor" />
+        <input name = "ambientOcclusion" type = "float" nodename = "Refract_IntensityNode_441e3b0bb3c4451bbef26cd0d13265ca" />
         <input name = "specular" type = "float" value = "0.5" />
         <input name = "roughness" type = "float" nodename = "SR_Vector_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
@@ -198,5 +416,9 @@
     <swizzle name = "CastSwizzleFromFresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238ToSR_VectorbaseColor" type = "color3">
         <input name = "in" type = "float" nodename = "FresnelEffect_OutNode_752d003d78d94e6cb3a31fbf94058238" />
         <input name = "channels" type = "string" value = "xxx" />
+    </swizzle>
+    <swizzle name = "CastSwizzleFromRefract_RefractedNode_441e3b0bb3c4451bbef26cd0d13265caToSR_VectoremissiveColor" type = "color3">
+        <input name = "in" type = "vector3" nodename = "Refract_RefractedNode_441e3b0bb3c4451bbef26cd0d13265ca" />
+        <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
 </materialx>

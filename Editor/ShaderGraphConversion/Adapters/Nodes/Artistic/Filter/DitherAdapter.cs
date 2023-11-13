@@ -1,15 +1,10 @@
-
-using System;
-using System.Collections.Generic;
-using Unity.PolySpatial;
-
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     class DitherAdapter : ANodeAdapter<DitherNode>
     {
+#if DISABLE_MATERIALX_EXTENSIONS
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
-
             if (node is DitherNode dnode)
             {
                 //[Slot(0, Binding.None)] DynamicDimensionVector In,
@@ -107,5 +102,92 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 externals.AddExternalPort(NodeUtils.GetPrimaryOutput(node).slotReference, outputNode.name);
             }
         }
+#else
+        public override string SupportDetails(AbstractMaterialNode node)
+        {
+            var slot = NodeUtils.GetInputByName(node, "Screen Position");
+            return slot.isConnected ? "Only the default screen position is supported." : "";
+        }
+
+        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        {
+            // Reference implementation:
+            // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Dither-Node.html
+            var dataType = NodeUtils.GetDataTypeName(node);
+            QuickNode.CompoundOp(node, graph, externals, "Dither", new()
+            {
+                ["UV"] = new(
+                    MtlxNodeTypes.RealityKitSurfaceScreenPosition, MtlxDataTypes.Vector4, new(), "screenPosition"),
+                // Absent a way to specify arrays or dynamically extract a row/column from a matrix, the best way
+                // I could find to index the thresholds is to use the switch node to select first between vectors
+                // and then between components.  Trying to use the ND_convert_float_integer node to convert the
+                // float (UV.y % 4) to an integer index for the extract node gave me an invalidTypeFound error.
+                // ND_convert_float_integer is in the apple_stdlib_extensions.mtlx file, so maybe this is a case
+                // where those definitions are not applicable to visionOS.
+                ["Row"] = new(MtlxNodeTypes.Switch, MtlxDataTypes.Vector4, new()
+                {
+                    ["in1"] = new FloatInputDef(
+                        MtlxDataTypes.Vector4, 1.0f / 17.0f,  9.0f / 17.0f,  3.0f / 17.0f, 11.0f / 17.0f),
+                    ["in2"] = new FloatInputDef(
+                        MtlxDataTypes.Vector4, 13.0f / 17.0f,  5.0f / 17.0f, 15.0f / 17.0f,  7.0f / 17.0f),
+                    ["in3"] = new FloatInputDef(
+                        MtlxDataTypes.Vector4, 4.0f / 17.0f, 12.0f / 17.0f,  2.0f / 17.0f, 10.0f / 17.0f),
+                    ["in4"] = new FloatInputDef(
+                        MtlxDataTypes.Vector4, 4.0f / 17.0f, 12.0f / 17.0f,  2.0f / 17.0f, 10.0f / 17.0f),
+                    ["which"] = new InlineInputDef(MtlxNodeTypes.Floor, MtlxDataTypes.Float, new()
+                    {
+                        ["in"] = new InlineInputDef(MtlxNodeTypes.Modulo, MtlxDataTypes.Float, new()
+                        {
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = new InternalInputDef("UV"),
+                                ["channels"] = new StringInputDef("x"),
+                            }),
+                            ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 4.0f),
+                        }),
+                    }),
+                }),
+                ["Out"] = new(MtlxNodeTypes.Subtract, dataType, new()
+                {
+                    ["in1"] = new ExternalInputDef("In"),
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Switch, MtlxDataTypes.Float, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("Row"),
+                            ["channels"] = new StringInputDef("x"),
+                        }),
+                        ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("Row"),
+                            ["channels"] = new StringInputDef("y"),
+                        }),
+                        ["in3"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("Row"),
+                            ["channels"] = new StringInputDef("z"),
+                        }),
+                        ["in4"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InternalInputDef("Row"),
+                            ["channels"] = new StringInputDef("w"),
+                        }),
+                        ["which"] = new InlineInputDef(MtlxNodeTypes.Floor, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = new InlineInputDef(MtlxNodeTypes.Modulo, MtlxDataTypes.Float, new()
+                            {
+                                ["in1"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                                {
+                                    ["in"] = new InternalInputDef("UV"),
+                                    ["channels"] = new StringInputDef("y"),
+                                }),
+                                ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 4.0f),
+                            }),
+                        }),
+                    }),
+                }),
+            });
+        }
+#endif
     }
 }

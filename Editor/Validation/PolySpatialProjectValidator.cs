@@ -46,17 +46,17 @@ namespace UnityEditor.PolySpatial.Validation
                 FixIt = () =>
                 {
                     var tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-                    var quantumLayerIndex= PolySpatialUnityBackend.AddLayer(tagManager, PolySpatialCore.PolySpatialLayerName);
+                    var polySpatialLayerIndex= PolySpatialUnityBackend.AddLayer(tagManager, PolySpatialCore.PolySpatialLayerName);
                     tagManager.ApplyModifiedProperties();
 
-                    if (quantumLayerIndex == -1)
+                    if (polySpatialLayerIndex == -1)
                     {
                         DisplayNoLayersAvailableDialog();
                     }
                     else
                     {
-                        DisplayAddPolySpatialLayerDialog(quantumLayerIndex);
-                        PolySpatialUnityBackend.IgnoreLayerCollision(quantumLayerIndex);
+                        DisplayAddPolySpatialLayerDialog(polySpatialLayerIndex);
+                        PolySpatialUnityBackend.IgnoreLayerCollision(polySpatialLayerIndex);
                     }
                 },
                 FixItMessage = $"Add a <b>{VolumeCamera.PolySpatialLayerName}</b> physics layer to the project."
@@ -111,11 +111,11 @@ namespace UnityEditor.PolySpatial.Validation
                 },
                 FixIt = () =>
                 {
-                    var quantumLayer = LayerMask.NameToLayer(VolumeCamera.PolySpatialLayerName);
-                    if (quantumLayer == -1)
+                    var polySpatialLayer = LayerMask.NameToLayer(VolumeCamera.PolySpatialLayerName);
+                    if (polySpatialLayer == -1)
                         return;
 
-                    PolySpatialUnityBackend.IgnoreLayerCollision(quantumLayer);
+                    PolySpatialUnityBackend.IgnoreLayerCollision(polySpatialLayer);
                 },
                 FixItMessage = $"Disable any physics layer collision with the <b>{VolumeCamera.PolySpatialLayerName}</b> layer."
             };

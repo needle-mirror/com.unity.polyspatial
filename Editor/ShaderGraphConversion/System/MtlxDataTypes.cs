@@ -134,6 +134,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitPbr = "realitykit_pbr";
         internal const string RealityKitImageLod = "realitykit_image_lod";
         internal const string RealityKitReflect = "realitykit_reflect";
+        internal const string RealityKitRefract = "realitykit_refract";
         internal const string RealityKitStep = "realitykit_step";
         internal const string RealityKitGeometrySwitchCameraIndex = "realitykit_geometry_switch_cameraindex";
     }

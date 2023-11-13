@@ -36,6 +36,19 @@ namespace Unity.PolySpatial
                 Save(true);
             }
         }
+
+        [SerializeField]
+        uint connectionTimeout = PolySpatialSettings.DefaultConnectionTimeOut;
+
+        internal uint ConnectionTimeout
+        {
+            get => connectionTimeout;
+            set
+            {
+                connectionTimeout = value;
+                Save(true);
+            }
+        }
     }
 }
 #endif

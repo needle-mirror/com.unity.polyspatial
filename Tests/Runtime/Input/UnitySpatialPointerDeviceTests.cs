@@ -52,18 +52,18 @@ namespace Tests.Runtime.Functional.Input
             primaryAction.performed += OnActionChange;
             primaryAction.Enable();
 
-            SendEvents(1, SpatialPointerPhase.Began, Vector3.one, 1);
+            SendEvents(SpatialPointerPhase.Began, Vector3.one, 1);
             InputSystem.Update();
 
             Assert.IsNotNull(state, "Expected to receive a SpatialPointerState.");
             Assert.IsTrue(state.Value.phase == SpatialPointerPhase.Began, "Expected Phase.Began");
 
-            SendEvents(1, SpatialPointerPhase.Moved, Vector3.one, 1);
+            SendEvents(SpatialPointerPhase.Moved, Vector3.one, 1);
             InputSystem.Update();
 
             Assert.IsTrue(state.Value.phase == SpatialPointerPhase.Moved, "Expected Phase.Moved");
 
-            SendEvents(1, SpatialPointerPhase.Ended, Vector3.one, 1);
+            SendEvents(SpatialPointerPhase.Ended, Vector3.one, 1);
             InputSystem.Update();
 
             Assert.IsTrue(state.Value.phase == SpatialPointerPhase.Ended, "Expected Phase.Ended");
@@ -90,7 +90,7 @@ namespace Tests.Runtime.Functional.Input
             Vector3 testPosition = Vector3.one * 10.0f;
             int testColliderId = 10;
 
-            SendEvents(1, SpatialPointerPhase.Began, testPosition, testColliderId);
+            SendEvents(SpatialPointerPhase.Began, testPosition, testColliderId);
             InputSystem.Update();
 
             // TODO -- this test depends on whatever the current opened scene is and its volume camera.
@@ -105,17 +105,24 @@ namespace Tests.Runtime.Functional.Input
             primaryAction.Disable();
         }
 
-        unsafe void SendEvents(int pointerId, SpatialPointerPhase phase, Vector3 position, int colliderId)
+        unsafe void SendEvents(SpatialPointerPhase phase, Vector3 position, int colliderId)
         {
-            NativeArray<PolySpatialPointerEvent> events = new(1, Allocator.Temp);
-            events[0] = new PolySpatialPointerEvent()
+            NativeArray<PolySpatialPointerEvent> events = new(2, Allocator.Temp);
+            var pointerEvent = new PolySpatialPointerEvent()
             {
-                targetId = new PolySpatialInstanceID {id = colliderId},
-                interactionId = pointerId,
+                targetId = new PolySpatialInstanceID { id = colliderId },
+                interactionId = 1,
                 interactionPosition = position,
-                phase = (Unity.PolySpatial.Internals.PolySpatialPointerPhase)phase
+                phase = (PolySpatialPointerPhase)phase
             };
-            PolySpatialSimulationHostImpl.SimHostOnInputEvent(PolySpatialInputType.Pointer, events.Length, events.GetUnsafePtr());
+
+            events[0] = pointerEvent;
+            pointerEvent.interactionId = 2;
+            events[1] = pointerEvent;
+
+            var port = 0;
+            var type = PolySpatialInputType.Pointer;
+            PolySpatialCore.HostMulticastHandler?.HostCommand(PolySpatialHostCommand.InputEvent, &type, &port, events.AsSpan());
             events.Dispose();
         }
     }

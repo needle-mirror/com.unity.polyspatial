@@ -81,39 +81,39 @@ def "MaterialX"
             def Shader "AddNode_9a68bac233f14ed78ebee0632b09f9b5"
             {
                 uniform token info:id = "ND_add_vector3"
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZNode_c433d563958a45edb48854fb301cc794.outputs:out>
-                float3 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_OutNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float3 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_OutNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "ReconstructZNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_OutNode_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_normalize_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZCombineNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVectorNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "ReconstructZCombineNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_normalVectorNode_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_combine3_vector3"
-                float inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/XReconstructZNode_c433d563958a45edb48854fb301cc794.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/YReconstructZNode_c433d563958a45edb48854fb301cc794.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZSquareRootNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVector_in1Node_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVector_in2Node_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "XReconstructZNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_normalVector_in1Node_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 string inputs:channels = "x"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZInNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_InNode_c433d563958a45edb48854fb301cc794"
             {
-                uniform token info:id = "ND_constant_vector2"
-                float2 inputs:value = (1, 0)
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in = (1, 0)
                 float2 outputs:out
             }
 
@@ -141,111 +141,143 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "ReconstructZNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_OutNode_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_normalize_vector3"
-                float3 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZCombineNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float3 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVectorNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "ReconstructZCombineNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_normalVectorNode_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_combine3_vector3"
-                float inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/XReconstructZNode_a5beafc600704580b1a195471b8465ad.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/YReconstructZNode_a5beafc600704580b1a195471b8465ad.outputs:out>
-                float inputs:in3.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZSquareRootNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVector_in1Node_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_normalVector_in2Node_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in3.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "ReconstructZSquareRootNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_reconstructZNode_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_sqrt_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZOnesComplementNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_inNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZOnesComplementNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_reconstructZ_inNode_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_subtract_float"
                 float inputs:in1 = 1
-                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZSaturateNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2Node_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZSaturateNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_reconstructZ_in_in2Node_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_clamp_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZDotNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_inNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZDotNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_inNode_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_dotproduct_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_a5beafc600704580b1a195471b8465ad.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_in_in1Node_a5beafc600704580b1a195471b8465ad.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_in_in2Node_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZInNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_in_in2Node_a5beafc600704580b1a195471b8465ad"
             {
-                uniform token info:id = "ND_constant_vector2"
-                float2 inputs:value = (0, 0)
+                uniform token info:id = "ND_swizzle_vector2_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                string inputs:channels = "xy"
                 float2 outputs:out
             }
 
-            def Shader "YReconstructZNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_InNode_a5beafc600704580b1a195471b8465ad"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in = (0, 0)
+                float2 outputs:out
+            }
+
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_in_in1Node_a5beafc600704580b1a195471b8465ad"
+            {
+                uniform token info:id = "ND_swizzle_vector2_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_a5beafc600704580b1a195471b8465ad.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
+            }
+
+            def Shader "NormalReconstructZ_normalVector_in2Node_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 string inputs:channels = "y"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "XReconstructZNode_a5beafc600704580b1a195471b8465ad"
+            def Shader "NormalReconstructZ_normalVector_in1Node_a5beafc600704580b1a195471b8465ad"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 string inputs:channels = "x"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_a5beafc600704580b1a195471b8465ad.outputs:out>
                 float outputs:out
             }
 
-            def Shader "YReconstructZNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_normalVector_in2Node_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 string inputs:channels = "y"
-                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZSquareRootNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_reconstructZNode_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_sqrt_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZOnesComplementNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_inNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZOnesComplementNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_reconstructZ_inNode_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_subtract_float"
                 float inputs:in1 = 1
-                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZSaturateNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2Node_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZSaturateNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_reconstructZ_in_in2Node_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_clamp_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZDotNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_inNode_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
             }
 
-            def Shader "ReconstructZDotNode_c433d563958a45edb48854fb301cc794"
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_inNode_c433d563958a45edb48854fb301cc794"
             {
                 uniform token info:id = "ND_dotproduct_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_c433d563958a45edb48854fb301cc794.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/ReconstructZInNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_in_in1Node_c433d563958a45edb48854fb301cc794.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_reconstructZ_in_in2_in_in2Node_c433d563958a45edb48854fb301cc794.outputs:out>
                 float outputs:out
+            }
+
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_in_in1Node_c433d563958a45edb48854fb301cc794"
+            {
+                uniform token info:id = "ND_swizzle_vector2_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
+            }
+
+            def Shader "NormalReconstructZ_reconstructZ_in_in2_in_in2Node_c433d563958a45edb48854fb301cc794"
+            {
+                uniform token info:id = "ND_swizzle_vector2_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_ReconstructZ/NormalReconstructZ_InNode_c433d563958a45edb48854fb301cc794.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
             }
         }
     }

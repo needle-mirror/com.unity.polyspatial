@@ -29,6 +29,7 @@ namespace UnityEditor.PolySpatial.Internal
         SerializedProperty m_EnablePolySpatialRuntimeProperty;
 
         SerializedProperty m_PolySpatialNetworkingModeProperty;
+        SerializedProperty m_ConnectionTimeoutProperty;
         SerializedProperty m_ServerAddressesProperty;
         SerializedProperty m_EnableHostCameraControlProperty;
         SerializedProperty m_EnableClippingProperty;
@@ -68,6 +69,7 @@ namespace UnityEditor.PolySpatial.Internal
             m_EnableTransformVerificationProperty = m_SerializedObject.FindProperty("m_EnableTransformVerification");
 
             m_PolySpatialNetworkingModeProperty = m_SerializedObject.FindProperty("m_PolySpatialNetworkingMode");
+            m_ConnectionTimeoutProperty = m_SerializedObject.FindProperty("m_ConnectionTimeOut");
             m_ServerAddressesProperty = m_SerializedObject.FindProperty("m_SerializedServerAddresses");
             m_EnableHostCameraControlProperty = m_SerializedObject.FindProperty("m_EnableHostCameraControl");
             m_EnableClippingProperty = m_SerializedObject.FindProperty("m_EnableClipping");
@@ -114,6 +116,9 @@ namespace UnityEditor.PolySpatial.Internal
                                 break;
                         }
 
+                        EditorGUILayout.PropertyField(m_ConnectionTimeoutProperty,
+                            new GUIContent("Connection Timeout",
+                                "Set connection timeout in seconds."));
                         EditorGUILayout.PropertyField(m_EnableHostCameraControlProperty,
                             new GUIContent("Enable Host Camera Control",
                                 "Host will control camera transform."));

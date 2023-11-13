@@ -281,9 +281,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             break;
                         
                         case SpecialRules.AdditiveAlpha:
-                            if (!isTransparent)
+                            if (!(isTransparent || alphaClipEnabled))
                             {
-                                // If opaque, omit opacity entirely.
+                                // If opaque and alpha clipping is disabled, omit opacity entirely.
                                 srcSlot = null;
                                 ignoreIfNotConnected = true;
                             }

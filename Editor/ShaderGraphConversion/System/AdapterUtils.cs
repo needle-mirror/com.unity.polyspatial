@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using Unity.PolySpatial.Internals;
 
 namespace UnityEditor.ShaderGraph.MaterialX
 {
@@ -10,7 +11,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
     {
         internal static string GetNodeName(AbstractMaterialNode node, string hint = "")
         {
-            return $"{RemoveWhitespace(hint)}Node_{node.objectId}";
+            return $"{PolySpatialShaderGraph.SanitizeName(hint)}Node_{node.objectId}";
         }
 
         internal static string RemoveWhitespace(string str)

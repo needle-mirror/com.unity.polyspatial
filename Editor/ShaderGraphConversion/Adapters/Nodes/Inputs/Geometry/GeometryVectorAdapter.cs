@@ -39,6 +39,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     });
                     break;
 
+                case CoordinateSpace.Tangent:
+                    // Tangent space vectors don't need to be flipped.
+                    QuickNode.CompoundOp(node, graph, externals, Hint, new()
+                    {
+                        ["Out"] = new(NodeType, MtlxDataTypes.Vector3, new()
+                        {
+                            ["space"] = new StringInputDef("tangent"),
+                        }),
+                    });
+                    break;
+
                 case var space:
                     QuickNode.CompoundOp(node, graph, externals, Hint, new()
                     {

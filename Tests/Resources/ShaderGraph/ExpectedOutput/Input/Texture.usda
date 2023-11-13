@@ -23,7 +23,7 @@ def "MaterialX"
             def Shader "realitykit_pbr"
             {
                 uniform token info:id = "ND_realitykit_pbr_surfaceshader"
-                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor.outputs:out>
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFrom_Node_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor.outputs:out>
                 float inputs:metallic.connect = </MaterialX/Materials/USD_Texture/TextureSize_WidthNode_806a6e888e464735ba91c5000dcb1175.outputs:out>
                 color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromAddNode_80f7e1133e0d46deb6636045bc0d837fToSR_TextureemissiveColor.outputs:out>
                 float inputs:ambientOcclusion = 1
@@ -42,27 +42,27 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromNode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor"
+            def Shader "CastSwizzleFrom_Node_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor"
             {
                 uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/Node_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/_Node_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
                 string inputs:channels = "rgb"
                 color3f outputs:out
             }
 
-            def Shader "Node_946cc4763c8a43298a3d3ec96ff71183"
+            def Shader "_Node_946cc4763c8a43298a3d3ec96ff71183"
             {
                 uniform token info:id = "ND_image_color4"
                 color4f inputs:default = (1, 1, 1, 1)
                 asset inputs:file.connect = </MaterialX/Materials/USD_Texture.inputs:_MainTex>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/_Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd.outputs:out>
                 string inputs:filtertype = "closest"
                 string inputs:uaddressmode = "clamp"
                 string inputs:vaddressmode = "clamp"
                 color4f outputs:out
             }
 
-            def Shader "Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd"
+            def Shader "_Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0
@@ -334,29 +334,29 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_multiply_vector3"
                 float3 inputs:in2 = (1, 1, -1)
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFrom_Node_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFromNode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1"
+            def Shader "CastSwizzleFrom_Node_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1"
             {
                 uniform token info:id = "ND_swizzle_color4_vector3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/Node_863147e977944b3e828c0de0418dbcb8.outputs:out>
+                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/_Node_863147e977944b3e828c0de0418dbcb8.outputs:out>
                 string inputs:channels = "rgb"
                 float3 outputs:out
             }
 
-            def Shader "Node_863147e977944b3e828c0de0418dbcb8"
+            def Shader "_Node_863147e977944b3e828c0de0418dbcb8"
             {
                 uniform token info:id = "ND_realitykit_image_lod_color4"
                 color4f inputs:default = (1, 1, 1, 1)
                 asset inputs:file.connect = </MaterialX/Materials/USD_Texture.inputs:_VertexTex>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/Node_863147e977944b3e828c0de0418dbcb8_UV_fwd.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/_Node_863147e977944b3e828c0de0418dbcb8_UV_fwd.outputs:out>
                 float inputs:level = 0
                 color4f outputs:out
             }
 
-            def Shader "Node_863147e977944b3e828c0de0418dbcb8_UV_fwd"
+            def Shader "_Node_863147e977944b3e828c0de0418dbcb8_UV_fwd"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0

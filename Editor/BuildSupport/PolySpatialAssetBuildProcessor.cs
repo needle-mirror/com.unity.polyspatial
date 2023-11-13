@@ -117,19 +117,19 @@ namespace UnityEditor.PolySpatial.Internals
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            if (BuildPipeline.isBuildingPlayer)
-            {
-                var guids = s_SceneAssets[scene.path];
-                var qam = new GameObject().AddComponent<PolySpatialSceneAssetMap>();
-                qam.m_SerializedAssetGUIDMap = new List<PolySpatialSceneAssetMap.AssetGUIDMapEntry>(guids.Select(agme =>
-                    new PolySpatialSceneAssetMap.AssetGUIDMapEntry
-                    {
-                        locator = agme.asset.locator,
-                        obj = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(agme.guid))
-                    }
-                ).Where(agme => agme.obj != null));
+            // If s_SceneAssets wasn't initialized, we are building an asset bundle.
+            if (s_SceneAssets == null)
+                return;
 
-            }
+            var guids = s_SceneAssets[scene.path];
+            var qam = new GameObject().AddComponent<PolySpatialSceneAssetMap>();
+            qam.m_SerializedAssetGUIDMap = new List<PolySpatialSceneAssetMap.AssetGUIDMapEntry>(guids.Select(agme =>
+                new PolySpatialSceneAssetMap.AssetGUIDMapEntry
+                {
+                    locator = agme.asset.locator,
+                    obj = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(agme.guid))
+                }
+            ).Where(agme => agme.obj != null));
         }
     }
 }

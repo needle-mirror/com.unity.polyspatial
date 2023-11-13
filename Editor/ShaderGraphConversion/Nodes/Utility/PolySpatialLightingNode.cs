@@ -156,7 +156,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     break;
             }
 
-            if (m_BakedLightingMode != BakedLightingMode.None)
+            if (m_BakedLightingMode != BakedLightingMode.None || m_ReflectionProbeMode != ReflectionProbeMode.None)
             {
                 switch (m_ReflectionProbeMode)
                 {
@@ -195,8 +195,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             StringWriter writer = new();
 
             // Compute the world space normal from the tangent space input normal and tangent frame vectors.
-            writer.WriteLine(@"
-float3 normalWS = normalize(mul(Normal, float3x3(TangentFrameX, TangentFrameY, TangentFrameZ)));");
+            writer.WriteLine($@"
+float3 normalVS = mul(Normal, float3x3(TangentFrameX, TangentFrameY, TangentFrameZ));
+float3 normalWS = normalize(mul({PolySpatialShaderGlobals.VolumeToWorld}, float4(normalVS, 0.0)).xyz);");
             
             // https://github.cds.internal.unity3d.com/unity/unity/blob/918aac026438f350a9716ff831b1e309f2483743/Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl#L82
             Color kDialectricSpec = new(0.04f, 0.04f, 0.04f, 1.0f - 0.04f);

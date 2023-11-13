@@ -7,23 +7,92 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2023-11-13
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fixed issue where simulation app may crash when connecting to PlayToDevice.
+- Fixed pink materials in Play Mode for AR Foundation simulation environments.
+- Fixed color spaces for sddhader graph color properties and PolySpatialPlatformText.
+
+### Security
+
+## [0.6.1] - 2023-11-09
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Baked Particles are now rendered with respect to AR head pose (when available, such as with an unbounded volume camera), and otherwise falls back to the main camera (if available)
+
+### Security
+
+## [0.6.0] - 2023-11-08
+
+### Added
+- Added partial support for Particle System's custom vertex streams.
+- Added PolySpatialGroundingShadow component.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fix over-release of shader assets.
+- Fixed failure to use native texture/render texture path on visionOS.
+- Fix initial UGUI display issue when properties don't change at start.
+- Fixed an issue with editor input not releasing a touch when mouse is out of bound.
+- Samples: Fixed issue with keeping the target position from going outside the platform in Character Navigation sample.
+- Fixed "Unparseable GUID" error when loading assets from still-loaded asset bundles. 
+- Fixed "Non shader graph shader" errors for standard materials (URP/Lit, etc.) loaded from asset bundles.
+- Fixed issue with PolySpatial Lighting Node normals for rotated volume cameras.
+- Fixed issue with Transform node in Tangent space.
+- Fixed an issue with particle system renderer module not change-tracking correctly.
+- Fixed application of Vector2 shader graph properties in visionOS.
+- Fixed BakeToMesh Particle System depth sorting
+- Fixed shader compilation error with PolySpatial Lighting Node with reflection probes enabled and baked lighting disabled.
+- Fixed NullReferenceException when building asset bundles containing scenes.
+- Fixed an issue where touch screen input would report more active touches than expected if a user initiates a pinch/gaze and the hand that initiated the interaction is no longer tracked.
+
+### Security
+
 ## [0.5.0] - 2023-10-26
 
 ### Added
 - "Disable Tracking Mask" in PolySpatial settings allows omitting objects from tracking based on their layer at creation.
 - Added support for new shader graph nodes: Channel Mixer, Replace Color, White Balance, Fade Transition, Channel Mask, Color Mask, Flip
+- Added support for platform base text rendering through the new UnityPolySpatialPlatformText component.
 - Added Trail support for BakeToMesh Particle Systems.
 - Added support for RGB/linear conversions to shader graph Colorspace Conversion node.
+- Enhanced Volume camera scene view interaction by adding several handles that let you visualize the position and volume of a volume camera when not selected in the hierarchy.
+- Added support for the Refract shader graph node.
 
 ### Changed
 - Fixed a typo in PolySpatialPointerKind: `indDirectPinch` -> `indirectPinch`
 - Fixed an issue accessing UV1 in shader graphs.
 - Changed the access modifier of the serialized fields in the PolySpatial settings (class `PolySpatialSettings`) from public to private and renamed these members to include the `m_` prefix.
 - Renamed the PolySpatial settings `Enable Default Volume Camera` to `Auto-Create Volume Camera`.
+- Updated XRTouchSpaceInteractor to use SpatialPointerDevice. Fixed XRIDebug sample scene.
 
 ### Deprecated
+- Uses of PolySpatialTouchspace upgraded from warning to error.
 
 ### Removed
+- Removed obsolete UI and hand tracking building blocks.
 
 ### Fixed
 - Fixed an issue where deleting a canvas renderer instance at runtime could cause an OOB exception in the tracker.
@@ -34,6 +103,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed invalid transforms for shader graph Transform and Transformation Matrix nodes used in vertex stage.
 - Fixed issue with sprite textures wrapping at edges.
 - Fixed an issue where `SpatialPointerDevice` events reported the Began phase for more than one frame in a row.
+- Fixed KeyNotFoundException when using CustomRenderTextures.
+- Fixed an issue with shader graphs failing to load if their filenames contained hyphens.
+- Fixed output of Normal Vector/Tangent Vector/Bitangent Vector nodes in Tangent space.
+- Fixed crash in visionOS when there were more submeshes in a Mesh than materials in the MeshRenderer.
+- Fixed shader graph Dither node.
+- Fixed an issue where `UnityPlayModeInput` would override the current `UIInputModule`'s action asset to null, breaking UI input in play mode.
+- Fixed failure to transfer float shader graph properties in "Slider" mode.
+- Fixed issue with invalid properties when materials/shader graphs had duplicate names.
+- Fixed an issue with the SDF Text Shader that was causing brightening in text coloration.
+- Fixed issue with global texture properties in shader graphs.
 
 ### Security
 

@@ -1,16 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Packages/com.unity.polyspatial/Editor/PlayToDevice/PlayToDeviceWindow.uss?fileID=7433441132597879392&amp;guid=a882e690f2642fd41b82babf6557875b&amp;type=3#PlayToDeviceWindow" />
-    <ui:VisualElement name="InfoBoxSeparator" style="height: 1px;" />
-    <ui:Box name="InfoBox" style="padding-left: 3px; padding-right: 3px; padding-top: 1px; padding-bottom: 3px;">
+    <ui:Box name="InfoBox" style="padding-left: 3px; padding-right: 3px; padding-top: 1px; padding-bottom: 3px; border-right-width: 0; border-left-width: 0;">
         <ui:Label text="Info Text" name="InfoTextLabel" style="white-space: normal;" />
         <ui:VisualElement name="Space" style="height: 6px;" />
-        <ui:Label text="DownloadLink" name="DownloadLinkLabel" />
+        <ui:Label text="DocumentationLink" name="DocumentationLinkLabel" style="padding-left: 1px; white-space: normal;" />
     </ui:Box>
-    <ui:VisualElement name="InfoBoxSeparator" style="height: 1px;" />
     <ui:Foldout text="Connection">
         <ui:HelpBox message-type="Warning" name="ConnectionHelpBox" />
         <ui:Toggle label="Connect To Player on Play Mode" name="ConnectToPlayerToggle" />
         <ui:TextField picking-mode="Ignore" label="Player IP" value="127.0.0.1" name="PlayerIPField" />
+        <ui:UnsignedIntegerField label="Connection Timeout (Seconds)" value="5" name="ConnectionTimeoutField"/>
         <ui:HelpBox message-type="Error" name="InvalidIPHelpBox" style="margin-left: 193px;" />
     </ui:Foldout>
 </ui:UXML>

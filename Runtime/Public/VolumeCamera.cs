@@ -20,6 +20,7 @@ namespace Unity.PolySpatial
     //
     // In unbounded mode, everything works similar, except that the volume camera and volume renderer each define an
     // unbounded 3-space rather than a bounded 3-space volume.
+    [Icon("Camera Gizmo")]
     public class VolumeCamera : MonoBehaviour
     {
         internal static string PolySpatialLayerName => "PolySpatial";
@@ -95,13 +96,13 @@ namespace Unity.PolySpatial
         /// <summary>
         /// The mode this volume camera will display its content in, Bounded or Unbounded.
         /// </summary>
-        public PolySpatialVolumeCameraMode OutputMode => ResolvedOutputConfiguration.Mode;
+        public PolySpatialVolumeCameraMode OutputMode => ResolvedOutputConfiguration?.Mode ?? PolySpatialVolumeCameraMode.Unbounded;
 
         /// <summary>
         /// The dimensions in meters of the actual output size of the volume camera. May be different than Dimensions,
         /// in which case the space described by Dimensions is scaled to fit the OutputDimensions.
         /// </summary>
-        public Vector3 OutputDimensions => ResolvedOutputConfiguration.Dimensions;
+        public Vector3 OutputDimensions => ResolvedOutputConfiguration?.Dimensions ?? Vector3.one;
 
         public Vector3 Dimensions
         {
@@ -350,16 +351,71 @@ namespace Unity.PolySpatial
             return ok;
         }
 
-        [Conditional("UNITY_EDITOR")]
-        internal void OnDrawGizmosSelected()
+#if UNITY_EDITOR
+        void OnDrawGizmosSelected()
         {
-            // Draw a green box that shows what will be included in 1x1x1 units of canonical space
             if (OutputMode == PolySpatialVolumeCameraMode.Bounded)
             {
                 Gizmos.matrix = gameObject.transform.localToWorldMatrix;
-                Gizmos.color = new Color(0, 0.5f, 0, 0.2f);
+                Gizmos.color = new Color(1, 1, 1, 0.1f);
                 Gizmos.DrawCube(Vector3.zero, Dimensions);
             }
         }
+
+        void OnDrawGizmos()
+        {
+            Gizmos.DrawIcon(transform.position, "Camera Gizmo");
+            DrawVolumeEdges(Dimensions);
+        }
+
+        void DrawVolumeEdges(Vector3 dimensions)
+        {
+            if (OutputMode != PolySpatialVolumeCameraMode.Bounded || OutputConfiguration == null)
+                return;
+
+            Gizmos.matrix = gameObject.transform.localToWorldMatrix;
+            Gizmos.color = new Color(1, 1, 1, 0.7f);
+            const float edgeSize = 0.2f;//as a percentage
+
+            var halfDimX = dimensions.x / 2;
+            var halfDimY = dimensions.y / 2;
+            var halfDimZ = dimensions.z / 2;
+
+            var corner1 = new Vector3(halfDimX, halfDimY, halfDimZ);
+            var corner2 = new Vector3(halfDimX, halfDimY, -halfDimZ);
+            var corner3 = new Vector3(halfDimX, -halfDimY, halfDimZ);
+            var corner4 = new Vector3(halfDimX, -halfDimY, -halfDimZ);
+            var corner5 = new Vector3(-halfDimX, halfDimY, halfDimZ);
+            var corner6 = new Vector3(-halfDimX, halfDimY, -halfDimZ);
+            var corner7 = new Vector3(-halfDimX, -halfDimY, halfDimZ);
+            var corner8 = new Vector3(-halfDimX, -halfDimY, -halfDimZ);
+
+            DrawSegment(corner1, corner2, edgeSize);
+            DrawSegment(corner1, corner3, edgeSize);
+            DrawSegment(corner1, corner5, edgeSize);
+            DrawSegment(corner2, corner4, edgeSize);
+            DrawSegment(corner2, corner6, edgeSize);
+            DrawSegment(corner3, corner4, edgeSize);
+            DrawSegment(corner3, corner7, edgeSize);
+            DrawSegment(corner4, corner8, edgeSize);
+            DrawSegment(corner5, corner6, edgeSize);
+            DrawSegment(corner5, corner7, edgeSize);
+            DrawSegment(corner6, corner8, edgeSize);
+            DrawSegment(corner7, corner8, edgeSize);
+        }
+
+        void DrawSegment(Vector3 a, Vector3 b, float edgeSizePct)
+        {
+            var ab = new Vector3(b.x - a.x, b.y - a.y, b.z - a.z);
+            var sqrLengthAB =  Vector3.SqrMagnitude(ab);
+
+            Vector3 edgeVec = ab / sqrLengthAB * sqrLengthAB * edgeSizePct/2;
+            Vector3 segmentPosA = new Vector3(a.x + edgeVec.x, a.y + edgeVec.y, a.z + edgeVec.z);
+            Vector3 segmentPosB = new Vector3(b.x - edgeVec.x, b.y - edgeVec.y, b.z - edgeVec.z);
+
+            Gizmos.DrawLine(a, segmentPosA);
+            Gizmos.DrawLine(b, segmentPosB);
+        }
+#endif
     }
 }
