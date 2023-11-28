@@ -229,21 +229,28 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 // Connect inputs, and gather up subgraph roots for further processing
                 foreach (var port in shaderNode.Ports)
                 {
-                    // Attach input and/or systemInputs
-                    if (m_Graph.Inputs.Contains(port.name)
-                        || m_Graph.SystemInputs.Contains(port.name))
+                    // Both inputs and connected nodes have node representations (inputs as default values).
+                    if (m_Graph.TryGetConnectedNode(shaderNode, port.name, out var connectedNode))
                     {
-                        string nodeConnection = $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = </MaterialX/Materials/{materialNode.name}.inputs:{port.name}>";
-                        AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
-                    }
-                    // Attach connected nodes
-                    else if (m_Graph.TryGetConnectedNode(shaderNode, port.name, out var connectedNode))
-                    {
-                        string nodeConnection =
-                            $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
-                            $"</MaterialX/Materials/{materialNode.name}/{connectedNode.name}.outputs:{connectedNode.outputName}>";
-                        AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
-                        rootNodes.Add(connectedNode);
+                        if (m_Graph.Inputs.Contains(connectedNode.name) ||
+                            m_Graph.SystemInputs.Contains(connectedNode.name))
+                        {
+                            // Attach input and/or systemInputs.
+                            string nodeConnection =
+                                $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
+                                $"</MaterialX/Materials/{materialNode.name}.inputs:{connectedNode.name}>";
+                            AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
+                        }
+                        else
+                        {
+                            // Attach connected node.
+                            string nodeConnection =
+                                $"{GetUsdDataType(port.datatype)} inputs:{port.name}.connect = " +
+                                $"</MaterialX/Materials/{materialNode.name}/{connectedNode.name}" +
+                                $".outputs:{connectedNode.outputName}>";
+                            AppendIndentedLine(nodeConnection, shaderScope.ChildIndentLevel);
+                            rootNodes.Add(connectedNode);
+                        }
                     }
                     else
                     {

@@ -7,14 +7,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class CameraAdapter : ANodeAdapter<CameraNode>
     {
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
 #if DISABLE_MATERIALX_EXTENSIONS
             QuickNode.AddImplicitPropertyFromNode(PolySpatialShaderGlobals.WorldSpaceCameraPos, MtlxDataTypes.Vector3, node, graph, externals, "Position");
             QuickNode.AddImplicitPropertyFromNode(PolySpatialShaderGlobals.WorldSpaceCameraDir, MtlxDataTypes.Vector3, node, graph, externals, "Direction");
 #else
             // Flip camera position in z to switch from RealityKit to Unity coordinate space.
-            QuickNode.CompoundOp(node, graph, externals, "CameraPosition", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "CameraPosition", new()
             {
                 ["Position"] = new(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3, new()
                 {

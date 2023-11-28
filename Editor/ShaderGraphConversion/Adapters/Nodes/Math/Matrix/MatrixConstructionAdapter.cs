@@ -13,7 +13,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
 #endif
         }
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             NodeDef matrix22 = new(MtlxNodeTypes.RealityKitCombine2, MtlxDataTypes.Matrix22, new()
             {
@@ -53,7 +54,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 ["in3"] = new ExternalInputDef("M2"),
                 ["in4"] = new ExternalInputDef("M3"),
             });
-            QuickNode.CompoundOp(node, graph, externals, "MatrixConstruction", MatrixSplitAdapter.GetAxis(node) switch
+            QuickNode.CompoundOp(
+                node, graph, externals, sgContext, "MatrixConstruction", MatrixSplitAdapter.GetAxis(node) switch
             {
                 MatrixAxis.Row => new()
                 {

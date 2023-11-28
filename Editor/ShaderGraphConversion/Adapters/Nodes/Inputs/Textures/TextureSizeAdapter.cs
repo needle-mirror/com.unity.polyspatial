@@ -36,7 +36,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return $"TextureSize{texturePropertyName}";
         }
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             // Unconnected texture slots correspond to implicit properties.
             var slot = NodeUtils.GetPrimaryInput(node);
@@ -45,7 +46,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
     
             var sizeNodeName = EnsureTextureSizeProperty(slot, graph);
 
-            QuickNode.CompoundOp(node, graph, externals, "TextureSize", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "TextureSize", new()
             {
                 ["Width"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
                 {

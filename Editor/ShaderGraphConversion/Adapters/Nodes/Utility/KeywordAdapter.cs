@@ -26,7 +26,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             };
         }
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             if (node is not KeywordNode knode)
                 return;
@@ -67,7 +68,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     };
                 }
 
-                QuickNode.CompoundOp(node, graph, externals, hint, new()
+                QuickNode.CompoundOp(node, graph, externals, sgContext, hint, new()
                 {
                     ["Out"] = new(MtlxNodeTypes.IfEqual, outputType, GetInputDefs(0)),
                 });

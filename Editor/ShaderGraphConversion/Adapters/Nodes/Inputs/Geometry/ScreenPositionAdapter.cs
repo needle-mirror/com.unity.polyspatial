@@ -189,7 +189,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
 
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             if (node is not ScreenPositionNode snode)
                 return;
@@ -239,7 +240,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 // Refer to:
                 // https://github.cds.internal.unity3d.com/unity/unity/blob/c70d8d41fa33940eff956ece3020687378e5be1a/Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl#L20
-                QuickNode.CompoundOp(node, graph, externals, "ScreenPosition", new()
+                QuickNode.CompoundOp(node, graph, externals, sgContext, "ScreenPosition", new()
                 {
                     ["Base"] = baseDef,
                     ["BaseW"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
@@ -299,7 +300,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, scale, scale, 0.0f, 0.0f),
             });
 
-            QuickNode.CompoundOp(node, graph, externals, "ScreenPosition", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "ScreenPosition", new()
             {
                 ["Base"] = baseDef,
                 ["Out"] = snode.screenSpaceType switch

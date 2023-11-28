@@ -87,6 +87,40 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return slot.RawDisplayName();
         }
 
+        internal static ShaderStage GetEffectiveShaderStage(MaterialSlot slot, SubGraphContext sgContext)
+        {
+            if (sgContext == null)
+                return UnityEditor.Graphing.NodeUtils.GetEffectiveShaderStage(slot, false);
+            
+            // Fragment is the default stage, so any occurrence of Vertex means that's the only one we can use.
+            foreach (var edge in slot.owner.owner.GetEdges(slot.slotReference))
+            {
+                switch (edge.inputSlot.node)
+                {
+                    case SubGraphOutputNode:
+                    {
+                        var output = NodeUtils.GetOutputByName(sgContext.Node, edge.inputSlot.slot.RawDisplayName());
+                        if (GetEffectiveShaderStage(output, sgContext.Parent) == ShaderStage.Vertex)
+                            return ShaderStage.Vertex;
+                        break;
+                    }
+                    case var node:
+                    {
+                        List<MaterialSlot> outputs = new();
+                        node.GetOutputSlots(outputs);
+                        foreach (var output in outputs)
+                        {
+                            if (GetEffectiveShaderStage(output, sgContext) == ShaderStage.Vertex)
+                                return ShaderStage.Vertex;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            return ShaderStage.Fragment;
+        }
+
         internal static TextureSamplerState GetPropertyRedirectedTextureSamplerState(
             MaterialSlot slot, SubGraphContext sgContext)
         {
@@ -499,7 +533,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             string hint, string expr, Dictionary<string, string> inputTypeOverrides = null)
         {
             CompoundOp(
-                node, graph, externals, hint, CompoundOpParser.Parse(node, sgContext, expr, inputTypeOverrides));
+                node, graph, externals, sgContext, hint,
+                CompoundOpParser.Parse(node, sgContext, expr, inputTypeOverrides));
         }
 
         // Creates nodes and connections for a compound operation: that is, one that is defined in
@@ -508,9 +543,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
         // multiple internal nodes.
         internal static void CompoundOp(
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
-            string hint, Dictionary<string, NodeDef> nodeDefs)
+            SubGraphContext sgContext, string hint, Dictionary<string, NodeDef> nodeDefs)
         {
-            CompoundOpContext ctx = new(node, graph, externals, hint, nodeDefs);
+            CompoundOpContext ctx = new(node, graph, externals, sgContext, hint, nodeDefs);
 
             List<MaterialSlot> outputSlots = new();
             node.GetOutputSlots(outputSlots);

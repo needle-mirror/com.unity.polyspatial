@@ -299,6 +299,8 @@ namespace Tests.Runtime.Functional.Components
                 mesh.DestroyAppropriately();
                 material.DestroyAppropriately();
 
+                yield return null;
+
                 void ClearIfDeleted(IAssetManager mgr, ref PolySpatialAssetID aid) {
                     if (aid != PolySpatialAssetID.InvalidAssetID && mgr.GetRegisteredResource(aid) == null)
                     {

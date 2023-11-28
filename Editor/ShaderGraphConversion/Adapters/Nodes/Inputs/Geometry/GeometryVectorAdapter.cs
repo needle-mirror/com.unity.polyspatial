@@ -5,12 +5,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
     abstract class GeometryVectorAdapter<T> : ANodeAdapter<T>
         where T : GeometryNode
     { 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             switch (((GeometryNode)node).space)
             {
                 case CoordinateSpace.View:
-                    QuickNode.CompoundOp(node, graph, externals, Hint, new()
+                    QuickNode.CompoundOp(node, graph, externals, sgContext, Hint, new()
                     {
                         ["Out"] = new(MtlxNodeTypes.Normalize, MtlxDataTypes.Vector3, new()
                         {
@@ -41,7 +42,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                 case CoordinateSpace.Tangent:
                     // Tangent space vectors don't need to be flipped.
-                    QuickNode.CompoundOp(node, graph, externals, Hint, new()
+                    QuickNode.CompoundOp(node, graph, externals, sgContext, Hint, new()
                     {
                         ["Out"] = new(NodeType, MtlxDataTypes.Vector3, new()
                         {
@@ -51,7 +52,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     break;
 
                 case var space:
-                    QuickNode.CompoundOp(node, graph, externals, Hint, new()
+                    QuickNode.CompoundOp(node, graph, externals, sgContext, Hint, new()
                     {
                         // Flip z coordinate to convert RealityKit space to Unity space.
                         ["Out"] = new(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3, new()

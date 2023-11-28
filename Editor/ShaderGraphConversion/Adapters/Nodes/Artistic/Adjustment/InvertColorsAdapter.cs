@@ -2,7 +2,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class InvertColorsAdapter : ANodeAdapter<InvertColorsNode>
     {
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@16.0/manual/Invert-Colors-Node.html
@@ -19,7 +20,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (invertColorsNode.alphaChannel.isOn && values.Length > 3)
                 values[3] = 1.0f;
                 
-            QuickNode.CompoundOp(node, graph, externals, "InvertColors", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "InvertColors", new()
             {
                 ["Out"] = new(MtlxNodeTypes.Absolute, dataType, new()
                 {

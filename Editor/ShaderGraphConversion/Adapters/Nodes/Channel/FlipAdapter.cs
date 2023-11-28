@@ -2,14 +2,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class FlipAdapter : ANodeAdapter<FlipNode>
     {
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Flip-Node.html
             var dataType = NodeUtils.GetDataTypeName(node);
             var flipNode = (FlipNode)node;
             
-            QuickNode.CompoundOp(node, graph, externals, "ChannelMask", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "ChannelMask", new()
             {
                 ["Out"] = new(MtlxNodeTypes.Multiply, dataType, new()
                 {

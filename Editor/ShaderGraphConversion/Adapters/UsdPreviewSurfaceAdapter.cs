@@ -252,8 +252,6 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                             if (!typeMap.TryGetValue(block.descriptor.name, out portType))
                                 portType = MtlxDataTypes.Vector3;
-
-                            ignoreIfNotConnected = true;
                             break;
                         
                         case SpecialRules.AdditiveColor:

@@ -13,7 +13,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 "axis", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(node);
         }
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             var dataType = SlotUtils.GetDataTypeName(NodeUtils.GetPrimaryInput(node));
             var elementLength = MtlxDataTypes.GetElementLength(dataType);
@@ -63,7 +64,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 }
                 nodeDefs[$"M{i}"] = outputDef;
             }
-            QuickNode.CompoundOp(node, graph, externals, "MatrixSplit", nodeDefs);
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "MatrixSplit", nodeDefs);
         }
     }
 }

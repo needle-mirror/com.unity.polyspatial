@@ -7,6 +7,34 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2023-11-28
+
+### Added
+
+### Changed
+- Changed license check modal option from "See Pricing" to "Learn about a 30-day trial".
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fixed typo on project settings on the "Hide PolySpatial Preview Objects In Scene" field.
+- Fix one frame pink textures on scene transition.
+- Cleanup BakeToMesh Particle and Trail meshes when Gameobject set inactive.
+- Fixed issue with shader graph dependencies of prefabs in Resources not being included in the build.
+- Fixed KeyNotFoundException when using multiple instances of the same input property in a shader subgraph.
+- Fixed MaterialX generation for shader graph Swizzle nodes that input and output floats.
+- Fixed default values for shader graph custom interpolators.
+- Fixed failure to display warnings for unsupported nodes in shader subgraphs.
+- Fix for shader graph input properties connected directly to outputs.
+- Fixed issue with using Transform/Transformation Matrix nodes in subgraphs outputting to vertex stage.
+- Fixed offset for bounded volumes using PolySpatial Volume to World/PolySpatial Lighting nodes.
+- Fixed offset z coordinates for box/sphere/capsule colliders.
+- Fixed crash related to overlapping colliders.
+
+### Security
+
 ## [0.6.2] - 2023-11-13
 
 ### Added

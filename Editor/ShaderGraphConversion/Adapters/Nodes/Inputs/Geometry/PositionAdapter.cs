@@ -16,9 +16,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
             _ => ""
         };
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
-            QuickNode.CompoundOp(node, graph, externals, "Position", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "Position", new()
             {
                 // Convert to vector4 with w = 1
                 ["Out"] = new(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()

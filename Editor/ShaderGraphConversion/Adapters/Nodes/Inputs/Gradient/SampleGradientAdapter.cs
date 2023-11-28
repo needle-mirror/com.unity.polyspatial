@@ -107,7 +107,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@16.0/manual/Sample-Gradient-Node.html
-            QuickNode.CompoundOp(node, graph, externals, "SampleGradient", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "SampleGradient", new()
             {
                 ["Out"] = new(MtlxNodeTypes.Combine2, MtlxDataTypes.Color4, new()
                 {

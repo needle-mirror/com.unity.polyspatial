@@ -109,12 +109,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return slot.isConnected ? "Only the default screen position is supported." : "";
         }
 
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Dither-Node.html
             var dataType = NodeUtils.GetDataTypeName(node);
-            QuickNode.CompoundOp(node, graph, externals, "Dither", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "Dither", new()
             {
                 ["UV"] = new(
                     MtlxNodeTypes.RealityKitSurfaceScreenPosition, MtlxDataTypes.Vector4, new(), "screenPosition"),

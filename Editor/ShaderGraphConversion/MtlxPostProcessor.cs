@@ -145,7 +145,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
                                 if (!(inputSlot.owner is KeywordNode keywordNode &&
                                     keywordNode.keyword.referenceName == KeywordAdapter.k_MaterialXKeywordReferenceName &&
                                     inputSlot.RawDisplayName() == "Off") &&
-                                    (inputSlot.owner is BlockNode || AffectsMaterialXOutput(inputSlot.owner)))
+                                    (inputSlot.owner is BlockNode || inputSlot.owner is SubGraphOutputNode ||
+                                        AffectsMaterialXOutput(inputSlot.owner)))
                                 {
                                     return true;
                                 }

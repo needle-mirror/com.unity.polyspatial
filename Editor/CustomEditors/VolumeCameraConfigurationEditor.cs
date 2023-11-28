@@ -33,7 +33,7 @@ namespace UnityEditor.PolySpatial.Internals
             m_IsUniformScaleProperty = serializedObject.FindProperty("m_IsUniformScale");
 
             m_InitialDimension = m_DimensionsProperty.vector3Value;
-            m_DimensionsContent = new GUIContent(m_DimensionsProperty.displayName, m_DimensionsProperty.tooltip);
+            m_DimensionsContent = new GUIContent($"{m_DimensionsProperty.displayName} (meters)", m_DimensionsProperty.tooltip);
         }
 
         public override void OnInspectorGUI()

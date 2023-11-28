@@ -4,7 +4,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class ChannelMaskAdapter : ANodeAdapter<ChannelMaskNode>
     {
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Channel-Mask-Node.html
@@ -39,7 +40,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 outputDef = new($"combine{length}", dataType, inputDefs);
             }
 
-            QuickNode.CompoundOp(node, graph, externals, "ChannelMask", new()
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "ChannelMask", new()
             {
                 ["Out"] = outputDef,
             });

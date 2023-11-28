@@ -1,7 +1,7 @@
 {
   "name": "com.unity.polyspatial",
   "displayName": "PolySpatial",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "unity": "2022.3",
   "unityRelease": "11f1",
   "description": "The Unity PolySpatial runtime includes platform-agnostic code required to build and deploy apps for supported platforms.\nUnity PolySpatial and visionOS support is only available to Unity Pro, Unity Enterprise, and Unity Industry users. Learn more about these plans at unity.com/pricing.",
@@ -21,16 +21,16 @@
     "changelog": ""
   },
   "_upm": {
-    "changelog": "### Added\n\n### Changed\n\n### Deprecated\n\n### Removed\n\n### Fixed\n- Fixed issue where simulation app may crash when connecting to PlayToDevice.\n- Fixed pink materials in Play Mode for AR Foundation simulation environments.\n- Fixed color spaces for sddhader graph color properties and PolySpatialPlatformText.\n\n### Security"
+    "changelog": "### Added\n\n### Changed\n- Changed license check modal option from \"See Pricing\" to \"Learn about a 30-day trial\".\n\n### Deprecated\n\n### Removed\n\n### Fixed\n- Fixed typo on project settings on the \"Hide PolySpatial Preview Objects In Scene\" field.\n- Fix one frame pink textures on scene transition.\n- Cleanup BakeToMesh Particle and Trail meshes when Gameobject set inactive.\n- Fixed issue with shader graph dependencies of prefabs in Resources not being included in the build.\n- Fixed KeyNotFoundException when using multiple instances of the same input property in a shader subgraph.\n- Fixed MaterialX generation for shader graph Swizzle nodes that input and output floats.\n- Fixed default values for shader graph custom interpolators.\n- Fixed failure to display warnings for unsupported nodes in shader subgraphs.\n- Fix for shader graph input properties connected directly to outputs.\n- Fixed issue with using Transform/Transformation Matrix nodes in subgraphs outputting to vertex stage.\n- Fixed offset for bounded volumes using PolySpatial Volume to World/PolySpatial Lighting nodes.\n- Fixed offset z coordinates for box/sphere/capsule colliders.\n- Fixed crash related to overlapping colliders.\n\n### Security"
   },
   "upmCi": {
-    "footprint": "84fea285e5cb6c0cde970a48b2af007940a9eab8"
+    "footprint": "30e7740a3d90acd29c9af5e70b023876f410f8fc"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@0.6/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/quantum.git",
     "type": "git",
-    "revision": "d865d526b87f703ed1b9f4dd1dc7828188ea75c5"
+    "revision": "81e2894f340510275c7a62c85782cc27bfcd2142"
   },
   "samples": [
     {

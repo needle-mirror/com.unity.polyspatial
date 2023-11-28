@@ -33,13 +33,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
             // Unique and stable property name, should be identical to the material property name.
             string nodeName = pnode.property.referenceName;
 
-            // Property Nodes are special, in that we only need 1 to exist for each property.
-            if (graph.HasNode(nodeName))
-                return;
-
             var slot = node.FindSlot<MaterialSlot>(0);
             externals.AddExternalPort(slot.slotReference, nodeName);
 
+            // Property Nodes are special, in that we only need 1 to exist for each property.
+            if (graph.HasNode(nodeName))
+                return;
+                
             string nodeType = MtlxNodeTypes.Constant;
             string dataType = (pnode.property.propertyType == PropertyType.Color) ?
                 MtlxDataTypes.Color4 : SlotUtils.GetDataTypeName(slot);

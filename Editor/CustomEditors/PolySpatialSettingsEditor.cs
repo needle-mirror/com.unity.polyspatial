@@ -12,6 +12,9 @@ namespace UnityEditor.PolySpatial
     [CustomEditor(typeof(PolySpatialSettings))]
     class PolySpatialSettingsEditor : Editor
     {
+        static readonly GUIContent k_ColliderSyncLayerMaskContent = new GUIContent("PolySpatial Collider Layer Mask");
+        static readonly GUIContent k_HidePolySpatialPreviewObjectsInSceneContent = new GUIContent("Hide PolySpatial Preview Objects In Scene");
+        
         static readonly HashSet<Type> k_TrackerTypes = new();
         static readonly string[] k_TrackerTypeNames;
 
@@ -100,12 +103,13 @@ namespace UnityEditor.PolySpatial
                         Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
                 }
                 EditorGUILayout.PropertyField(m_AutoCreateVolumeCameraProperty, m_AutoCreateVolumeCameraContent);
-                EditorGUILayout.PropertyField(m_ColliderSyncLayerMaskProperty, new GUIContent("PolySpatial Collider Layer Mask"));
+                EditorGUILayout.PropertyField(m_ColliderSyncLayerMaskProperty, k_ColliderSyncLayerMaskContent);
                 EditorGUILayout.PropertyField(m_ParticleModeProperty);
 
                 EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
                 EditorGUILayout.PropertyField(m_TransmitDebugInfoProperty);
-                EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene);
+                // Due to CamelCase drawing in the UI for serialized properties we have to manually override the property label to write PolySpatial instead of "Poly Spatial"
+                EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene, k_HidePolySpatialPreviewObjectsInSceneContent);
                 EditorGUILayout.PropertyField(m_DisableTrackingMaskProperty);
             }
 

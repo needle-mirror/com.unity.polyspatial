@@ -24,13 +24,7 @@ namespace UnityEditor.PolySpatial.Internals
     {
         public override int callbackOrder => 0;
 
-        internal struct AssetGUIDMapEntryEditor
-        {
-            internal PolySpatialSceneAssetMap.AssetGUIDMapEntry asset;
-            internal string guid;
-        }
-
-        static private Dictionary<string, List<AssetGUIDMapEntryEditor>> s_SceneAssets;
+        static private Dictionary<string, Dictionary<string, string>> s_SceneAssetLocators;
 
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
@@ -56,57 +50,68 @@ namespace UnityEditor.PolySpatial.Internals
 
         void PrepareForBuildInner(BuildPlayerContext buildPlayerContext)
         {
-            s_SceneAssets = new();
+            s_SceneAssetLocators = new();
             bool firstScene = true;
             foreach (var scene in buildPlayerContext.BuildPlayerOptions.scenes)
             {
-                var guids = new List<AssetGUIDMapEntryEditor>();
+                Dictionary<string, string> locators = new();
                 var sceneDeps = ContentBuildInterface.CalculatePlayerDependenciesForScene(scene, new(), new());
                 foreach (var obj in sceneDeps.referencedObjects)
-                    CollectAssetReference(buildPlayerContext, obj.guid.ToString(), guids);
+                {
+                    CollectAssetReference(buildPlayerContext, obj.guid.ToString(), locators);
+                }
 
                 if (firstScene)
                 {
                     // Add manager and resource dependencies to the first scene, so that the object mapping for those
                     // becomes available right from the beginning.
-                    var managerDeps = ContentBuildInterface.CalculatePlayerDependenciesForGameManagers(new(),
-                        new(), new());
+                    var managerDeps = ContentBuildInterface.CalculatePlayerDependenciesForGameManagers(
+                        new(), new(), new());
                     foreach (var obj in managerDeps.referencedObjects)
-                        CollectAssetReference(buildPlayerContext, obj.guid.ToString(), guids);
+                    {
+                        CollectAssetReference(buildPlayerContext, obj.guid.ToString(), locators);
+                    }
 
                     foreach (var resourcePath in new[] { "", "Packages/com.unity.polyspatial/Resources" })
                     {
                         var resources = Resources.LoadAll(resourcePath);
                         foreach (var obj in resources)
                         {
-                            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guid, out long _))
-                                CollectAssetReference(buildPlayerContext, guid, guids);
+                            var objPath = AssetDatabase.GetAssetOrScenePath(obj);
+                            foreach (var dependencyPath in AssetDatabase.GetDependencies(objPath, true))
+                            {
+                                var guid = AssetDatabase.AssetPathToGUID(dependencyPath);
+                                CollectAssetReference(buildPlayerContext, guid, locators);
+                            }
                         }
                     }
 
                     firstScene = false;
                 }
 
-                s_SceneAssets[scene] = guids;
+                s_SceneAssetLocators[scene] = locators;
             }
         }
 
-        private static void CollectAssetReference(BuildPlayerContext buildPlayerContext, string guid,
-            List<AssetGUIDMapEntryEditor> guids)
+        private static void CollectAssetReference(
+            BuildPlayerContext buildPlayerContext, string guid, Dictionary<string, string> locators)
         {
+            if (locators.ContainsKey(guid))
+                return;
+
             var paths = EditorPolySpatialAssetProvider.GetPathsForAsset(guid);
             if (paths.Length == 0)
                 return;
-            guids.Add(new()
-            {
-                guid = guid,
+
+            locators.Add(
+                guid,
                 // Unity stores secondary artifacts for Assets in the Library folder. All secondary artifacts for an asset
                 // are stored next to each other, with the artifact key as an extension. So, we just store the base path
                 // without the extension here, which will let us find all the artifacts with a wildcard search. We don't use
                 // Path.GetFileNameWithoutExtension, as there are usually multiple extensions
                 // (ie: [file hash].[key].polyspatialasset).
-                asset = { locator = paths[0].Substring(0, paths[0].IndexOf('.')) }
-            });
+                paths[0].Substring(0, paths[0].IndexOf('.'))
+            );
 
             foreach (var p in paths)
             {
@@ -117,17 +122,17 @@ namespace UnityEditor.PolySpatial.Internals
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            // If s_SceneAssets wasn't initialized, we are building an asset bundle.
-            if (s_SceneAssets == null)
+            // If s_SceneAssetLocators wasn't initialized, we are building an asset bundle.
+            if (s_SceneAssetLocators == null)
                 return;
 
-            var guids = s_SceneAssets[scene.path];
+            var locators = s_SceneAssetLocators[scene.path];
             var qam = new GameObject().AddComponent<PolySpatialSceneAssetMap>();
-            qam.m_SerializedAssetGUIDMap = new List<PolySpatialSceneAssetMap.AssetGUIDMapEntry>(guids.Select(agme =>
-                new PolySpatialSceneAssetMap.AssetGUIDMapEntry
+            qam.m_SerializedAssetGUIDMap = new(locators.Select(entry =>
+                new PolySpatialSceneAssetMap.AssetGUIDMapEntry()
                 {
-                    locator = agme.asset.locator,
-                    obj = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(agme.guid))
+                    locator = entry.Value,
+                    obj = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(entry.Key))
                 }
             ).Where(agme => agme.obj != null));
         }

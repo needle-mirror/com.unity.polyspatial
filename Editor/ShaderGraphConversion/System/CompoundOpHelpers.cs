@@ -10,6 +10,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal AbstractMaterialNode Node { get; private set; }
         internal MtlxGraphData Graph { get; private set; }
         internal ExternalEdgeMap Externals { get; private set; }
+        internal SubGraphContext SGContext { get; private set; }
         internal string Hint { get; private set; }
         internal Dictionary<string, NodeDef> NodeDefs { get; private set; }
         internal Dictionary<string, MtlxNodeData> NodeData  { get; private set; } = new();
@@ -17,11 +18,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         internal CompoundOpContext(
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals,
-            string hint, Dictionary<string, NodeDef> nodeDefs)
+            SubGraphContext sgContext, string hint, Dictionary<string, NodeDef> nodeDefs)
         {
             Node = node;
             Graph = graph;
             Externals = externals;
+            SGContext = sgContext;
             Hint = hint;
             NodeDefs = nodeDefs;
         }
@@ -513,7 +515,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             foreach (var output in outputs)
             {
                 // Fragment is the default stage, so any occurrence of Vertex means that's the only one we can use.
-                if (UnityEditor.Graphing.NodeUtils.GetEffectiveShaderStage(output, false) == ShaderStage.Vertex)
+                if (SlotUtils.GetEffectiveShaderStage(output, ctx.SGContext) == ShaderStage.Vertex)
                 {
                     Vertex.AddPortsAndEdges(ctx, nodeDatum, nodeKey, inputKey);
                     return;
