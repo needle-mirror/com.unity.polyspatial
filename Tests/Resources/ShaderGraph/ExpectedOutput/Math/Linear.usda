@@ -19,7 +19,6 @@ def "MaterialX"
                 uniform token info:id = "ND_realitykit_unlit_surfaceshader"
                 bool inputs:applyPostProcessToneMap = 0
                 color3f inputs:color.connect = </MaterialX/Materials/USD_Linear/CastSwizzleFromCombine_RGBNode_a72c99b6da4149f586dbba8a5b2c5130ToSR_Linearcolor.outputs:out>
-                float inputs:opacity = 1
                 token outputs:out
             }
 

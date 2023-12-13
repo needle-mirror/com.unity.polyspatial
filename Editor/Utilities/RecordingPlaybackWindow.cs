@@ -3,7 +3,6 @@ using System.IO;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEditor.SceneManagement;
-using UnityEditor.SearchService;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,6 +46,9 @@ namespace UnityEditor.PolySpatial.Utilities
 
         [NonSerialized]
         string[] m_AvailableRecordings;
+
+        [SerializeField]
+        int m_TargetFrameRate = 0;
 
         // we use this to prevent the UI to display wrong information when the user is switching from edit to play mode
         bool m_IsInPlayMode;
@@ -175,15 +177,13 @@ namespace UnityEditor.PolySpatial.Utilities
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         EditorGUILayout.LabelField("Recording Framerate", GUILayout.Width(150));
-                        PolySpatialSettings.SessionRecordingFrameRate = EditorGUILayout.IntField(PolySpatialSettings.SessionRecordingFrameRate);
+                        m_TargetFrameRate = EditorGUILayout.IntField(m_TargetFrameRate);
 
-                        if (PolySpatialSettings.SessionRecordingFrameRate < 0)
-                        {
-                            PolySpatialSettings.SessionRecordingFrameRate = 0;
-                        }
+                        if (m_TargetFrameRate < 0)
+                            m_TargetFrameRate = 0;
                     }
 
-                    using (new EditorGUI.DisabledScope(PolySpatialSettings.SessionRecordingFrameRate == 0))
+                    using (new EditorGUI.DisabledScope(m_TargetFrameRate <= 0))
                     {
                         EditorGUIUtility.labelWidth = position.width - 35;
                         PolySpatialSettings.SessionLimitFramerateWhenRecording =
@@ -238,54 +238,20 @@ namespace UnityEditor.PolySpatial.Utilities
                         break;
                 }
             }
-            // Only showing this message if there are no recordings available
-            else if (AvailableRecordings().Length == 0)
-            {
-                var msg = "Press Record to enter play mode and start recording. Framerate is set to record at: ";
-
-                if (PolySpatialSettings.SessionRecordingFrameRate == 0)
-                {
-                    msg += "Unlimited";
-                }
-                else
-                {
-                    msg += PolySpatialSettings.SessionRecordingFrameRate + " fps";
-                }
-
-                EditorGUILayout.HelpBox(msg, MessageType.Info);
-            }
             else
             {
-                var msg = "Framerate is set to record at: ";
-
-                if (PolySpatialSettings.SessionRecordingFrameRate == 0)
-                {
-                    msg += "Unlimited";
-                }
-                else
-                {
-                    msg += PolySpatialSettings.SessionRecordingFrameRate + " fps";
-                }
-
-                EditorGUILayout.HelpBox(msg, MessageType.Info);
+                // Only showing this message if there are no recordings available
+                var msg = AvailableRecordings().Length == 0 ? "Press Record to enter play mode and start recording. " : "";
+                EditorGUILayout.HelpBox($"{msg}Framerate is set to record at: {GetFpsMessage()}", MessageType.Info);
             }
         }
 
-        void Record()
+        private string GetFpsMessage()
         {
-            if (!Directory.Exists(k_RecordingBaseDir))
-                Directory.CreateDirectory(k_RecordingBaseDir);
+            if (m_TargetFrameRate == 0 || !PolySpatialSettings.SessionLimitFramerateWhenRecording)
+                return "Unlimited";
 
-            var recordingPath = GenerateRecordingPath();
-
-            PolySpatialSettings.SessionRecordingMode = PolySpatialSettings.RecordingMode.Record;
-            PolySpatialSettings.SessionRecordingFilePath = recordingPath;
-
-            EditorUtility.SetDirty(PolySpatialSettings.instance);
-            AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);
-
-            Debug.Log($"Recording to {recordingPath}");
-            EditorApplication.EnterPlaymode();
+            return m_TargetFrameRate + " fps";
         }
 
         void Play()
@@ -317,10 +283,33 @@ namespace UnityEditor.PolySpatial.Utilities
                                #if UNITY_EDITOR
                                EditorSceneManager.GetActiveScene().name + "-" +
                                #else
-                               SceneManager.GetActiveScene().name + " - " + 
+                               SceneManager.GetActiveScene().name + " - " +
                                #endif
                                DateTime.Now.ToString("yyyy-M-d-HHmmss") + ".qrec";
            return Path.Combine(k_RecordingBaseDir, recordingFile);
+        }
+
+        void Record()
+        {
+            if (!Directory.Exists(k_RecordingBaseDir))
+                Directory.CreateDirectory(k_RecordingBaseDir);
+
+            var recordingPath = GenerateRecordingPath();
+
+            PolySpatialSettings.SessionRecordingMode = PolySpatialSettings.RecordingMode.Record;
+            PolySpatialSettings.SessionRecordingFilePath = recordingPath;
+
+            // set framerate before starting PlayMode
+            if (PolySpatialSettings.SessionLimitFramerateWhenRecording && m_TargetFrameRate > 0)
+                PolySpatialSettings.SessionRecordingFrameRate = m_TargetFrameRate;
+            else
+                PolySpatialSettings.SessionRecordingFrameRate = 0;
+
+            EditorUtility.SetDirty(PolySpatialSettings.instance);
+            AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);
+
+            Debug.Log($"Recording to {recordingPath}");
+            EditorApplication.EnterPlaymode();
         }
 
         void RefreshRecordingList()

@@ -120,7 +120,7 @@ namespace UnityEditor.PolySpatial.Validation
                 {
                     var buttonContent = hasAutoFixIssues ? styles.FixObjectButtonContent : styles.DisabledFixObjectButtonContent;
                     if (GUILayout.Button(buttonContent))
-                        PolySpatialSceneValidator.AutoFixGameObject(instanceID);
+                        EditorApplication.delayCall += () => PolySpatialSceneValidator.AutoFixGameObject(instanceID);
                 }
             }
         }

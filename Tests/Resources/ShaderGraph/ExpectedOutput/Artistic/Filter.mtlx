@@ -44,7 +44,6 @@
     <realitykit_unlit name = "SR_Filter" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromFadeTransition_FadeNode_0ecd4252ee504ed3b5099285785465ddToSR_Filtercolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Filter" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_FilterVertex" />

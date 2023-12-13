@@ -555,7 +555,7 @@ public class PolySpatialStateValidator
         // Client side objects that are in the PolySpatial layer
         // are not tracked and so will not have matching items
         // in the host list.
-        if (go.layer == LayerMask.NameToLayer(PolySpatialCore.PolySpatialLayerName))
+        if (go.layer == LayerMask.NameToLayer(PolySpatialUnityBackend.PolySpatialLayerName))
             return false;
 
         // Can't use GameObjectTracker.IsTrackedGameObjectInstanceID because we may not have actually

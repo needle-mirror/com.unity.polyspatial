@@ -276,7 +276,7 @@
         <input name = "in" type = "color3" nodename = "PolySpatialLighting_BaseColorNode_b8043f58f0084f4bbf5634b3be8a003a" />
     </convert>
     <dot name = "PolySpatialLighting_BaseColorNode_b8043f58f0084f4bbf5634b3be8a003a" type = "color3">
-        <input name = "in" type = "color3" value = "0.2140411,0.2140411,0.2140411" />
+        <input name = "in" type = "color3" nodename = "PolySpatialEnvironmentRadiance_DiffuseRadianceNode_9c67d4cdb41b43fba344b9ef76223215" />
     </dot>
     <multiply name = "PolySpatialLighting_oneMinusReflectivityNode_b8043f58f0084f4bbf5634b3be8a003a" type = "float">
         <input name = "in1" type = "float" value = "0.96" />
@@ -1292,24 +1292,19 @@
         <input name = "in" type = "vector4" nodename = "PolySpatialLighting_encodedIlluminanceNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <image name = "PolySpatialLighting_encodedIlluminanceNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
+    <RealityKitTexture2D name = "PolySpatialLighting_encodedIlluminanceNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
         <input name = "file" type = "filename" nodename = "polySpatial_Lightmap" />
-        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_encodedIlluminance_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "filtertype" type = "string" value = "linear" />
-        <input name = "uaddressmode" type = "string" value = "clamp" />
-        <input name = "vaddressmode" type = "string" value = "clamp" />
-    </image>
+        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_uvNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "min_filter" type = "string" value = "linear" />
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "u_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "v_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2D>
     <constant name = "polySpatial_Lightmap" type = "filename">
         <input name = "value" type = "filename" value = "ERR" />
     </constant>
-    <add name = "PolySpatialLighting_encodedIlluminance_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_encodedIlluminance_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" value = "0,1" />
-    </add>
-    <multiply name = "PolySpatialLighting_encodedIlluminance_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_uvNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" value = "1,-1" />
-    </multiply>
     <add name = "PolySpatialLighting_uvNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_uv_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_uv_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
@@ -1436,24 +1431,19 @@
         <input name = "in" type = "vector4" nodename = "PolySpatialLighting_directionNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <image name = "PolySpatialLighting_directionNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
+    <RealityKitTexture2D name = "PolySpatialLighting_directionNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
         <input name = "file" type = "filename" nodename = "polySpatial_LightmapInd" />
-        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_direction_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "filtertype" type = "string" value = "linear" />
-        <input name = "uaddressmode" type = "string" value = "clamp" />
-        <input name = "vaddressmode" type = "string" value = "clamp" />
-    </image>
+        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_uvNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "min_filter" type = "string" value = "linear" />
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "u_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "v_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2D>
     <constant name = "polySpatial_LightmapInd" type = "filename">
         <input name = "value" type = "filename" value = "ERR" />
     </constant>
-    <add name = "PolySpatialLighting_direction_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_direction_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" value = "0,1" />
-    </add>
-    <multiply name = "PolySpatialLighting_direction_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_uvNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" value = "1,-1" />
-    </multiply>
     <max name = "PolySpatialLighting_bakedGI_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in1" type = "float" value = "0.0001" />
         <input name = "in2" type = "float" nodename = "PolySpatialLighting_bakedGI_in2_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
@@ -1503,27 +1493,25 @@
         <input name = "in" type = "vector4" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <convert name = "PolySpatialLighting_environmentColor_in1_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
-        <input name = "in" type = "color4" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-    </convert>
-    <realitykit_image_lod name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "color4">
+    <RealityKitTexture2DLOD name = "PolySpatialLighting_environmentColor_in1_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
         <input name = "file" type = "filename" nodename = "polySpatial_SpecCube0" />
-        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "level" type = "float" nodename = "PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "s_address" type = "string" value = "clamp_to_edge" />
-        <input name = "t_address" type = "string" value = "clamp_to_edge" />
-        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "lod" type = "float" nodename = "PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "u_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "v_wrap_mode" type = "string" value = "clamp_to_edge" />
         <input name = "min_filter" type = "string" value = "linear" />
-        <input name = "mip_filter" type = "string" value = "linear" />
-    </realitykit_image_lod>
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2DLOD>
     <constant name = "polySpatial_SpecCube0" type = "filename">
         <input name = "value" type = "filename" value = "ERR" />
     </constant>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
@@ -1581,31 +1569,31 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "y" />
     </swizzle>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp28Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" nodename = "PolySpatialLighting___Tmp34Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp27Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "z" />
     </swizzle>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp24Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" value = "0" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp24Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "x" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.08333334" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp31Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "-0.5,-0.08333334" />
     </multiply>
@@ -1617,11 +1605,11 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "zy" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.25" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp31Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,-0.08333334" />
     </multiply>
@@ -1659,27 +1647,27 @@
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp33Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "-0.5,-0.08333334" />
     </multiply>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp29Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp30Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" nodename = "PolySpatialLighting___Tmp34Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp25Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" value = "0" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp25Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "y" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.4166667" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp32Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.08333334" />
     </multiply>
@@ -1691,11 +1679,11 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xz" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.5833333" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in1_in1_in1_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp32Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,-0.08333334" />
     </multiply>
@@ -1733,27 +1721,25 @@
         <input name = "in" type = "vector4" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xyz" />
     </swizzle>
-    <convert name = "PolySpatialLighting_environmentColor_in2_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
-        <input name = "in" type = "color4" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-    </convert>
-    <realitykit_image_lod name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "color4">
+    <RealityKitTexture2DLOD name = "PolySpatialLighting_environmentColor_in2_in1_in1_inNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector4">
         <input name = "file" type = "filename" nodename = "polySpatial_SpecCube1" />
-        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "level" type = "float" nodename = "PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "s_address" type = "string" value = "clamp_to_edge" />
-        <input name = "t_address" type = "string" value = "clamp_to_edge" />
-        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "texcoord" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "lod" type = "float" nodename = "PolySpatialLighting_mipNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "u_wrap_mode" type = "string" value = "clamp_to_edge" />
+        <input name = "v_wrap_mode" type = "string" value = "clamp_to_edge" />
         <input name = "min_filter" type = "string" value = "linear" />
-        <input name = "mip_filter" type = "string" value = "linear" />
-    </realitykit_image_lod>
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2DLOD>
     <constant name = "polySpatial_SpecCube1" type = "filename">
         <input name = "value" type = "filename" value = "ERR" />
     </constant>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoordNode_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
@@ -1766,31 +1752,31 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "y" />
     </swizzle>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp39Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" nodename = "PolySpatialLighting___Tmp45Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting___Tmp38Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "z" />
     </swizzle>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp35Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" value = "0" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp35Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "x" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.08333334" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp42Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "-0.5,-0.08333334" />
     </multiply>
@@ -1802,11 +1788,11 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "zy" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.25" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in1_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp42Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,-0.08333334" />
     </multiply>
@@ -1844,27 +1830,27 @@
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp44Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "-0.5,-0.08333334" />
     </multiply>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp40Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" nodename = "PolySpatialLighting___Tmp41Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" nodename = "PolySpatialLighting___Tmp45Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
-    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <ifgreater name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "value1" type = "float" nodename = "PolySpatialLighting___Tmp36Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "value2" type = "float" value = "0" />
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
-        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+        <input name = "in2" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
     </ifgreater>
     <swizzle name = "PolySpatialLighting___Tmp36Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "float">
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "y" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.4166667" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in1_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp43Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.08333334" />
     </multiply>
@@ -1876,11 +1862,11 @@
         <input name = "in" type = "vector3" nodename = "PolySpatialLighting_reflectVectorNode_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "channels" type = "string" value = "xz" />
     </swizzle>
-    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
-        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
+    <add name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in2Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,0.5833333" />
     </add>
-    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
+    <multiply name = "PolySpatialLighting_environmentColor_in2_in1_in1_in_texcoord_in2_in1_in2_in1Node_b0ebbb9d1dd84952ab627a76c4627d5e" type = "vector2">
         <input name = "in1" type = "vector2" nodename = "PolySpatialLighting___Tmp43Node_b0ebbb9d1dd84952ab627a76c4627d5e" />
         <input name = "in2" type = "vector2" value = "0.5,-0.08333334" />
     </multiply>
@@ -1995,6 +1981,48 @@
     <realitykit_viewdirection name = "ViewDirection_Out_in1Node_d93144b5e96344949541b4a2e5030981" type = "vector3">
         <input name = "space" type = "string" value = "world" />
     </realitykit_viewdirection>
+    <realitykit_environment_radiance name = "PolySpatialEnvironmentRadiance_DiffuseRadianceNode_9c67d4cdb41b43fba344b9ef76223215" type = "color3">
+        <input name = "baseColor" type = "color3" nodename = "PolySpatialEnvironmentRadiance_BaseColorNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "roughness" type = "half" nodename = "PolySpatialEnvironmentRadiance_DiffuseRadiance_roughnessNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "specular" type = "half" nodename = "PolySpatialEnvironmentRadiance_DiffuseRadiance_specularNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "metallic" type = "half" nodename = "PolySpatialEnvironmentRadiance_DiffuseRadiance_metallicNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </realitykit_environment_radiance>
+    <dot name = "PolySpatialEnvironmentRadiance_BaseColorNode_9c67d4cdb41b43fba344b9ef76223215" type = "color3">
+        <input name = "in" type = "color3" value = "1,1,1" />
+    </dot>
+    <convert name = "PolySpatialEnvironmentRadiance_DiffuseRadiance_roughnessNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_RoughnessNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
+    <dot name = "PolySpatialEnvironmentRadiance_RoughnessNode_9c67d4cdb41b43fba344b9ef76223215" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <convert name = "PolySpatialEnvironmentRadiance_DiffuseRadiance_specularNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_SpecularNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
+    <dot name = "PolySpatialEnvironmentRadiance_SpecularNode_9c67d4cdb41b43fba344b9ef76223215" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <convert name = "PolySpatialEnvironmentRadiance_DiffuseRadiance_metallicNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_MetallicNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
+    <dot name = "PolySpatialEnvironmentRadiance_MetallicNode_9c67d4cdb41b43fba344b9ef76223215" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <realitykit_environment_radiance name = "PolySpatialEnvironmentRadiance_SpecularRadianceNode_9c67d4cdb41b43fba344b9ef76223215" type = "color3">
+        <input name = "baseColor" type = "color3" nodename = "PolySpatialEnvironmentRadiance_BaseColorNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "roughness" type = "half" nodename = "PolySpatialEnvironmentRadiance_SpecularRadiance_roughnessNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "specular" type = "half" nodename = "PolySpatialEnvironmentRadiance_SpecularRadiance_specularNode_9c67d4cdb41b43fba344b9ef76223215" />
+        <input name = "metallic" type = "half" nodename = "PolySpatialEnvironmentRadiance_SpecularRadiance_metallicNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </realitykit_environment_radiance>
+    <convert name = "PolySpatialEnvironmentRadiance_SpecularRadiance_roughnessNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_RoughnessNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
+    <convert name = "PolySpatialEnvironmentRadiance_SpecularRadiance_specularNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_SpecularNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
+    <convert name = "PolySpatialEnvironmentRadiance_SpecularRadiance_metallicNode_9c67d4cdb41b43fba344b9ef76223215" type = "half">
+        <input name = "in" type = "float" nodename = "PolySpatialEnvironmentRadiance_MetallicNode_9c67d4cdb41b43fba344b9ef76223215" />
+    </convert>
     <GeometryModification name = "SR_UtilityVertex" type = "vertexshader">
     </GeometryModification>
     <realitykit_pbr name = "SR_Utility" type = "surfaceshader">
@@ -2006,7 +2034,6 @@
         <input name = "roughness" type = "float" nodename = "SR_Utility_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_pbr>
     <surfacematerial name = "USD_Utility" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_UtilityVertex" />

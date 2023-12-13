@@ -203,7 +203,6 @@
     <realitykit_unlit name = "SR_Logic" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_d4e684d4bdb54b6ea9787cb05d7ec7f9ToSR_Logiccolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Logic" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_LogicVertex" />

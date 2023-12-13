@@ -7,12 +7,64 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2023-12-13
+
+### Added
+- Added PolySpatial Environment Radiance shader graph node.
+- Added support for more shader graph nodes: Blackbody, Dielectric Specular, Checkerboard, Rounded Polygon, Rounded Rectangle, and Ambient.
+- Added "Unseparated" option for PolySpatial Sorting Group depth pass property.
+- Explicitly present the dimensions of output volume configurations as meters.
+- Added support for bold text in Text Mesh Pro components.
+- Added a list of available devices in your network to the **Play To Device** window (menu **Window > PolySpatial > Play To Device**). You can select the desired device to connect or add direct connections. 
+- Added PolySpatial Image Based Light/Image Based Light Receiver components.
+- Added support for blended tilesheet animations for BakeToMesh Particle Systems.
+- Added support for custom user assigned font for PolySpatialTextComponent.
+- Added backup implementation for Text Component to support macOS and iOS.
+- Added support for Emission map and color for unlit URP particle shader.
+- Added additional documentation for RenderTexture usage.
+- Added documentation for shader graph properties and targets.
+- Added 10 volume camera configurations to PlayToDevice project. If a connecting app requests a camera configuration that is not available, it will be rerouted based on cubic volume and aspect ratio. 
+- Volume Cameras now have opened/closed/resized/focused events that code can respond to.
+- Volume Cameras can have their volumetric windows explicitly opened and closed.
+
+### Changed
+- Renamed VolumeCameraConfiguration to VolumeCameraWindowConfiguration
+- All packages now require 2022.3.15f1 and later (rather than 2022.3.11f1 and later) to pick up fixes for various memory leaks made in 15f1.
+
+### Deprecated
+
+### Removed
+- Support for Unity versions earlier than 2022.3.11f1.
+
+### Fixed
+- Fixed issue with opaque shader graphs not being rendered before transparent ones.
+- Fixed issue with shader graph view space positions/normals/tangents/bitangents being read in vertex stage.
+- Fixed issue with shader graphs sampling vertex colors in meshes that lack explicit ones.
+- Fixed issue with clipped UI elements (such as scroll view contents) with non-identity rotations.
+- Fixed issue with Lit shaders being generated when material type set to Unlit.
+- Fixed ArgumentNullException when using non-directional lightmaps.
+- Fix for visual discontinuities when updating meshes/textures.
+- Fixed issue with "Fix This Object" button in the Inspector view throwing errors.
+- Fixed issue with `VolumeCamera` scene handles being drawn in the wrong position when not in the origin.
+- Fixed issue with input and UI objects when outside the viewable area of the main camera.
+- Fixed performance regression related to light and reflection probe tracking.
+- Fixed issue with persisting Particle Systems GameObject post-deletion.
+- Fixed issue with wrapping on 3D textures sampled in clamp mode in shader graphs.
+- Fixed issue with VolumeToWorld transform being overwritten when keywords/globals were changed.
+- Fixed warnings from shader graph imports in URP package.
+- Fixed issue with standard shaders (e.g. URP/Lit, URP/Unlit) using alpha-to-coverage when semi-transparent.
+- Fixed Recording & Playback framerate limiting using built-in framerate controls
+- Fixed issue with PolySpatialSortingGroup items not being sorted correctly if their activation state changes.
+- Fixed crash on disabling GameObjects containing particle systems.
+- Fixed color space issue with HDR shader graph properties.
+
+### Security
+
 ## [0.6.3] - 2023-11-28
 
 ### Added
 
 ### Changed
-- Changed license check modal option from "See Pricing" to "Learn about a 30-day trial".
 
 ### Deprecated
 
@@ -32,6 +84,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed offset for bounded volumes using PolySpatial Volume to World/PolySpatial Lighting nodes.
 - Fixed offset z coordinates for box/sphere/capsule colliders.
 - Fixed crash related to overlapping colliders.
+- Fixed issue where textures were not being unregistered after material unregistration due to a scene unload.
 
 ### Security
 
@@ -48,7 +101,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fixed issue where simulation app may crash when connecting to PlayToDevice.
 - Fixed pink materials in Play Mode for AR Foundation simulation environments.
-- Fixed color spaces for sddhader graph color properties and PolySpatialPlatformText.
+- Fixed color spaces for shader graph color properties and PolySpatialPlatformText.
 
 ### Security
 
@@ -72,6 +125,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added partial support for Particle System's custom vertex streams.
 - Added PolySpatialGroundingShadow component.
+- Added support for Normal From Texture shader graph node.
 
 ### Changed
 
@@ -80,6 +134,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 ### Fixed
+- Fixed Volume Camera Configuration Handles for rotated Volume Cameras
 - Fix over-release of shader assets.
 - Fixed failure to use native texture/render texture path on visionOS.
 - Fix initial UGUI display issue when properties don't change at start.
@@ -95,6 +150,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed shader compilation error with PolySpatial Lighting Node with reflection probes enabled and baked lighting disabled.
 - Fixed NullReferenceException when building asset bundles containing scenes.
 - Fixed an issue where touch screen input would report more active touches than expected if a user initiates a pinch/gaze and the hand that initiated the interaction is no longer tracked.
+- Fixed issue where input in Game View would not work if the EventSystem was switched to use the new Input system UI module.
+- Fixed KeyNotFoundException when using multiple instances of the same input property in a shader subgraph.
+- Fixed MaterialX generation for shader graph Swizzle nodes that input and output floats.
+- Fixed color spaces for shader graph color properties and PolySpatialPlatformText.
+- Fixed default values for shader graph custom interpolators.
+- Fixed issue with using Transform/Transformation Matrix nodes in subgraphs outputting to vertex stage.
+- Fix for shader graph input properties connected directly to outputs.
+- Fixed failure to display warnings for unsupported nodes in shader subgraphs.
 
 ### Security
 

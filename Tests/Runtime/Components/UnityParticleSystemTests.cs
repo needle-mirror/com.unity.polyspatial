@@ -35,6 +35,9 @@ namespace Tests.Runtime.Functional.Components
 
         GameObject GetBackingGameObjectForParticleSystem(ParticleSystem ps)
         {
+            if (m_ParticleSystem == null)
+                return null;
+            
             if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
                 return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
 
@@ -259,6 +262,8 @@ namespace Tests.Runtime.Functional.Components
 
         internal override IEnumerator InternalUnityTearDown()
         {
+            var go = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+
             if (m_SubEmitterParticleSystems != null)
                 Object.Destroy(m_SubEmitterParticleSystems);
             if (m_SubEmitterObject != null)
@@ -269,6 +274,8 @@ namespace Tests.Runtime.Functional.Components
                 Object.Destroy(m_TestGameObject);
 
             yield return base.InternalUnityTearDown();
+            yield return null;
+            Assert.IsTrue(go == null);
             PolySpatialSettings.instance.ParticleMode = m_previousParticleMode;
         }
 
@@ -536,9 +543,6 @@ namespace Tests.Runtime.Functional.Components
             var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
             particleRenderer.trailMaterial = material;
             yield return null;
-
-            var go = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
-            Object.Destroy(go);
         }
     }
 }

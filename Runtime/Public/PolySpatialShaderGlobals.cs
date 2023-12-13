@@ -17,7 +17,10 @@ namespace Unity.PolySpatial
         public const string ScreenParams = "_ScreenParams";
         public const string ViewMatrix = "UNITY_MATRIX_V";
         public const string ProjectionMatrix = "UNITY_MATRIX_P";
-        
+        public const string AmbientSkyColor = "unity_AmbientSky";
+        public const string AmbientEquatorColor = "unity_AmbientEquator";
+        public const string AmbientGroundColor = "unity_AmbientGround";
+
         public const int LightCount = 4;
         public const string LightColorPrefix = "polySpatial_LightColor";
         public const string LightPositionPrefix = "polySpatial_LightPosition";
@@ -25,7 +28,6 @@ namespace Unity.PolySpatial
         public const string LightAttenPrefix = "polySpatial_LightAtten";
 
         public const string GlossyEnvironmentColor = "polySpatial_GlossyEnvironmentColor";
-        public const string VolumeToWorld = "polySpatial_VolumeToWorld";
 
         internal static readonly int TimeID = Shader.PropertyToID(Time);
         internal static readonly int SinTimeID = Shader.PropertyToID(SinTime);
@@ -38,8 +40,10 @@ namespace Unity.PolySpatial
         internal static readonly int ScreenParamsID = Shader.PropertyToID(ScreenParams);
         internal static readonly int ViewMatrixID = Shader.PropertyToID(ViewMatrix);
         internal static readonly int ProjectionMatrixID = Shader.PropertyToID(ProjectionMatrix);
+        internal static readonly int AmbientSkyColorID = Shader.PropertyToID(AmbientSkyColor);
+        internal static readonly int AmbientEquatorColorID = Shader.PropertyToID(AmbientEquatorColor);
+        internal static readonly int AmbientGroundColorID = Shader.PropertyToID(AmbientGroundColor);
         internal static readonly int GlossyEnvironmentColorID = Shader.PropertyToID(GlossyEnvironmentColor);
-        internal static readonly int VolumeToWorldID = Shader.PropertyToID(VolumeToWorld);
 
         internal static readonly int[] LightColorIDs = GetLightPropertyIDs(LightColorPrefix);
         internal static readonly int[] LightPositionIDs = GetLightPropertyIDs(LightPositionPrefix);
@@ -69,8 +73,10 @@ namespace Unity.PolySpatial
             [ScreenParams] = PropertyType.Vector,
             [ViewMatrix] = PropertyType.Matrix,
             [ProjectionMatrix] = PropertyType.Matrix,
+            [AmbientSkyColor] = PropertyType.Vector,
+            [AmbientEquatorColor] = PropertyType.Vector,
+            [AmbientGroundColor] = PropertyType.Vector,
             [GlossyEnvironmentColor] = PropertyType.Vector,
-            [VolumeToWorld] = PropertyType.Matrix,
         };
 
         static Dictionary<PropertyType, string[]> s_Names = new();

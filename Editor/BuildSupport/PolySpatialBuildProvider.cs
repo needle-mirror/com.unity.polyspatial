@@ -1,3 +1,5 @@
+using Platforms.Unity;
+using TMPro;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEditor.Build;
@@ -48,6 +50,21 @@ namespace UnityEditor.PolySpatial.Internals
             return true;
         }
 
+        void MapAllFontAssets()
+        {
+            var assetGuids = AssetDatabase.FindAssets("t:TMP_FontAsset");
+
+            foreach (var assetGuid in assetGuids)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
+                var tmpFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+                if (tmpFontAsset != null)
+                {
+                    PolySpatialFontManager.Instance.UpdateFontAssociation(tmpFontAsset, PolySpatialPlatformTextUtility.FontForTmpFont(tmpFontAsset));
+                }
+            }
+        }
+
         /// <summary>
         /// Called before a build is started.
         /// </summary>
@@ -58,6 +75,9 @@ namespace UnityEditor.PolySpatial.Internals
 
             if (!ShouldProcessBuild(report))
                 return;
+
+            MapAllFontAssets();
+            PolySpatialFontManager.WriteFontMapToAssets();
         }
 
         /// <summary>
@@ -70,6 +90,8 @@ namespace UnityEditor.PolySpatial.Internals
 
             if (!ShouldProcessBuild(report))
                 return;
+
+            PolySpatialFontManager.RemoveFontMapFromAssets();
         }
 
         private static bool IsPlayerSettingsDirty()

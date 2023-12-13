@@ -470,7 +470,6 @@
     <realitykit_unlit name = "SR_hsv" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_00f72d4538b64277b273c0ce08329809ToSR_hsvcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_hsv" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_hsvVertex" />

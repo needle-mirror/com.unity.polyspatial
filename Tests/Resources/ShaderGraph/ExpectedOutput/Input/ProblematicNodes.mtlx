@@ -736,7 +736,6 @@
     <realitykit_unlit name = "SR_ProblematicNodes" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromDither_OutNode_757ba7213e054b3183b3908a30a8522cToSR_ProblematicNodescolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_ProblematicNodes" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_ProblematicNodesVertex" />

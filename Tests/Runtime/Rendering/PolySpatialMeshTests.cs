@@ -58,7 +58,8 @@ namespace Tests.Runtime.Functional.Rendering
 
         static void ConvertAndCheckMesh(Mesh mesh)
         {
-            MeshConversionHelpers.ConvertMeshAssetToPolySpatialMesh(mesh, convertedMesh =>
+            var representation = new AssetRepresentation(mesh);
+            MeshConversionHelpers.ConvertMeshAssetToPolySpatialMesh(representation, (assetId, convertedMesh) =>
              {
                  Assert.IsTrue(convertedMesh.subMeshes.HasValue);
                  Assert.AreEqual(mesh.subMeshCount, convertedMesh.subMeshes.Value.Length,
@@ -247,7 +248,7 @@ namespace Tests.Runtime.Functional.Rendering
         {
             m_Mesh = new Mesh();
             m_Mesh.vertices = s_PlaneVertices;
-            
+
             // Use an index buffer of size 100, but only use the six elements at the end.
             const int kIndexBufferSize = 100;
             m_Mesh.SetIndexBufferParams(kIndexBufferSize, IndexFormat.UInt32);

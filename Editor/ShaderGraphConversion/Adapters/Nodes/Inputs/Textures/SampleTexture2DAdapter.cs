@@ -2,38 +2,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class SampleTexture2DAdapter : AbstractSampleTexture2DAdapter<SampleTexture2DNode>
     {
-        internal static string GetFilterType(TextureSamplerState samplerState)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
-            return samplerState.filter switch
-            {
-                TextureSamplerState.FilterMode.Point => "closest",
-                _ => "linear",
-            };
-        }
-
-        internal static string GetAddressMode(TextureSamplerState samplerState)
-        {
-            return samplerState.wrap switch
-            {
-                TextureSamplerState.WrapMode.Clamp => "clamp",
-                TextureSamplerState.WrapMode.Mirror => "mirror",
-                _ => "periodic",
-            };
-        }
-
-        protected override string NodeType => MtlxNodeTypes.Image;
-
-        protected override TextureType GetTextureType(SampleTexture2DNode node)
-        {
-            return node.textureType;
-        }
-
-        protected override void AddSamplerState(MtlxNodeData nodeData, TextureSamplerState samplerState)
-        {
-            nodeData.AddPortString("filtertype", MtlxDataTypes.String, GetFilterType(samplerState));
-            var addressMode = GetAddressMode(samplerState);
-            nodeData.AddPortString("uaddressmode", MtlxDataTypes.String, addressMode);
-            nodeData.AddPortString("vaddressmode", MtlxDataTypes.String, addressMode);
+            // Reference implementation:
+            // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Sample-Texture-2D-Node.html
+            QuickNode.CompoundOp(
+                node, graph, externals, sgContext, "SampleTexture2D",
+                GetExpr("SAMPLE_TEXTURE2D(Texture, Sampler, UV)", ((SampleTexture2DNode)node).textureType));
         }
     }
 }

@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Internals
 {
-    [CustomEditor(typeof(VolumeCameraConfiguration))]
-    class VolumeCameraConfigurationEditor : Editor
+    [CustomEditor(typeof(VolumeCameraWindowConfiguration))]
+    class VolumeCameraWindowConfigurationEditor : Editor
     {
         const int k_MinInspectorWidth = 212;
         const string k_ResourcesFolderMessage = "This asset is not inside of a <b>Resources</b> folder. For this <b>VolumeCameraConfiguration</b> asset to be usable at runtime, it must be moved under a <b>Resources</b> folder.";
@@ -57,7 +57,7 @@ namespace UnityEditor.PolySpatial.Internals
                 var toggleContent = EditorGUIUtility.TrTextContent("", (isUniformScale ? "Disable" : "Enable") + " constrained proportions");
                 var position = EditorGUILayout.GetControlRect(true);
 
-                var targetObjectMode = ((VolumeCameraConfiguration)target).Mode;
+                var targetObjectMode = ((VolumeCameraWindowConfiguration)target).Mode;
 
                 Vector3 dimensions;
 

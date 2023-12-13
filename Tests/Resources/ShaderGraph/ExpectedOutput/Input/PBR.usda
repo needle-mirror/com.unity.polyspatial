@@ -18,14 +18,13 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_realitykit_pbr_surfaceshader"
                 color3f inputs:baseColor.connect = </MaterialX/Materials/USD_PBR/CastSwizzleFromMetalReflectanceNode_5ac8fc39cdbb48a7aa387e63c6e705fdToSR_PBRbaseColor.outputs:out>
-                float inputs:metallic = 1
+                float inputs:metallic.connect = </MaterialX/Materials/USD_PBR/DielectricSpecular_OutNode_3128ffc307f34ce392960ae17427012b.outputs:out>
                 color3f inputs:emissiveColor = (0, 0, 0)
                 float inputs:ambientOcclusion = 1
                 float inputs:specular = 0.5
                 float inputs:roughness.connect = </MaterialX/Materials/USD_PBR/SR_PBR_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
-                float inputs:opacity = 1
                 token outputs:out
             }
 
@@ -48,6 +47,13 @@ def "MaterialX"
                 uniform token info:id = "ND_constant_vector3"
                 float3 inputs:value = (1, 0.766, 0.336)
                 float3 outputs:out
+            }
+
+            def Shader "DielectricSpecular_OutNode_3128ffc307f34ce392960ae17427012b"
+            {
+                uniform token info:id = "ND_constant_float"
+                float inputs:value = 0.041
+                float outputs:out
             }
 
             def Shader "SR_PBR_roughness_OnesComplement"

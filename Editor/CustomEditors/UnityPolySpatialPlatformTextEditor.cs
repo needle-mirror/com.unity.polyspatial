@@ -1,4 +1,6 @@
 using System;
+using System.Security.Permissions;
+using TMPro;
 using Unity.PolySpatial;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -14,6 +16,7 @@ namespace UnityEditor.PolySpatial.Internals
 
         RectIntField m_Insets;
         Vector2Field m_CanvasSize;
+        PropertyField m_TmpFontAsset;
 
         public override VisualElement CreateInspectorGUI()
         {
@@ -29,6 +32,11 @@ namespace UnityEditor.PolySpatial.Internals
             m_CanvasSize = customInspector.Q<Vector2Field>(name: "CanvasSize");
             if (m_CanvasSize != null)
                 m_CanvasSize.RegisterValueChangedCallback(OnCanvasSizeChanged);
+
+            m_TmpFontAsset = customInspector.Q<PropertyField>(name: "TmProFontAsset");
+            if (m_TmpFontAsset != null)
+                m_TmpFontAsset.RegisterValueChangeCallback(OnTmpFontAssetChanged);
+
             return customInspector;
         }
 
@@ -82,6 +90,18 @@ namespace UnityEditor.PolySpatial.Internals
             insets.height = bottom;
 
             m_Insets.SetValueWithoutNotify(insets);
+        }
+
+        void OnTmpFontAssetChanged(SerializedPropertyChangeEvent evt)
+        {
+            if (m_TmpFontAsset == null)
+                return;
+
+            var text = target as UnityPolySpatialPlatformText;
+            if (text == null)
+                return;
+
+            text.UpdateFontAssets();
         }
     }
 }

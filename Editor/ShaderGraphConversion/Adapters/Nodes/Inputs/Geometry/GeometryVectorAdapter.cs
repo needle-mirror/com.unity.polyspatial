@@ -26,14 +26,18 @@ namespace UnityEditor.ShaderGraph.MaterialX
                                         {
                                             ["in"] = new InlineInputDef(NodeType, MtlxDataTypes.Vector3, new()
                                             {
-                                                ["space"] = new StringInputDef("world"),
+                                                ["space"] = new StringInputDef("object"),
                                             }),
                                         }),
                                         ["in2"] = new FloatInputDef(MtlxDataTypes.Vector4, 1.0f, 1.0f, 1.0f, 0.0f),
                                     }),
-                                    ["mat"] = new InlineInputDef(
-                                        MtlxNodeTypes.RealityKitSurfaceWorldToView, MtlxDataTypes.Matrix44,
-                                        new(), "worldToView"),
+                                    ["mat"] = new PerStageInputDef(
+                                        new InlineInputDef(
+                                            MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                                            MtlxDataTypes.Matrix44, new(), "modelToView"),
+                                        new InlineInputDef(
+                                            MtlxNodeTypes.RealityKitSurfaceModelToView,
+                                            MtlxDataTypes.Matrix44, new(), "modelToView")),
                                 }),
                             }),
                         }),

@@ -71,7 +71,6 @@
         <input name = "roughness" type = "float" nodename = "SR_Interpolation_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_pbr>
     <surfacematerial name = "USD_Interpolation" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_InterpolationVertex" />

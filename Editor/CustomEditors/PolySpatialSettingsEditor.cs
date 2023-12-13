@@ -14,7 +14,7 @@ namespace UnityEditor.PolySpatial
     {
         static readonly GUIContent k_ColliderSyncLayerMaskContent = new GUIContent("PolySpatial Collider Layer Mask");
         static readonly GUIContent k_HidePolySpatialPreviewObjectsInSceneContent = new GUIContent("Hide PolySpatial Preview Objects In Scene");
-        
+
         static readonly HashSet<Type> k_TrackerTypes = new();
         static readonly string[] k_TrackerTypeNames;
 
@@ -24,13 +24,13 @@ namespace UnityEditor.PolySpatial
         SerializedProperty m_EnablePolySpatialRuntimeProperty;
         GUIContent m_EnablePolySpatialRuntimeContent;
 
-        SerializedProperty m_DefaultVolumeCameraConfigurationProperty;
+        SerializedProperty m_DefaultVolumeCameraWindowConfigurationProperty;
         SerializedProperty m_AutoCreateVolumeCameraProperty;
         GUIContent m_AutoCreateVolumeCameraContent;
         SerializedProperty m_ColliderSyncLayerMaskProperty;
         SerializedProperty m_ParticleModeProperty;
+        SerializedProperty m_TrackLightAndReflectionProbesProperty;
 
-        SerializedProperty m_EnableStatisticsProperty;
         SerializedProperty m_TransmitDebugInfoProperty;
         SerializedProperty m_HidePolySpatialPreviewObjectsInScene;
 
@@ -40,6 +40,9 @@ namespace UnityEditor.PolySpatial
         SavedBool m_TrackersFoldoutState;
 
         SerializedProperty m_ForceValidationForCurrentBuildTargetProperty;
+        SerializedProperty m_ShowWarningsForShaderGraphsInPackagesProperty;
+
+        SerializedProperty m_EnableFallbackShaderConversionProperty;
 
         static PolySpatialSettingsEditor()
         {
@@ -65,13 +68,13 @@ namespace UnityEditor.PolySpatial
             m_EnablePolySpatialRuntimeProperty = serializedObject.FindProperty("m_EnablePolySpatialRuntime");
             m_EnablePolySpatialRuntimeContent = new GUIContent("Enable PolySpatial Runtime");
 
-            m_DefaultVolumeCameraConfigurationProperty = serializedObject.FindProperty("m_DefaultVolumeCameraConfiguration");
+            m_DefaultVolumeCameraWindowConfigurationProperty = serializedObject.FindProperty("m_DefaultVolumeCameraWindowConfiguration");
             m_AutoCreateVolumeCameraProperty = serializedObject.FindProperty("m_AutoCreateVolumeCamera");
             m_AutoCreateVolumeCameraContent = new GUIContent("Auto-Create Volume Camera", m_AutoCreateVolumeCameraProperty.tooltip);
             m_ColliderSyncLayerMaskProperty = serializedObject.FindProperty("m_ColliderSyncLayerMask");
             m_ParticleModeProperty = serializedObject.FindProperty("m_ParticleMode");
+            m_TrackLightAndReflectionProbesProperty = serializedObject.FindProperty("m_TrackLightAndReflectionProbes");
 
-            m_EnableStatisticsProperty = serializedObject.FindProperty("m_EnableStatistics");
             m_TransmitDebugInfoProperty = serializedObject.FindProperty("m_TransmitDebugInfo");
             m_HidePolySpatialPreviewObjectsInScene = serializedObject.FindProperty("m_HidePolySpatialPreviewObjectsInScene");
 
@@ -86,6 +89,8 @@ namespace UnityEditor.PolySpatial
             m_TrackersFoldoutState = new SavedBool("PolySpatialSettingsEditor.TrackersFoldoutState", true);
 
             m_ForceValidationForCurrentBuildTargetProperty = serializedObject.FindProperty("m_ForceValidationForCurrentBuildTarget");
+            m_ShowWarningsForShaderGraphsInPackagesProperty = serializedObject.FindProperty("m_ShowWarningsForShaderGraphsInPackages");
+            m_EnableFallbackShaderConversionProperty = serializedObject.FindProperty("m_EnableFallbackShaderConversion");
         }
 
         /// <inheritdoc/>
@@ -96,21 +101,22 @@ namespace UnityEditor.PolySpatial
             m_EnablePolySpatialRuntimeProperty.boolValue = EditorGUILayout.BeginToggleGroup(m_EnablePolySpatialRuntimeContent, m_EnablePolySpatialRuntimeProperty.boolValue);
             using (new EditorGUI.IndentLevelScope())
             {
-                EditorGUILayout.PropertyField(m_DefaultVolumeCameraConfigurationProperty);
-                if (m_DefaultVolumeCameraConfigurationProperty.objectReferenceValue == null)
+                EditorGUILayout.PropertyField(m_DefaultVolumeCameraWindowConfigurationProperty);
+                if (m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue == null)
                 {
-                    m_DefaultVolumeCameraConfigurationProperty.objectReferenceValue =
-                        Resources.Load<VolumeCameraConfiguration>("Default Unbounded Configuration");
+                    m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue =
+                        Resources.Load<VolumeCameraWindowConfiguration>("Default Unbounded Configuration");
                 }
                 EditorGUILayout.PropertyField(m_AutoCreateVolumeCameraProperty, m_AutoCreateVolumeCameraContent);
                 EditorGUILayout.PropertyField(m_ColliderSyncLayerMaskProperty, k_ColliderSyncLayerMaskContent);
                 EditorGUILayout.PropertyField(m_ParticleModeProperty);
+                EditorGUILayout.PropertyField(m_TrackLightAndReflectionProbesProperty);
 
-                EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
                 EditorGUILayout.PropertyField(m_TransmitDebugInfoProperty);
                 // Due to CamelCase drawing in the UI for serialized properties we have to manually override the property label to write PolySpatial instead of "Poly Spatial"
                 EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene, k_HidePolySpatialPreviewObjectsInSceneContent);
                 EditorGUILayout.PropertyField(m_DisableTrackingMaskProperty);
+                EditorGUILayout.PropertyField(m_EnableFallbackShaderConversionProperty);
             }
 
             EditorGUILayout.Space();
@@ -130,14 +136,17 @@ namespace UnityEditor.PolySpatial
                 }
             }
 
+            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(m_ShowWarningsForShaderGraphsInPackagesProperty);
+
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);
         }
 
         void DrawRuntimeTrackers()
         {
-            m_TrackersFoldoutState.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_TrackersFoldoutState.value, "Runtime Trackers");
-            if (!m_TrackersFoldoutState.value)
+            m_TrackersFoldoutState.Value = EditorGUILayout.BeginFoldoutHeaderGroup(m_TrackersFoldoutState.Value, "Runtime Trackers");
+            if (!m_TrackersFoldoutState.Value)
             {
                 EditorGUILayout.EndFoldoutHeaderGroup();
                 return;

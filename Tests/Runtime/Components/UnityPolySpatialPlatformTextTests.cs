@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
+using TMPro;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
@@ -20,9 +22,7 @@ namespace Tests.Runtime.Functional.Components
             CreateTestObjects("Text Test Objects");
         }
 
-// TODO: LXR-2764 Currently Mac and iOS don't support the RK TextComponent. We need to
-// add some sort of backstop for that.
-#if UNITY_EDITOR || !(UNITY_IOS || UNITY_STANDALONE_OSX)
+#if UNITY_EDITOR 
         [UnityTest]
         public IEnumerator Test_Availability_Checks()
         {
@@ -192,10 +192,22 @@ namespace Tests.Runtime.Functional.Components
             yield return (new Vector2(-1, -1), new Vector2(1, 1));
         }
 
+        static IEnumerator<(object, object)> TestTmpFont()
+        {
+            var fontOne = Resources.Load("Fonts & Materials/LiberationSans SDF");
+            var fontOneAssetId = PolySpatialCore.LocalAssetManager.Register(fontOne);
+            yield return (fontOne, fontOneAssetId);
+
+            var fontTwo = Resources.Load("Symbol SDF");
+            var fontTwoAssetId = PolySpatialCore.LocalAssetManager.Register(fontTwo);
+            yield return (fontTwo, fontTwoAssetId);
+        }
+
         public struct TestData
         {
             public string componentPropertyName;
             public string dataPropertyName;
+            public Type propertyType;
             public Type expectedType;
             public Func<IEnumerator<(object, object)>> testValues;
 
@@ -213,6 +225,7 @@ namespace Tests.Runtime.Functional.Components
             new TestData() { componentPropertyName = "CanvasBackgroundColor", dataPropertyName = "canvasBackgroundColor", expectedType = typeof(Color), testValues = TestColors },
             new TestData() { componentPropertyName = "CanvasSize", dataPropertyName = "canvasSize", expectedType = typeof(Vector2), testValues = TestCanvasSize },
             new TestData() { componentPropertyName = "CanvasCornerRadius", dataPropertyName = "canvasCornerRadius", expectedType = typeof(int), testValues = TestCornerRadius },
+            new TestData() { componentPropertyName = "TmProFontAsset", dataPropertyName = "tmProFontAssetId", propertyType = typeof(TMP_FontAsset), expectedType = typeof(PolySpatialAssetID), testValues = TestTmpFont },
         };
 
         [UnityTest]
@@ -229,8 +242,8 @@ namespace Tests.Runtime.Functional.Components
             var dataProperty = data.customData.GetType().GetField(prop.dataPropertyName);
 
             Assert.IsNotNull(property);
-            Assert.AreEqual(prop.expectedType, property.PropertyType);
-            Assert.AreEqual(dataProperty.FieldType, property.PropertyType);
+            Assert.AreEqual(prop.propertyType != null ? prop.propertyType : prop.expectedType, property.PropertyType);
+            Assert.AreEqual(prop.expectedType, dataProperty.FieldType);
 
             var val = property.GetValue(m_TestComponent);
             var testValues = prop.testValues();
@@ -242,8 +255,16 @@ namespace Tests.Runtime.Functional.Components
                 yield return null;
 
                 data = PolySpatialComponentUtils.GetTrackingData(m_TestComponent);
-                Assert.AreEqual(tuple.Item2, property.GetValue(m_TestComponent));
-                Assert.AreEqual(dataProperty.GetValue(data.customData), property.GetValue(m_TestComponent));
+                if (prop.propertyType != null)
+                {
+                    Assert.AreEqual(tuple.Item1, property.GetValue(m_TestComponent));
+                    Assert.AreEqual(tuple.Item2, dataProperty.GetValue(data.customData));
+                }
+                else
+                {
+                    Assert.AreEqual(tuple.Item2, property.GetValue(m_TestComponent));
+                    Assert.AreEqual(dataProperty.GetValue(data.customData), property.GetValue(m_TestComponent));
+                }
             }
 
         }

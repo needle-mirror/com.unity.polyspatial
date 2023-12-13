@@ -15,7 +15,6 @@
     <realitykit_unlit name = "SR_Channel" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromChannelMask_OutNode_740d6f25fa844441bb939b969e221e64ToSR_Channelcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Channel" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_ChannelVertex" />

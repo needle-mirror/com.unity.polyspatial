@@ -155,7 +155,6 @@
     <realitykit_unlit name = "SR_LerpRange" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_1afcd9d457ec4d49aae482c231abe6ceToSR_LerpRangecolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_LerpRange" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_LerpRangeVertex" />

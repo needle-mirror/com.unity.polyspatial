@@ -25,7 +25,6 @@ def "MaterialX"
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Vector/SR_Vector_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
-                float inputs:opacity = 1
                 token outputs:out
             }
 

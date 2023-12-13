@@ -25,6 +25,7 @@ namespace UnityEditor.PolySpatial.Internals
         public override int callbackOrder => 0;
 
         static private Dictionary<string, Dictionary<string, string>> s_SceneAssetLocators;
+        static private Dictionary<string, string> s_AssetNameLocators;
 
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
@@ -51,6 +52,8 @@ namespace UnityEditor.PolySpatial.Internals
         void PrepareForBuildInner(BuildPlayerContext buildPlayerContext)
         {
             s_SceneAssetLocators = new();
+            s_AssetNameLocators = new();
+
             bool firstScene = true;
             foreach (var scene in buildPlayerContext.BuildPlayerOptions.scenes)
             {
@@ -84,6 +87,21 @@ namespace UnityEditor.PolySpatial.Internals
                                 CollectAssetReference(buildPlayerContext, guid, locators);
                             }
                         }
+                    }
+
+                    // Find and include all shader graph artifacts and store a mapping by name.  This is a temporary
+                    // measure to allow using shader graphs referenced in asset bundles or included after scene
+                    // processing.
+                    // TODO (LXR-1716): Remove this when we have a better solution for the above cases.
+                    foreach (var guid in AssetDatabase.FindAssets("t:shader"))
+                    {
+                        if (EditorPolySpatialAssetProvider.GetPathsForAsset(guid).Length == 0)
+                            continue;
+
+                        CollectAssetReference(buildPlayerContext, guid, locators);
+                        var path = AssetDatabase.GUIDToAssetPath(guid);
+                        var name = AssetDatabase.LoadAssetAtPath(path, typeof(Shader)).name;
+                        s_AssetNameLocators[name] = locators[guid];
                     }
 
                     firstScene = false;
@@ -128,13 +146,23 @@ namespace UnityEditor.PolySpatial.Internals
 
             var locators = s_SceneAssetLocators[scene.path];
             var qam = new GameObject().AddComponent<PolySpatialSceneAssetMap>();
-            qam.m_SerializedAssetGUIDMap = new(locators.Select(entry =>
+            qam.m_AssetGUIDMap = new(locators.Select(entry =>
                 new PolySpatialSceneAssetMap.AssetGUIDMapEntry()
                 {
                     locator = entry.Value,
                     obj = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(entry.Key))
                 }
             ).Where(agme => agme.obj != null));
+
+            if (scene.buildIndex == 0)
+            {
+                qam.m_AssetNameMap = new(s_AssetNameLocators.Select(entry =>
+                    new PolySpatialSceneAssetMap.AssetNameMapEntry()
+                {
+                    name = entry.Key,
+                    locator = entry.Value,
+                }));
+            }
         }
     }
 }

@@ -74,7 +74,6 @@
     <realitykit_unlit name = "SR_Mask" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromMultiplyNode_e7ce4037f7a04ff49140ffa21dec109aToSR_Maskcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Mask" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_MaskVertex" />

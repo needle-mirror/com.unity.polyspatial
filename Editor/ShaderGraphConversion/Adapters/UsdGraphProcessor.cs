@@ -421,6 +421,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         private string GetUsdDefaultValue(string datatype)
         {       
             if (datatype.Equals("float", StringComparison.OrdinalIgnoreCase) ||
+                datatype.Equals("half", StringComparison.OrdinalIgnoreCase) ||
                 datatype.Equals("boolean", StringComparison.OrdinalIgnoreCase))
             {
                 return "0";
@@ -543,6 +544,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         case MtlxNodeTypes.RealityKitGeometryModifierProjectionToView:
                         case MtlxNodeTypes.RealityKitGeometryModifierVertexID:
                         case MtlxNodeTypes.RealityKitSurfaceCustomAttribute:
+                        case MtlxNodeTypes.RealityKitEnvironmentRadiance:
                             return $"ND_{node.nodetype}";
 
                         default:

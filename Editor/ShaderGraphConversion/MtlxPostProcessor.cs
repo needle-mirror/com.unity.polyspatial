@@ -96,6 +96,33 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return graph;
         }
 
+        internal static void LogWarningForGraph(GraphData graphData, string message)
+        {
+            if (!ShouldSuppressWarningsForGraph(graphData))
+                Debug.LogWarning(message);
+        }
+
+        static bool ShouldSuppressWarningsForGraph(GraphData graphData)
+        {
+            // Only suppress warnings for assets in immutable packages.
+            var assetPath = AssetDatabase.GUIDToAssetPath(graphData.assetGuid);
+            if (!Path.GetFullPath(assetPath).Contains("PackageCache"))
+                return false;
+            
+            // Suppress all warnings if specifically disabled.
+            if (!PolySpatialSettings.instance.ShowWarningsForShaderGraphsInPackages)
+                return true;
+            
+            // Otherwise, suppress Unity package warnings unless it's an internal build.
+#if POLYSPATIAL_INTERNAL
+            return false;
+#else
+            // Suppress warnings for non-PolySpatial Unity shader graphs (such as those in the URP package).
+            return assetPath.StartsWith("Packages/com.unity.") &&
+                !assetPath.StartsWith("Packages/com.unity.polyspatial");
+#endif
+        }
+
         class MtlxNodeValidation : INodeValidationExtension
         {
             public INodeValidationExtension.Status GetValidationStatus(AbstractMaterialNode node, out string msg)
@@ -154,7 +181,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         }
                         return false;
                     }
-                    if (!AffectsMaterialXOutput(node))
+                    if (ShouldSuppressWarningsForGraph(node.owner) || !AffectsMaterialXOutput(node))
                     {
                         msg = "";
                         return INodeValidationExtension.Status.None;

@@ -20,6 +20,8 @@ namespace Tests.Runtime.Functional.Components
     {
         static Texture2D s_TestTexture = new Texture2D(1, 1);
 
+        static readonly string s_DefaultSortingLayerName = "Default";
+
         GameObject m_Canvas;
         GameObject m_TestGameObject;
         CanvasRenderer m_TestCanvasRenderer;
@@ -306,21 +308,21 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_Canvas_SortByLayerName()
         {
-            var tree1 = CreateSortTestSubTree("One", "Default", 0);
-            var tree2 = CreateSortTestSubTree("Two", "Default", 0);
+            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
+            var tree2 = CreateSortTestSubTree("Two", s_DefaultSortingLayerName, 0);
 
             yield return null;
 
             Assert.IsTrue(tree1.CompareTo(tree2) < 0, "Expected tree1 to be sorted before tree2 for sibling ordering");
 
-            tree1.canvas.sortingLayerName = "PolySpatial";
+            tree1.canvas.sortingLayerName = PolySpatialUnityBackend.PolySpatialUISortingLayerName;
 
             yield return null;
 
             Assert.IsTrue(tree2.CompareTo(tree1) < 0, "Expected tree2 to be sorted before tree1 in layer value ordering");
 
-            tree1.canvas.sortingLayerName = "Default";
-            tree2.canvas.sortingLayerName = "PolySpatial";
+            tree1.canvas.sortingLayerName = s_DefaultSortingLayerName;
+            tree2.canvas.sortingLayerName = PolySpatialUnityBackend.PolySpatialUISortingLayerName;
 
             yield return null;
 
@@ -335,8 +337,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_Canvas_SortByLayerOrder()
         {
-            var tree1 = CreateSortTestSubTree("One", "Default", 0);
-            var tree2 = CreateSortTestSubTree("Two", "Default", 0);
+            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
+            var tree2 = CreateSortTestSubTree("Two", s_DefaultSortingLayerName, 0);
 
             yield return null;
 
@@ -364,7 +366,7 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_SameLevel_SortBySiblingIndex()
         {
-            var tree1 = CreateSortTestSubTree("One", "Default", 0);
+            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
 
             yield return null;
 
@@ -392,7 +394,7 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_CanvasRenderer_DeletingItem_ResetsSortIndices()
         {
-            var tree1 = CreateSortTestSubTree("One", "Default", 0);
+            var tree1 = CreateSortTestSubTree("One", s_DefaultSortingLayerName, 0);
 
             var canvas = tree1.canvas;
             var image1 = new GameObject("Image 1", new[] { typeof(RectTransform), typeof(Image) });

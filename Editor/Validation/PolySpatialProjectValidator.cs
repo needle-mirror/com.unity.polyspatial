@@ -24,7 +24,6 @@ namespace UnityEditor.PolySpatial.Validation
         static void Initialize()
         {
             var rules = new List<BuildValidationRule>();
-            rules.Add(CreatePolySpatialLayerExistRule());
             rules.Add(CreateCollisionMatrixRule());
 
             if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
@@ -33,55 +32,6 @@ namespace UnityEditor.PolySpatial.Validation
             }
 
             BuildValidator.AddRules(BuildTargetGroup.VisionOS, rules);
-        }
-
-        static BuildValidationRule CreatePolySpatialLayerExistRule()
-        {
-            return new BuildValidationRule()
-            {
-                IsRuleEnabled = () => CapabilityProfileSelection.Selected.Any(c => c is PolySpatialCapabilityProfile),
-                Category = string.Format(PolySpatialSceneValidator.RuleCategoryFormat, "LayerExist"),
-                Message = $"The <b>{VolumeCamera.PolySpatialLayerName}</b> physics layer does not exist.",
-                CheckPredicate = () => LayerMask.NameToLayer(VolumeCamera.PolySpatialLayerName) != -1,
-                FixIt = () =>
-                {
-                    var tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-                    var polySpatialLayerIndex= PolySpatialUnityBackend.AddLayer(tagManager, PolySpatialCore.PolySpatialLayerName);
-                    tagManager.ApplyModifiedProperties();
-
-                    if (polySpatialLayerIndex == -1)
-                    {
-                        DisplayNoLayersAvailableDialog();
-                    }
-                    else
-                    {
-                        DisplayAddPolySpatialLayerDialog(polySpatialLayerIndex);
-                        PolySpatialUnityBackend.IgnoreLayerCollision(polySpatialLayerIndex);
-                    }
-                },
-                FixItMessage = $"Add a <b>{VolumeCamera.PolySpatialLayerName}</b> physics layer to the project."
-            };
-        }
-
-        static void DisplayNoLayersAvailableDialog()
-        {
-            if (EditorUtility.DisplayDialog(
-                $"{VolumeCamera.PolySpatialLayerName} Layer Error",
-                $"There were no available layer slots. The {VolumeCamera.PolySpatialLayerName} layer was not added. " +
-                $"Delete or rename an existing layer to `{VolumeCamera.PolySpatialLayerName}`.",
-                "Ok",
-                "Cancel"))
-                SettingsService.OpenProjectSettings("Project/Tags and Layers");
-        }
-
-        static void DisplayAddPolySpatialLayerDialog(int layerIndex)
-        {
-            if (EditorUtility.DisplayDialog(
-                $"{VolumeCamera.PolySpatialLayerName} Layer Added",
-                $"The {VolumeCamera.PolySpatialLayerName} layer was added on 'User Layer {layerIndex}' (the first available physics layer index).",
-                "Go to Layer Settings",
-                "Ok"))
-                SettingsService.OpenProjectSettings("Project/Tags and Layers");
         }
 
         static BuildValidationRule CreateCollisionMatrixRule()

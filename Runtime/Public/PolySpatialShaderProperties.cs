@@ -6,6 +6,8 @@ namespace Unity.PolySpatial
     // (such as for the lighting node) and also available for direct access by users.
     public static class PolySpatialShaderProperties
     {
+        public const string VolumeToWorld = "polySpatial_VolumeToWorld";
+
         public const string Lightmap = "polySpatial_Lightmap";
         public const string LightmapInd = "polySpatial_LightmapInd";
         public const string LightmapST = "polySpatial_LightmapST";
@@ -21,6 +23,8 @@ namespace Unity.PolySpatial
         public const int ReflectionProbeCount = 2;
         public const string ReflectionProbeTexturePrefix = "polySpatial_SpecCube";
         public const string ReflectionProbeWeightPrefix = "polySpatial_SpecCubeWeight";
+
+        internal static readonly int VolumeToWorldID = Shader.PropertyToID(VolumeToWorld);
 
         internal static readonly int LightmapID = Shader.PropertyToID(Lightmap);
         internal static readonly int LightmapIndID = Shader.PropertyToID(LightmapInd);

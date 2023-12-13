@@ -213,7 +213,6 @@
     <realitykit_unlit name = "SR_RoundTrig" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_5a03a67df08d46f18366e56eae380a7bToSR_RoundTrigcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_RoundTrig" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_RoundTrigVertex" />

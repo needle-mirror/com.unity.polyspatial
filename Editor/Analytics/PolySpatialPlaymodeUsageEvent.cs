@@ -86,7 +86,8 @@ namespace UnityEditor.PolySpatial.Analytics
                 return localAppNetwork;
 
             var localAppNetworkConnection = PolySpatialCore.LocalAppNetworkConnection;
-            var playToDeviceIP = IPAddress.TryParse(PolySpatialUserSettings.instance.PlayToDeviceIP, out var ipAddress) ? ipAddress : null;
+            var selectedCandidate = PolySpatialUserSettings.instance.ConnectionCandidates.Values.FirstOrDefault(c => c.IsSelected);
+            var playToDeviceIP = selectedCandidate != null && IPAddress.TryParse(selectedCandidate.IP, out var ipAddress) ? ipAddress : null;
 
             if (localAppNetworkConnection != null && localAppNetworkConnection.Connected)
             {
@@ -138,7 +139,7 @@ namespace UnityEditor.PolySpatial.Analytics
                     var volumeCamera = PolySpatialCore.UnitySimulation.Camera;
                     if (volumeCamera != null)
                     {
-                        switch (volumeCamera.OutputMode)
+                        switch (volumeCamera.WindowMode)
                         {
                             case VolumeCamera.PolySpatialVolumeCameraMode.Bounded:
                                 payload.BoundedVolumes++;

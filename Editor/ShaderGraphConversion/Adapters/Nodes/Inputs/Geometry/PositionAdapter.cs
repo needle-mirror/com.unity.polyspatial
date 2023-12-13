@@ -31,11 +31,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         {
                             ["in"] = new InlineInputDef(MtlxNodeTypes.GeomPosition, MtlxDataTypes.Vector3, new()
                             {
-                                ["space"] = new StringInputDef("world"),
+                                ["space"] = new StringInputDef("object"),
                             }),
-                            ["mat"] = new InlineInputDef(
-                                MtlxNodeTypes.RealityKitSurfaceWorldToView, MtlxDataTypes.Matrix44,
-                                new(), "worldToView"),
+                            ["mat"] = new PerStageInputDef(
+                                new InlineInputDef(
+                                    MtlxNodeTypes.RealityKitGeometryModifierModelToView,
+                                    MtlxDataTypes.Matrix44, new(), "modelToView"),
+                                new InlineInputDef(
+                                    MtlxNodeTypes.RealityKitSurfaceModelToView,
+                                    MtlxDataTypes.Matrix44, new(), "modelToView")),
                         }),
 
                         // Flip z coordinate to convert RealityKit space to Unity space.

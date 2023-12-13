@@ -169,11 +169,153 @@
         <input name = "in1" type = "vector3" nodename = "NormalUnpack_OutNode_e2a62117509640d0855a7bded8f7fad1" />
         <input name = "in2" type = "vector3" nodename = "NormalUnpack_OutNode_df765cbf0c4c48ee81c51fcced774793" />
     </add>
+    <normalize name = "NormalFromTexture_OutNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "NormalFromTexture_Out_inNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </normalize>
+    <crossproduct name = "NormalFromTexture_Out_inNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "NormalFromTexture_vaNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "vector3" nodename = "NormalFromTexture_vbNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </crossproduct>
+    <combine3 name = "NormalFromTexture_vaNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector3">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" nodename = "NormalFromTexture_va_in3Node_c3eeca2a78284789aa453e06cb5583d6" />
+    </combine3>
+    <multiply name = "NormalFromTexture_va_in3Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_va_in3_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_StrengthNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </multiply>
+    <subtract name = "NormalFromTexture_va_in3_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_uSampleNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_normalSampleNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </subtract>
+    <swizzle name = "NormalFromTexture_uSampleNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalFromTexture_uSample_inNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <RealityKitTexture2D name = "NormalFromTexture_uSample_inNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector4">
+        <input name = "file" type = "filename" nodename = "NormalFromTexture_TextureNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "texcoord" type = "vector2" nodename = "NormalFromTexture_offsetUNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "min_filter" type = "string" value = "linear" />
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "u_wrap_mode" type = "string" value = "repeat" />
+        <input name = "v_wrap_mode" type = "string" value = "repeat" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2D>
+    <dot name = "NormalFromTexture_TextureNode_c3eeca2a78284789aa453e06cb5583d6" type = "filename">
+        <input name = "in" type = "filename" nodename = "_Texture2D" />
+    </dot>
+    <combine2 name = "NormalFromTexture_offsetUNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector2">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_offsetU_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_offsetU_in2Node_c3eeca2a78284789aa453e06cb5583d6" />
+    </combine2>
+    <add name = "NormalFromTexture_offsetU_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_offsetU_in1_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_uvOffsetNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </add>
+    <swizzle name = "NormalFromTexture_offsetU_in1_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <dot name = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6Add" />
+    </dot>
+    <texcoord name = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6UV" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6Multiply" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6UV" />
+        <input name = "in2" type = "vector2" value = "1,-1" />
+    </multiply>
+    <add name = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6Add" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6Multiply" />
+        <input name = "in2" type = "vector2" value = "0,1" />
+    </add>
+    <multiply name = "NormalFromTexture_uvOffsetNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_uvOffset_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" value = "0.1" />
+    </multiply>
+    <power name = "NormalFromTexture_uvOffset_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_OffsetNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" value = "3" />
+    </power>
+    <dot name = "NormalFromTexture_OffsetNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "float" value = "0.5" />
+    </dot>
+    <swizzle name = "NormalFromTexture_offsetU_in2Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "NormalFromTexture_normalSampleNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalFromTexture_normalSample_inNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <RealityKitTexture2D name = "NormalFromTexture_normalSample_inNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector4">
+        <input name = "file" type = "filename" nodename = "NormalFromTexture_TextureNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "texcoord" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "min_filter" type = "string" value = "linear" />
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "u_wrap_mode" type = "string" value = "repeat" />
+        <input name = "v_wrap_mode" type = "string" value = "repeat" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2D>
+    <dot name = "NormalFromTexture_StrengthNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "float" value = "8" />
+    </dot>
+    <combine3 name = "NormalFromTexture_vbNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector3">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "in3" type = "float" nodename = "NormalFromTexture_vb_in3Node_c3eeca2a78284789aa453e06cb5583d6" />
+    </combine3>
+    <multiply name = "NormalFromTexture_vb_in3Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_vb_in3_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_StrengthNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </multiply>
+    <subtract name = "NormalFromTexture_vb_in3_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_vSampleNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_normalSampleNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </subtract>
+    <swizzle name = "NormalFromTexture_vSampleNode_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector4" nodename = "NormalFromTexture_vSample_inNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <RealityKitTexture2D name = "NormalFromTexture_vSample_inNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector4">
+        <input name = "file" type = "filename" nodename = "NormalFromTexture_TextureNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "texcoord" type = "vector2" nodename = "NormalFromTexture_offsetVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "min_filter" type = "string" value = "linear" />
+        <input name = "mag_filter" type = "string" value = "linear" />
+        <input name = "mip_filter" type = "string" value = "nearest" />
+        <input name = "u_wrap_mode" type = "string" value = "repeat" />
+        <input name = "v_wrap_mode" type = "string" value = "repeat" />
+        <input name = "max_anisotropy" type = "integer" value = "1" />
+    </RealityKitTexture2D>
+    <combine2 name = "NormalFromTexture_offsetVNode_c3eeca2a78284789aa453e06cb5583d6" type = "vector2">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_offsetV_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_offsetV_in2Node_c3eeca2a78284789aa453e06cb5583d6" />
+    </combine2>
+    <swizzle name = "NormalFromTexture_offsetV_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <add name = "NormalFromTexture_offsetV_in2Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in1" type = "float" nodename = "NormalFromTexture_offsetV_in2_in1Node_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "in2" type = "float" nodename = "NormalFromTexture_uvOffsetNode_c3eeca2a78284789aa453e06cb5583d6" />
+    </add>
+    <swizzle name = "NormalFromTexture_offsetV_in2_in1Node_c3eeca2a78284789aa453e06cb5583d6" type = "float">
+        <input name = "in" type = "vector2" nodename = "NormalFromTexture_UVNode_c3eeca2a78284789aa453e06cb5583d6" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <constant name = "_Texture2D" type = "filename">
+        <input name = "value" type = "filename" value = "placeholder.png" />
+    </constant>
     <GeometryModification name = "SR_NormalVertex" type = "vertexshader">
         <input name = "normal" type = "vector3" nodename = "SR_NormalVertex_normal_FlipZ" />
     </GeometryModification>
     <realitykit_pbr name = "SR_Normal" type = "surfaceshader">
         <input name = "baseColor" type = "color3" nodename = "CastSwizzleFromAddNode_2cb6a4f4eef242e8ab62bc78ddb6de60ToSR_NormalbaseColor" />
+        <input name = "normal" type = "vector3" nodename = "NormalFromTexture_OutNode_c3eeca2a78284789aa453e06cb5583d6" />
         <input name = "metallic" type = "float" value = "0" />
         <input name = "emissiveColor" type = "color3" value = "0,0,0" />
         <input name = "ambientOcclusion" type = "float" value = "1" />
@@ -181,7 +323,6 @@
         <input name = "roughness" type = "float" nodename = "SR_Normal_roughness_OnesComplement" />
         <input name = "clearcoat" type = "float" value = "0" />
         <input name = "clearcoatRoughness" type = "float" value = "0.01" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_pbr>
     <surfacematerial name = "USD_Normal" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_NormalVertex" />

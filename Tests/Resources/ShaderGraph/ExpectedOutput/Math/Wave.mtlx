@@ -125,7 +125,6 @@
     <realitykit_unlit name = "SR_Wave" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_1fb04e6723f043a4bb449a33439084ccToSR_Wavecolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Wave" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_WaveVertex" />

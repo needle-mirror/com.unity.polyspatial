@@ -325,7 +325,6 @@
     <realitykit_unlit name = "SR_Adjustment" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromAddNode_9fc47f374fc34cbeb63b77625c20853bToSR_Adjustmentcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_Adjustment" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_AdjustmentVertex" />

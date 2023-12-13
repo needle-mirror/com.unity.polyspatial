@@ -113,7 +113,6 @@
     <realitykit_unlit name = "SR_GeomPosition" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromCombine_RGBNode_4a10d2fcd9564cd091d90d06a990d009ToSR_GeomPositioncolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_GeomPosition" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_GeomPositionVertex" />

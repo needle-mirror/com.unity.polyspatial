@@ -57,13 +57,20 @@ namespace UnityEditor.PolySpatial.Validation
 
             rule.CheckPredicate = () =>
             {
+                // need to check the layer name every time, as it might have changed by the users
+                var polySpatialLayer = LayerMask.NameToLayer(PolySpatialUnityBackend.PolySpatialLayerName);
+
+                // is there a PolySpatial layer at all?
+                if (polySpatialLayer == -1)
+                    return true;
+
                 var go = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
                 if (go == null)
                     return true;
 
                 // Update the rule messages to keep it synced with the game object name.
                 UpdateRuleMessages(rule, go.name);
-                return go.layer != PolySpatialCore.PolySpatialLayer;
+                return go.layer != polySpatialLayer;
             };
 
             UpdateRuleMessages(rule, gameObject.name);

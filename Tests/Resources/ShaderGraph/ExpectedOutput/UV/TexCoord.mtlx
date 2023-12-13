@@ -31,7 +31,6 @@
     <realitykit_unlit name = "SR_TexCoord" type = "surfaceshader">
         <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
         <input name = "color" type = "color3" nodename = "CastSwizzleFromMultiplyNode_8b5add3eccd74fdb9350d2560686bdb7ToSR_TexCoordcolor" />
-        <input name = "opacity" type = "float" value = "1" />
     </realitykit_unlit>
     <surfacematerial name = "USD_TexCoord" type = "material">
         <input name = "vertexshader" type = "vertexshader" nodename = "SR_TexCoordVertex" />

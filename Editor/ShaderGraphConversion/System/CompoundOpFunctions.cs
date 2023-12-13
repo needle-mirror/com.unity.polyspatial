@@ -142,12 +142,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         static Dictionary<string, Compiler> s_SymbolCompilers = new()
         {
+            ["PI"] = CreateConstantCompiler(Mathf.PI),
+            ["HALF_PI"] = CreateConstantCompiler(Mathf.PI * 0.5f),
             [PolySpatialShaderGlobals.Time] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.SinTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.CosTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.DeltaTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.GlossyEnvironmentColor] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.VolumeToWorld] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            [PolySpatialShaderProperties.VolumeToWorld] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
             [PolySpatialShaderProperties.Lightmap] = CreateImplicitCompiler(MtlxDataTypes.Filename),
             [$"sampler{PolySpatialShaderProperties.Lightmap}"] = CreateSamplerCompiler(
                 new() { wrap = TextureSamplerState.WrapMode.Clamp }),
@@ -831,17 +833,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
             CoerceToType(node, inputs, output, inputDefs, "file", MtlxDataTypes.Filename);
             CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector2);
 
-            FlipTexCoordInput(inputDefs);
-
             var samplerInputDef = node.Children[1].Compile(inputs, output);
             var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
-            var addressMode = new StringInputDef(SampleTexture2DAdapter.GetAddressMode(samplerState));
 
-            inputDefs.Add("filtertype", new StringInputDef(SampleTexture2DAdapter.GetFilterType(samplerState)));
-            inputDefs.Add("uaddressmode", addressMode);
-            inputDefs.Add("vaddressmode", addressMode);
-
+#if DISABLE_MATERIALX_EXTENSIONS
+            AddImageSamplerState(inputDefs, samplerState);
             return new InlineInputDef(MtlxNodeTypes.Image, MtlxDataTypes.Vector4, inputDefs);
+#else
+            AddTexture2DSamplerState(inputDefs, samplerState);
+            return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2D, MtlxDataTypes.Vector4, inputDefs);
+#endif
         }
 
         static InputDef SampleTexture2DLodCompiler(
@@ -853,29 +854,17 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 ["file"] = node.Children[0].Compile(inputs, output),
                 ["texcoord"] = node.Children[2].Compile(inputs, output),
-                ["level"] = node.Children[3].Compile(inputs, output),
+                ["lod"] = node.Children[3].Compile(inputs, output),
             };
             CoerceToType(node, inputs, output, inputDefs, "file", MtlxDataTypes.Filename);
             CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector2);
-            CoerceToType(node, inputs, output, inputDefs, "level", MtlxDataTypes.Float);
-
-            FlipTexCoordInput(inputDefs);
+            CoerceToType(node, inputs, output, inputDefs, "lod", MtlxDataTypes.Float);
 
             var samplerInputDef = node.Children[1].Compile(inputs, output);
             var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
-            var filterType = new StringInputDef(SampleTexture2DLODAdapter.GetFilterType(samplerState));
-            var addressMode = new StringInputDef(SampleTexture2DLODAdapter.GetAddressMode(samplerState));
+            AddTexture2DSamplerState(inputDefs, samplerState);
 
-            inputDefs.Add("mag_filter", filterType);
-            inputDefs.Add("min_filter", filterType);
-            inputDefs.Add("mip_filter", filterType);
-            inputDefs.Add("s_address", addressMode);
-            inputDefs.Add("t_address", addressMode);
-
-            return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
-            {
-                ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
-            });
+            return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, inputDefs);
         }
 
         static InputDef SampleTexture3DCompiler(
@@ -896,21 +885,21 @@ namespace UnityEditor.ShaderGraph.MaterialX
             CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
 
             var texCoords3D = CompileWrappedTexCoords3D(output, inputDefs["texcoord"], samplerState);
-            var filterType = new StringInputDef(SampleTexture2DAdapter.GetFilterType(samplerState));
-            var addressMode = new StringInputDef(SampleTexture2DAdapter.GetAddressMode(samplerState));
-
+            
             return CompileSampleTexture3D(output, texCoords3D, file, samplerState, texCoords2D =>
             {
                 Dictionary<string, InputDef> inputDefs = new()
                 {
                     ["file"] = file,
                     ["texcoord"] = texCoords2D,
-                    ["filtertype"] = filterType,
-                    ["uaddressmode"] = addressMode,
-                    ["vaddressmode"] = addressMode,
                 };
-                FlipTexCoordInput(inputDefs);
+#if DISABLE_MATERIALX_EXTENSIONS
+                AddImageSamplerState(inputDefs, samplerState);
                 return new InlineInputDef(MtlxNodeTypes.Image, MtlxDataTypes.Vector4, inputDefs);
+#else
+                AddTexture2DSamplerState(inputDefs, samplerState);
+                return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2D, MtlxDataTypes.Vector4, inputDefs);
+#endif
             });
         }
 
@@ -928,34 +917,24 @@ namespace UnityEditor.ShaderGraph.MaterialX
             Dictionary<string, InputDef> inputDefs = new()
             {
                 ["texcoord"] = node.Children[2].Compile(inputs, output),
-                ["level"] = node.Children[3].Compile(inputs, output),
+                ["lod"] = node.Children[3].Compile(inputs, output),
             };
             CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
-            CoerceToType(node, inputs, output, inputDefs, "level", MtlxDataTypes.Float);
+            CoerceToType(node, inputs, output, inputDefs, "lod", MtlxDataTypes.Float);
             
             var texCoords3D = CompileWrappedTexCoords3D(output, inputDefs["texcoord"], samplerState);
-            var level = inputDefs["level"];
-            var filterType = new StringInputDef(SampleTexture2DLODAdapter.GetFilterType(samplerState));
-            var addressMode = new StringInputDef(SampleTexture2DLODAdapter.GetAddressMode(samplerState));
-
+            var lod = inputDefs["lod"];
+            
             return CompileSampleTexture3D(output, texCoords3D, file, samplerState, texCoords2D =>
             {
                 Dictionary<string, InputDef> inputDefs = new()
                 {
                     ["file"] = file,
                     ["texcoord"] = texCoords2D,
-                    ["level"] = level,
-                    ["mag_filter"] = filterType,
-                    ["min_filter"] = filterType,
-                    ["mip_filter"] = filterType,
-                    ["s_address"] = addressMode,
-                    ["t_address"] = addressMode,
+                    ["lod"] = lod,
                 };
-                FlipTexCoordInput(inputDefs);
-                return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
-                {
-                    ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
-                });
+                AddTexture2DSamplerState(inputDefs, samplerState);
+                return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, inputDefs);
             });
         }
 
@@ -1089,10 +1068,31 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 ["channels"] = new StringInputDef("x"),
             }), output);
 
-            var sharedV = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+            // To prevent bleeding between slices at their tops and bottoms, when we use linear filtering,
+            // we need to clamp V to [0.5/height, 1 - 0.5/height].
+            var sharedHalfTexelHeight = GetSharedInput(
+                new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Float, new()
             {
-                ["in"] = sharedTexCoords3D,
-                ["channels"] = new StringInputDef("y"),
+                ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                {
+                    ["in"] = new TextureSizeInputDef(file.Source),
+                    ["channels"] = new StringInputDef("y"),
+                }),
+            }), output);
+            var sharedV = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Clamp, MtlxDataTypes.Float, new()
+            {
+                ["in"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                {
+                    ["in"] = sharedTexCoords3D,
+                    ["channels"] = new StringInputDef("y"),
+                }),
+                ["low"] = sharedHalfTexelHeight,
+                ["high"] = new InlineInputDef(MtlxNodeTypes.Subtract, MtlxDataTypes.Float, new()
+                {
+                    ["in1"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                    ["in2"] = sharedHalfTexelHeight,
+                }),
             }), output);
 
             var sharedWD = GetSharedInput(new InlineInputDef(MtlxNodeTypes.Subtract, MtlxDataTypes.Float, new()
@@ -1196,13 +1196,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 ["file"] = node.Children[0].Compile(inputs, output),
                 ["texcoord"] = node.Children[2].Compile(inputs, output),
-                ["level"] = node.Children[3].Compile(inputs, output),
-                ["s_address"] = new StringInputDef("clamp_to_edge"),
-                ["t_address"] = new StringInputDef("clamp_to_edge"),
+                ["lod"] = node.Children[3].Compile(inputs, output),
+                ["u_wrap_mode"] = new StringInputDef("clamp_to_edge"),
+                ["v_wrap_mode"] = new StringInputDef("clamp_to_edge"),
             };
             CoerceToType(node, inputs, output, inputDefs, "file", MtlxDataTypes.Filename);
             CoerceToType(node, inputs, output, inputDefs, "texcoord", MtlxDataTypes.Vector3);
-            CoerceToType(node, inputs, output, inputDefs, "level", MtlxDataTypes.Float);
+            CoerceToType(node, inputs, output, inputDefs, "lod", MtlxDataTypes.Float);
 
             // Create shared intermediate values for the texcoord direction and its
             // components so that we can reference them in multiple places.
@@ -1381,16 +1381,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             var samplerInputDef = node.Children[1].Compile(inputs, output);
             var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
-            var filterType = new StringInputDef(SampleTexture2DLODAdapter.GetFilterType(samplerState));
             
-            inputDefs.Add("mag_filter", filterType);
-            inputDefs.Add("min_filter", filterType);
-            inputDefs.Add("mip_filter", filterType);
+            StringInputDef minMagFilter = new(GetMinMagFilter(samplerState));
+            inputDefs.Add("min_filter", minMagFilter);
+            inputDefs.Add("mag_filter", minMagFilter);
+            inputDefs.Add("mip_filter", new StringInputDef(GetMipFilter(samplerState)));
 
-            return new InlineInputDef(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
-            {
-                ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, inputDefs),
-            });
+            inputDefs.Add("max_anisotropy", new FloatInputDef(MtlxDataTypes.Integer, GetMaxAnisotropy(samplerState)));
+
+            return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, inputDefs);
         }
 
         static InputDef RefractCompiler(
@@ -1754,20 +1753,102 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 return true;
             }
 
+            // We can reduce the number of components of vectors by swizzling.
+            var isColor = MtlxDataTypes.IsColor(outputType);
+            var isVector = MtlxDataTypes.IsVector(outputType);
+            if ((isColor || isVector) && expectedLength < outputLength)
+            {
+                inputDef = new InlineInputDef(MtlxNodeTypes.Swizzle, expectedType, new()
+                {
+                    ["in"] = inputDef,
+                    ["channels"] = new StringInputDef((isColor ? "rgb" : "xyz").Substring(0, expectedLength)),
+                });
+                return true;
+            }
+
             return false;
         }
 
-        static void FlipTexCoordInput(Dictionary<string, InputDef> inputDefs)
+        static void AddImageSamplerState(Dictionary<string, InputDef> inputDefs, TextureSamplerState samplerState)
         {
-            inputDefs["texcoord"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+            inputDefs.Add("filtertype", new StringInputDef(GetFilterType(samplerState)));
+
+            StringInputDef addressMode = new(GetAddressMode(samplerState));
+            inputDefs.Add("uaddressmode", addressMode);
+            inputDefs.Add("vaddressmode", addressMode);
+        }
+
+        static string GetAddressMode(TextureSamplerState samplerState)
+        {
+            return samplerState.wrap switch
             {
-                ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
-                {
-                    ["in1"] = inputDefs["texcoord"],
-                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, new[] { 1.0f, -1.0f }),
-                }),
-                ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, new[] { 0.0f, 1.0f }),
-            });
+                TextureSamplerState.WrapMode.Clamp => "clamp",
+                TextureSamplerState.WrapMode.Mirror => "mirror",
+                _ => "periodic",
+            };
+        }
+
+        static string GetFilterType(TextureSamplerState samplerState)
+        {
+            return samplerState.filter switch
+            {
+                TextureSamplerState.FilterMode.Point => "closest",
+                _ => "linear",
+            };
+        }
+
+        static void AddTexture2DSamplerState(Dictionary<string, InputDef> inputDefs, TextureSamplerState samplerState)
+        {
+            StringInputDef minMagFilter = new(GetMinMagFilter(samplerState));
+            inputDefs.Add("min_filter", minMagFilter);
+            inputDefs.Add("mag_filter", minMagFilter);
+            inputDefs.Add("mip_filter", new StringInputDef(GetMipFilter(samplerState)));
+
+            StringInputDef wrapMode = new(GetWrapMode(samplerState));
+            inputDefs.Add("u_wrap_mode", wrapMode);
+            inputDefs.Add("v_wrap_mode", wrapMode);
+
+            inputDefs.Add("max_anisotropy", new FloatInputDef(MtlxDataTypes.Integer, GetMaxAnisotropy(samplerState)));
+        }
+
+        static string GetMinMagFilter(TextureSamplerState samplerState)
+        {
+            return samplerState.filter switch
+            {
+                TextureSamplerState.FilterMode.Point => "nearest",
+                _ => "linear",
+            };
+        }
+
+        static string GetMipFilter(TextureSamplerState samplerState)
+        {
+            return samplerState.filter switch
+            {
+                TextureSamplerState.FilterMode.Trilinear => "linear",
+                _ => "nearest",
+            };
+        }
+
+        static string GetWrapMode(TextureSamplerState samplerState)
+        {
+            return samplerState.wrap switch
+            {
+                TextureSamplerState.WrapMode.Clamp => "clamp_to_edge",
+                TextureSamplerState.WrapMode.Mirror => "mirrored_repeat",
+                _ => "repeat",
+            };
+        }
+
+        static int GetMaxAnisotropy(TextureSamplerState samplerState)
+        {
+            return samplerState.anisotropic switch
+            {
+                TextureSamplerState.Anisotropic.x2 => 2,
+                TextureSamplerState.Anisotropic.x4 => 4,
+                TextureSamplerState.Anisotropic.x8 => 8,
+                TextureSamplerState.Anisotropic.x16 => 16,
+                _ => 1,
+            };
         }
 
         // Creates a compiler to construct the specified data type
@@ -1981,6 +2062,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 TextureSizeInputDef => MtlxDataTypes.Vector3,
                 _ => MtlxDataTypes.String,
             };
+        }
+
+        static Compiler CreateConstantCompiler(float value)
+        {
+            return (node, inputs, output) => new FloatInputDef(MtlxDataTypes.Float, value);
         }
 
         static Compiler CreateImplicitCompiler(string dataType)

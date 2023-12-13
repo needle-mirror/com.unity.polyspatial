@@ -419,6 +419,31 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
             };
             actualNodeDefs = CompoundOpParser.Parse(inputs, "float3 tmp = {0, 1, Power}; Out = tmp;");
             Assert.AreEqual(expectedNodeDefs, actualNodeDefs);
+
+            expectedNodeDefs = new()
+            {
+                ["tmp"] = new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                {
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.Combine3, MtlxDataTypes.Vector3, new()
+                    {
+                        ["in1"] = new ExternalInputDef("Power"),
+                        ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                        ["in3"] = new FloatInputDef(MtlxDataTypes.Float, 2.0f),
+                    }),
+                    ["channels"] = new StringInputDef("x"),
+                }),
+                ["tmp3"] = new(MtlxNodeTypes.Convert, MtlxDataTypes.Vector3, new()
+                {
+                    ["in"] = new InternalInputDef("tmp"),
+                }),
+                ["Out"] = new(MtlxNodeTypes.Dot, MtlxDataTypes.Vector3, new()
+                {
+                    ["in"] = new InternalInputDef("tmp3"),
+                }),
+            };
+            actualNodeDefs = CompoundOpParser.Parse(
+                inputs, "float tmp = float3(Power, 1, 2); float3 tmp3 = tmp; Out = tmp3;");
+            Assert.AreEqual(expectedNodeDefs, actualNodeDefs);
         }
 
         [Test]
@@ -727,21 +752,16 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
             };
             Dictionary<string, NodeDef> expectedNodeDefs = new()
             {
-                ["Out"] = new(MtlxNodeTypes.Image, MtlxDataTypes.Vector4, new()
+                ["Out"] = new(MtlxNodeTypes.RealityKitTexture2D, MtlxDataTypes.Vector4, new()
                 {
                     ["file"] = new ExternalInputDef("Texture"),
-                    ["texcoord"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
-                    {
-                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
-                        {
-                            ["in1"] = new ExternalInputDef("UV"),
-                            ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 1.0f, -1.0f),
-                        }),
-                        ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.0f, 1.0f),
-                    }),
-                    ["filtertype"] = new StringInputDef("linear"),
-                    ["uaddressmode"] = new StringInputDef("clamp"),
-                    ["vaddressmode"] = new StringInputDef("clamp"),
+                    ["texcoord"] = new ExternalInputDef("UV"),
+                    ["mag_filter"] = new StringInputDef("linear"),
+                    ["min_filter"] = new StringInputDef("linear"),
+                    ["mip_filter"] = new StringInputDef("nearest"),
+                    ["u_wrap_mode"] = new StringInputDef("clamp_to_edge"),
+                    ["v_wrap_mode"] = new StringInputDef("clamp_to_edge"),
+                    ["max_anisotropy"] = new FloatInputDef(MtlxDataTypes.Integer, 1),
                 }),
             };
             var actualNodeDefs = CompoundOpParser.Parse(
@@ -750,27 +770,17 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
 
             expectedNodeDefs = new()
             {
-                ["Out"] = new(MtlxNodeTypes.Convert, MtlxDataTypes.Vector4, new()
+                ["Out"] = new(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, new()
                 {
-                    ["in"] = new InlineInputDef(MtlxNodeTypes.RealityKitImageLod, MtlxDataTypes.Color4, new()
-                    {
-                        ["file"] = new ExternalInputDef("Texture"),
-                        ["texcoord"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
-                        {
-                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
-                            {
-                                ["in1"] = new ExternalInputDef("UV"),
-                                ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 1.0f, -1.0f),
-                            }),
-                            ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.0f, 1.0f),
-                        }),
-                        ["level"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
-                        ["mag_filter"] = new StringInputDef("linear"),
-                        ["min_filter"] = new StringInputDef("linear"),
-                        ["mip_filter"] = new StringInputDef("linear"),
-                        ["s_address"] = new StringInputDef("clamp_to_edge"),
-                        ["t_address"] = new StringInputDef("clamp_to_edge"),
-                    }),
+                    ["file"] = new ExternalInputDef("Texture"),
+                    ["texcoord"] = new ExternalInputDef("UV"),
+                    ["lod"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+                    ["mag_filter"] = new StringInputDef("linear"),
+                    ["min_filter"] = new StringInputDef("linear"),
+                    ["mip_filter"] = new StringInputDef("nearest"),
+                    ["u_wrap_mode"] = new StringInputDef("clamp_to_edge"),
+                    ["v_wrap_mode"] = new StringInputDef("clamp_to_edge"),
+                    ["max_anisotropy"] = new FloatInputDef(MtlxDataTypes.Integer, 1),
                 }),
             };
             actualNodeDefs = CompoundOpParser.Parse(

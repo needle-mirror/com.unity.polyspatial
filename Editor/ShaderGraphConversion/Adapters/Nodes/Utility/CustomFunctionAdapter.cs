@@ -44,7 +44,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             }
             catch (CompoundOpParser.ParseException e)
             {
-                Debug.LogWarning($"Couldn't parse custom function: {e}");
+                MtlxPostProcessor.LogWarningForGraph(node.owner, $"Couldn't parse custom function: {e}");
             }
         }
     }

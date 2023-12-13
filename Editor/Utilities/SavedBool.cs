@@ -23,7 +23,7 @@ namespace UnityEditor.PolySpatial.Utilities
             m_Value = EditorPrefs.GetBool(m_Name, m_Value);
         }
 
-        internal bool value
+        internal bool Value
         {
             get { Load(); return m_Value; }
             set
@@ -40,6 +40,6 @@ namespace UnityEditor.PolySpatial.Utilities
         /// Bool cast operator to allow direct conditional checks with SavedBool.
         /// </summary>
         /// <param name="s">Saved bool to check.</param>
-        public static implicit operator bool(SavedBool s) => s.value;
+        public static implicit operator bool(SavedBool s) => s.Value;
     }
 }

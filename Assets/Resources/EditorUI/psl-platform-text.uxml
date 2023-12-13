@@ -4,6 +4,7 @@
         <ui:VisualElement style="flex-grow: initial; padding-bottom: 20px;">
             <ui:Label tabindex="-1" text="Text Properties" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 14px;" />
             <ui:TextField picking-mode="Ignore" label="Text" multiline="true" name="TextField" binding-path="m_Text" style="flex-direction: column; white-space: normal; margin-top: 4px; margin-bottom: 4px; padding-bottom: 10px;" />
+            <uie:PropertyField name="TmProFontAsset" label="Font Asset" binding-path="m_TmProFontAsset" />
             <uie:PropertyField label="Size" value="42" binding-path="m_TextSize" />
             <uie:PropertyField name="ColorField" binding-path="m_TextColor" label="Color" />
             <uie:RectIntField name="Insets" label="Insets" binding-path="m_TextEdgeInsets" />
@@ -13,7 +14,7 @@
             <ui:Label tabindex="-1" text="Canvas Properties" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 14px;" />
             <uie:PropertyField name="ColorField" binding-path="m_CanvasBackgroundColor" label="Color" />
             <uie:Vector2Field name="CanvasSize" label="Size" binding-path="m_CanvasSize" />
-            <uie:PropertyField label="Corner Radius" value="42" binding-path="m_CanvasCornerRadius" />
+            <uie:PropertyField label="Corner Radius" name="CornerRadius" value="42" binding-path="m_CanvasCornerRadius" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

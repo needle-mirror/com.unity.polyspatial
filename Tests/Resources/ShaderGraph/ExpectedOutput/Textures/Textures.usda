@@ -16,22 +16,15 @@ def "MaterialX"
             asset inputs:_Triplanar_866a5c0c75f84e4c9b25421f3988b9a3_Texture_1_Texture2D = @placeholder.png@ (colorSpace = "srgb_texture")
             asset inputs:_Texture2DAsset_67eda6922a484f11826572a12c4ea406_Out_0_Texture2D = @placeholder.png@ (colorSpace = "srgb_texture")
 
-            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Textures/realitykit_pbr.outputs:out>
+            token outputs:mtlx:surface.connect = </MaterialX/Materials/USD_Textures/realitykit_unlit.outputs:out>
             token outputs:realitykit:vertex.connect = </MaterialX/Materials/USD_Textures/GeometryModifier.outputs:out>
 
-            def Shader "realitykit_pbr"
+            def Shader "realitykit_unlit"
             {
-                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
-                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFromBlend_OutNode_88dc1a7af1074cbdb585537afd42e0a4ToSR_TexturesbaseColor.outputs:out>
-                float3 inputs:normal.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFrom_Node_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal.outputs:out>
-                float inputs:specular = 0.5
-                float inputs:ambientOcclusion = 1
-                color3f inputs:emissiveColor = (0, 0, 0)
-                float inputs:metallic = 0
-                float inputs:roughness = 0.5
-                float inputs:clearcoat = 0
-                float inputs:clearcoatRoughness = 0.01
-                float inputs:opacity = 1
+                uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                bool inputs:applyPostProcessToneMap = 0
+                color3f inputs:color.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFromBlend_OutNode_88dc1a7af1074cbdb585537afd42e0a4ToSR_Texturescolor.outputs:out>
+                float3 inputs:normal.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFromSampleTexture2D_RGBANode_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal.outputs:out>
                 token outputs:out
             }
 
@@ -41,7 +34,7 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFromBlend_OutNode_88dc1a7af1074cbdb585537afd42e0a4ToSR_TexturesbaseColor"
+            def Shader "CastSwizzleFromBlend_OutNode_88dc1a7af1074cbdb585537afd42e0a4ToSR_Texturescolor"
             {
                 uniform token info:id = "ND_swizzle_vector4_color3"
                 float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/Blend_OutNode_88dc1a7af1074cbdb585537afd42e0a4.outputs:out>
@@ -101,28 +94,63 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal"
+            def Shader "CastSwizzleFromSampleTexture2D_RGBANode_7c3e82d91e7d41c78f46c07eb5bd7045ToSR_Texturesnormal"
             {
-                uniform token info:id = "ND_swizzle_color4_vector3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Textures/_Node_7c3e82d91e7d41c78f46c07eb5bd7045.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_RGBANode_7c3e82d91e7d41c78f46c07eb5bd7045.outputs:out>
+                string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
-            def Shader "_Node_7c3e82d91e7d41c78f46c07eb5bd7045"
+            def Shader "SampleTexture2D_RGBANode_7c3e82d91e7d41c78f46c07eb5bd7045"
             {
-                uniform token info:id = "ND_image_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2DAsset_67eda6922a484f11826572a12c4ea406_Out_0_Texture2D>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/_Node_7c3e82d91e7d41c78f46c07eb5bd7045_UV_fwd.outputs:out>
-                color4f outputs:out
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_TextureNode_7c3e82d91e7d41c78f46c07eb5bd7045.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045.outputs:out>
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
+                float4 outputs:out
             }
 
-            def Shader "_Node_7c3e82d91e7d41c78f46c07eb5bd7045_UV_fwd"
+            def Shader "SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045Add.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_7c3e82d91e7d41c78f46c07eb5bd7045UV"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0
                 float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_TextureNode_7c3e82d91e7d41c78f46c07eb5bd7045"
+            {
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2DAsset_67eda6922a484f11826572a12c4ea406_Out_0_Texture2D>
+                asset outputs:out
             }
 
             def Shader "Blend_Out_fgNode_88dc1a7af1074cbdb585537afd42e0a4"
@@ -239,32 +267,29 @@ def "MaterialX"
             def Shader "Blend_BlendNode_aebf78d88d9f466bad9eec41c5f64ab9"
             {
                 uniform token info:id = "ND_dot_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFrom_Node_1474f2d5073b4ac29398add84bb23240ToBlend_BlendNode_aebf78d88d9f466bad9eec41c5f64ab9in.outputs:out>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_RGBANode_1474f2d5073b4ac29398add84bb23240.outputs:out>
                 float4 outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_1474f2d5073b4ac29398add84bb23240ToBlend_BlendNode_aebf78d88d9f466bad9eec41c5f64ab9in"
+            def Shader "SampleTexture2D_RGBANode_1474f2d5073b4ac29398add84bb23240"
             {
-                uniform token info:id = "ND_swizzle_color4_vector4"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Textures/_Node_1474f2d5073b4ac29398add84bb23240.outputs:out>
-                string inputs:channels = "rgba"
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_TextureNode_1474f2d5073b4ac29398add84bb23240.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240.outputs:out>
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
-            def Shader "_Node_1474f2d5073b4ac29398add84bb23240"
+            def Shader "SampleTexture2D_TextureNode_1474f2d5073b4ac29398add84bb23240"
             {
-                uniform token info:id = "ND_image_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Textures.inputs:_SampleTexture2D_1474f2d5073b4ac29398add84bb23240_Texture_1_Texture2D>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/_Node_1474f2d5073b4ac29398add84bb23240_UV_fwd.outputs:out>
-                color4f outputs:out
-            }
-
-            def Shader "_Node_1474f2d5073b4ac29398add84bb23240_UV_fwd"
-            {
-                uniform token info:id = "ND_texcoord_vector2"
-                int inputs:index = 0
-                float2 outputs:out
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Textures.inputs:_SampleTexture2D_1474f2d5073b4ac29398add84bb23240_Texture_1_Texture2D>
+                asset outputs:out
             }
 
             def Shader "Blend_BaseNode_aebf78d88d9f466bad9eec41c5f64ab9"
@@ -318,32 +343,59 @@ def "MaterialX"
             def Shader "Blend_BaseNode_5a12138b6fb14f2795a91bfd9c10b35a"
             {
                 uniform token info:id = "ND_dot_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFrom_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2ToBlend_BaseNode_5a12138b6fb14f2795a91bfd9c10b35ain.outputs:out>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_RGBANode_913bc5769ebb4d31a2bf4f95b1ea6bf2.outputs:out>
                 float4 outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2ToBlend_BaseNode_5a12138b6fb14f2795a91bfd9c10b35ain"
+            def Shader "SampleTexture2D_RGBANode_913bc5769ebb4d31a2bf4f95b1ea6bf2"
             {
-                uniform token info:id = "ND_swizzle_color4_vector4"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Textures/_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2.outputs:out>
-                string inputs:channels = "rgba"
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_TextureNode_913bc5769ebb4d31a2bf4f95b1ea6bf2.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2.outputs:out>
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
-            def Shader "_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2"
+            def Shader "SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2"
             {
-                uniform token info:id = "ND_image_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2DAsset_8f14bfbef458429a8aa3c2828046fc2b_Out_0_Texture2D>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2_UV_fwd.outputs:out>
-                color4f outputs:out
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2Add.outputs:out>
+                float2 outputs:out
             }
 
-            def Shader "_Node_913bc5769ebb4d31a2bf4f95b1ea6bf2_UV_fwd"
+            def Shader "SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_913bc5769ebb4d31a2bf4f95b1ea6bf2UV"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0
                 float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_TextureNode_913bc5769ebb4d31a2bf4f95b1ea6bf2"
+            {
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2DAsset_8f14bfbef458429a8aa3c2828046fc2b_Out_0_Texture2D>
+                asset outputs:out
             }
 
             def Shader "Blend_result2_in1Node_88dc1a7af1074cbdb585537afd42e0a4"
@@ -388,6 +440,36 @@ def "MaterialX"
                 uniform token info:id = "ND_dot_float"
                 float inputs:in = 1
                 float outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240Add.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_1474f2d5073b4ac29398add84bb23240UV"
+            {
+                uniform token info:id = "ND_texcoord_vector2"
+                int inputs:index = 0
+                float2 outputs:out
             }
 
             def Shader "Blend_OpacityNode_5a12138b6fb14f2795a91bfd9c10b35a"
@@ -464,28 +546,55 @@ def "MaterialX"
             def Shader "Blend_BlendNode_5a12138b6fb14f2795a91bfd9c10b35a"
             {
                 uniform token info:id = "ND_dot_vector4"
-                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/CastSwizzleFrom_Node_44adcc54f3fe425e9e8ddbc1565c6973ToBlend_BlendNode_5a12138b6fb14f2795a91bfd9c10b35ain.outputs:out>
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_RGBANode_44adcc54f3fe425e9e8ddbc1565c6973.outputs:out>
                 float4 outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_44adcc54f3fe425e9e8ddbc1565c6973ToBlend_BlendNode_5a12138b6fb14f2795a91bfd9c10b35ain"
+            def Shader "SampleTexture2D_RGBANode_44adcc54f3fe425e9e8ddbc1565c6973"
             {
-                uniform token info:id = "ND_swizzle_color4_vector4"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Textures/_Node_44adcc54f3fe425e9e8ddbc1565c6973.outputs:out>
-                string inputs:channels = "rgba"
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_TextureNode_44adcc54f3fe425e9e8ddbc1565c6973.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973.outputs:out>
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
-            def Shader "_Node_44adcc54f3fe425e9e8ddbc1565c6973"
+            def Shader "SampleTexture2D_TextureNode_44adcc54f3fe425e9e8ddbc1565c6973"
             {
-                uniform token info:id = "ND_image_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2D>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Textures/_Node_44adcc54f3fe425e9e8ddbc1565c6973_UV_fwd.outputs:out>
-                color4f outputs:out
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Textures.inputs:_Texture2D>
+                asset outputs:out
             }
 
-            def Shader "_Node_44adcc54f3fe425e9e8ddbc1565c6973_UV_fwd"
+            def Shader "SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973Add.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Textures/SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_44adcc54f3fe425e9e8ddbc1565c6973UV"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0

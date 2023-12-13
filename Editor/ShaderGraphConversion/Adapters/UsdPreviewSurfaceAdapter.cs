@@ -31,50 +31,23 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             Init();
 
-            var blocks = graphData.GetNodes<BlockNode>();
-
-#if DISABLE_MATERIALX_EXTENSIONS
-            var fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
-#else
-            // Use the presence of lighting parameter blocks as an indicator of whether the material is lit.
-            var fragmentNodeType = MtlxNodeTypes.RealityKitUnlit;
-            foreach (var block in blocks)
-            {
-                if (block.descriptor.shaderStage == ShaderStage.Fragment &&
-                    block.descriptor.name != "BaseColor" &&
-                    block.descriptor.name != "Alpha" &&
-                    block.descriptor.name != "AlphaClipThreshold")
-                {
-                    fragmentNodeType = MtlxNodeTypes.RealityKitPbr;
-                    break;
-                }
-            }
-#endif
-
-            // setup the surface shader node.
-            var fragmentNodeName = "SR_" + graph.name;
-            var vertexNodeName = fragmentNodeName + "Vertex";
-            var materialNodeName = "USD_" + graph.name;
-            var vertexNode = ignoreVertexStage ? null : graph.AddNode(vertexNodeName, GeometryModification, MtlxDataTypes.Vertex);
-            var fragmentNode = graph.AddNode(fragmentNodeName, fragmentNodeType, MtlxDataTypes.Surface);
-
-            // Disable tone mapping for unlit surfaces to match Unity's behavior.
-            if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
-                fragmentNode.AddPortValue("applyPostProcessToneMap", MtlxDataTypes.Boolean, new[] { 0.0f });
-
             var isTransparent = false;
+            var alphaIsPremultiplied = false;
             var alphaIsAdditive = false;
             var alphaClipEnabled = false;
+            var isUnlit = false;
             foreach (var target in graphData.activeTargets)
             {
                 var surfaceType = "Opaque";
                 var alphaMode = "Alpha";
+                var subTargetName = "Lit";
                 switch (target)
                 {
                     case BuiltInTarget builtInTarget:
                         surfaceType = builtInTarget.surfaceType.ToString();
                         alphaMode = builtInTarget.alphaMode.ToString();
                         alphaClipEnabled = builtInTarget.alphaClip;
+                        subTargetName = builtInTarget.activeSubTarget.displayName;
                         break;
                     
                     // UniversalTarget cannot be accessed directly due to its protection level.  Instead, we use
@@ -86,10 +59,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             surfaceType = type.GetProperty("surfaceType").GetValue(target).ToString();
                             alphaMode = type.GetProperty("alphaMode").GetValue(target).ToString();
                             alphaClipEnabled = (bool)type.GetProperty("alphaClip").GetValue(target);
+                            var subTarget = (SubTarget)type.GetProperty("activeSubTarget").GetValue(target);
+                            subTargetName = subTarget.displayName;
                         }
                         else
                         {
-                            Debug.LogWarning($"Unsupported target type: {type}");
+                            MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported target type: {type}");
                         }
                         break;
                 }
@@ -103,10 +78,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         break;
                     
                     default:
-                        Debug.LogWarning($"Unsupported surface type: {surfaceType}");
+                        MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported surface type: {surfaceType}");
                         break;
                 }
-                if (isTransparent && fragmentNodeType != MtlxNodeTypes.UsdPreviewSurface)
+                if (isTransparent)
                 {
                     switch (alphaMode)
                     {
@@ -114,20 +89,54 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             break;
                         
                         case "Premultiply":
-                            fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
+                            alphaIsPremultiplied = true;
                             break;
 
                         case "Additive":
-                            fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
                             alphaIsAdditive = true;
                             break;
 
                         default:
-                            Debug.LogWarning($"Unsupported alpha mode: {alphaMode}");
+                            MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported alpha mode: {alphaMode}");
                             break;
                     }
                 }
+
+                switch (subTargetName)
+                {
+                    case "Lit":
+                        break;
+
+                    case "Unlit":
+                        isUnlit = true;
+                        break;
+                    
+                    default:
+                        MtlxPostProcessor.LogWarningForGraph(graphData, $"Unsupported subtarget: {subTargetName}");
+                        break;
+                }
             }
+
+#if DISABLE_MATERIALX_EXTENSIONS
+            var fragmentNodeType = MtlxNodeTypes.UsdPreviewSurface;
+#else
+            var fragmentNodeType = isUnlit ? MtlxNodeTypes.RealityKitUnlit : MtlxNodeTypes.RealityKitPbr;
+#endif
+
+            // setup the surface shader node.
+            var fragmentNodeName = "SR_" + graph.name;
+            var vertexNodeName = fragmentNodeName + "Vertex";
+            var materialNodeName = "USD_" + graph.name;
+            var vertexNode = ignoreVertexStage ? null : graph.AddNode(vertexNodeName, GeometryModification, MtlxDataTypes.Vertex);
+            var fragmentNode = graph.AddNode(fragmentNodeName, fragmentNodeType, MtlxDataTypes.Surface);
+
+            // Disable tone mapping for unlit surfaces to match Unity's behavior.
+            if (fragmentNodeType == MtlxNodeTypes.RealityKitUnlit)
+                fragmentNode.AddPortValue("applyPostProcessToneMap", MtlxDataTypes.Boolean, new[] { 0.0f });
+
+            // Premultiplied and additive modes use premultiplied alpha.
+            if (fragmentNodeType != MtlxNodeTypes.UsdPreviewSurface && (alphaIsPremultiplied || alphaIsAdditive))
+                fragmentNode.AddPortValue("hasPremultipliedAlpha", MtlxDataTypes.Boolean, new[] { 1.0f });
 
             // initialize the material node boiler plate.
             graph.AddNode(materialNodeName, MtlxNodeTypes.Material, MtlxDataTypes.Material);
@@ -136,6 +145,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             graph.AddPortAndEdge(fragmentNodeName, materialNodeName, "surfaceshader", MtlxDataTypes.Surface);
 
             // each relevant block should map to a surfaceshader input in UsdPreviewSurface.
+            var blocks = graphData.GetNodes<BlockNode>();
             foreach (var block in blocks)
             {
                 if (!HasAdapter(block))
@@ -331,9 +341,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 {
                     // As a special case, if alpha clipping is disabled, we need to omit opacityThreshold entirely.
                     // Including it in any form causes the surface to be treated as opaque, causing a "cut-out"
-                    // effect on visionOS.
-                    if (defaultPorts.name != "opacityThreshold" || alphaClipEnabled)
+                    // effect on visionOS.  Similarly, we omit opacity if the surface isn't transparent/alpha-clipped;
+                    // including it causes the object to be sorted as transparent.
+                    if (!(defaultPorts.name == "opacityThreshold" && !alphaClipEnabled ||
+                        defaultPorts.name == "opacity" && !(isTransparent || alphaClipEnabled)))
+                    {
                         fragmentNode.AddPortValue(defaultPorts.name, defaultPorts.datatype, defaultPorts.value);
+                    }
                 }
             }
         }

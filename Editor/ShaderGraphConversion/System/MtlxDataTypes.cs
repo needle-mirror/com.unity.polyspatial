@@ -132,11 +132,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string RealityKitSurfaceCustomAttribute = "realitykit_surface_custom_attribute";
         internal const string RealityKitUnlit = "realitykit_unlit";
         internal const string RealityKitPbr = "realitykit_pbr";
-        internal const string RealityKitImageLod = "realitykit_image_lod";
         internal const string RealityKitReflect = "realitykit_reflect";
         internal const string RealityKitRefract = "realitykit_refract";
         internal const string RealityKitStep = "realitykit_step";
         internal const string RealityKitGeometrySwitchCameraIndex = "realitykit_geometry_switch_cameraindex";
+        internal const string RealityKitEnvironmentRadiance = "realitykit_environment_radiance";
+        internal const string RealityKitTexture2D = "RealityKitTexture2D";
+        internal const string RealityKitTexture2DLOD = "RealityKitTexture2DLOD";
     }
     
     internal static class MtlxDataTypes
@@ -160,6 +162,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string Filename = "filename";
         internal const string String = "string";
 
+        // TODO (LXR-2897): Support half precision types throughout the conversion process when the shader graph
+        // precision is set to "half".  Currently, we only use this type for a node that specifically requires
+        // it (realitykit_environment_radiance).  
+        internal const string Half = "half";
+
         internal const string FloatArray = "floatarray"; // For Gradients only.
         internal const string Color4Array = "color4array"; // For Gradients only.
 
@@ -168,6 +175,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             Integer => 1,
             Boolean => 1,
             Float => 1,
+            Half => 1,
             Vector2 => 2,
             Vector3 => 3,
             Color3 => 3,

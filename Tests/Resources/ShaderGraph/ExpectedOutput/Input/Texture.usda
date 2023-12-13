@@ -23,7 +23,7 @@ def "MaterialX"
             def Shader "realitykit_pbr"
             {
                 uniform token info:id = "ND_realitykit_pbr_surfaceshader"
-                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFrom_Node_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor.outputs:out>
+                color3f inputs:baseColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromSampleTexture2D_RGBANode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor.outputs:out>
                 float inputs:metallic.connect = </MaterialX/Materials/USD_Texture/TextureSize_WidthNode_806a6e888e464735ba91c5000dcb1175.outputs:out>
                 color3f inputs:emissiveColor.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromAddNode_80f7e1133e0d46deb6636045bc0d837fToSR_TextureemissiveColor.outputs:out>
                 float inputs:ambientOcclusion = 1
@@ -31,7 +31,6 @@ def "MaterialX"
                 float inputs:roughness.connect = </MaterialX/Materials/USD_Texture/SR_Texture_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoat = 0
                 float inputs:clearcoatRoughness = 0.01
-                float inputs:opacity = 1
                 token outputs:out
             }
 
@@ -42,31 +41,33 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor"
+            def Shader "CastSwizzleFromSampleTexture2D_RGBANode_946cc4763c8a43298a3d3ec96ff71183ToSR_TexturebaseColor"
             {
-                uniform token info:id = "ND_swizzle_color4_color3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/_Node_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector4_color3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_RGBANode_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
+                string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "_Node_946cc4763c8a43298a3d3ec96ff71183"
+            def Shader "SampleTexture2D_RGBANode_946cc4763c8a43298a3d3ec96ff71183"
             {
-                uniform token info:id = "ND_image_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Texture.inputs:_MainTex>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/_Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd.outputs:out>
-                string inputs:filtertype = "closest"
-                string inputs:uaddressmode = "clamp"
-                string inputs:vaddressmode = "clamp"
-                color4f outputs:out
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_TextureNode_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183.outputs:out>
+                string inputs:min_filter = "nearest"
+                string inputs:mag_filter = "nearest"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "clamp_to_edge"
+                string inputs:v_wrap_mode = "clamp_to_edge"
+                int inputs:max_anisotropy = 1
+                float4 outputs:out
             }
 
-            def Shader "_Node_946cc4763c8a43298a3d3ec96ff71183_UV_fwd"
+            def Shader "SampleTexture2D_TextureNode_946cc4763c8a43298a3d3ec96ff71183"
             {
-                uniform token info:id = "ND_texcoord_vector2"
-                int inputs:index = 0
-                float2 outputs:out
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Texture.inputs:_MainTex>
+                asset outputs:out
             }
 
             def Shader "TextureSize_WidthNode_806a6e888e464735ba91c5000dcb1175"
@@ -112,12 +113,15 @@ def "MaterialX"
 
             def Shader "SampleTexture3D_RGBA_bgNode_1593172023c94f18ba8ab24245d3dba5"
             {
-                uniform token info:id = "ND_image_vector4"
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
                 asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_TextureNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoordNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                string inputs:filtertype = "linear"
-                string inputs:uaddressmode = "periodic"
-                string inputs:vaddressmode = "periodic"
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
@@ -130,32 +134,26 @@ def "MaterialX"
 
             def Shader "SampleCubemap_OutNode_300ce2639efd436fbff656280edf31c3"
             {
-                uniform token info:id = "ND_convert_color4_vector4"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_inNode_300ce2639efd436fbff656280edf31c3.outputs:out>
+                uniform token info:id = "ND_RealityKitTexture2DLOD_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_CubeNode_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoordNode_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float inputs:lod.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_LODNode_300ce2639efd436fbff656280edf31c3.outputs:out>
+                string inputs:u_wrap_mode = "clamp_to_edge"
+                string inputs:v_wrap_mode = "clamp_to_edge"
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_inNode_300ce2639efd436fbff656280edf31c3"
-            {
-                uniform token info:id = "ND_realitykit_image_lod_color4"
-                asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_CubeNode_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoordNode_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float inputs:level.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_LODNode_300ce2639efd436fbff656280edf31c3.outputs:out>
-                string inputs:s_address = "clamp_to_edge"
-                string inputs:t_address = "clamp_to_edge"
-                string inputs:mag_filter = "linear"
-                string inputs:min_filter = "linear"
-                string inputs:mip_filter = "linear"
-                color4f outputs:out
-            }
-
-            def Shader "SampleCubemap_Out_in_texcoordNode_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoordNode_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp5Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp6Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 outputs:out
             }
 
@@ -219,23 +217,17 @@ def "MaterialX"
 
             def Shader "SampleRawCubemap_OutNode_ac67974057a943d3a9193b568a57d458"
             {
-                uniform token info:id = "ND_convert_color4_vector4"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_inNode_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float4 outputs:out
-            }
-
-            def Shader "SampleRawCubemap_Out_inNode_ac67974057a943d3a9193b568a57d458"
-            {
-                uniform token info:id = "ND_realitykit_image_lod_color4"
+                uniform token info:id = "ND_RealityKitTexture2DLOD_vector4"
                 asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_CubeNode_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoordNode_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float inputs:level.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_LODNode_ac67974057a943d3a9193b568a57d458.outputs:out>
-                string inputs:s_address = "clamp_to_edge"
-                string inputs:t_address = "clamp_to_edge"
-                string inputs:mag_filter = "linear"
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoordNode_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float inputs:lod.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_LODNode_ac67974057a943d3a9193b568a57d458.outputs:out>
+                string inputs:u_wrap_mode = "clamp_to_edge"
+                string inputs:v_wrap_mode = "clamp_to_edge"
                 string inputs:min_filter = "linear"
-                string inputs:mip_filter = "linear"
-                color4f outputs:out
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                int inputs:max_anisotropy = 1
+                float4 outputs:out
             }
 
             def Shader "SampleRawCubemap_LODNode_ac67974057a943d3a9193b568a57d458"
@@ -245,13 +237,13 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoordNode_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoordNode_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp4Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp5Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 outputs:out
             }
 
@@ -334,29 +326,101 @@ def "MaterialX"
             {
                 uniform token info:id = "ND_multiply_vector3"
                 float3 inputs:in2 = (1, 1, -1)
-                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFrom_Node_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1.outputs:out>
+                float3 inputs:in1.connect = </MaterialX/Materials/USD_Texture/CastSwizzleFromSampleTexture2DLOD_RGBANode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "CastSwizzleFrom_Node_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1"
+            def Shader "CastSwizzleFromSampleTexture2DLOD_RGBANode_863147e977944b3e828c0de0418dbcb8ToSR_TextureVertex_modelPositionOffset_FlipZin1"
             {
-                uniform token info:id = "ND_swizzle_color4_vector3"
-                color4f inputs:in.connect = </MaterialX/Materials/USD_Texture/_Node_863147e977944b3e828c0de0418dbcb8.outputs:out>
-                string inputs:channels = "rgb"
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_RGBANode_863147e977944b3e828c0de0418dbcb8.outputs:out>
+                string inputs:channels = "xyz"
                 float3 outputs:out
             }
 
-            def Shader "_Node_863147e977944b3e828c0de0418dbcb8"
+            def Shader "SampleTexture2DLOD_RGBANode_863147e977944b3e828c0de0418dbcb8"
             {
-                uniform token info:id = "ND_realitykit_image_lod_color4"
-                color4f inputs:default = (1, 1, 1, 1)
-                asset inputs:file.connect = </MaterialX/Materials/USD_Texture.inputs:_VertexTex>
-                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/_Node_863147e977944b3e828c0de0418dbcb8_UV_fwd.outputs:out>
-                float inputs:level = 0
-                color4f outputs:out
+                uniform token info:id = "ND_RealityKitTexture2DLOD_vector4"
+                asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_TextureNode_863147e977944b3e828c0de0418dbcb8.outputs:out>
+                float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8.outputs:out>
+                float inputs:lod.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_LODNode_863147e977944b3e828c0de0418dbcb8.outputs:out>
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
+                float4 outputs:out
             }
 
-            def Shader "_Node_863147e977944b3e828c0de0418dbcb8_UV_fwd"
+            def Shader "SampleTexture2DLOD_LODNode_863147e977944b3e828c0de0418dbcb8"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in = 0
+                float outputs:out
+            }
+
+            def Shader "SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8Add.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2DLOD_UVNode_863147e977944b3e828c0de0418dbcb8UV"
+            {
+                uniform token info:id = "ND_texcoord_vector2"
+                int inputs:index = 0
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2DLOD_TextureNode_863147e977944b3e828c0de0418dbcb8"
+            {
+                uniform token info:id = "ND_dot_filename"
+                asset inputs:in.connect = </MaterialX/Materials/USD_Texture.inputs:_VertexTex>
+                asset outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183Add.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183Add"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183Multiply.outputs:out>
+                float2 inputs:in2 = (0, 1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector2"
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183UV.outputs:out>
+                float2 inputs:in2 = (1, -1)
+                float2 outputs:out
+            }
+
+            def Shader "SampleTexture2D_UVNode_946cc4763c8a43298a3d3ec96ff71183UV"
             {
                 uniform token info:id = "ND_texcoord_vector2"
                 int inputs:index = 0
@@ -365,43 +429,30 @@ def "MaterialX"
 
             def Shader "SampleTexture3D_RGBA_fgNode_1593172023c94f18ba8ab24245d3dba5"
             {
-                uniform token info:id = "ND_image_vector4"
+                uniform token info:id = "ND_RealityKitTexture2D_vector4"
                 asset inputs:file.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_TextureNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float2 inputs:texcoord.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoordNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                string inputs:filtertype = "linear"
-                string inputs:uaddressmode = "periodic"
-                string inputs:vaddressmode = "periodic"
+                string inputs:min_filter = "linear"
+                string inputs:mag_filter = "linear"
+                string inputs:mip_filter = "nearest"
+                string inputs:u_wrap_mode = "repeat"
+                string inputs:v_wrap_mode = "repeat"
+                int inputs:max_anisotropy = 1
                 float4 outputs:out
             }
 
             def Shader "SampleTexture3D_RGBA_fg_texcoordNode_1593172023c94f18ba8ab24245d3dba5"
             {
-                uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float2 inputs:in2 = (0, 1)
-                float2 outputs:out
-            }
-
-            def Shader "SampleTexture3D_RGBA_fg_texcoord_in1Node_1593172023c94f18ba8ab24245d3dba5"
-            {
-                uniform token info:id = "ND_multiply_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float2 inputs:in2 = (1, -1)
-                float2 outputs:out
-            }
-
-            def Shader "SampleTexture3D_RGBA_fg_texcoord_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
-            {
                 uniform token info:id = "ND_combine2_vector2"
                 float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_fg_texcoord_in2Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in2_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp0Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
@@ -414,15 +465,48 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_fg_texcoord_in2_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_fg_texcoord_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5"
+            {
+                uniform token info:id = "ND_clamp_float"
+                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4_inNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:low.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp3Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:high.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4_highNode_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleTexture3D___Tmp4_highNode_1593172023c94f18ba8ab24245d3dba5"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
                 float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp3Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
             def Shader "SampleTexture3D___Tmp3Node_1593172023c94f18ba8ab24245d3dba5"
+            {
+                uniform token info:id = "ND_divide_float"
+                float inputs:in1 = 0.5
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp3_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "SampleTexture3D___Tmp3_in2Node_1593172023c94f18ba8ab24245d3dba5"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = </MaterialX/Materials/USD_Texture.inputs:TextureSize_Texture3D>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "SampleTexture3D___Tmp4_inNode_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
@@ -474,40 +558,40 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_fg_texcoord_in1_in1_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_fg_texcoord_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_ifgreatereq_float"
-                float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp7Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp0Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:in1 = 0
-                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp7Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D___Tmp7Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_ceil_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_subtract_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:in2 = 0.5
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D___Tmp4_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D___Tmp5_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_multiply_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp0Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D___Tmp4_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D___Tmp5_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
                 float3 inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
@@ -526,61 +610,45 @@ def "MaterialX"
             def Shader "SampleTexture3D_RGBA_mixNode_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_realitykit_fractional_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
             def Shader "SampleTexture3D_RGBA_bg_texcoordNode_1593172023c94f18ba8ab24245d3dba5"
             {
-                uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float2 inputs:in2 = (0, 1)
-                float2 outputs:out
-            }
-
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1Node_1593172023c94f18ba8ab24245d3dba5"
-            {
-                uniform token info:id = "ND_multiply_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float2 inputs:in2 = (1, -1)
-                float2 outputs:out
-            }
-
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
-            {
                 uniform token info:id = "ND_combine2_vector2"
                 float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_bg_texcoord_in2Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_divide_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in2_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp0Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_bg_texcoord_in2_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_add_float"
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp3Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_bg_texcoord_in2_in1_in1Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_ifgreatereq_float"
-                float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float inputs:value2 = 0
-                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
-                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D_RGBA_bg_texcoord_in2_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D_RGBA_bg_texcoord_in1_in1_in2_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D_RGBA_bg_texcoord_in2_in1_in1_in2Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_subtract_float"
                 float inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp0Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
@@ -588,10 +656,10 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5"
+            def Shader "SampleTexture3D___Tmp6Node_1593172023c94f18ba8ab24245d3dba5"
             {
                 uniform token info:id = "ND_floor_float"
-                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp4Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
+                float inputs:in.connect = </MaterialX/Materials/USD_Texture/SampleTexture3D___Tmp5Node_1593172023c94f18ba8ab24245d3dba5.outputs:out>
                 float outputs:out
             }
 
@@ -610,12 +678,12 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp5Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp7Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp11Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 outputs:out
             }
@@ -686,25 +754,25 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float inputs:value2 = 0
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1_in1_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1_in1_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1_in1_in2Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1_in1_in2Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2 = (0.5, 0.25)
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp8Node_300ce2639efd436fbff656280edf31c3.outputs:out>
@@ -728,15 +796,15 @@ def "MaterialX"
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in1_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in1_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2 = (0.5, 0.08333334)
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in1_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in1_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp8Node_300ce2639efd436fbff656280edf31c3.outputs:out>
@@ -760,35 +828,35 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp6Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp7Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp11Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float inputs:value2 = 0
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2_in1_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2_in1_in2Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2_in1_in2Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2_in1_in2Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2 = (0.5, 0.5833333)
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2_in1_in2_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp9Node_300ce2639efd436fbff656280edf31c3.outputs:out>
@@ -812,15 +880,15 @@ def "MaterialX"
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2_in1_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2_in1_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_in_texcoord_in2_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap_Out_texcoord_in2_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3.outputs:out>
                 float2 inputs:in2 = (0.5, 0.4166667)
                 float2 outputs:out
             }
 
-            def Shader "SampleCubemap_Out_in_texcoord_in2_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
+            def Shader "SampleCubemap_Out_texcoord_in2_in1_in1_in1Node_300ce2639efd436fbff656280edf31c3"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleCubemap___Tmp9Node_300ce2639efd436fbff656280edf31c3.outputs:out>
@@ -858,12 +926,12 @@ def "MaterialX"
                 float3 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp4Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp6Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp10Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 outputs:out
             }
@@ -934,25 +1002,25 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp0Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float inputs:value2 = 0
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1_in1_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1_in1_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1_in1_in2Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1_in1_in2Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2 = (0.5, 0.25)
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp7Node_ac67974057a943d3a9193b568a57d458.outputs:out>
@@ -976,15 +1044,15 @@ def "MaterialX"
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in1_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in1_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2 = (0.5, 0.08333334)
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in1_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in1_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp7Node_ac67974057a943d3a9193b568a57d458.outputs:out>
@@ -1008,23 +1076,23 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp5Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float inputs:value2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp6Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp10Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_ifgreater_vector2"
                 float inputs:value1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float inputs:value2 = 0
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
-                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2_in1_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in2.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2_in1_in2Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 outputs:out
             }
 
@@ -1036,15 +1104,15 @@ def "MaterialX"
                 float outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2_in1_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2_in1_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2 = (0.5, 0.4166667)
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2_in1_in1_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp8Node_ac67974057a943d3a9193b568a57d458.outputs:out>
@@ -1068,15 +1136,15 @@ def "MaterialX"
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2_in1_in2Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2_in1_in2Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_add_vector2"
-                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_in_texcoord_in2_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
+                float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap_Out_texcoord_in2_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458.outputs:out>
                 float2 inputs:in2 = (0.5, 0.5833333)
                 float2 outputs:out
             }
 
-            def Shader "SampleRawCubemap_Out_in_texcoord_in2_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458"
+            def Shader "SampleRawCubemap_Out_texcoord_in2_in1_in2_in1Node_ac67974057a943d3a9193b568a57d458"
             {
                 uniform token info:id = "ND_multiply_vector2"
                 float2 inputs:in1.connect = </MaterialX/Materials/USD_Texture/SampleRawCubemap___Tmp8Node_ac67974057a943d3a9193b568a57d458.outputs:out>

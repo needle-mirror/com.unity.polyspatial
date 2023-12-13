@@ -56,7 +56,7 @@ namespace Tests.Runtime.Functional
         public void Test_GameObjectTracker_Asserts_UsingPolySpatialCullingMask()
         {
 #if UNITY_EDITOR
-            Assert.Throws<UnityEngine.Assertions.AssertionException>(() => PolySpatialCore.UnitySimulation?.Tracker.TrackObjectChanges(LayerMask.GetMask(PolySpatialCore.PolySpatialLayerName)));
+            Assert.Throws<UnityEngine.Assertions.AssertionException>(() => PolySpatialCore.UnitySimulation?.Tracker.TrackObjectChanges(LayerMask.GetMask(PolySpatialUnityBackend.PolySpatialLayerName)));
 #endif
         }
 

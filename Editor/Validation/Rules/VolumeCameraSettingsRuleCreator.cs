@@ -42,7 +42,7 @@ namespace UnityEditor.PolySpatial.Validation
                     if (volumeCamera == null)
                         return true;
 
-                    var configuration = volumeCamera.OutputConfiguration;
+                    var configuration = volumeCamera.WindowConfiguration;
                     return configuration == null || AssetDatabase.GetAssetPath(configuration).Contains("/Resources/");
                 },
                 FixIt = () =>
@@ -51,7 +51,7 @@ namespace UnityEditor.PolySpatial.Validation
                     if (volumeCamera == null)
                         return;
 
-                    var path = AssetDatabase.GetAssetPath(volumeCamera.OutputConfiguration);
+                    var path = AssetDatabase.GetAssetPath(volumeCamera.WindowConfiguration);
                     if (string.IsNullOrEmpty(path) || path.Contains("/Resources/"))
                         return;
 

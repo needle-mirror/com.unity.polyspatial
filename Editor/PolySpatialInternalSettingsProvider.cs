@@ -43,11 +43,19 @@ namespace UnityEditor.PolySpatial.Internal
         SerializedProperty m_RuntimeFlags;
         SerializedProperty m_AdditionalTextureFormatsProperty;
 
+        SerializedProperty m_EnableStatisticsProperty;
+
         SerializedProperty m_IgnoredScenesListProperty;
         ReorderableList m_IgnoredScenesReorderableList;
 
         SerializedProperty m_AlwaysLinkPolySpatialRuntimeProperty;
         SerializedProperty m_EnableInEditorPreviewProperty;
+
+        SerializedProperty m_ConnectionDiscoveryPortProperty;
+        SerializedProperty m_ConnectionDiscoverySendIntervalProperty;
+        SerializedProperty m_ConnectionDiscoveryTimeOutDurationProperty;
+
+        SerializedProperty m_MockBackendProperty;
 
         /// <summary>
         /// Settings constructor called when we need a new settings instance.
@@ -78,6 +86,8 @@ namespace UnityEditor.PolySpatial.Internal
             m_RuntimeFlags = m_SerializedObject.FindProperty("m_RuntimeFlags");
             m_AdditionalTextureFormatsProperty = m_SerializedObject.FindProperty("m_AdditionalTextureFormats");
 
+            m_EnableStatisticsProperty = m_SerializedObject.FindProperty("m_EnableStatistics");
+
             m_IgnoredScenesListProperty = m_SerializedObject.FindProperty("m_SerializedIgnoredScenePaths");
             m_IgnoredScenesReorderableList = new ReorderableList(m_SerializedObject, m_IgnoredScenesListProperty, true, true, true, true)
             {
@@ -90,6 +100,12 @@ namespace UnityEditor.PolySpatial.Internal
 
             m_EnableProgressiveMipStreamingProperty = m_SerializedObject.FindProperty("m_EnableProgressiveMipStreaming");
             m_MaxMipByteSizePerCycleProperty = m_SerializedObject.FindProperty("m_MaxMipByteSizePerCycle");
+
+            m_ConnectionDiscoveryPortProperty = m_SerializedObject.FindProperty("m_ConnectionDiscoveryPort");
+            m_ConnectionDiscoverySendIntervalProperty = m_SerializedObject.FindProperty("m_ConnectionDiscoverySendInterval");
+            m_ConnectionDiscoveryTimeOutDurationProperty = m_SerializedObject.FindProperty("m_ConnectionDiscoveryTimeOutDuration");
+
+            m_MockBackendProperty = m_SerializedObject.FindProperty("m_MockBackend");
 
             m_EnableProgressiveMipStreamingAnim = new AnimBool(m_EnableProgressiveMipStreamingProperty.boolValue);
             m_EnableProgressiveMipStreamingAnim.valueChanged.AddListener(Repaint);
@@ -127,6 +143,8 @@ namespace UnityEditor.PolySpatial.Internal
                                 "Clip apps to the bounds of their VolumeRenderer."));
                     }
 
+                    EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
+
                     EditorGUILayout.PropertyField(m_EnableTransformVerificationProperty);
 
                     EditorGUILayout.PropertyField(m_EnableProgressiveMipStreamingProperty);
@@ -158,6 +176,14 @@ namespace UnityEditor.PolySpatial.Internal
 
                 EditorGUILayout.PropertyField(m_AlwaysLinkPolySpatialRuntimeProperty);
                 EditorGUILayout.PropertyField(m_EnableInEditorPreviewProperty);
+
+                EditorGUILayout.Space();
+
+                EditorGUILayout.PropertyField(m_ConnectionDiscoveryPortProperty);
+                EditorGUILayout.PropertyField(m_ConnectionDiscoverySendIntervalProperty);
+                EditorGUILayout.PropertyField(m_ConnectionDiscoveryTimeOutDurationProperty);
+
+                EditorGUILayout.PropertyField(m_MockBackendProperty);
 
                 m_SerializedObject.ApplyModifiedPropertiesWithoutUndo();
                 AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);

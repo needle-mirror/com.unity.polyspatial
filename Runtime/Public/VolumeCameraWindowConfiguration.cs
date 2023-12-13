@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Unity.PolySpatial
 {
-    [CreateAssetMenu(fileName = "VolumeCameraConfiguration", menuName = "PolySpatial/Volume Camera Configuration")]
-    public class VolumeCameraConfiguration : ScriptableObject
+    [CreateAssetMenu(fileName = "VolumeCameraWindowConfiguration", menuName = "PolySpatial/Volume Camera Window Configuration")]
+    public class VolumeCameraWindowConfiguration : ScriptableObject
     {
         [SerializeField]
         [Tooltip("Whether the camera should restrict the rendered content to objects within its bounding box or be unbounded.")]
@@ -18,11 +18,17 @@ namespace Unity.PolySpatial
         [SerializeField]
         bool m_IsUniformScale;
 
+        /// <summary>
+        /// The mode (Bounded, Unbounded) of the camera's output. This value cannot be changed at runtime and can only be modified on the asset.
+        /// </summary>
         public VolumeCamera.PolySpatialVolumeCameraMode Mode
         {
             get => m_Mode;
         }
 
+        /// <summary>
+        /// The dimensions of the camera's output. This value cannot be changed at runtime and can only be modified on the asset.
+        /// </summary>
         public Vector3 Dimensions
         {
             get => m_OutputDimensions;

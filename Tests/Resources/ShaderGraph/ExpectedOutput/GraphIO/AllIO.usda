@@ -34,7 +34,6 @@ def "MaterialX"
                 float inputs:specular.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_specular_Grayscale.outputs:out>
                 float inputs:roughness.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_roughness_OnesComplement.outputs:out>
                 float inputs:clearcoatRoughness.connect = </MaterialX/Materials/USD_AllIO/SR_AllIO_clearcoatRoughness_OnesComplement.outputs:out>
-                float inputs:opacity = 1
                 token outputs:out
             }
 

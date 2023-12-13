@@ -80,9 +80,9 @@ namespace UnityEditor.PolySpatial.Validation
 
         void DrawDefaultEditorNested()
         {
-            m_ShowDefaultEditor.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowDefaultEditor.value, k_DefaultInspectorFoldoutLabel);
+            m_ShowDefaultEditor.Value = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowDefaultEditor.Value, k_DefaultInspectorFoldoutLabel);
             EditorGUILayout.EndFoldoutHeaderGroup();
-            if (!m_ShowDefaultEditor.value)
+            if (!m_ShowDefaultEditor.Value)
                 return;
 
             // EditorGUI.indentLevel does not play nice with FoldoutHeaderGroups, so we use Vertical and Horizontal layout groups to ensure consistent layout.

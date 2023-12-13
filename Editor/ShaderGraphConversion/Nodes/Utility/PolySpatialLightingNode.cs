@@ -89,53 +89,50 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             base.CollectShaderProperties(properties, generationMode);
 
-            void AddTexture2DProperty(string referenceName)
+            void AddProperty(AbstractShaderProperty property, string referenceName, bool exposeAsHidden)
             {
-                properties.AddShaderProperty(new Texture2DShaderProperty()
+                property.overrideReferenceName = referenceName;
+
+                // We expose certain properties as hidden so that they will show up in the Shader.GetProperty APIs
+                // (with the HideInInspector flag), allowing us to tell at runtime which lighting features are used.
+                if (exposeAsHidden)
+                    property.hidden = true;
+                else
+                    property.generatePropertyBlock = false;
+
+                properties.AddShaderProperty(property);
+            }
+
+            void AddTexture2DProperty(string referenceName, bool exposeAsHidden = false)
+            {
+                var property = new Texture2DShaderProperty()
                 {
-                    overrideReferenceName = referenceName,
                     defaultType = Texture2DShaderProperty.DefaultType.Black,
-                    generatePropertyBlock = false,
-                });
+                };
+                AddProperty(property, referenceName, exposeAsHidden);
             }
 
-            void AddCubemapProperty(string referenceName)
+            void AddCubemapProperty(string referenceName, bool exposeAsHidden = false)
             {
-                properties.AddShaderProperty(new CubemapShaderProperty()
-                {
-                    overrideReferenceName = referenceName,
-                    generatePropertyBlock = false,
-                });
+                AddProperty(new CubemapShaderProperty(), referenceName, exposeAsHidden);
             }
 
-            void AddFloatProperty(string referenceName)
+            void AddFloatProperty(string referenceName, bool exposeAsHidden = false)
             {
-                properties.AddShaderProperty(new Vector1ShaderProperty()
-                {
-                    overrideReferenceName = referenceName,
-                    generatePropertyBlock = false,
-                });
+                AddProperty(new Vector1ShaderProperty(), referenceName, exposeAsHidden);
             }
 
-            void AddVector4Property(string referenceName)
+            void AddVector4Property(string referenceName, bool exposeAsHidden = false)
             {
-                properties.AddShaderProperty(new Vector4ShaderProperty()
-                {
-                    overrideReferenceName = referenceName,
-                    generatePropertyBlock = false,
-                });
+                AddProperty(new Vector4ShaderProperty(), referenceName, exposeAsHidden);
             }
 
-            void AddMatrix4Property(string referenceName)
+            void AddMatrix4Property(string referenceName, bool exposeAsHidden = false)
             {
-                properties.AddShaderProperty(new Matrix4ShaderProperty()
-                {
-                    overrideReferenceName = referenceName,
-                    generatePropertyBlock = false,
-                });
+                AddProperty(new Matrix4ShaderProperty(), referenceName, exposeAsHidden);
             }
 
-            AddMatrix4Property(PolySpatialShaderGlobals.VolumeToWorld);
+            AddMatrix4Property(PolySpatialShaderProperties.VolumeToWorld);
 
             switch (m_BakedLightingMode)
             {
@@ -146,13 +143,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     break;
 
                 case BakedLightingMode.LightProbes:
-                    AddVector4Property(PolySpatialShaderProperties.SHAr);
-                    AddVector4Property(PolySpatialShaderProperties.SHAg);
-                    AddVector4Property(PolySpatialShaderProperties.SHAb);
-                    AddVector4Property(PolySpatialShaderProperties.SHBr);
-                    AddVector4Property(PolySpatialShaderProperties.SHBg);
-                    AddVector4Property(PolySpatialShaderProperties.SHBb);
-                    AddVector4Property(PolySpatialShaderProperties.SHC);
+                    AddVector4Property(PolySpatialShaderProperties.SHAr, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHAg, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHAb, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHBr, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHBg, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHBb, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHC, true);
                     break;
             }
 
@@ -165,14 +162,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         break;
                     
                     case ReflectionProbeMode.Simple:
-                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0");
+                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0", true);
                         break;
                     
                     case ReflectionProbeMode.Blended:
                         for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
                         {
-                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i);
-                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i);
+                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i, true);
+                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i, true);
                         }
                         break;
                 }
@@ -197,7 +194,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             // Compute the world space normal from the tangent space input normal and tangent frame vectors.
             writer.WriteLine($@"
 float3 normalVS = mul(Normal, float3x3(TangentFrameX, TangentFrameY, TangentFrameZ));
-float3 normalWS = normalize(mul({PolySpatialShaderGlobals.VolumeToWorld}, float4(normalVS, 0.0)).xyz);");
+float3 normalWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorld}, float4(normalVS, 0.0)).xyz);");
             
             // https://github.cds.internal.unity3d.com/unity/unity/blob/918aac026438f350a9716ff831b1e309f2483743/Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl#L82
             Color kDialectricSpec = new(0.04f, 0.04f, 0.04f, 1.0f - 0.04f);
@@ -217,7 +214,8 @@ float3 brdfSpecular = lerp(
             writer.WriteLine("float normalizationTerm = roughness * 4.0 + 2.0;");
             writer.WriteLine("float grazingTerm = saturate(Smoothness + reflectivity);");
             writer.WriteLine($@"
-float3 viewDirectionWS = normalize(mul({PolySpatialShaderGlobals.VolumeToWorld}, float4(ViewDirectionVS, 0.0)).xyz);");
+float3 viewDirectionWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorld},
+    float4(ViewDirectionVS, 0.0)).xyz);");
 
             StringBuilder finalSumExpr = new("Emission");
 
@@ -315,7 +313,7 @@ SAMPLE_TEXTURECUBE_LOD({textureProperty}, sampler{textureProperty}, reflectVecto
             if (m_DynamicLighting)
             {
                 writer.WriteLine($@"
-float3 positionWS = mul({PolySpatialShaderGlobals.VolumeToWorld}, float4(PositionVS, 1)).xyz;");
+float3 positionWS = mul({PolySpatialShaderProperties.VolumeToWorld}, float4(PositionVS, 1)).xyz;");
 
                 for (var i = 0; i < PolySpatialShaderGlobals.LightCount; ++i)
                 {
