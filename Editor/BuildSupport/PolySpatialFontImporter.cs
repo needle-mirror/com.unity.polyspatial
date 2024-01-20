@@ -33,7 +33,6 @@ namespace UnityEditor.PolySpatial.Internals
             if (font != null)
             {
                 name = font.name;
-                Debug.Log($"Found font {name} from font");
                 fi = new FileInfo(ctx.assetPath);
             }
 
@@ -42,7 +41,6 @@ namespace UnityEditor.PolySpatial.Internals
                 return;
 
             var destPath = ctx.GetOutputArtifactFilePath($"{name}{PolySpatialAssetData.PolySpatialAssetExtension}");
-            Debug.Log(destPath);
             try
             {
                 // Transfer the font to the PSL Asset Data storage location for

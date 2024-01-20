@@ -1,29 +1,23 @@
-
-using System;
-using System.Collections.Generic;
-
 namespace UnityEditor.ShaderGraph.MaterialX
 {
     class GradientNoiseAdapter : AbstractUVNodeAdapter<GradientNoiseNode>
     {
-        public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
+        public override void BuildInstance(
+            AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
-            var portMap = new Dictionary<string, string>();
-            portMap.Add("Scale", "amplitude");
-            var outputNode = QuickNode.NaryOp(MtlxNodeTypes.PerlinNoise2d, node, graph, externals, "GradientNoise", portMap);
-            outputNode.AddPort("texcoord", MtlxDataTypes.Vector2);
-
-            var uvSlot = (UVMaterialSlot)NodeUtils.GetSlotByName(node, "UV");
-            if (!uvSlot.isConnected)
+            QuickNode.CompoundOp(node, graph, externals, sgContext, "GradientNoise", new()
             {
-                var uvNode = QuickNode.CreateUVNode(
-                    graph, NodeUtils.GetNodeName(node, "GradientNoiseUV"), (int)uvSlot.channel);
-                graph.AddEdge(uvNode.name, outputNode.name, "texcoord");
-            }
-            else
-            {
-                externals.AddExternalPortAndEdge(uvSlot, outputNode.name, "texcoord");
-            }
+                ["Out"] = new(MtlxNodeTypes.PerlinNoise2d, MtlxDataTypes.Float, new()
+                {
+                    ["amplitude"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+                    ["pivot"] = new FloatInputDef(MtlxDataTypes.Float, 0.5f),
+                    ["texcoord"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = new ExternalInputDef("UV"),
+                        ["in2"] = new ExternalInputDef("Scale"),
+                    }),
+                })
+            });
         }
     }
 }

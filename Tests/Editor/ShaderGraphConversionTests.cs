@@ -13,8 +13,8 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
     [TestFixture]
     public class ShaderGraphConversionTests
     {
-        private const string k_TestAssetsDirectory = "Packages/com.unity.polyspatial/Tests/Resources/ShaderGraph/SourceAssets";
-        private const string k_TestExpectedOutputDirectory = "Packages/com.unity.polyspatial/Tests/Resources/ShaderGraph/ExpectedOutput";
+        private const string k_TestAssetsDirectory = "Packages/com.unity.polyspatial/Tests/Data/ShaderGraph/SourceAssets";
+        private const string k_TestExpectedOutputDirectory = "Packages/com.unity.polyspatial/Tests/Data/ShaderGraph/ExpectedOutput";
 
         void ExpectGraphConverts(string assetPath)
         {

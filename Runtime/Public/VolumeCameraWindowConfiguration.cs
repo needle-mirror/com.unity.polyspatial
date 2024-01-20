@@ -16,7 +16,9 @@ namespace Unity.PolySpatial
         // This will lock the current ratio and scale the camera uniformly.
         // ReSharper disable once NotAccessedField.Local
         [SerializeField]
+#pragma warning disable CS0414 // Field is assigned but its value is never used
         bool m_IsUniformScale;
+#pragma warning restore CS0414
 
         /// <summary>
         /// The mode (Bounded, Unbounded) of the camera's output. This value cannot be changed at runtime and can only be modified on the asset.

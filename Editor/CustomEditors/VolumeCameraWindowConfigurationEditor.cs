@@ -1,5 +1,5 @@
 using Unity.PolySpatial;
-using UnityEditor.PolySpatial.InternalBridge;
+using UnityEditor.PolySpatial.Internals.InternalBridge;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
 

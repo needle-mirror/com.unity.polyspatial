@@ -107,7 +107,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             continue;
 
                         // mtlx name for the endogenous upstream src node
-                        var portRef = subExternals.slotToPort[srcSlot.slotReference];
+                        if (!subExternals.slotToPort.TryGetValue(srcSlot.slotReference, out var portRef))
+                        {
+                            // If there's no slotToPort mapping, then something went wrong with node conversion
+                            // (for example, failure to parse a custom function) and a warning will have been
+                            // logged if appropriate.  Omitting the external port mapping is fine and will result
+                            // in anything referencing that mapping using its default value (refer to the
+                            // implementation of ExternalEdgeMap.ResolveExternals).
+                            continue;
+                        }
 
                         // output node in the main graph- TODO: RawDisplayName should be wrapped by something.
                         var sgOutputSlot = NodeUtils.GetOutputByName(sgNode, input.RawDisplayName());

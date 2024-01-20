@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 #if UNITY_EDITOR && ENABLE_MULTIPLE_DISPLAYS
-using Unity.PolySpatial.InternalBridge;
+using Unity.PolySpatial.Internals.InternalBridge;
 #endif
 using Unity.PolySpatial.Internals;
 using UnityEngine;
@@ -35,12 +35,14 @@ namespace Unity.PolySpatial
         Vector3 m_Dimensions = k_DefaultDimensions;
 
         // This will lock the current ratio and scale the camera uniformly.
-        // ReSharper disable once NotAccessedField.Local
         [SerializeField]
+        // ReSharper disable once NotAccessedField
+#pragma warning disable CS0414 // Field is assigned but its value is never used
         bool m_IsUniformScale;
+#pragma warning restore CS0414
 
         [SerializeField]
-        [Tooltip("The output Volume Camera Window Configuration object for this volume camera, or None for default. Create new output configurations via VolumeCameraWindowConfiguration scriptable objects.")]
+        [Tooltip("The output Volume Camera Window Configuration object for this volume camera, or None for default. Create new volume camera configurations via the Asset Create menu.")]
         VolumeCameraWindowConfiguration m_OutputConfiguration = null;
 
         [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
@@ -84,7 +86,9 @@ namespace Unity.PolySpatial
         #if UNITY_EDITOR
         // fields used in the editor that wont carry on to runtime
         [SerializeField]
+#pragma warning disable CS0414 // Field is assigned but its value is never used
         bool m_ShowVolumeCameraEventsFoldout;
+#pragma warning restore CS0414
         #endif
 
         public enum PolySpatialVolumeCameraMode : int
@@ -123,6 +127,17 @@ namespace Unity.PolySpatial
         /// </summary>
         public Vector3 OutputDimensions => ResolvedWindowConfiguration?.Dimensions ?? Vector3.one;
 
+        /// <summary>
+        /// Defines the (unscaled) size of the camera's bounding box. The box is centered at the position of the
+        /// **VolumeCamera**’s transform.
+        /// </summary>
+        /// <remarks>
+        /// The effective, world space dimensions of the bounding box are calculated by
+        /// multiplying the Dimensions by the transform's scale.
+        ///
+        /// When you set the volume camera **Mode** to **Bounded**, the camera only displays GameObjects
+        /// within the scaled bounding box.  A bounding box is not used when you set the **Mode** to **Unbounded**.
+        /// </remarks>
         public Vector3 Dimensions
         {
             get
@@ -147,9 +162,10 @@ namespace Unity.PolySpatial
             }
         }
 
-        public Camera BackingCamera => m_BackingCamera.enabled ? m_BackingCamera : null;
+        internal Camera BackingCamera => m_BackingCamera.enabled ? m_BackingCamera : null;
 
-        public bool IsHostCameraAvailable => m_IsHostCameraAvailable;
+        // Note: nobody calls this
+        internal bool IsHostCameraAvailable => m_IsHostCameraAvailable;
 
         // A matrix that translates from the unit cube at origin canonical volume space
         // back into the world space of the volume camera.
@@ -294,7 +310,7 @@ namespace Unity.PolySpatial
 
         void Awake()
         {
-            if (!PolySpatialSettings.instance.EnablePolySpatialRuntime)
+            if (!PolySpatialBridge.RuntimeEnabled)
             {
                 this.enabled = false;
                 return;
@@ -312,8 +328,12 @@ namespace Unity.PolySpatial
 
             m_BackingCameraGO = new GameObject("Culling Camera");
             m_BackingCameraGO.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
-            m_BackingCameraGO.layer = m_PolySpatialLayerIndex;
             m_BackingCameraGO.transform.SetParent(transform);
+
+            if (m_PolySpatialLayerIndex != -1)
+            {
+                m_BackingCameraGO.layer = m_PolySpatialLayerIndex;
+            }
 
             m_BackingCamera = m_BackingCameraGO.AddComponent<Camera>();
 #if ENABLE_MULTIPLE_DISPLAYS
@@ -394,7 +414,14 @@ namespace Unity.PolySpatial
             m_BackingCamera.orthographicSize = worldSpaceDimensions.y / 2;
             m_BackingCamera.nearClipPlane = 1;
             m_BackingCamera.farClipPlane = 1 + worldSpaceDimensions.z;
-            m_BackingCamera.cullingMask = CullingMask & ~(1 << m_PolySpatialLayerIndex);
+            if (m_PolySpatialLayerIndex != -1)
+            {
+                m_BackingCamera.cullingMask = CullingMask & ~(1 << m_PolySpatialLayerIndex);
+            }
+            else
+            {
+                m_BackingCamera.cullingMask = CullingMask;
+            }
 
             m_BackingCamera.enabled = true;
         }
@@ -432,7 +459,14 @@ namespace Unity.PolySpatial
             cam.focalLength = hostData.focalLength;
             cam.nearClipPlane = hostData.nearClip;
             cam.farClipPlane = hostData.farClip;
-            cam.cullingMask = hostData.cullingMask & ~(1 << m_PolySpatialLayerIndex);
+            if (m_PolySpatialLayerIndex != -1)
+            {
+                cam.cullingMask = hostData.cullingMask & ~(1 << m_PolySpatialLayerIndex);
+            }
+            else
+            {
+                cam.cullingMask = hostData.cullingMask;
+            }
 
             // The host is not required to invoke this function, but once it has done so, the host camera is assumed to
             // be in sync until the volume camera's mode changes.

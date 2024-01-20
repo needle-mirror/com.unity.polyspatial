@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -390,9 +391,9 @@ namespace Tests.Runtime.Functional.Components
         {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 
-            var shouldUpdateSkeleton = true;
+            bool? shouldUpdateSkeleton = true;
 
-            void AssertUpdateSkeleton(bool actualValue)
+            void AssertUpdateSkeleton(bool? actualValue)
             {
                 UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
                 // shouldUpdateSkeleton should be true the first time a valid change is detected,
@@ -402,6 +403,7 @@ namespace Tests.Runtime.Functional.Components
             SkinnedMeshRendererTracker.OnShouldUpdateSkeleton += AssertUpdateSkeleton;
 
             CreateTestObjects();
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
             yield return null;
 
             m_SkinnedMeshRenderer.gameObject.SetActive(false);
@@ -423,6 +425,11 @@ namespace Tests.Runtime.Functional.Components
             shouldUpdateSkeleton = true;
             yield return null;
 
+            // With the renderer only casting shadows, shouldUpdateSkeleton should be null.
+            m_SkinnedMeshRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            shouldUpdateSkeleton = null;
+            yield return null;
+
             SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
 #endif
         }
@@ -432,9 +439,9 @@ namespace Tests.Runtime.Functional.Components
         {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 
-            var shouldUpdateSkeleton = false;
+            bool? shouldUpdateSkeleton = false;
 
-            void AssertUpdateSkeleton(bool actualValue)
+            void AssertUpdateSkeleton(bool? actualValue)
             {
                 UnityEngine.Assertions.Assert.AreEqual(shouldUpdateSkeleton, actualValue, $"Expected skeleton update to be set to {shouldUpdateSkeleton} but was {actualValue}!");
                 // shouldUpdateSkeleton should be true the first time a valid change is detected,
@@ -445,6 +452,7 @@ namespace Tests.Runtime.Functional.Components
 
             // Attempt to start off with a disabled skinned mesh renderer, before enabling it.
             CreateTestObjects();
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
             m_SkinnedMeshRenderer.enabled = false;
             yield return null;
 
@@ -456,7 +464,45 @@ namespace Tests.Runtime.Functional.Components
             shouldUpdateSkeleton = true;
             yield return null;
 
+            // With no mesh, shouldUpdateSkeleton should be null.
+            m_SkinnedMeshRenderer.sharedMesh = null;
+            shouldUpdateSkeleton = null;
+            yield return null;
+
             SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnitySkinnedMeshRenderer_NullMesh()
+        {
+            CreateTestObjects();
+            m_SkinnedMeshRenderer.sharedMesh = null;
+
+            yield return null;
+
+            AssertNullSkinnedMeshRenderer();
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnitySkinnedMeshRenderer_ShadowsOnly()
+        {
+            CreateTestObjects();
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
+            m_SkinnedMeshRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+
+            yield return null;
+
+            AssertNullSkinnedMeshRenderer();
+        }
+
+        void AssertNullSkinnedMeshRenderer()
+        {
+#if UNITY_EDITOR
+            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_SkinnedMeshRenderer.gameObject));
+            Assert.NotNull(backingGameObject);
+            var skinnedMeshRenderer = backingGameObject.GetComponent<SkinnedMeshRenderer>();
+            Assert.Null(skinnedMeshRenderer);
 #endif
         }
     }

@@ -1,6 +1,6 @@
 using System;
 using Unity.XR.CoreUtils.Editor;
-using UnityEditor.PolySpatial.InternalBridge;
+using UnityEditor.PolySpatial.Internals.InternalBridge;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Utilities

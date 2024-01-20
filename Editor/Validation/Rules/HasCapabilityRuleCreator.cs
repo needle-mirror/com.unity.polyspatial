@@ -14,7 +14,7 @@ namespace UnityEditor.PolySpatial.Validation
     /// specific capability.
     /// </summary>
     /// <seealso cref="StandardCapabilityKeys"/>
-    public sealed class HasCapabilityRuleCreator : IComponentRuleCreator
+    internal sealed class HasCapabilityRuleCreator : IComponentRuleCreator
     {
         const string k_MessageFormat = "The {0} profile(s) don't support the <b>\"{1}\"</b> capability and the <b>{2}</b> component will not work properly.";
         const string k_RemoveMessageFormat = "Remove the <b>{0}</b> component.";

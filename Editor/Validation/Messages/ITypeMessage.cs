@@ -4,7 +4,7 @@ namespace UnityEditor.PolySpatial.Validation
     /// <summary>
     /// An interface that represents a message to be displayed in the Inspector view.
     /// </summary>
-    public interface ITypeMessage
+    internal interface ITypeMessage
     {
         /// <summary>
         /// The message text.
@@ -28,12 +28,12 @@ namespace UnityEditor.PolySpatial.Validation
         {
             readonly string m_LinkURL;
             readonly string m_linkTittle;
-            
+
             /// <summary>
             /// the Link URL
             /// </summary>
             public string LinkUrl => m_LinkURL;
-            
+
             /// <summary>
             /// the tittle of the Link
             /// </summary>

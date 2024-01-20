@@ -140,7 +140,7 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        uint m_ConnectionTimeout = PolySpatialSettings.DefaultConnectionTimeOut;
+        uint m_ConnectionTimeout = PolySpatialSettings.DefaultConnectionTimeout;
 
         internal uint ConnectionTimeout
         {

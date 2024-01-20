@@ -109,6 +109,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         internal const string WorleyNoise2d = "worleynoise2d";
 
         internal const string SplitLR = "splitlr";
+        internal const string Time = "time";
 
         // Non-standard RealityKit nodes.
         internal const string RealityKitCameraPosition = "realitykit_cameraposition";

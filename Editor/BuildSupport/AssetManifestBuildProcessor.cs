@@ -14,7 +14,7 @@ namespace UnityEditor.PolySpatial.Internals
     /// which traverses the scenes to be built, finds all asset references and adds them to the manifest, then hands off
     /// the rest of build execution to DefaultBuildMethods.BuildPlayer()
     /// </summary>
-    public class AssetManifestBuildProcessor : BuildPlayerProcessor
+    internal class AssetManifestBuildProcessor : BuildPlayerProcessor
     {
         /// <inheritdoc/>
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEditor.AnimatedValues;
-using UnityEditor.PolySpatial.InternalBridge;
+using UnityEditor.PolySpatial.Internals.InternalBridge;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.PolySpatial.Internal
+namespace UnityEditor.PolySpatial.Internals
 {
     /// <summary>
     /// Settings provider for internal properties.
@@ -26,8 +26,9 @@ namespace UnityEditor.PolySpatial.Internal
 
         SerializedObject m_SerializedObject;
 
-        SerializedProperty m_EnablePolySpatialRuntimeProperty;
+        SerializedProperty m_RuntimeModeProperty;
 
+        SerializedProperty m_HidePolySpatialPreviewObjectsInScene;
         SerializedProperty m_PolySpatialNetworkingModeProperty;
         SerializedProperty m_ConnectionTimeoutProperty;
         SerializedProperty m_ServerAddressesProperty;
@@ -39,7 +40,6 @@ namespace UnityEditor.PolySpatial.Internal
         AnimBool m_EnableProgressiveMipStreamingAnim;
 
         SerializedProperty m_EnableTransformVerificationProperty;
-        SerializedProperty m_EnableMacRealityKitPreviewInPlayMode;
         SerializedProperty m_RuntimeFlags;
         SerializedProperty m_AdditionalTextureFormatsProperty;
 
@@ -72,18 +72,18 @@ namespace UnityEditor.PolySpatial.Internal
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             m_SerializedObject = new SerializedObject(PolySpatialSettings.instance);
-            m_EnablePolySpatialRuntimeProperty = m_SerializedObject.FindProperty("m_EnablePolySpatialRuntime");
+            m_RuntimeModeProperty = m_SerializedObject.FindProperty("m_RuntimeMode");
 
             m_EnableTransformVerificationProperty = m_SerializedObject.FindProperty("m_EnableTransformVerification");
 
             m_PolySpatialNetworkingModeProperty = m_SerializedObject.FindProperty("m_PolySpatialNetworkingMode");
-            m_ConnectionTimeoutProperty = m_SerializedObject.FindProperty("m_ConnectionTimeOut");
+            m_ConnectionTimeoutProperty = m_SerializedObject.FindProperty("m_ConnectionTimeout");
             m_ServerAddressesProperty = m_SerializedObject.FindProperty("m_SerializedServerAddresses");
             m_EnableHostCameraControlProperty = m_SerializedObject.FindProperty("m_EnableHostCameraControl");
             m_EnableClippingProperty = m_SerializedObject.FindProperty("m_EnableClipping");
 
-            m_EnableMacRealityKitPreviewInPlayMode = m_SerializedObject.FindProperty("m_EnableMacRealityKitPreviewInPlayMode");
             m_RuntimeFlags = m_SerializedObject.FindProperty("m_RuntimeFlags");
+            m_HidePolySpatialPreviewObjectsInScene = m_SerializedObject.FindProperty("m_HidePolySpatialPreviewObjectsInScene");
             m_AdditionalTextureFormatsProperty = m_SerializedObject.FindProperty("m_AdditionalTextureFormats");
 
             m_EnableStatisticsProperty = m_SerializedObject.FindProperty("m_EnableStatistics");
@@ -118,61 +118,51 @@ namespace UnityEditor.PolySpatial.Internal
             {
                 m_SerializedObject.Update();
 
-                m_EnablePolySpatialRuntimeProperty.boolValue =
-                    EditorGUILayout.BeginToggleGroup("Enable PolySpatial Runtime", m_EnablePolySpatialRuntimeProperty.boolValue);
+                EditorGUILayout.PropertyField(m_RuntimeModeProperty, new GUIContent("Runtime Mode"));
+
+                EditorGUILayout.PropertyField(m_PolySpatialNetworkingModeProperty, new GUIContent("Networking Mode"));
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    EditorGUILayout.PropertyField(m_PolySpatialNetworkingModeProperty, new GUIContent("Networking Mode"));
-                    using (new EditorGUI.IndentLevelScope())
+                    switch ((PolySpatialSettings.NetworkingMode)m_PolySpatialNetworkingModeProperty.enumValueFlag)
                     {
-                        switch ((PolySpatialSettings.NetworkingMode)m_PolySpatialNetworkingModeProperty.enumValueFlag)
-                        {
-                            case PolySpatialSettings.NetworkingMode.LocalAndClient:
-                                EditorGUILayout.PropertyField(m_ServerAddressesProperty, new GUIContent("Server Addresses"));
-                                break;
-                        }
-
-                        EditorGUILayout.PropertyField(m_ConnectionTimeoutProperty,
-                            new GUIContent("Connection Timeout",
-                                "Set connection timeout in seconds."));
-                        EditorGUILayout.PropertyField(m_EnableHostCameraControlProperty,
-                            new GUIContent("Enable Host Camera Control",
-                                "Host will control camera transform."));
-                        EditorGUILayout.PropertyField(m_EnableClippingProperty,
-                            new GUIContent("Enable Clipping Buffer",
-                                "Clip apps to the bounds of their VolumeRenderer."));
+                        case PolySpatialSettings.NetworkingMode.LocalAndClient:
+                            EditorGUILayout.PropertyField(m_ServerAddressesProperty, new GUIContent("Server Addresses"));
+                            break;
                     }
 
-                    EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
-
-                    EditorGUILayout.PropertyField(m_EnableTransformVerificationProperty);
-
-                    EditorGUILayout.PropertyField(m_EnableProgressiveMipStreamingProperty);
-                    m_EnableProgressiveMipStreamingAnim.target = m_EnableProgressiveMipStreamingProperty.boolValue;
-                    using (var group = new EditorGUILayout.FadeGroupScope(m_EnableProgressiveMipStreamingAnim.faded))
-                    {
-                        if (group.visible)
-                        {
-                            using (new EditorGUI.IndentLevelScope())
-                                EditorGUILayout.PropertyField(m_MaxMipByteSizePerCycleProperty);
-                        }
-                    }
-
-#if UNITY_EDITOR_OSX
-                    using (new EditorGUI.DisabledScope(false))
-#else
-                    using (new EditorGUI.DisabledScope(true))
-#endif
-                    {
-                        EditorGUILayout.PropertyField(m_EnableMacRealityKitPreviewInPlayMode);
-                    }
-                    DrawRuntimeFlags();
-                    EditorGUILayout.PropertyField(m_AdditionalTextureFormatsProperty);
-                    EditorGUILayout.Space();
+                    EditorGUILayout.PropertyField(m_ConnectionTimeoutProperty,
+                        new GUIContent("Connection Timeout",
+                            "Set connection timeout in seconds."));
+                    EditorGUILayout.PropertyField(m_EnableHostCameraControlProperty,
+                        new GUIContent("Enable Host Camera Control",
+                            "Host will control camera transform."));
+                    EditorGUILayout.PropertyField(m_EnableClippingProperty,
+                        new GUIContent("Enable Clipping Buffer",
+                            "Clip apps to the bounds of their VolumeRenderer."));
                 }
 
+                EditorGUILayout.PropertyField(m_EnableStatisticsProperty);
+
+                EditorGUILayout.PropertyField(m_EnableTransformVerificationProperty);
+
+                EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene, new GUIContent("Hide Play Mode Preview Objects In Scene View"));
+
+                EditorGUILayout.PropertyField(m_EnableProgressiveMipStreamingProperty);
+                m_EnableProgressiveMipStreamingAnim.target = m_EnableProgressiveMipStreamingProperty.boolValue;
+                using (var group = new EditorGUILayout.FadeGroupScope(m_EnableProgressiveMipStreamingAnim.faded))
+                {
+                    if (group.visible)
+                    {
+                        using (new EditorGUI.IndentLevelScope())
+                            EditorGUILayout.PropertyField(m_MaxMipByteSizePerCycleProperty);
+                    }
+                }
+
+                DrawRuntimeFlags();
+                EditorGUILayout.PropertyField(m_AdditionalTextureFormatsProperty);
+                EditorGUILayout.Space();
+
                 m_IgnoredScenesReorderableList.DoLayoutList();
-                EditorGUILayout.EndToggleGroup();
 
                 EditorGUILayout.PropertyField(m_AlwaysLinkPolySpatialRuntimeProperty);
                 EditorGUILayout.PropertyField(m_EnableInEditorPreviewProperty);

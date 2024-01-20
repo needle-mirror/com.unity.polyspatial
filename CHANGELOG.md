@@ -7,6 +7,78 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2024-01-20
+
+### Added
+- Added support for PolySpatial Time shader graph node.
+- Added support for inline sprites in TextMeshPro strings.
+- Added support for Built-in Render Pipeline's Unlit and Lit Particle shaders.
+- Added support for Universal Render Pipeline's Lit Particle shader.
+- Added support for Radians setting of Rotate shader graph node.
+- Added links to PolySpatial API docs/changelog from PolySpatial visionOS docs.
+- Added runtime validations option to PolySpatial project settings.
+- Added instructions panel to MixedReality and Image Tracking sample scenes as an example of an object that always faces the camera, and to provide an affordance for returning to the ProjectLauncher scene.
+- Added device rotation and distinct device position (was a copy of interaction position) to events sent by UnityPlayModeInput script.
+- Added a list of `MaterialSwapSet`s to `PolySpatialSettings`. `MaterialSwapSet`s must now be explicitly added to this list in order to be used.
+- Added StackTrace and Categories logging options to the PolySpatial settings `Project Settings > PolySpatial > Logging`.
+
+### Changed
+- PolySpatial Sorting Group components can now override sprite/UI sorting.
+- Manipulation sample now supports grabbing two cubes.
+- Sample panel in ProjectLauncher scene now blocks gaze interactions so you don't accidentally click the bubble behind the panel.
+- Changed the layer of the Default AR Plane in samples so that it no longer blocks input.
+- We changed the names of a few classes and provided automatic API updaters for them to help with the transition.
+    - `PolySpatialHoverEffect` is now `VisionOSHoverEffect`
+    - `PolySpatialGroundingShadow` is now `VisionOSGroundingShadow`
+    - `PolySpatialImageBasedLight` is now `VisionOSImageBasedLight`
+    - `PolySpatialImageBasedLightReceiver` is now `VisionOSImageBasedLightReceiver`
+    - `PolySpatialSortingGroup` is now `VisionOSSortingGroup`
+    - `PolySpatialVideoComponent` is now `VisionOSVideoComponent`
+    - `UnityPolySpatialPlatformText` is now `VisionOSNativeText`
+    - `PolySpatialRaycaster` is now `PolySpatialUIRaycaster`
+- PolySpatial-specific logging settings will be respected in player builds.
+- Changed shader graph test input data folder to Data, rather than Resources.
+- Renamed `devicePosition` and `deviceRotation` input controls to `inputDevicePosition` and `inputDeviceRotation`.
+
+### Deprecated
+
+### Removed
+- Removed a call to `Resources.LoadAll` which caused all assets in Resources to be loaded into memory.
+- Removed deprecated PolySpatialTouchspace input device.
+
+### Fixed
+- Fixed invalid MaterialX generation for Vertex ID shader graph node.
+- Fixed issue with sprite flipping (x flips and y flips were swapped).
+- Fixed issue with TextMeshPro vertex colors in UI components.
+- Fixed warnings from shader graph imports in URP samples.
+- Fixed issue with toggle visuals not reflecting state.
+- Improved text rendering at distance/in peripheral vision.
+- Fixed frequency/amplitude of shader graph Gradient Noise node.
+- Fixed issue with pink materials temporarily appearing on BakeToMesh particle systems.
+- Fixed crash when using PolySpatial Image Based Light Receiver on Play to Device.
+- Fixed error logged on first import: `A new PolySpatialSettings asset was initialized when its asset already exists. Was PolySpatialSettings.instance used by an asset importer?`
+- Fixed crash caused by meshes with tangents but no normals.
+- Fixed colliders to update when mesh updates occur in Unity host environment.
+- Fixed baked mesh particles not scaling relative to volume camera transform in unity backend.
+- Fixed issue with transparent textures on unlit materials rendering as opaque.
+- Fixed issue with meshes set to `None` rendering as spheres.
+- Fixed issue with Renderers set to `Shadows Only` being visible.
+- Fixed two minor NativeArray leaks.
+- Fixed scale of platform text.
+- Fixed handling of device rotation in manipulation sample.
+- Fixed pink UI/text in Unity play mode when using built-in render pipeline.
+- Fixed issue with lowered frame rate when using an Animator on UI element.
+- Fixed issue with URP unlit particle material not incorporating base color.
+- Fixed `HandVisualizer` script in samples to properly hide visuals for hand skeleton joints when they lose tracking.
+- Fixed an issue where the virtual keyboard would not show when selecting UI text fields.
+- Fixed issue where setting empty text on TextMeshProUGUI component would still render previous text.
+- Fixed issue with hit tests and Built-In Render Pipeline
+- Fixed issue with validation processing scene objects with HideAndDontSave hideFlags.
+- Fixed issue with using RenderTextures in RawImage components.
+- Fixed potential failure caused by font manager asset remaining after a failed build.
+
+### Security
+
 ## [0.7.1] - 2023-12-13
 
 ### Added

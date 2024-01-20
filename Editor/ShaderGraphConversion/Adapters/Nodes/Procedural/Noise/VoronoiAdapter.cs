@@ -6,6 +6,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class VoronoiAdapter : AbstractUVNodeAdapter<VoronoiNode>
     {
+        public override string SupportDetails(AbstractMaterialNode node)
+        {
+            var slot = NodeUtils.GetOutputByName(node, "Cells");
+            return slot.isConnected ? "Cells output not supported for MaterialX conversion." : "";
+        }
+
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
             var portMap = new Dictionary<string, string>();

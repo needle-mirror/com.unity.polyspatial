@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.PolySpatial;
-using UnityEditor.PolySpatial.InternalBridge;
+using UnityEditor.PolySpatial.Internals.InternalBridge;
+using UnityEditor.PolySpatial.Internals;
 using Object = UnityEngine.Object;
 
 namespace UnityEditor.PolySpatial
@@ -46,6 +47,8 @@ namespace UnityEditor.PolySpatial
             {
                 m_PolySpatialSettingsEditor.OnInspectorGUI();
             }
+
+            PolySpatialLoggingUI.DrawLoggingSettings();
         }
     }
 }

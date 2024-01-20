@@ -1,6 +1,6 @@
 {
     "name": "Unity.PolySpatial.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "Unity.PolySpatial.Editor",
     "references": [
         "Unity.PolySpatial",
         "Unity.InternalAPIEngineBridge.021",

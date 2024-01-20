@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.Runtime.Functional.Components
 {
-    public class UnityPolySpatialPlatformTextTests : PooledComponentTestBase<UnityPolySpatialPlatformText>
+    public class UnityPolySpatialPlatformTextTests : PooledComponentTestBase<VisionOSNativeText>
     {
         const string k_TestText = "This is test text";
         const string k_TestText2 = "This is test text 2";
@@ -22,7 +22,7 @@ namespace Tests.Runtime.Functional.Components
             CreateTestObjects("Text Test Objects");
         }
 
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
         [UnityTest]
         public IEnumerator Test_Availability_Checks()
         {
@@ -128,7 +128,7 @@ namespace Tests.Runtime.Functional.Components
             var data = PolySpatialComponentUtils.GetTrackingData(m_TestComponent);
             var iid = data.InstanceId;
 
-            var text = PlatformTextTracker.GetStringForInstance(iid);
+            var text = VisionOSNativeTextTracker.GetStringForInstance(iid);
             Assert.IsFalse(String.CompareOrdinal(text, k_TestText) == 0);
             Assert.IsFalse(String.CompareOrdinal(text, k_TestText2) == 0);
 
@@ -136,7 +136,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            text = PlatformTextTracker.GetStringForInstance(iid);
+            text = VisionOSNativeTextTracker.GetStringForInstance(iid);
             Assert.IsFalse(String.IsNullOrEmpty(text));
             Assert.AreEqual(0, String.CompareOrdinal(text, m_TestComponent.Text));
             Assert.AreEqual(0, String.CompareOrdinal(text, k_TestText));
@@ -145,7 +145,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            text = PlatformTextTracker.GetStringForInstance(iid);
+            text = VisionOSNativeTextTracker.GetStringForInstance(iid);
             Assert.AreEqual(0, String.CompareOrdinal(text, m_TestComponent.Text));
             Assert.AreEqual(0, String.CompareOrdinal(text, k_TestText2));
 
@@ -153,7 +153,7 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
 
-            text = PlatformTextTracker.GetStringForInstance(iid);
+            text = VisionOSNativeTextTracker.GetStringForInstance(iid);
             Assert.IsTrue(String.IsNullOrEmpty(text));
         }
 

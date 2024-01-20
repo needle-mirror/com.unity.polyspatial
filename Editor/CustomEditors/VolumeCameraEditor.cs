@@ -1,6 +1,7 @@
 using Unity.PolySpatial;
+using Unity.PolySpatial.Internals;
 using UnityEditor.IMGUI.Controls;
-using UnityEditor.PolySpatial.InternalBridge;
+using UnityEditor.PolySpatial.Internals.InternalBridge;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEngine;
 
@@ -141,7 +142,7 @@ namespace UnityEditor.PolySpatial.Internals
                 using (new EditorGUILayout.VerticalScope("Box"))
                 {
                     EditorGUILayout.ObjectField(m_ConfigurationProperty, typeof(VolumeCameraWindowConfiguration),
-                        EditorGUIBridge.TextContent("Output Configuration"));
+                        EditorGUIBridge.TextContent("Volume Window Configuration"));
 
                     if (m_ConfigurationProperty.objectReferenceValue != null)
                     {
@@ -149,7 +150,7 @@ namespace UnityEditor.PolySpatial.Internals
                         CreateCachedEditor(config, null, ref m_VolumeCameraConfigEditor);
                         if (m_VolumeCameraConfigEditor is VolumeCameraWindowConfigurationEditor configEditor)
                             configEditor.ShowValidationMessage = false;
-
+                        using (new EditorGUI.DisabledScope(true))
                         using (new EditorGUI.IndentLevelScope())
                         {
                             m_VolumeCameraConfigEditor.OnInspectorGUI();
@@ -178,7 +179,7 @@ namespace UnityEditor.PolySpatial.Internals
                 {
                     m_DimensionsProperty.vector3Value = dimensions;
                     serializedObject.ApplyModifiedProperties();
-                    if (Application.isPlaying && PolySpatialSettings.instance.EnablePolySpatialRuntime)
+                    if (Application.isPlaying && PolySpatialRuntime.Enabled)
                     {
                         var volumeCamera = (VolumeCamera)target;
                         volumeCamera.UpdateConfiguration();

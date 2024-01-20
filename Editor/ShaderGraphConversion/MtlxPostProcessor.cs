@@ -28,9 +28,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     continue;
 
                 var fileContents = nodeProcessor.ProcessGraph(mtlxGraph);
-             
+
                 File.WriteAllText(
-                    context.GetOutputArtifactFilePath($"{nodeProcessor.FileExtension}.polyspatial"),  
+                    context.GetOutputArtifactFilePath($"{nodeProcessor.FileExtension}.polyspatial"),
                     fileContents);
 
                 // Optionally dump the generated data to an intermediate file, which can aid in debugging shadergraph
@@ -104,22 +104,29 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         static bool ShouldSuppressWarningsForGraph(GraphData graphData)
         {
-            // Only suppress warnings for assets in immutable packages.
+            // Only suppress warnings for assets in immutable packages and their associated imports.
             var assetPath = AssetDatabase.GUIDToAssetPath(graphData.assetGuid);
-            if (!Path.GetFullPath(assetPath).Contains("PackageCache"))
+            var isUnityImport = assetPath.StartsWith("Assets/Samples/Universal RP/") ||
+                assetPath.StartsWith("Assets/TextMesh Pro/");
+            if (!(Path.GetFullPath(assetPath).Contains("PackageCache") || isUnityImport))
                 return false;
-            
+                
+            var showWarningsForShaderGraphsInPackages = true;
+            var polySpatialSettings = PolySpatialSettings.GetInstanceIfExists();
+            if (polySpatialSettings != null)
+                showWarningsForShaderGraphsInPackages = polySpatialSettings.ShowWarningsForShaderGraphsInPackages;
+
             // Suppress all warnings if specifically disabled.
-            if (!PolySpatialSettings.instance.ShowWarningsForShaderGraphsInPackages)
+            if (!showWarningsForShaderGraphsInPackages)
                 return true;
-            
+
             // Otherwise, suppress Unity package warnings unless it's an internal build.
 #if POLYSPATIAL_INTERNAL
             return false;
 #else
             // Suppress warnings for non-PolySpatial Unity shader graphs (such as those in the URP package).
             return assetPath.StartsWith("Packages/com.unity.") &&
-                !assetPath.StartsWith("Packages/com.unity.polyspatial");
+                !assetPath.StartsWith("Packages/com.unity.polyspatial") || isUnityImport;
 #endif
         }
 
@@ -131,7 +138,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 node.owner.messageManager.ClearNodesFromProvider(this, Enumerable.Repeat(node, 1));
 
                 var status = INodeValidationExtension.Status.None;
-                
+
                 if (node is BlockNode bnode && !MaterialX.AdapterMap.IsBlockSupported(bnode))
                 {
                     msg = $"Block Node '{bnode.descriptor.name}' are not supported for MaterialX conversion.";
@@ -200,7 +207,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             public string GetValidatorKey() => "MaterialXValidator";
         }
-        
+
         public bool IsInterestedInAsset(string path) => IsAssetShaderGraph(path);
     }
 }

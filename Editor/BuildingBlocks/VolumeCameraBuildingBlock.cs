@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityEditor.PolySpatial.BuildingBlocks
 {
-    public class VolumeCameraBuildingBlock : ScriptableSingleton<VolumeCameraBuildingBlock>, IBuildingBlock
+    internal class VolumeCameraBuildingBlock : ScriptableSingleton<VolumeCameraBuildingBlock>, IBuildingBlock
     {
         const string k_Id = "Volume Camera";
         const string k_BuildingBlockPath = "GameObject/XR/Setup/" + k_Id;

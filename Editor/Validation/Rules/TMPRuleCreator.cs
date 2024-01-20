@@ -4,7 +4,7 @@ using System.Linq;
 using TMPro;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Capabilities;
+using Unity.PolySpatial.Internals.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation

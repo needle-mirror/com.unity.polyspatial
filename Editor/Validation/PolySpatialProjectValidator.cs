@@ -4,7 +4,7 @@ using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Capabilities;
+using Unity.PolySpatial.Internals.Capabilities;
 using UnityEngine;
 
 namespace UnityEditor.PolySpatial.Validation
@@ -23,10 +23,14 @@ namespace UnityEditor.PolySpatial.Validation
 
         static void Initialize()
         {
+            if(PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.Disabled)
+                return;
+
             var rules = new List<BuildValidationRule>();
             rules.Add(CreateCollisionMatrixRule());
 
-            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
+                PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
             {
                 BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, rules);
             }

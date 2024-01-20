@@ -218,15 +218,6 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             m_ConnectToggle.value = connectionCandidate.IsSelected;
             m_ConnectToggle.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue)
-                {
-                    foreach (var connection in connectionCandidates)
-                    {
-                        if (connection != null)
-                            connection.IsSelected = false;
-                    }
-                }
-
                 connectionCandidate.IsSelected = evt.newValue;
                 EditorApplication.delayCall += playToDeviceWindow.Refresh;
             });

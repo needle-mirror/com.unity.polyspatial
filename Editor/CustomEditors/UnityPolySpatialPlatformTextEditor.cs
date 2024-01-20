@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.PolySpatial.Internals
 {
-    [CustomEditor(typeof(UnityPolySpatialPlatformText))]
+    [CustomEditor(typeof(VisionOSNativeText))]
     public class UnityPolySpatialPlatformTextEditor : Editor
     {
         static string s_Uxml = "EditorUI/psl-platform-text";
@@ -61,7 +61,7 @@ namespace UnityEditor.PolySpatial.Internals
             if (m_Insets == null)
                 return;
 
-            var text = target as UnityPolySpatialPlatformText;
+            var text = target as VisionOSNativeText;
             if (text == null)
                 return;
 
@@ -97,7 +97,7 @@ namespace UnityEditor.PolySpatial.Internals
             if (m_TmpFontAsset == null)
                 return;
 
-            var text = target as UnityPolySpatialPlatformText;
+            var text = target as VisionOSNativeText;
             if (text == null)
                 return;
 

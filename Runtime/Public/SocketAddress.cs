@@ -3,12 +3,12 @@ using Unity.Collections;
 
 namespace Unity.PolySpatial.Networking
 {
-    public struct ConnectionID
+    internal struct ConnectionID
     {
         public FixedString128Bytes Address;
     };
 
-    public struct SocketAddress : IEquatable<SocketAddress>
+    internal struct SocketAddress : IEquatable<SocketAddress>
     {
         public string Host;
         public int Port;

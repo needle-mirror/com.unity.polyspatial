@@ -82,23 +82,36 @@ namespace UnityEditor.PolySpatial.Analytics
         static List<AppNetworkPayload> GetLocalAppNetworkConnections()
         {
             var localAppNetwork = new List<AppNetworkPayload>();
-            if (!PolySpatialSettings.instance.EnablePolySpatialRuntime)
+            if (!PolySpatialRuntime.Enabled)
                 return localAppNetwork;
 
-            var localAppNetworkConnection = PolySpatialCore.LocalAppNetworkConnection;
+            var localAppNetworkConnections = PolySpatialCore.LocalAppNetworkConnections;
             var selectedCandidate = PolySpatialUserSettings.instance.ConnectionCandidates.Values.FirstOrDefault(c => c.IsSelected);
             var playToDeviceIP = selectedCandidate != null && IPAddress.TryParse(selectedCandidate.IP, out var ipAddress) ? ipAddress : null;
 
-            if (localAppNetworkConnection != null && localAppNetworkConnection.Connected)
+            // Will be marked true if one or more connections are valid
+            var connected = false;
+
+            if (localAppNetworkConnections != null)
             {
-                localAppNetwork.Add(new AppNetworkPayload()
+                foreach (var localAppNetworkConnection in localAppNetworkConnections)
                 {
-                    IsConnected = true,
-                    AppName = localAppNetworkConnection.Address.Equals(playToDeviceIP) ?
-                        AppNetworkPayload.UnityPlayToDeviceName : AppNetworkPayload.UnknownAppName
-                });
+                    if (localAppNetworkConnection != null && localAppNetworkConnection.Connected)
+                    {
+                        connected = true;
+
+                        localAppNetwork.Add(new AppNetworkPayload()
+                        {
+                            IsConnected = true,
+                            AppName = localAppNetworkConnection.Address.Equals(playToDeviceIP)
+                                ? AppNetworkPayload.UnityPlayToDeviceName
+                                : AppNetworkPayload.UnknownAppName
+                        });
+                    }
+                }
             }
-            else if (PolySpatialUserSettings.instance.ConnectToPlayToDevice && playToDeviceIP != null)
+
+            if (!connected && PolySpatialUserSettings.instance.ConnectToPlayToDevice && playToDeviceIP != null)
             {
                 localAppNetwork.Add(new AppNetworkPayload()
                 {
@@ -131,10 +144,10 @@ namespace UnityEditor.PolySpatial.Analytics
                 ConfiguredMode = Payload.UndefinedMode
             };
 
-            if (PolySpatialSettings.instance.EnablePolySpatialRuntime)
+            if (PolySpatialRuntime.Enabled)
             {
                 payload.PolySpatialRuntimeState = Payload.ActivatedState;
-                if (PolySpatialSettings.instance.EnablePolySpatialRuntime && PolySpatialCore.UnitySimulation != null)
+                if (PolySpatialRuntime.Enabled && PolySpatialCore.UnitySimulation != null)
                 {
                     var volumeCamera = PolySpatialCore.UnitySimulation.Camera;
                     if (volumeCamera != null)

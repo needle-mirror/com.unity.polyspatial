@@ -249,6 +249,22 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
+        public IEnumerator Test_SpriteRenderer_ShadowsOnly()
+        {
+            CreateTestObjects();
+            m_TestComponent.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            
+            yield return null;
+
+#if UNITY_EDITOR
+            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestComponent.gameObject));
+            Assert.NotNull(backingGameObject);
+            var spriteRenderer = backingGameObject.GetComponent<SpriteRenderer>();
+            Assert.Null(spriteRenderer);
+#endif
+        }
+
+        [UnityTest]
         public IEnumerator Test_SprintRenderer_SetFlip_ChangesMesh(
             [ValueSource("DrawModeEnum")] SpriteDrawMode drawMode, [ValueSource("FlipModeEnum")] (bool, bool) flipMode)
         {
@@ -301,8 +317,8 @@ namespace Tests.Runtime.Functional.Components
 
             for (int i = 0; i < oldMesh.vertexCount; i++)
             {
-                FlipCheck("Y", m_TestComponent.flipY, oldVertices[i].x, newMesh.vertices[i].x);
-                FlipCheck("X", m_TestComponent.flipX, oldVertices[i].y, newMesh.vertices[i].y);
+                FlipCheck("X", m_TestComponent.flipX, oldVertices[i].x, newMesh.vertices[i].x);
+                FlipCheck("Y", m_TestComponent.flipY, oldVertices[i].y, newMesh.vertices[i].y);
             }
 
             if (flipMode.Item1 != flipMode.Item2)

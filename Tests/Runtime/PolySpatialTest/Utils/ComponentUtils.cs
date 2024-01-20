@@ -111,12 +111,12 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             return GetParticleSystemData(ps.GetInstanceID());
         }
 
-        internal static DefaultTrackingData GetTrackingData(PolySpatialVideoComponent player)
+        internal static DefaultTrackingData GetTrackingData(VisionOSVideoComponent player)
         {
             return GetVideoPlayerData(player.GetInstanceID());
         }
 
-        internal static TrackingData<PolySpatialPlatformTextComponentTrackingData> GetTrackingData(UnityPolySpatialPlatformText text)
+        internal static TrackingData<PolySpatialPlatformTextComponentTrackingData> GetTrackingData(VisionOSNativeText text)
         {
             return GetTextData(text.GetInstanceID());
         }
@@ -173,7 +173,7 @@ namespace Tests.Runtime.PolySpatialTest.Utils
 
         internal static TrackingData<PolySpatialPlatformTextComponentTrackingData> GetTextData(int iid)
         {
-            return PlatformTextTracker.GetTrackingData(iid);
+            return VisionOSNativeTextTracker.GetTrackingData(iid);
         }
 
         internal static DefaultTrackingData GetPolySpatialVolumeCameraTrackingData(int iid)
@@ -187,30 +187,59 @@ namespace Tests.Runtime.PolySpatialTest.Utils
             Assert.AreEqual(expectFlag, data.GetLifecycleStage());
         }
 
-        internal static Material CreateUnlitMaterial(Color color, string textureName = null)
+        internal static Material CreateMaterial(Shader shader, Color color, string textureName = null, string texturePropertyName = null)
         {
-            // this shader needs to be compiled in.  We have a material in resources that uses it.
-            var material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            var material = new Material(shader);
             if (!String.IsNullOrEmpty(textureName))
             {
                 var tex = Resources.Load(textureName) as Texture2D;
-                material.mainTexture = tex;
+                if (texturePropertyName == null)
+                    material.mainTexture = tex;
+                else
+                    material.SetTexture(texturePropertyName, tex);
             }
             material.color = color;
             return material;
         }
 
-        internal static Material CreateUnlitParticleMaterial(Color color, string textureName = null)
+        internal static Material CreateUnlitMaterial(Color color, string textureName = null)
         {
-            var material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
-            if (!String.IsNullOrEmpty(textureName))
-            {
-                var tex = Resources.Load(textureName) as Texture2D;
-                material.mainTexture = tex;
-            }
+            // this shader needs to be compiled in.  We have a material in resources that uses it.
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            return CreateMaterial(shader, color, textureName, null);
+        }
 
-            material.color = color;
-            return material;
+        internal static Material CreateUnlitParticleURPMaterial(Color color, string textureName = null)
+        {
+            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            return CreateMaterial(shader, color, textureName, null);
+        }
+
+        internal static Material CreateUnlitParticleBIRPMaterial(Color color, string textureName = null)
+        {
+            var shader = Shader.Find("Particles/Standard Unlit");
+            if (shader == null)
+                return null;
+
+            return CreateMaterial(shader, color, textureName, "_MainTex");
+        }
+
+        internal static Material CreateLitParticleBIRPMaterial(Color color, string textureName = null)
+        {
+            var shader = Shader.Find("Particles/Standard Surface");
+            if (shader == null)
+                return null;
+
+            return CreateMaterial(shader, color, textureName, "_MainTex");
+        }
+
+        internal static Material CreateLitParticleURPMaterial(Color color, string textureName = null)
+        {
+            var shader = Shader.Find("Universal Render Pipeline/Particles/Lit");
+            if (shader == null)
+                return null;
+
+            return CreateMaterial(shader, color, textureName, null);
         }
     }
 }

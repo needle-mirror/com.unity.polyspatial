@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.PolySpatial;
-using Unity.XR.CoreUtils;
 using Unity.XR.CoreUtils.Capabilities;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
-using Unity.PolySpatial.Capabilities;
+using Unity.PolySpatial.Internals.Capabilities;
 using UnityEditor.PolySpatial.Internals;
+using UnityEditor.PolySpatial.Utilities;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using UnityEngine;
@@ -215,8 +215,15 @@ namespace UnityEditor.PolySpatial.Validation
 
             AddRuleCreator(typeof(VolumeCamera), new VolumeCameraSettingsRuleCreator());
 
+            AddRuleCreator(typeof(Collider), new ColliderNonUniformScaleRule());
+
 #if ENABLE_UGUI
             // UGUI
+            AddMessages(typeof(ContentSizeFitter), null);
+            AddMessages(typeof(AspectRatioFitter), null);
+            AddMessages(typeof(LayoutGroup), null);
+            AddMessages(typeof(LayoutElement), null);
+
             AddMessages(typeof(Image), new ImageSyncMessage());
             AddRuleCreator(typeof(Image), null);
 
@@ -383,6 +390,9 @@ namespace UnityEditor.PolySpatial.Validation
 
         static void Refresh()
         {
+            if(PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.Disabled)
+                return;
+
             FetchAddedGameObjectsInLoadedScenes();
             UpdateRuleFailures();
         }
@@ -393,7 +403,7 @@ namespace UnityEditor.PolySpatial.Validation
             s_AddedComponents.Clear();
             s_Components.Clear();
 
-            GameObjectUtils.GetComponentsInAllScenes(s_Components, true);
+            ComponentUtility<Component>.GetComponentsInAllScenes(s_Components, true, (int)HideFlags.HideAndDontSave);
             foreach (var component in s_Components)
             {
                 // Fix for GetComponentsInChildren returning a null component for MonoBehaviours with a missing script
@@ -463,7 +473,8 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_ComponentRules.Count == 0)
                 return;
 
-            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
+                PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
             {
                 BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
                 s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
@@ -491,7 +502,8 @@ namespace UnityEditor.PolySpatial.Validation
             if (s_GameObjectRules.Count == 0)
                 return;
 
-            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS && PolySpatialSettings.instance.ForceValidationForCurrentBuildTarget)
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
+                PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
             {
                 BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
                 s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);

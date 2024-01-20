@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 
 using Assert = NUnit.Framework.Assert;
@@ -89,6 +90,7 @@ namespace Tests.Runtime.Functional.Components
         public IEnumerator Test_UnityMeshRenderer_Create_Disable_Enable_Tracking()
         {
             CreateTestObjects();
+            m_TestMeshFilter.sharedMesh = CreateTestMesh();
             m_TestGameObject.SetActive(false);
 
             // Let a frame be processed to create the inactive backing objects
@@ -241,7 +243,8 @@ namespace Tests.Runtime.Functional.Components
             CreateTestObjects();
 
             m_TestMeshFilter.sharedMesh = CreateTestMesh();
-            m_TestMeshRenderer.sharedMaterial = PolySpatialComponentUtils.CreateUnlitMaterial(Color.blue, "Test01_a");
+            m_TestMeshRenderer.sharedMaterial = PolySpatialComponentUtils.CreateUnlitMaterial(
+                Color.blue, "Textures/Texture2DBlue");
 
             // Let a frame be processed and trigger the above assertions
             yield return null;
@@ -442,6 +445,39 @@ namespace Tests.Runtime.Functional.Components
             var meshRenderer = backingGameObject.GetComponent<MeshRenderer>();
             Assert.NotNull(meshRenderer);
             Assert.NotNull(meshRenderer.sharedMaterial);
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_NullMesh()
+        {
+            CreateTestObjects();
+            m_TestMeshFilter.sharedMesh = null;
+
+            yield return null;
+
+            AssertNullMeshRenderer();
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_ShadowsOnly()
+        {
+            CreateTestObjects();
+            m_TestMeshFilter.sharedMesh = CreateTestMesh();
+            m_TestMeshRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+
+            yield return null;
+
+            AssertNullMeshRenderer();
+        }
+
+        void AssertNullMeshRenderer()
+        {
+#if UNITY_EDITOR
+            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestMeshRenderer.gameObject));
+            Assert.NotNull(backingGameObject);
+            var meshRenderer = backingGameObject.GetComponent<MeshRenderer>();
+            Assert.Null(meshRenderer);
 #endif
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
+using Unity.XR.CoreUtils;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEditorInternal;
 using UnityEngine;
@@ -12,17 +13,8 @@ namespace UnityEditor.PolySpatial
     [CustomEditor(typeof(PolySpatialSettings))]
     class PolySpatialSettingsEditor : Editor
     {
-        static readonly GUIContent k_ColliderSyncLayerMaskContent = new GUIContent("PolySpatial Collider Layer Mask");
-        static readonly GUIContent k_HidePolySpatialPreviewObjectsInSceneContent = new GUIContent("Hide PolySpatial Preview Objects In Scene");
-
-        static readonly HashSet<Type> k_TrackerTypes = new();
-        static readonly string[] k_TrackerTypeNames;
-
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<string> k_InactiveTrackers = new();
-
-        SerializedProperty m_EnablePolySpatialRuntimeProperty;
-        GUIContent m_EnablePolySpatialRuntimeContent;
+        static readonly List<string> s_TrackerTypeNames;
+        static readonly List<string> s_TrackerTooltips;
 
         SerializedProperty m_DefaultVolumeCameraWindowConfigurationProperty;
         SerializedProperty m_AutoCreateVolumeCameraProperty;
@@ -32,42 +24,55 @@ namespace UnityEditor.PolySpatial
         SerializedProperty m_TrackLightAndReflectionProbesProperty;
 
         SerializedProperty m_TransmitDebugInfoProperty;
-        SerializedProperty m_HidePolySpatialPreviewObjectsInScene;
 
         SerializedProperty m_DisableTrackingMaskProperty;
         SerializedProperty m_DisabledTrackersProperty;
         ReorderableList m_DisabledTrackersList;
-        SavedBool m_TrackersFoldoutState;
 
-        SerializedProperty m_ForceValidationForCurrentBuildTargetProperty;
+        SerializedProperty m_SelectedValidationTypeProperty;
         SerializedProperty m_ShowWarningsForShaderGraphsInPackagesProperty;
 
         SerializedProperty m_EnableFallbackShaderConversionProperty;
+        SerializedProperty m_MaterialSwapSetsProperty;
+
+        SerializedProperty m_EnableRuntimeValidationProperty;
 
         static PolySpatialSettingsEditor()
         {
-            var trackerTypeNames = new List<string>();
+            List<(string, string)> trackers = new();
+
             foreach (var type in TypeCache.GetTypesDerivedFrom<IUnityObjectTracker>())
             {
-                // GameObjectTracker cannot be disabled
+                // Some can't be disabled
                 if (type == typeof(GameObjectTracker))
                     continue;
 
                 if (!PolySpatialUnityTracker.IsValidTrackerType(type))
                     continue;
 
-                k_TrackerTypes.Add(type);
-                trackerTypeNames.Add(type.FullName);
+                var label = type.Name;
+                if (type.IsDefined(typeof(TooltipAttribute), false))
+                {
+                    label = type.GetAttribute<TooltipAttribute>(inherit: false).tooltip;
+                }
+                else
+                {
+                    // for now, if there is no Tooltip, then it can't be disabled
+                    continue;
+                }
+
+                trackers.Add((type.FullName, label));
             }
 
-            k_TrackerTypeNames = trackerTypeNames.ToArray();
+            // sort trackers by label
+            trackers.Sort((a, b) => string.Compare(a.Item2, b.Item2, StringComparison.Ordinal));
+
+            s_TrackerTypeNames = trackers.Select(x => x.Item1).ToList();
+            s_TrackerTooltips = trackers.Select(x => x.Item2).ToList();
         }
 
         void OnEnable()
         {
-            m_EnablePolySpatialRuntimeProperty = serializedObject.FindProperty("m_EnablePolySpatialRuntime");
-            m_EnablePolySpatialRuntimeContent = new GUIContent("Enable PolySpatial Runtime");
-
             m_DefaultVolumeCameraWindowConfigurationProperty = serializedObject.FindProperty("m_DefaultVolumeCameraWindowConfiguration");
             m_AutoCreateVolumeCameraProperty = serializedObject.FindProperty("m_AutoCreateVolumeCamera");
             m_AutoCreateVolumeCameraContent = new GUIContent("Auto-Create Volume Camera", m_AutoCreateVolumeCameraProperty.tooltip);
@@ -76,7 +81,6 @@ namespace UnityEditor.PolySpatial
             m_TrackLightAndReflectionProbesProperty = serializedObject.FindProperty("m_TrackLightAndReflectionProbes");
 
             m_TransmitDebugInfoProperty = serializedObject.FindProperty("m_TransmitDebugInfo");
-            m_HidePolySpatialPreviewObjectsInScene = serializedObject.FindProperty("m_HidePolySpatialPreviewObjectsInScene");
 
             m_DisableTrackingMaskProperty = serializedObject.FindProperty("m_DisableTrackingMask");
             m_DisabledTrackersProperty = serializedObject.FindProperty("m_DisabledTrackers");
@@ -86,49 +90,52 @@ namespace UnityEditor.PolySpatial
                 drawElementCallback = DrawDisabledTrackersItem,
                 onAddCallback = OnAddDisabledTrackers
             };
-            m_TrackersFoldoutState = new SavedBool("PolySpatialSettingsEditor.TrackersFoldoutState", true);
 
-            m_ForceValidationForCurrentBuildTargetProperty = serializedObject.FindProperty("m_ForceValidationForCurrentBuildTarget");
+            m_SelectedValidationTypeProperty = serializedObject.FindProperty("m_SelectedValidationType");
             m_ShowWarningsForShaderGraphsInPackagesProperty = serializedObject.FindProperty("m_ShowWarningsForShaderGraphsInPackages");
             m_EnableFallbackShaderConversionProperty = serializedObject.FindProperty("m_EnableFallbackShaderConversion");
+
+            m_EnableRuntimeValidationProperty = serializedObject.FindProperty("m_EnableRuntimeValidation");
+            m_MaterialSwapSetsProperty = serializedObject.FindProperty("m_MaterialSwapSets");
         }
 
-        /// <inheritdoc/>
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
-            m_EnablePolySpatialRuntimeProperty.boolValue = EditorGUILayout.BeginToggleGroup(m_EnablePolySpatialRuntimeContent, m_EnablePolySpatialRuntimeProperty.boolValue);
-            using (new EditorGUI.IndentLevelScope())
+            EditorGUILayout.PropertyField(m_DefaultVolumeCameraWindowConfigurationProperty, new GUIContent("Default Volume Camera Window Config"));
+            if (m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue == null)
             {
-                EditorGUILayout.PropertyField(m_DefaultVolumeCameraWindowConfigurationProperty);
-                if (m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue == null)
-                {
-                    m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue =
-                        Resources.Load<VolumeCameraWindowConfiguration>("Default Unbounded Configuration");
-                }
-                EditorGUILayout.PropertyField(m_AutoCreateVolumeCameraProperty, m_AutoCreateVolumeCameraContent);
-                EditorGUILayout.PropertyField(m_ColliderSyncLayerMaskProperty, k_ColliderSyncLayerMaskContent);
-                EditorGUILayout.PropertyField(m_ParticleModeProperty);
-                EditorGUILayout.PropertyField(m_TrackLightAndReflectionProbesProperty);
-
-                EditorGUILayout.PropertyField(m_TransmitDebugInfoProperty);
-                // Due to CamelCase drawing in the UI for serialized properties we have to manually override the property label to write PolySpatial instead of "Poly Spatial"
-                EditorGUILayout.PropertyField(m_HidePolySpatialPreviewObjectsInScene, k_HidePolySpatialPreviewObjectsInSceneContent);
-                EditorGUILayout.PropertyField(m_DisableTrackingMaskProperty);
-                EditorGUILayout.PropertyField(m_EnableFallbackShaderConversionProperty);
+                m_DefaultVolumeCameraWindowConfigurationProperty.objectReferenceValue =
+                    Resources.Load<VolumeCameraWindowConfiguration>("Default Unbounded Configuration");
             }
+            EditorGUILayout.PropertyField(m_AutoCreateVolumeCameraProperty, m_AutoCreateVolumeCameraContent);
 
             EditorGUILayout.Space();
+
+            EditorGUILayout.PropertyField(m_ParticleModeProperty, new GUIContent("Particle System Mode"));
+            EditorGUILayout.PropertyField(m_ColliderSyncLayerMaskProperty, new GUIContent("Collider Objects Layer Mask"));
+            EditorGUILayout.PropertyField(m_DisableTrackingMaskProperty, new GUIContent("Ignored Objects Layer Mask"));
+
+            EditorGUILayout.PropertyField(m_TrackLightAndReflectionProbesProperty, new GUIContent("Light and Reflection Probes"));
+            EditorGUILayout.PropertyField(m_EnableFallbackShaderConversionProperty, new GUIContent("Fallback Shader Conversion"));
+            EditorGUILayout.PropertyField(m_MaterialSwapSetsProperty);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.PropertyField(m_TransmitDebugInfoProperty, new GUIContent("Extra Debug Information"));
+            EditorGUILayout.PropertyField(m_EnableRuntimeValidationProperty, new GUIContent("Runtime Validation"));
+
+            EditorGUILayout.Space();
+
             m_DisabledTrackersList.DoLayoutList();
-            DrawRuntimeTrackers();
-            EditorGUILayout.Space();
 
-            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.Space();
 
             using (var check = new EditorGUI.ChangeCheckScope())
             {
-                EditorGUILayout.PropertyField(m_ForceValidationForCurrentBuildTargetProperty);
+                EditorGUILayout.PropertyField(m_SelectedValidationTypeProperty,
+                    new GUIContent("PolySpatial Project Validation"));
 
                 if (check.changed)
                 {
@@ -137,97 +144,44 @@ namespace UnityEditor.PolySpatial
             }
 
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(m_ShowWarningsForShaderGraphsInPackagesProperty);
+            EditorGUILayout.PropertyField(m_ShowWarningsForShaderGraphsInPackagesProperty,
+                new GUIContent("Warnings for ShaderGraphs in Packages"));
 
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssetIfDirty(PolySpatialSettings.instance);
         }
 
-        void DrawRuntimeTrackers()
-        {
-            m_TrackersFoldoutState.Value = EditorGUILayout.BeginFoldoutHeaderGroup(m_TrackersFoldoutState.Value, "Runtime Trackers");
-            if (!m_TrackersFoldoutState.Value)
-            {
-                EditorGUILayout.EndFoldoutHeaderGroup();
-                return;
-            }
-
-            using (new EditorGUI.IndentLevelScope())
-            {
-                if (Application.isPlaying)
-                {
-                    var trackers = PolySpatialCore.UnitySimulation?.Tracker?.Trackers;
-                    if (trackers == null)
-                    {
-                        EditorGUILayout.HelpBox("No Active Trackers.", MessageType.Info);
-                    }
-                    else
-                    {
-                        EditorGUILayout.LabelField($"Active Trackers ({trackers.Count})", EditorStyles.boldLabel);
-                        foreach (var tracker in trackers)
-                        {
-                            EditorGUILayout.LabelField(tracker.GetType().FullName);
-                        }
-
-                        k_InactiveTrackers.Clear();
-                        foreach (var trackerType in k_TrackerTypes)
-                        {
-                            var hasActiveTracker = false;
-                            foreach (var tracker in trackers)
-                            {
-                                if (tracker.GetType() == trackerType)
-                                {
-                                    hasActiveTracker = true;
-                                    break;
-                                }
-                            }
-
-                            if (!hasActiveTracker)
-                                k_InactiveTrackers.Add(trackerType.FullName);
-                        }
-
-                        var inactiveTrackersCount = k_InactiveTrackers.Count;
-                        if (inactiveTrackersCount > 0)
-                        {
-                            EditorGUILayout.Space();
-                            EditorGUILayout.LabelField($"Inactive Trackers ({inactiveTrackersCount})", EditorStyles.boldLabel);
-                            foreach (var inactiveTracker in k_InactiveTrackers)
-                            {
-                                EditorGUILayout.LabelField(inactiveTracker);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox("Trackers are only available at runtime.", MessageType.Info);
-                }
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
-        }
-
         void DrawDisabledTrackersHeader(Rect rect)
         {
-            EditorGUI.LabelField(rect, m_DisabledTrackersProperty.displayName);
+            EditorGUI.LabelField(rect, "Disabled Features");
         }
 
         void DrawDisabledTrackersItem(Rect rect, int index, bool isActive, bool isFocused)
         {
             var element = m_DisabledTrackersProperty.GetArrayElementAtIndex(index);
-            EditorGUI.PropertyField(rect, element, GUIContent.none);
+            var typeName = element.stringValue;
+            var knownIndex = s_TrackerTypeNames.IndexOf(typeName);
+            var label = knownIndex != -1
+                ? s_TrackerTooltips[knownIndex]
+                : typeName + " (Invalid)";
+
+            EditorGUI.LabelField(rect, label);
         }
 
         void OnAddDisabledTrackers(ReorderableList list)
         {
             var disabledTrackers = PolySpatialSettings.instance.DisabledTrackers;
             var menu = new GenericMenu();
-            foreach (var trackerTypeName in k_TrackerTypeNames)
+
+            for (var i = 0; i < s_TrackerTypeNames.Count; i++)
             {
-                if (disabledTrackers.Contains(trackerTypeName))
-                    menu.AddDisabledItem(new GUIContent(trackerTypeName));
+                var typeName = s_TrackerTypeNames[i];
+                var label = s_TrackerTooltips[i];
+
+                if (disabledTrackers.Contains(typeName))
+                    menu.AddDisabledItem(new GUIContent(label));
                 else
-                    menu.AddItem(new GUIContent(trackerTypeName), false, () => AddDisabledTracker(list, trackerTypeName));
+                    menu.AddItem(new GUIContent(label), false, () => AddDisabledTracker(list, typeName));
             }
             menu.ShowAsContext();
         }

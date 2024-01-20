@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -21,6 +22,7 @@ namespace Tests.Runtime.Functional.Components
 
         const string k_TestMaterialName = "ParticleTestMaterial";
         const string k_TestMeshName = "ParticleTestMesh";
+        const string k_TestParticleTextureName = "Texture2DBlue";
 
         PolySpatialSettings.ParticleReplicationMode m_previousParticleMode;
 
@@ -37,14 +39,14 @@ namespace Tests.Runtime.Functional.Components
         {
             if (m_ParticleSystem == null)
                 return null;
-            
+
             if (PolySpatialSettings.instance.ParticleMode == PolySpatialSettings.ParticleReplicationMode.ReplicateProperties)
                 return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem.gameObject));
 
             return BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_ParticleSystem));
         }
 
-        private void CreateTestParticleSystem()
+        private void CreateTestParticleSystem(Material material)
         {
             m_TestGameObject = new GameObject("Test object main particle system");
             m_SubEmitterObject = new GameObject("Test object subemitter particle system");
@@ -190,7 +192,6 @@ namespace Tests.Runtime.Functional.Components
             textureSheetAnimations.frameOverTime = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, 1, 1, 1));
             textureSheetAnimations.cycleCount = 6;
 
-            var material = PolySpatialComponentUtils.CreateUnlitParticleMaterial(Color.blue);
             particleRenderer.material = material;
             particleRenderer.material.name = k_TestMaterialName;
             particleRenderer.sortMode = ParticleSystemSortMode.Depth;
@@ -282,7 +283,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Create_Destroy_Tracking()
         {
-            CreateTestParticleSystem();
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+            CreateTestParticleSystem(material);
 
             // Let a frame be processed and trigger the above assertions
             yield return null;
@@ -315,7 +317,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialParticlePlayState()
         {
-            CreateTestParticleSystem();
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+            CreateTestParticleSystem(material);
             m_ParticleSystem.Play();
             Assert.IsTrue(m_ParticleSystem.isPlaying);
 
@@ -387,7 +390,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialMinMaxCurves()
         {
-            CreateTestParticleSystem();
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+            CreateTestParticleSystem(material);
 
             yield return null;
 
@@ -443,7 +447,8 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_UnityParticleSystem_Check_PolySpatialParticleGradients()
         {
-            CreateTestParticleSystem();
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+            CreateTestParticleSystem(material);
 
             yield return null;
 
@@ -533,16 +538,190 @@ namespace Tests.Runtime.Functional.Components
         public IEnumerator Test_UnityParticleSystem_Check_BakeToMeshParticlesWithTrail()
         {
             PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            CreateTestParticleSystem();
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+
+            CreateTestParticleSystem(material);
 
             yield return null;
 
-            var material = PolySpatialComponentUtils.CreateUnlitParticleMaterial(Color.blue);
             var particleSystemTrails = m_ParticleSystem.trails;
             particleSystemTrails.enabled = true;
             var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
             particleRenderer.trailMaterial = material;
             yield return null;
+        }
+
+        /// <summary>
+        /// Scales the auto-generated volume camera and checks to see if the baked mesh backing-GO's lossy scale reflects
+        /// those changes. This ensures the backing-GO is parented to the root object that receives scaling updates relative
+        /// to the scene's volume camera.
+        /// </summary>
+        /// <returns></returns>
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_BakeToMeshParticleScale()
+        {
+            const float scaleFactor = 10f;
+
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+
+            CreateTestParticleSystem(material);
+            var particleSystemScale = m_ParticleSystem.transform.lossyScale;
+            var qvc = GameObject.FindAnyObjectByType<VolumeCamera>();
+            qvc.transform.localScale = Vector3.one * scaleFactor;
+
+            // Not a typo - For some reason this requires 2 frames.
+            yield return null;
+            yield return null;
+
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+
+            // TODO: LXR-3062 for some reason, backingGO is null on macOS standalone tests
+            if (backingGO == null)
+                yield break;
+
+            var lossyScale = backingGO.transform.lossyScale;
+            Assert.IsTrue(Mathf.Approximately(particleSystemScale.x / scaleFactor, lossyScale.x) &&
+                          Mathf.Approximately(particleSystemScale.y / scaleFactor, lossyScale.y) &&
+                          Mathf.Approximately(particleSystemScale.z / scaleFactor, lossyScale.z));
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_BiRPUnlitMaterialParticleSystem()
+        {
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            var material = PolySpatialComponentUtils.CreateUnlitParticleBIRPMaterial(Color.white, "Textures/" + k_TestParticleTextureName);
+
+            if (material == null)
+                yield break;
+
+            var materialBaseMap = material.GetTexture("_MainTex");
+            CreateTestParticleSystem(material);
+
+            yield return null;
+
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
+            var backingMaterialBaseMap = backingMaterial.GetTexture("_BaseMap");
+
+            // Check dimensions are equal as texture name doesn't seem to be transmitted.
+            Assert.IsTrue(backingMaterialBaseMap.width == materialBaseMap.width && backingMaterialBaseMap.height == materialBaseMap.height);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_URPUnlitMaterialParticleSystem()
+        {
+            var baseColor = Color.red;
+
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
+
+            if (material == null)
+                yield break;
+
+            CreateTestParticleSystem(material);
+
+            yield return null;
+
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+
+            if (backingGO == null)
+                yield break;
+
+            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
+            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
+
+            Assert.AreEqual(backingBaseColor, baseColor);
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_ShadowsOnly()
+        {
+            var material = PolySpatialComponentUtils.CreateUnlitParticleURPMaterial(Color.blue);
+
+            CreateTestParticleSystem(material);
+            m_ParticleSystem.GetComponent<ParticleSystemRenderer>().shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+
+            yield return null;
+
+#if UNITY_EDITOR
+            var backingGameObject = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            Assert.NotNull(backingGameObject);
+            var particleSystemRenderer = backingGameObject.GetComponent<ParticleSystemRenderer>();
+            Assert.Null(particleSystemRenderer);
+#endif
+		}
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_BiRPLitMaterialParticleSystem()
+        {
+            const float k_Metallic = 0.25f;
+            const float k_Smoothness = 0.75f;
+
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            var material = PolySpatialComponentUtils.CreateLitParticleBIRPMaterial(Color.white, "Textures/" + k_TestParticleTextureName);
+
+            if (material == null)
+                yield break;
+
+            material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
+            // Glossiness is the smoothness property of birp lit.
+            material.SetFloat(MaterialProperties.k_Glossiness, k_Smoothness);
+            var materialBaseMap = material.GetTexture("_MainTex");
+            CreateTestParticleSystem(material);
+
+            yield return null;
+
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
+            var backingMaterialBaseMap = backingMaterial.GetTexture("_BaseMap");
+
+            // Check dimensions are equal as texture name doesn't seem to be transmitted.
+            Assert.IsTrue(backingMaterialBaseMap.width == materialBaseMap.width && backingMaterialBaseMap.height == materialBaseMap.height);
+
+            var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
+            var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
+
+            Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
+            Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
+        }
+
+        [UnityTest]
+        public IEnumerator Test_UnityParticleSystem_Check_URPLitMaterialParticleSystem()
+        {
+            const float k_Metallic = 0.25f;
+            const float k_Smoothness = 0.75f;
+            var baseColor = Color.red;
+            var emissionColor = Color.blue;
+
+            PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
+            var material = PolySpatialComponentUtils.CreateLitParticleURPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
+
+            if (material == null)
+                yield break;
+
+            material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
+            material.SetFloat(MaterialProperties.k_Smoothness, k_Smoothness);
+            var emissionKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_Emission);
+            material.SetKeyword(emissionKeyword, true);
+            material.SetColor(MaterialProperties.k_EmissionColor, emissionColor);
+            CreateTestParticleSystem(material);
+
+            yield return null;
+
+            var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
+            var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
+            var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
+            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
+            var backingEmissionColor = backingMaterial.GetColor(MaterialProperties.k_EmissionColor);
+
+            Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
+            Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
+            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_Emission));
+            Assert.AreEqual(backingBaseColor, baseColor);
+            Assert.AreEqual(backingEmissionColor, emissionColor);
         }
     }
 }

@@ -37,9 +37,6 @@ namespace Tests.Runtime.Functional.Input
         }
 
         [Test]
-#if UNITY_IOS
-        [Ignore("Disabling as it currently crashes/fails on iOS.")]
-#endif
         public void Test_CheckPhaseState()
         {
             SpatialPointerState? state = null;
@@ -72,9 +69,6 @@ namespace Tests.Runtime.Functional.Input
         }
 
         [Test]
-#if UNITY_IOS
-        [Ignore("Disabling as it currently crashes/fails on iOS.")]
-#endif
         public void Test_CheckPositionState()
         {
             SpatialPointerState? state = null;

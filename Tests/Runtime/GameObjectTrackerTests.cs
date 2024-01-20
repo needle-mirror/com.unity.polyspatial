@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 
@@ -27,8 +28,8 @@ namespace Tests.Runtime.Functional
         [SetUp]
         public void SetUp()
         {
-            m_RestoreEnablePolySpatialRuntime = PolySpatialSettings.instance.EnablePolySpatialRuntime;
-            PolySpatialSettings.instance.EnablePolySpatialRuntime = true;
+            m_RestoreEnablePolySpatialRuntime = PolySpatialRuntime.Enabled;
+            PolySpatialRuntime.Enabled = true;
 
             if (!(PolySpatialCore.LocalBackend is PolySpatialUnityBackend))
             {
@@ -49,7 +50,7 @@ namespace Tests.Runtime.Functional
             m_Child1 = null;
             m_Child2 = null;
 
-            PolySpatialSettings.instance.EnablePolySpatialRuntime = m_RestoreEnablePolySpatialRuntime;
+            PolySpatialRuntime.Enabled = m_RestoreEnablePolySpatialRuntime;
         }
 
         [Test]
@@ -337,6 +338,57 @@ namespace Tests.Runtime.Functional
 
                 GameObject.Destroy(trackedObject);
                 GameObject.Destroy(untrackedObject);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Test_GameObjectTracker_Create_Destroy_Tracking_ManualRegister()
+        {
+            Assert.IsTrue(PolySpatialCore.LocalBackend is PolySpatialUnityBackend);
+            var unityBackend = PolySpatialCore.LocalBackend as PolySpatialUnityBackend;
+            var sceneGraph = unityBackend.SceneGraph;
+            var simTracker = PolySpatialCore.UnitySimulation.Tracker;
+
+            // Creation
+            {
+                const string kGrandparentName = "Grandparent";
+                const int kGrandparentLayer = 13;
+
+                m_Grandparent = new GameObject(kGrandparentName);
+                m_Grandparent.layer = kGrandparentLayer;
+
+                var grandparentId = PolySpatialInstanceID.For(m_Grandparent);
+
+                sceneGraph.RegisterCustomBackingGameObject(m_Grandparent, grandparentId);
+
+                Assert.IsFalse(simTracker.IsTrackedGameObjectInstanceID(grandparentId.id));
+                Assert.IsTrue(sceneGraph.FindBackingGameObjectForId(grandparentId) != null);
+
+                yield return null;
+
+                // This fails because the GameObjectTracker.ShouldTrackGameObject will always return false
+                // when the GameObject is already registered to the UnitySceneGraph.
+                // In Distributed Rendering, PolySpatialUnitySimulation and UnitySceneGraph never co-exist
+                // in the same Unity instance.
+                // Assert.IsTrue(simTracker.IsTrackedGameObjectInstanceID(grandparentId.id));
+
+                var clientGameObject = sceneGraph.FindBackingGameObjectForId(grandparentId);
+                Assert.IsTrue(clientGameObject != null);
+                Assert.AreEqual(kGrandparentLayer, clientGameObject.layer, "UnitySceneGraph should preserve the GameObject layer");
+                Assert.AreEqual(kGrandparentName, clientGameObject.name, "UnitySceneGraph should preserve the GameObject name");
+                Assert.AreEqual(SceneManager.GetActiveScene(), m_Grandparent.scene, "UnitySceneGraph should not move manually registered GameObjects");
+            }
+
+            // Destruction
+            {
+                var grandparentId = PolySpatialInstanceID.For(m_Grandparent);
+
+                GameObject.Destroy(m_Grandparent);
+
+                yield return null;
+
+                var clientGameObject = sceneGraph.FindBackingGameObjectForId(grandparentId);
+                Assert.IsTrue(clientGameObject == null);
             }
         }
 

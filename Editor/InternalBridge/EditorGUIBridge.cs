@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityEditor.PolySpatial.InternalBridge
+namespace UnityEditor.PolySpatial.Internals.InternalBridge
 {
     /// <summary>
     /// This class acts as a bridge for accessing trunk methods, for the EditorGUI and EditorGuiUtility classes.

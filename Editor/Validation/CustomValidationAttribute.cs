@@ -25,7 +25,7 @@ namespace UnityEditor.PolySpatial.Validation
     ///
     /// public class MyValidDerivedComponent : MyInvalidComponent
     /// { }
-    /// 
+    ///
     /// class MyCustomMessage : ITypeMessage
     /// {
     ///    const string k_MessageFormat = "This is a <b>{0}</b> message";
@@ -34,7 +34,7 @@ namespace UnityEditor.PolySpatial.Validation
     ///    public ITypeMessage.LinkData Link { get; } = new ITypeMessage.LinkData("MyCustom Link Tittle", "www.myCustomURL.com");
     /// }
     ///
-    /// 
+    ///
     /// public class MyRuleCreatorManager
     /// {
     ///     [CustomValidationAttribute]
@@ -52,7 +52,7 @@ namespace UnityEditor.PolySpatial.Validation
     /// </example>
     /// <seealso cref="BuildValidationRule"/>
     [AttributeUsage(AttributeTargets.Method)]
-    public class CustomValidationAttribute : Attribute
+    internal class CustomValidationAttribute : Attribute
     {
         internal readonly int Priority;
 

@@ -2,6 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Unity.PolySpatial;
+using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -32,14 +33,14 @@ namespace Tests.Runtime.PolySpatialTest.Base
         internal void EnableRuntime()
         {
             // capture current runtime value
-            enablePolySpatialRuntime = PolySpatialSettings.instance.EnablePolySpatialRuntime;
-            PolySpatialSettings.instance.EnablePolySpatialRuntime = true;
+            enablePolySpatialRuntime = PolySpatialRuntime.Enabled;
+            PolySpatialRuntime.Enabled = true;
         }
 
         internal void RestoreRuntime()
         {
             // reset to captured value
-            PolySpatialSettings.instance.EnablePolySpatialRuntime = enablePolySpatialRuntime;
+            PolySpatialRuntime.Enabled = enablePolySpatialRuntime;
         }
     }
 

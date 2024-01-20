@@ -8,7 +8,7 @@ namespace UnityEditor.PolySpatial.Validation
     /// An interface that represents a creator of validation rules for components.
     /// </summary>
     /// <seealso cref="IPropertyValidator"/>
-    public interface IComponentRuleCreator
+    internal interface IComponentRuleCreator
     {
         /// <summary>
         /// Creates validation rules for the given component.

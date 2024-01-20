@@ -132,7 +132,7 @@ namespace UnityEditor.PolySpatial.Utilities
                 case PlayModeStateChange.EnteredPlayMode:
                 {
                     m_IsInPlayMode = true;
-                    if (PolySpatialSettings.instance.EnablePolySpatialRuntime && PolySpatialCore.Instance.ActiveRecordingMode == PolySpatialSettings.RecordingMode.Playback)
+                    if (PolySpatialRuntime.Enabled && PolySpatialCore.Instance.ActiveRecordingMode == PolySpatialSettings.RecordingMode.Playback)
                         m_PlaybackManager = FindFirstObjectByType<PolySpatialEditorPlaybackManager>();
 
                     break;
@@ -222,7 +222,7 @@ namespace UnityEditor.PolySpatial.Utilities
         {
             if (m_IsInPlayMode)
             {
-                if (!PolySpatialSettings.instance.EnablePolySpatialRuntime)
+                if (!PolySpatialRuntime.Enabled)
                     return;
 
                 switch (PolySpatialCore.Instance.ActiveRecordingMode)

@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace Unity.PolySpatial.Internals
 {
-    public class EditorPolySpatialAssetProvider : IPolySpatialAssetProvider
+    internal class EditorPolySpatialAssetProvider : IPolySpatialAssetProvider
     {
         public static string[] GetPathsForAsset(string guid)
         {
