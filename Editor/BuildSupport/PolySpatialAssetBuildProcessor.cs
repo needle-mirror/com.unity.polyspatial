@@ -38,7 +38,7 @@ namespace UnityEditor.PolySpatial.Internals
             var openedScenePath = SceneManager.GetActiveScene().path;
             try
             {
-                PrepareForBuildInner(buildPlayerContext);
+                PrepareForBuildInner(buildPlayerContext, openedScenePath);
             }
             finally
             {
@@ -49,13 +49,17 @@ namespace UnityEditor.PolySpatial.Internals
             }
         }
 
-        void PrepareForBuildInner(BuildPlayerContext buildPlayerContext)
+        void PrepareForBuildInner(BuildPlayerContext buildPlayerContext, string openedScenePath)
         {
             s_SceneAssetLocators = new();
             s_AssetNameLocators = new();
 
+            var scenes = buildPlayerContext.BuildPlayerOptions.scenes;
+            if (scenes.Length == 0)
+                scenes = new[] { openedScenePath };
+
             bool firstScene = true;
-            foreach (var scene in buildPlayerContext.BuildPlayerOptions.scenes)
+            foreach (var scene in scenes)
             {
                 Dictionary<string, string> locators = new();
                 var sceneDeps = ContentBuildInterface.CalculatePlayerDependenciesForScene(scene, new(), new());

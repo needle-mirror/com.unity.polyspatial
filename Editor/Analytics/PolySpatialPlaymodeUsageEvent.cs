@@ -1,4 +1,4 @@
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,7 @@ using System.Net;
 using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 #if ENABLE_XR_MANAGEMENT
 using UnityEditor.XR.Management;
@@ -17,6 +18,9 @@ namespace UnityEditor.PolySpatial.Analytics
     /// Editor event used to send editor usage <see cref="PolySpatialAnalytics"/> data.
     /// Only accepts <see cref="PolySpatialPlaymodeUsageEvent.Payload"/> parameters.
     /// </summary>
+#if UNITY_2023_2_OR_NEWER
+    [AnalyticInfo(k_EventName, PolySpatialAnalytics.VendorKey, k_EventVersion, k_MaxEventPerHour, k_MaxItems)]
+#endif
     class PolySpatialPlaymodeUsageEvent : PolySpatialEditorAnalyticsEvent<PolySpatialPlaymodeUsageEvent.Payload>
     {
         const string k_EventName = "polyspatial_playmode_usage";
@@ -28,6 +32,9 @@ namespace UnityEditor.PolySpatial.Analytics
         /// </summary>
         [Serializable]
         internal struct Payload
+#if UNITY_2023_2_OR_NEWER
+            : IAnalytic.IData
+#endif
         {
             internal const string EnteredPlaymodeState = "EnteredPlaymode";
             internal const string NotInstalledState = "NotInstalled";
@@ -64,6 +71,14 @@ namespace UnityEditor.PolySpatial.Analytics
 
             [SerializeField]
             internal List<AppNetworkPayload> AppNetworkConnections;
+
+#if UNITY_2023_2_OR_NEWER
+            [SerializeField]
+            internal string package;
+
+            [SerializeField]
+            internal string package_ver;
+#endif
         }
 
         [Serializable]
@@ -123,7 +138,11 @@ namespace UnityEditor.PolySpatial.Analytics
             return localAppNetwork;
         }
 
-        internal PolySpatialPlaymodeUsageEvent() : base(k_EventName, k_EventVersion)
+
+        internal PolySpatialPlaymodeUsageEvent()
+#if !UNITY_2023_2_OR_NEWER
+            : base(k_EventName, k_EventVersion)
+#endif
         {
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
@@ -141,7 +160,11 @@ namespace UnityEditor.PolySpatial.Analytics
                 PolySpatialRuntimeState = Payload.DeactivatedState,
                 XRManagementState = Payload.NotInstalledState,
                 ActiveXRLoaders = new string[0],
-                ConfiguredMode = Payload.UndefinedMode
+                ConfiguredMode = Payload.UndefinedMode,
+#if UNITY_2023_2_OR_NEWER
+                package = PolySpatialAnalytics.PackageName,
+                package_ver = PolySpatialAnalytics.PackageVersion
+#endif
             };
 
             if (PolySpatialRuntime.Enabled)
@@ -202,4 +225,4 @@ namespace UnityEditor.PolySpatial.Analytics
         }
     }
 }
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER

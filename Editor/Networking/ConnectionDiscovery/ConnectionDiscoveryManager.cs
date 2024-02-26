@@ -85,7 +85,7 @@ namespace Unity.PolySpatial.Networking
             // Unselect mismatched versions that are not direct connections
             foreach (var connection in ConnectionCandidates.Values)
             {
-                if (connection.IsSelected && !string.IsNullOrEmpty(connection.PlayToDeviceHostVersion) && connection.PlayToDeviceHostVersion != PolySpatialSettings.instance.PackageVersion)
+                if (connection.IsSelected && connection.PlayToDeviceHostMagicCookie != 0 && connection.PlayToDeviceHostMagicCookie != (long)PolySpatialMagicCookie.Value)
                     connection.IsSelected = false;
             }
 
@@ -103,7 +103,8 @@ namespace Unity.PolySpatial.Networking
             // Add a new background thread
             m_ListenerThread = new Thread(DiscoveryListener)
             {
-                IsBackground = true
+                IsBackground = true,
+                Name = "PSL Connection Discovery"
             };
 
             m_ListenerThread.Start();
@@ -169,7 +170,8 @@ namespace Unity.PolySpatial.Networking
                         IP = hostIP.Address.ToString(),
                         Name = responseData.Hostname,
                         ServerPort = responseData.ServerPort,
-                        PlayToDeviceHostVersion = responseData.PlayToDeviceHostVersion
+                        PlayToDeviceHostVersion = responseData.PlayToDeviceHostVersion,
+                        PlayToDeviceHostMagicCookie = responseData.PlayToDeviceHostMagicCookie
                     };
                     lock (m_InvokeChangedActionLock)
                     {
@@ -179,10 +181,12 @@ namespace Unity.PolySpatial.Networking
 
                 // Invoke connection change if the data is different for a connection candidate
                 if (ConnectionCandidates[connection].Status != responseData.Status ||
-                    ConnectionCandidates[connection].PlayToDeviceHostVersion != responseData.PlayToDeviceHostVersion)
+                    ConnectionCandidates[connection].PlayToDeviceHostVersion != responseData.PlayToDeviceHostVersion ||
+                    ConnectionCandidates[connection].PlayToDeviceHostMagicCookie != responseData.PlayToDeviceHostMagicCookie)
                 {
                     ConnectionCandidates[connection].Status = responseData.Status;
                     ConnectionCandidates[connection].PlayToDeviceHostVersion = responseData.PlayToDeviceHostVersion;
+                    ConnectionCandidates[connection].PlayToDeviceHostMagicCookie = responseData.PlayToDeviceHostMagicCookie;
                     lock (m_InvokeChangedActionLock)
                     {
                         m_InvokeChangedAction = true;

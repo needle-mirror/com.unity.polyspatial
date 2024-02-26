@@ -7,6 +7,113 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2024-02-26
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.1.3] - 2024-02-22
+
+### Added
+
+### Changed
+- Update min Unity version to 2022.3.19f1
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.1.2] - 2024-02-21
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.1.1] - 2024-02-15
+
+### Added
+- Added support for surface type with URP/BiRP particle shaders under BakeToMesh particle mode.
+- Added progress bar when attempting to establish a connection with PlayToDevice host app.
+- Added support for variable reassignment to shader graph Custom Function node support.
+- Added ability to set texture offset/scale in shader graph materials.
+- Added protocol hash to the PlayToDevice host app and editor window. PlayToDevice now checks against the protocol hash instead of the package version.
+
+### Changed
+- CanvasRenderer components (TextMeshProUGUI, Image, RawImage, TMP_SubMeshUI) can now use custom materials/shader graphs.
+- Sprites can now use custom materials/shader graphs.
+- Scaled down play to device UI for easier workflow iteration
+- For performance reasons, UI text components (Text/TextMeshProUGUI) are no longer raycastable by default.  To enable raycasting on these components, add a Collider (such as a BoxCollider) to their GameObject.
+- MaskingShader shader graph (used for sprites and UI images) now supports vertex colors.
+- Play to device editor window status now shows connected / disconnected status instead of colored bullets.
+- Changes to shader graphs while in play mode will be reflected in Play to Device.
+- Native textures are no longer disabled when streaming to PlayToDevice.
+
+### Deprecated
+
+### Removed
+- Types in the Unity.PolySpatial.Internals namespace are now actually internal, and are not accessible.
+
+### Fixed
+- Fixed VisionOS Grounding Shadow/VisionOS Image Based Light Receiver/VisionOS Sorting Group components for skinned mesh renderers.
+- Documented usage of VisionOS Hover Effect component for skinned mesh renderers.
+- Fixed Built-in Render Pipeline's unlit particle shader under BakeToMesh Particle System Mode.
+- Fixed issue where switching a Material to a new shader graph shader would crash on visionOS.
+- Fixed issue with shader graph MaterialX not being included in build when no scenes were in build list.
+- Fixed use of material color when using particles in Replicate Properties mode.
+- Fixed default texture when using particles in Replicate Properties mode.
+- Fixed missing justification support in visionOSNativeText.
+- Fixed unlit particle shaders' emissive property operating while disabled.
+- Fixed particle shaders not emitting if emissive texture not assigned.
+- Fixed performance issues with scene validation when compiling or updating several objects.
+- Removed normal map processing that was affecting non-visionOS platforms.
+- Fixed hit testing for UI in Editor.
+- Improved performance for SpriteRenderers.
+- Fixed failure to transfer texture scale/offset for URP materials.
+- Fixed sign of texture offset v coordinate for URP/Lit and Standard materials.
+- Fixed direction of Main Light Direction shader graph node.
+- Fixed priority of light used for Main Light Direction node (uses first directional light with shadow, if present; otherwise, first directional light).
+- Improved performance for raycastable UI elements.
+- Fixed issue where Play to Device would sometimes incorrectly display "Connection Lost".
+- Fixed setting particle system render mode to none and disabling renderer at runtime.
+- Fixed KeyNotFound exception when using the default volume camera when the "Ignored Objects Layer Mask" is set to filter out "Default".
+- Fixed "Trying to access unloaded resource!" error when scenes were loaded/Resources.UnloadUnusedAssets was called with sprites in the scene.
+- Fixed "Couldn't find object" error message when objects were destroyed when `Extra Debug Information` was enabled.
+- Fixed incorrect clipping on rotated RectMask2D instances.
+- Fixed another issue with pink materials temporarily appearing on BakeToMesh particle systems.
+- Fixed mipmaps being generated for textures without `Generate Mipmaps` set on Play to Device.
+- Fixed rect mask 2d clip calculations.
+- Fixed issue where lighting would not show up when using PolySpatial Lighting node and streaming to PlayToDevice.
+- Fixed transfer of block-compressed 3D textures on Play to Device.
+- Fixed incorrect project validation for UGUI components.
+- Fixed unnecessary importing/conversion of PolySpatial shader graph test assets.
+- Fixed issue with SpriteRenderers referencing the same Sprite using different properties for non-Simple draw modes.
+- Fixed performance issue with TextMeshProUGUI components.
+- In sample scenes LoadLevelButton.cs, disabled ARSession before switching scenes to work around an Image Tracking crash we are working to resolve.
+- Fixed crash when exiting play mode before shader graphs finish loading on Play to Device.
+
+### Security
+
 ## [1.0.3] - 2024-01-20
 
 ### Added
@@ -21,6 +128,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added device rotation and distinct device position (was a copy of interaction position) to events sent by UnityPlayModeInput script.
 - Added a list of `MaterialSwapSet`s to `PolySpatialSettings`. `MaterialSwapSet`s must now be explicitly added to this list in order to be used.
 - Added StackTrace and Categories logging options to the PolySpatial settings `Project Settings > PolySpatial > Logging`.
+- Added validation for the Video Player component.
 
 ### Changed
 - PolySpatial Sorting Group components can now override sprite/UI sorting.

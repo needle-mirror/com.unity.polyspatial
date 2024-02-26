@@ -89,6 +89,8 @@ namespace Unity.PolySpatial
             public ConnectionDiscoveryStatus Status;
             /// <summary> The PolySpatial package version of the play to device App host </summary>
             public string PlayToDeviceHostVersion;
+            /// <summary> The PolySpatial magic cookie of the play to device App host </summary>
+            public long PlayToDeviceHostMagicCookie;
             /// <summary> Whether a candidate has been selected for connection </summary>
             public bool IsSelected;
             /// <summary> Last time a ping was received from the App host </summary>

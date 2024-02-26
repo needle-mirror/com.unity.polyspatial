@@ -116,54 +116,62 @@ namespace Tests.Runtime.Functional.Components
         [UnityTest]
         public IEnumerator Test_PolySpatial_Light_Shader_Globals()
         {
-            // When we start,  the first tests are for the light's color and no color.
-            Assert.IsTrue(GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.clear }));
+            // When we start, the first tests are for the light's color and no color.
+            Assert.AreEqual(GetGlobalLightColors(), new[] { m_TestLight.color, Color.clear, Color.clear, Color.clear });
 
             // After adding several more lights, they should be included in the globals.
             var light2 = AddTestLight(2, Color.red);
             var light3 = AddTestLight(3, Color.blue);
             var light4 = AddTestLight(4, Color.green);
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.red, Color.blue, Color.green }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { m_TestLight.color, Color.red, Color.blue, Color.green });
             
             // An additional light will not be included in the globals.
             var light5 = AddTestLight(5, Color.cyan);
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.red, Color.blue, Color.green }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { m_TestLight.color, Color.red, Color.blue, Color.green });
 
             // If we mark the light as "Important" (ForcePixel), it will take the place of one of the "Auto" lights.
             light5.renderMode = LightRenderMode.ForcePixel;
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { Color.red, Color.blue, Color.green, Color.cyan }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.cyan, m_TestLight.color, Color.red, Color.blue });
 
             // Lights marked "Not Important" (ForceVertex) will be omitted from the globals.
             light2.renderMode = LightRenderMode.ForceVertex;
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.blue, Color.green, Color.cyan }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.cyan, m_TestLight.color, Color.blue, Color.green });
             
             // Disabled lights will be omitted from the globals.
             light3.enabled = false;
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.green, Color.cyan, Color.clear }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.cyan, m_TestLight.color, Color.green, Color.clear });
             
             // Destroyed lights will be omitted from the globals.
             Object.Destroy(light4.gameObject);
             yield return null;
-            Assert.IsTrue(
-                GetGlobalLightColors().SetEquals(new[] { m_TestLight.color, Color.cyan, Color.clear }));
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.cyan, m_TestLight.color, Color.clear, Color.clear });
+
+            // Directional lights take precedence over all others.
+            var light6 = AddTestLight(6, Color.magenta);
+            light6.type = LightType.Directional;
+            yield return null;
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.magenta, Color.cyan, m_TestLight.color, Color.clear });
+
+            // Shadow-casting directional lights take precedence over non-shadow-casting.
+            var light7 = AddTestLight(6, Color.yellow);
+            light7.type = LightType.Directional;
+            light7.shadows = LightShadows.Hard;
+            yield return null;
+            Assert.AreEqual(GetGlobalLightColors(), new[] { Color.yellow, Color.magenta, Color.cyan, m_TestLight.color });
         }
 
-        static HashSet<Color> GetGlobalLightColors()
+        static Color[] GetGlobalLightColors()
         {
-            HashSet<Color> colors = new();
-            for (var i = 0; i < PolySpatialShaderGlobals.LightCount; ++i)
+            var colors = new Color[PolySpatialShaderGlobals.LightCount];
+            for (var i = 0; i < colors.Length; ++i)
             {
-                colors.Add(Shader.GetGlobalColor(PolySpatialShaderGlobals.LightColorPrefix + i));
+                // Colors are transmitted as linear vectors.
+                colors[i] = Shader.GetGlobalColor(PolySpatialShaderGlobals.LightColorPrefix + i).gamma;
             }
             return colors;
         }

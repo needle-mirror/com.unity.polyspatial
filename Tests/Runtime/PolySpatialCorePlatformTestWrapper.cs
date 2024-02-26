@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
+using FlatSharp.Runtime.Extensions;
 using Tests.Runtime.Functional.Components;
 using Unity.Collections;
-using Unity.PolySpatial;
 using Unity.PolySpatial.Internals;
-using UnityEngine;
 
 namespace Tests.Runtime.Functional
 {
@@ -48,10 +46,14 @@ namespace Tests.Runtime.Functional
             }
             else if (cmd == PolySpatialCommand.SetVolumeCameraData)
             {
-                PolySpatialArgs.ExtractArgs(argCount, argValues, argSizes, out PolySpatialInstanceID* id, out PolySpatialVolumeCameraData* cameraData);
-                OnBeforeVolumeCameraChangedCalled?.Invoke(*id, *cameraData);
-                NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
-                OnAfterVolumeCameraChangedCalled?.Invoke(*id, *cameraData);
+                PolySpatialArgs.ExtractArgs(argCount, argValues, argSizes, out PolySpatialInstanceID* id, out Span<byte> data);
+                fixed (byte* p = data)
+                {
+                    var cameraData = PolySpatialVolumeCameraData.Serializer.Parse(data.Length, p);
+                    OnBeforeVolumeCameraChangedCalled?.Invoke(*id, cameraData);
+                    NextHandler?.HandleCommand(cmd, argCount, argValues, argSizes);
+                    OnAfterVolumeCameraChangedCalled?.Invoke(*id, cameraData);
+                }
             }
             else if (cmd == PolySpatialCommand.SetParticleSystemData)
             {

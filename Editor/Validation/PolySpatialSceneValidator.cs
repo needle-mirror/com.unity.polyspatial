@@ -7,6 +7,7 @@ using Unity.XR.CoreUtils.Capabilities;
 using Unity.XR.CoreUtils.Capabilities.Editor;
 using Unity.XR.CoreUtils.Editor;
 using Unity.PolySpatial.Internals.Capabilities;
+using Unity.Profiling;
 using UnityEditor.PolySpatial.Internals;
 using UnityEditor.PolySpatial.Utilities;
 using UnityEditor.SceneManagement;
@@ -91,6 +92,11 @@ namespace UnityEditor.PolySpatial.Validation
         internal static event Action OnValidateRules;
 
         static string s_CachedCapabilityProfileNames;
+
+        static ProfilerMarker s_FetchAddedGameObjectsInLoadedScenesMarker = new ProfilerMarker("PolySpatialSceneValidator.FetchAddedGameObjectsInLoadedScenes");
+        static ProfilerMarker s_TryCreateRulesComponentMarker = new ProfilerMarker("PolySpatialSceneValidator.TryCreateRules(Component)");
+        static ProfilerMarker s_TryCreateRulesGameObjectMarker = new ProfilerMarker("PolySpatialSceneValidator.TryCreateRules(GameObject)");
+        static ProfilerMarker s_UpdateRuleFailuresMarker = new ProfilerMarker("PolySpatialSceneValidator.UpdateRuleFailures");
 
         internal static string CachedCapabilityProfileNames => s_CachedCapabilityProfileNames ??= GetPolySpatialCapabilityProfileNames();
 
@@ -209,40 +215,28 @@ namespace UnityEditor.PolySpatial.Validation
             AddMessages(typeof(SkinnedMeshRenderer), new SkinnedMeshRendererSyncMessage());
             AddRuleCreator(typeof(SkinnedMeshRenderer), new SkinnedMeshRendererRuleCreator());
 
-            //ParticleSystem
+            // ParticleSystem
             AddMessages(typeof(ParticleSystem), new ParticleSystemMessage());
             AddRuleCreator(typeof(ParticleSystem), new ParticleRuleCreator());
 
             AddRuleCreator(typeof(VolumeCamera), new VolumeCameraSettingsRuleCreator());
+            AddRuleCreator(typeof(VideoPlayer), new VideoPlayerRuleCreator());
 
             AddRuleCreator(typeof(Collider), new ColliderNonUniformScaleRule());
 
+            AddRuleCreator(typeof(Transform), new TransformScaleRuleCreator());
+
 #if ENABLE_UGUI
-            // UGUI
-            AddMessages(typeof(ContentSizeFitter), null);
-            AddMessages(typeof(AspectRatioFitter), null);
-            AddMessages(typeof(LayoutGroup), null);
-            AddMessages(typeof(LayoutElement), null);
-
-            AddMessages(typeof(Image), new ImageSyncMessage());
-            AddRuleCreator(typeof(Image), null);
-
-            AddRuleCreator(typeof(Button), null);
-            AddRuleCreator(typeof(CanvasScaler), null);
-            AddRuleCreator(typeof(BaseRaycaster), null);
-
-            AddRuleCreator(typeof(EventSystem), null);
-            AddRuleCreator(typeof(BaseInputModule), null);
-
             AddRuleCreator(typeof(Canvas), new CanvasComponentRule());
-
+            AddMessages(typeof(Image), new ImageSyncMessage());
 #endif
 
 #if ENABLE_TEXT_MESH_PRO
-            // Text mesh pro Text
+            // TMP Text and InputField
             var tmpRuleCreator =  new TMPRuleCreator();
             AddRuleCreator(typeof(TextMeshPro), tmpRuleCreator);
             AddRuleCreator(typeof(TextMeshProUGUI), tmpRuleCreator);
+            AddRuleCreator(typeof(TMP_InputField), tmpRuleCreator);
 #endif
         }
 
@@ -294,8 +288,19 @@ namespace UnityEditor.PolySpatial.Validation
 #endif
 
 #if ENABLE_UGUI
-            // All UGUI and TextMeshPro components
-            AddRuleCreator(typeof(UIBehaviour), unsupportedRuleCreator);
+            // UGUI effects
+            AddRuleCreator(typeof(Shadow), unsupportedRuleCreator);
+            AddRuleCreator(typeof(Outline), unsupportedRuleCreator);
+            AddRuleCreator(typeof(PositionAsUV1), unsupportedRuleCreator);
+
+            // UGUI Masks
+            AddRuleCreator(typeof(Mask), unsupportedRuleCreator);
+            AddRuleCreator(typeof(RectMask2D), unsupportedRuleCreator);
+#endif
+
+#if ENABLE_TEXT_MESH_PRO
+            // Other TMP components
+            AddRuleCreator(typeof(TextContainer), unsupportedRuleCreator);
 #endif
         }
 
@@ -368,7 +373,7 @@ namespace UnityEditor.PolySpatial.Validation
             UpdateRuleFailures(true);
         }
 
-        static void OnObjectChangedByUser(List<UnityObject> changed, List<int> destroyed)
+        static void OnObjectChangedByUser()
         {
             UpdateRuleFailures(true);
         }
@@ -393,124 +398,149 @@ namespace UnityEditor.PolySpatial.Validation
             if(PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.Disabled)
                 return;
 
-            FetchAddedGameObjectsInLoadedScenes();
+            // We can safely ignore rules update during compilation or PlayMode changes since scene objects will be changed later
+            if (EditorApplication.isCompiling || EditorApplication.isPlayingOrWillChangePlaymode)
+                return;
+
+            FetchAddedGameObjectsInLoadedScenes(s_AddedGameObjects, s_AddedComponents);
+            TryCreateRules(s_AddedGameObjects);
+            TryCreateRules(s_AddedComponents);
             UpdateRuleFailures();
         }
 
-        static void FetchAddedGameObjectsInLoadedScenes()
+        static void FetchAddedGameObjectsInLoadedScenes(List<GameObject> gameObjects, List<Component> components)
         {
-            s_AddedGameObjects.Clear();
-            s_AddedComponents.Clear();
-            s_Components.Clear();
-
-            ComponentUtility<Component>.GetComponentsInAllScenes(s_Components, true, (int)HideFlags.HideAndDontSave);
-            foreach (var component in s_Components)
+            using (s_FetchAddedGameObjectsInLoadedScenesMarker.Auto())
             {
-                // Fix for GetComponentsInChildren returning a null component for MonoBehaviours with a missing script
-                if (component == null)
-                    continue;
+                gameObjects.Clear();
+                s_AddedComponents.Clear();
+                s_Components.Clear();
 
-                var componentID = component.GetInstanceID();
-                if (s_VisitedComponents.Contains(componentID))
-                    continue;
+                ComponentUtility<Component>.GetComponentsInAllScenes(s_Components, true, (int)HideFlags.HideAndDontSave);
+                foreach (var component in s_Components)
+                {
+                    // Fix for GetComponentsInChildren returning a null component for MonoBehaviours with a missing script
+                    if (component == null)
+                        continue;
 
-                s_VisitedComponents.Add(componentID);
-                s_AddedComponents.Add(component);
+                    var componentID = component.GetInstanceID();
+                    if (s_VisitedComponents.Contains(componentID))
+                        continue;
 
-                // Below we fetch the newly added GameObjects
-                if (component is not Transform)
-                    continue;
+                    s_VisitedComponents.Add(componentID);
+                    components.Add(component);
 
-                var gameObjectID = component.gameObject.GetInstanceID();
-                if (s_VisitedGameObjects.Contains(gameObjectID))
-                    continue;
+                    // Below we fetch the newly added GameObjects
+                    if (component is not Transform)
+                        continue;
 
-                s_VisitedGameObjects.Add(gameObjectID);
-                s_AddedGameObjects.Add(component.gameObject);
+                    var gameObjectID = component.gameObject.GetInstanceID();
+                    if (s_VisitedGameObjects.Contains(gameObjectID))
+                        continue;
+
+                    s_VisitedGameObjects.Add(gameObjectID);
+                    gameObjects.Add(component.gameObject);
+                }
             }
-
-            TryCreateRules(s_AddedGameObjects);
-            TryCreateRules(s_AddedComponents);
         }
 
         static void TryCreateRules(List<Component> components)
         {
-            if (components.Count == 0)
-                return;
-
-            s_ComponentRules.Clear();
-
-            foreach (var component in components)
+            using (s_TryCreateRulesComponentMarker.Auto())
             {
-                var componentType = component.GetType();
-                var ruleCreator = GetRuleCreator(componentType);
-                if (ruleCreator == null)
-                    continue;
+                if (components.Count == 0)
+                    return;
 
-                s_CreatedRules.Clear();
-                ruleCreator.CreateRules(component, s_CreatedRules);
-                if (s_CreatedRules.Count == 0)
-                    continue;
+                s_ComponentRules.Clear();
 
-                if (ruleCreator is IPropertyValidator propertyValidator)
+                var trackedTypesWasEmpty = s_TrackedTypes.Count == 0;
+
+                foreach (var component in components)
                 {
-                    s_TypesToTrack.Clear();
-                    propertyValidator.GetTypesToTrack(component, s_TypesToTrack);
-                    foreach (var typeToTrack in s_TypesToTrack)
-                    {
-                        if (s_TrackedTypes.Contains(typeToTrack))
-                            continue;
+                    var componentType = component.GetType();
+                    var ruleCreator = GetRuleCreator(componentType);
+                    if (ruleCreator == null)
+                        continue;
 
-                        s_TrackedTypes.Add(typeToTrack);
-                        PolySpatialObjectAuthoringTracker.AddListener(typeToTrack, OnObjectChangedByUser);
+                    s_CreatedRules.Clear();
+                    ruleCreator.CreateRules(component, s_CreatedRules);
+                    if (s_CreatedRules.Count == 0)
+                        continue;
+
+                    if (ruleCreator is IPropertyValidator propertyValidator)
+                    {
+                        s_TypesToTrack.Clear();
+                        propertyValidator.GetTypesToTrack(component, s_TypesToTrack);
+
+                        foreach (var typeToTrack in s_TypesToTrack)
+                        {
+                            if (s_TrackedTypes.Contains(typeToTrack))
+                                continue;
+
+                            s_TrackedTypes.Add(typeToTrack);
+                            PolySpatialObjectAuthoringTracker.AddListener(typeToTrack, null);
+                        }
                     }
+
+                    Associate(component, s_CreatedRules);
+                    s_ComponentRules.AddRange(s_CreatedRules);
                 }
 
-                Associate(component, s_CreatedRules);
-                s_ComponentRules.AddRange(s_CreatedRules);
+                // OnObjectChangedByUser callback was not registered yet? We only need to register a single delegate.
+                if (trackedTypesWasEmpty && s_TrackedTypes.Count != 0)
+                {
+                    PolySpatialObjectAuthoringTracker.OnTrackChanges += OnObjectChangedByUser;
+                }
+
+                if (s_ComponentRules.Count == 0)
+                {
+                    return;
+                }
+
+                if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
+                    PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
+                {
+                    BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
+                    s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
+                }
+
+                BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
+                s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
             }
-
-            if (s_ComponentRules.Count == 0)
-                return;
-
-            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
-                PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
-            {
-                BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
-                s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_ComponentRules);
-            }
-
-            BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_ComponentRules);
         }
 
         static void TryCreateRules(List<GameObject> gameObjects)
         {
-            if (gameObjects.Count == 0)
-                return;
-
-            s_GameObjectRules.Clear();
-
-            foreach (var gameObject in gameObjects)
+            using (s_TryCreateRulesGameObjectMarker.Auto())
             {
-                var createdRules = new List<BuildValidationRule>();
-                PolySpatialLayerRule.CreateRules(gameObject, createdRules);
-                s_ObjectsRuleMap.Add(gameObject.GetInstanceID(),createdRules);
-                s_GameObjectRules.AddRange(createdRules);
+                if (gameObjects.Count == 0)
+                    return;
+
+                s_GameObjectRules.Clear();
+
+                foreach (var gameObject in gameObjects)
+                {
+                    var createdRules = new List<BuildValidationRule>();
+                    PolySpatialLayerRule.CreateRules(gameObject, createdRules);
+                    s_ObjectsRuleMap.Add(gameObject.GetInstanceID(), createdRules);
+                    s_GameObjectRules.AddRange(createdRules);
+                }
+
+                if (s_GameObjectRules.Count == 0)
+                {
+                    return;
+                }
+
+                if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
+                    PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
+                {
+                    BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
+                    s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
+                }
+
+                BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
+                s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
             }
-
-            if (s_GameObjectRules.Count == 0)
-                return;
-
-            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.VisionOS &&
-                PolySpatialSettings.instance.PolySpatialValidationOption == PolySpatialSettings.ValidationOption.EnabledForAllPlatforms)
-            {
-                BuildValidator.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
-                s_BuildValidatorCopy.AddRules(EditorUserBuildSettings.selectedBuildTargetGroup, s_GameObjectRules);
-            }
-
-            BuildValidator.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
-            s_BuildValidatorCopy.AddRules(BuildTargetGroup.VisionOS, s_GameObjectRules);
         }
 
         static IComponentRuleCreator GetRuleCreator(Type componentType)
@@ -520,16 +550,23 @@ namespace UnityEditor.PolySpatial.Validation
 
         static void UpdateRuleFailures(bool repaintHierarchy = false)
         {
-            var buildTargetGroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
-            s_BuildValidatorCopy.GetCurrentValidationIssues(s_RuleFailures, buildTargetGroup);
+            using (s_UpdateRuleFailuresMarker.Auto())
+            {
+                // We can safely ignore rules update during compilation or PlayMode changes since scene objects will be changed later
+                if (EditorApplication.isCompiling || EditorApplication.isPlayingOrWillChangePlaymode)
+                    return;
 
-            CacheObjectFailures();
+                var buildTargetGroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+                s_BuildValidatorCopy.GetCurrentValidationIssues(s_RuleFailures, buildTargetGroup);
 
-            // Issues that don't add/remove objects will not trigger Hierarchy repaint. When needed, we'll call RepaintHierarchyWindow to ensure consistency
-            if (repaintHierarchy)
-                EditorApplication.RepaintHierarchyWindow();
+                CacheObjectFailures();
 
-            OnValidateRules?.Invoke();
+                // Issues that don't add/remove objects will not trigger Hierarchy repaint. When needed, we'll call RepaintHierarchyWindow to ensure consistency
+                if (repaintHierarchy)
+                    EditorApplication.RepaintHierarchyWindow();
+
+                OnValidateRules?.Invoke();
+            }
         }
 
         static void CacheObjectFailures()
@@ -797,12 +834,9 @@ namespace UnityEditor.PolySpatial.Validation
                     {
                         failures.Add(validation);
                     }
-                    else
+                    else if (validation.IsRuleEnabled.Invoke() && !validation.CheckPredicate.Invoke())
                     {
-                        var isEnabled = validation.IsRuleEnabled.Invoke();
-                        var checkPredicate = validation.CheckPredicate.Invoke();
-                        if (isEnabled && !checkPredicate)
-                            failures.Add(validation);
+                        failures.Add(validation);
                     }
                 }
             }

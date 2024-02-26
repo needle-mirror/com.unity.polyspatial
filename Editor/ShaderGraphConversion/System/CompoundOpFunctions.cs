@@ -29,6 +29,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             [(";", Operator.VariantType.Default)] = SemicolonCompiler,
             [("=", Operator.VariantType.Default)] = AssignmentCompiler,
+            [("+=", Operator.VariantType.Default)] = CreateBinaryAssignmentCompiler(MtlxNodeTypes.Add),
+            [("-=", Operator.VariantType.Default)] = CreateBinaryAssignmentCompiler(MtlxNodeTypes.Subtract),
+            [("*=", Operator.VariantType.Default)] = CreateBinaryAssignmentCompiler(MtlxNodeTypes.Multiply),
+            [("/=", Operator.VariantType.Default)] = CreateBinaryAssignmentCompiler(MtlxNodeTypes.Divide),
+            [("%=", Operator.VariantType.Default)] = CreateBinaryAssignmentCompiler(MtlxNodeTypes.Modulo),
+            [("++", Operator.VariantType.Default)] = CreateUnaryAssignmentCompiler(MtlxNodeTypes.Add, true),
+            [("++", Operator.VariantType.Prefix)] = CreateUnaryAssignmentCompiler(MtlxNodeTypes.Add, false),
+            [("--", Operator.VariantType.Default)] = CreateUnaryAssignmentCompiler(MtlxNodeTypes.Subtract, true),
+            [("--", Operator.VariantType.Prefix)] = CreateUnaryAssignmentCompiler(MtlxNodeTypes.Subtract, false),
             [("+", Operator.VariantType.Prefix)] = IdentityCompiler,
             [("-", Operator.VariantType.Prefix)] = CreateUnaryOpCompiler(MtlxNodeTypes.Subtract, "in2"),
             [("+", Operator.VariantType.Default)] = CreateBinaryOpCompiler(MtlxNodeTypes.Add, true),
@@ -68,12 +77,20 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("dot", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(
                 MtlxNodeTypes.DotProduct, false, MtlxDataTypes.Float),
             [("exp", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Exponential),
+            [("float", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Float),
             [("float2", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector2),
             [("float2x2", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix22),
             [("float3", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector3),
             [("float3x3", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix33),
             [("float4", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Vector4),
             [("float4x4", Operator.VariantType.FunctionCall)] = CreateConstructorCompiler(MtlxDataTypes.Matrix44),
+            [("float", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Float),
+            [("float2", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Vector2),
+            [("float2x2", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix22),
+            [("float3", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Vector3),
+            [("float3x3", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix33),
+            [("float4", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Vector4),
+            [("float4x4", Operator.VariantType.VariableDefinition)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix44),            
             [("floor", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Floor),
             [("fmod", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(MtlxNodeTypes.Modulo, true),
             [("frac", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.RealityKitFractional),
@@ -267,8 +284,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (inputs.ContainsKey(symbol.Span.contents))
                 return new ExternalInputDef(symbol.Span.contents);
             
-            if (output.ContainsKey(symbol.Span.contents))
-                return new InternalInputDef(symbol.Span.contents);
+            // Outputs and temporary variables map to versioned values.
+            if (TryGetVersionedVariableDef(output, symbol.Span.contents, out var versionedVariableDef))
+                return versionedVariableDef;
 
             if (s_SymbolCompilers.TryGetValue(symbol.Span.contents, out var compiler))
                 return compiler(node, inputs, output);
@@ -287,13 +305,84 @@ namespace UnityEditor.ShaderGraph.MaterialX
             SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output)
         {
             node.RequireChildCount(2);
-            InputDef inputDef = node.Children[1].Compile(inputs, output);
+            
+            return CompileAssignment(node, inputs, output, node.Children[1].Compile(inputs, output));
+        }
 
+        static Compiler CreateBinaryAssignmentCompiler(string nodeType)
+        {
+            return (node, inputs, output) =>
+            {
+                node.RequireChildCount(2);
+
+                Dictionary<string, InputDef> inputDefs = new()
+                {
+                    ["in1"] = node.Children[0].Compile(inputs, output),
+                    ["in2"] = node.Children[1].Compile(inputs, output),
+                };
+
+                // Match LHS type (but accept float variants).
+                var outputType = GetOutputType(inputDefs["in1"], inputs, output);
+                if (GetOutputType(inputDefs["in2"], inputs, output) != MtlxDataTypes.Float)
+                    CoerceToType(node, inputs, output, inputDefs, "in2", outputType);
+
+                return CompileAssignment(node, inputs, output, new InlineInputDef(nodeType, outputType, inputDefs));
+            };
+        }
+
+        static Compiler CreateUnaryAssignmentCompiler(string nodeType, bool postfixForm)
+        {
+            return (node, inputs, output) =>
+            {
+                node.RequireChildCount(1);
+
+                Dictionary<string, InputDef> inputDefs = new()
+                {
+                    ["in1"] = node.Children[0].Compile(inputs, output),
+                    ["in2"] = new FloatInputDef(MtlxDataTypes.Float, 1.0f),
+                };
+
+                // LHS determines type.
+                var outputType = GetOutputType(inputDefs["in1"], inputs, output);
+                return CompileAssignment(
+                    node, inputs, output, new InlineInputDef(nodeType, outputType, inputDefs), postfixForm);
+            };
+        }
+
+        /// <summary>
+        /// Compiles an assignment expression: either a direct assignment (=) or a compound assignment
+        /// (+=, -=, *=, /=, %=, ++, --).  Direct assignments (but not compound assignments) may be part of
+        /// initial variable definitions (e.g., "float a = 1;").
+        /// </summary>
+        /// <param name="node">The abstract syntax node representing the operator to compile.</param>
+        /// <param name="inputs">The map of all inputs to the parsed expression.</param>
+        /// <param name="output">The map that will contain the generated node definitions for the parsed
+        /// expression.</param>
+        /// <param name="rvalue">The expression to be assigned to the left hand side of the operator.</param>
+        /// <param name="postfixForm">If true, the operator (either ++ or --) is in its postfix form, meaning that
+        /// the expression returned should represent the value *before* the assignment is performed.</param>
+        /// <returns>The compiled expression representing the value (either the current value of the variable,
+        /// or the previous value if postfixForm is true).</returns>
+        static InputDef CompileAssignment(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, Dictionary<string, NodeDef> output,
+            InputDef rvalue, bool postfixForm = false)
+        {
             string symbol;
+            string variableType = null;
+            string swizzle = null;
             var leftChild = node.Children[0];
             if (leftChild.Lexeme is Symbol)
             {
                 symbol = leftChild.Lexeme.Span.contents;
+            }
+            else if (leftChild.Lexeme is Operator &&
+                leftChild.Lexeme.Span.contents == "." &&
+                leftChild.Children.Count == 2 &&
+                leftChild.Children[0].Lexeme is Symbol swizzleLeftSymbol &&
+                leftChild.Children[1].Lexeme is Symbol swizzleRightSymbol)
+            {
+                symbol = swizzleLeftSymbol.Span.contents;
+                swizzle = swizzleRightSymbol.Span.contents;
             }
             else if (leftChild.Lexeme is Operator op &&
                 op.Variant == Operator.VariantType.VariableDefinition &&
@@ -302,11 +391,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 symbol = leftGrandchildSymbol.Span.contents;
 
-                var expectedType = MtlxDataTypes.GetTypeForHlsl(op.Span.contents);
-                if (expectedType == null)
+                variableType = MtlxDataTypes.GetTypeForHlsl(op.Span.contents);
+                if (variableType == null)
                     throw new ParseException("Unknown type", op.Span);
                     
-                if (!TryCoerce(ref inputDef, inputs, output, expectedType))
+                if (!TryCoerce(ref rvalue, inputs, output, variableType))
                     throw new ParseException($"Expected {op.Span.contents} rvalue", node.Lexeme.Span);
             }
             else
@@ -314,21 +403,133 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 throw new ParseException("Invalid lvalue for assignment", node.Lexeme.Span);
             }
 
-            switch (inputDef)
-            {
-                case InlineInputDef inlineInputDef:
-                    output[symbol] = inlineInputDef.Source;
-                    break;
-                
-                default:
-                    output[symbol] = new(MtlxNodeTypes.Dot, GetOutputType(inputDef, inputs, output), new()
-                    {
-                        ["in"] = inputDef,
-                    });
-                    break;
-            }
+            // Increment the version.
+            var (oldVersionedDef, newVersionedDef) = IncrementVersionedVariableDef(output, symbol);
+
+            // Get the type from the old version, if any.
+            if (oldVersionedDef != null)
+                variableType = GetOutputType(oldVersionedDef, inputs, output);
+            else if (postfixForm)
+                throw new ParseException($"Variable {symbol} not initialized", node.Lexeme.Span);
             
-            return new InternalInputDef(symbol);
+            // Coerce the rvalue into the expected type, if any.
+            var expectedType = (swizzle != null) ? MtlxDataTypes.GetTypeOfLength(swizzle.Length) : variableType;
+            if (expectedType != null && !TryCoerce(ref rvalue, inputs, output, expectedType))
+                throw new ParseException($"Expected {expectedType} rvalue", node.Lexeme.Span);
+            
+            // Handle swizzle, if any, by combining old version with new values.
+            if (swizzle != null)
+            {
+                var sharedRvalue = GetSharedInput(rvalue, output);
+                
+                var length = MtlxDataTypes.GetLength(variableType);
+                Dictionary<string, InputDef> inputDefs = new();
+                for (var i = 0; i < length; ++i)
+                {
+                    InputDef inputDef;
+                    var vectorElement = "xyzw".Substring(i, 1);
+                    var colorElement = "rgba".Substring(i, 1);
+                    var vectorIndex = swizzle.IndexOf(vectorElement);
+                    var swizzleIndex = (vectorIndex == -1) ? swizzle.IndexOf(colorElement) : vectorIndex;
+
+                    if (swizzleIndex != -1)
+                    {
+                        if (swizzle.Length == 1)
+                        {
+                            inputDef = sharedRvalue;
+                        }
+                        else
+                        {
+                            inputDef = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                            {
+                                ["in"] = sharedRvalue,
+                                ["channels"] = new StringInputDef("xyzw".Substring(swizzleIndex, 1)),
+                            });
+                        }
+                    }
+                    else
+                    {
+                        if (oldVersionedDef == null)
+                            throw new ParseException($"Variable {symbol} not initialized", node.Lexeme.Span);
+
+                        inputDef = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                        {
+                            ["in"] = oldVersionedDef,
+                            ["channels"] = new StringInputDef(vectorElement),
+                        });
+                    }
+
+                    inputDefs[$"in{i + 1}"] = inputDef;
+                }
+
+                rvalue = new InlineInputDef($"combine{length}", variableType, inputDefs);
+            }
+
+            // The versioned symbol contains the actual value.
+            var outputType = GetOutputType(rvalue, inputs, output);
+            output[newVersionedDef.Source] = rvalue switch
+            {
+                InlineInputDef inlineInputDef => inlineInputDef.Source,
+                _ => new(MtlxNodeTypes.Dot, outputType, new()
+                {
+                    ["in"] = rvalue,
+                }),
+            };
+
+            // The raw symbol points to the versioned symbol.
+            output[symbol] = new(MtlxNodeTypes.Dot, outputType, new()
+            {
+                ["in"] = newVersionedDef,
+            });
+
+            // The evaluated value refers to the previous or current versioned symbol.
+            return postfixForm ? oldVersionedDef : newVersionedDef;
+        }
+
+        /// <summary>
+        /// Obtains the current versioned reference for the named variable and generates a new reference with an
+        /// incremented version number.  Versioned references are of the form #_[name], starting with 0_[name]
+        /// and increasing by one with each revision.  The names start with integers to avoid collisions with
+        /// unversioned symbols (which must be valid identifiers, and thus can't start with numbers).
+        /// </summary>
+        /// <param name="output">The map that will contain the generated node definitions for the parsed
+        /// expression.</param>
+        /// <param name="symbol">The symbol representing the (unversioned) variable to obtain.</param>
+        /// <returns>A tuple containing the old versioned reference for the variable (or null for none) and the
+        /// new versioned referenced.</returns>
+        static (InternalInputDef oldVersionedDef, InternalInputDef newVersionedDef) IncrementVersionedVariableDef(
+            Dictionary<string, NodeDef> output, string symbol)
+        {
+            var version = 0;
+            if (TryGetVersionedVariableDef(output, symbol, out var oldVersionedDef))
+            {
+                var oldVersionedSymbol = oldVersionedDef.Source;
+                version = int.Parse(oldVersionedSymbol.Remove(oldVersionedSymbol.Length - symbol.Length - 1)) + 1;
+            }
+            return (oldVersionedDef, new InternalInputDef($"{version}_{symbol}"));
+        }
+
+        /// <summary>
+        /// Retrieves the most recent versioned reference to a variable value by looking up the symbol in the output.
+        /// </summary>
+        /// <param name="output">The map that will contain the generated node definitions for the parsed
+        /// expression.</param>
+        /// <param name="symbol">The name of the variable to look up.</param>
+        /// <param name="versionedVariableDef">The definition that will hold the versioned reference.</param>
+        /// <returns>True if the variable was found, false if not.</returns>
+        static bool TryGetVersionedVariableDef(
+            Dictionary<string, NodeDef> output, string symbol, out InternalInputDef versionedVariableDef)
+        {
+            if (output.TryGetValue(symbol, out var nodeDef) &&
+                nodeDef.NodeType == MtlxNodeTypes.Dot &&
+                nodeDef.Inputs.TryGetValue("in", out var inputDef) &&
+                inputDef is InternalInputDef internalInputDef)
+            {
+                versionedVariableDef = internalInputDef;
+                return true;
+            }
+            versionedVariableDef = null;
+            return false;
         }
 
         static InputDef IdentityCompiler(
@@ -825,9 +1026,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             node.RequireChildCount(3);
 
+            var fileInputDef = node.Children[0].Compile(inputs, output);
+            var externalFile = GetExternalTexture(node, inputs, fileInputDef);
+
             Dictionary<string, InputDef> inputDefs = new()
             {
-                ["file"] = node.Children[0].Compile(inputs, output),
+                ["file"] = fileInputDef,
                 ["texcoord"] = node.Children[2].Compile(inputs, output),
             };
             CoerceToType(node, inputs, output, inputDefs, "file", MtlxDataTypes.Filename);
@@ -835,6 +1039,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             var samplerInputDef = node.Children[1].Compile(inputs, output);
             var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
+
+            if (externalFile != null)
+                ApplyTextureTransform(inputDefs, externalFile);
 
 #if DISABLE_MATERIALX_EXTENSIONS
             AddImageSamplerState(inputDefs, samplerState);
@@ -850,9 +1057,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             node.RequireChildCount(4);
 
+            var fileInputDef = node.Children[0].Compile(inputs, output);
+            var externalFile = GetExternalTexture(node, inputs, fileInputDef);
+
             Dictionary<string, InputDef> inputDefs = new()
             {
-                ["file"] = node.Children[0].Compile(inputs, output),
+                ["file"] = fileInputDef,
                 ["texcoord"] = node.Children[2].Compile(inputs, output),
                 ["lod"] = node.Children[3].Compile(inputs, output),
             };
@@ -863,8 +1073,32 @@ namespace UnityEditor.ShaderGraph.MaterialX
             var samplerInputDef = node.Children[1].Compile(inputs, output);
             var samplerState = RequireTextureSampler(node, inputs, samplerInputDef);
             AddTexture2DSamplerState(inputDefs, samplerState);
+            
+            if (externalFile != null)
+                ApplyTextureTransform(inputDefs, externalFile);
 
             return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, inputDefs);
+        }
+
+        static void ApplyTextureTransform(Dictionary<string, InputDef> inputDefs, ExternalInputDef externalFile)
+        {
+            inputDefs["texcoord"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+                {
+                    ["in1"] = inputDefs["texcoord"],
+                    ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in"] = new TextureTransformInputDef(externalFile.Source),
+                        ["channels"] = new StringInputDef("xy"),
+                    }),
+                }),
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+                {
+                    ["in"] = new TextureTransformInputDef(externalFile.Source),
+                    ["channels"] = new StringInputDef("zw"),
+                }), 
+            });
         }
 
         static InputDef SampleTexture3DCompiler(
@@ -1631,6 +1865,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
         static ExternalInputDef RequireExternalTexture(
             SyntaxNode node, Dictionary<string, ParserInput> inputs, InputDef inputDef)
         {
+            var externalInputDef = GetExternalTexture(node, inputs, inputDef);
+            if (externalInputDef != null)
+                return externalInputDef;
+
+            throw new ParseException($"Expected texture argument", node.Lexeme.Span);
+        }
+
+        static ExternalInputDef GetExternalTexture(
+            SyntaxNode node, Dictionary<string, ParserInput> inputs, InputDef inputDef)
+        {
             if (inputDef is ExternalInputDef externalInputDef &&
                 inputs.TryGetValue(externalInputDef.Source, out var input) &&
                 input is ExternalInput externalInput &&
@@ -1638,7 +1882,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 return externalInputDef;
             }
-            throw new ParseException($"Expected texture argument", node.Lexeme.Span);
+            return null;
         }
 
         /// <summary>
@@ -1907,6 +2151,34 @@ namespace UnityEditor.ShaderGraph.MaterialX
             };
         }
         
+        /// <summary>
+        /// Creates a compiler to define a variable of the specified type without initializing it
+        /// (for example, "float foo;")  This is useful for out parameters of functions, for example.
+        /// </summary>
+        /// <param name="dataType">The type of variable to define.</param>
+        /// <returns>A compiler that will generate a definition of the specified type.</returns>
+        static Compiler CreateDefinitionCompiler(string dataType)
+        {
+            return (node, inputs, output) =>
+            {
+                node.RequireChildCount(1);
+
+                var symbol = node.Children[0].Lexeme.Span.contents;
+                var (oldVersionedDef, newVersionedDef) = IncrementVersionedVariableDef(output, symbol);
+                if (oldVersionedDef != null)
+                    throw new ParseException($"Variable {symbol} already defined", node.Lexeme.Span);
+
+                // Map both the versioned symbol (to the value) and the unversioned (to the versioned).
+                output[newVersionedDef.Source] = new(MtlxNodeTypes.Constant, dataType, new());
+                output[symbol] = new(MtlxNodeTypes.Dot, dataType, new()
+                {
+                    ["in"] = newVersionedDef,
+                });
+
+                return newVersionedDef;
+            };
+        }
+
         static InputDef CompileVectorConstructor(
             Dictionary<string, NodeDef> output, string dataType, List<InputDef> inputDefs, List<string> outputTypes)
         {

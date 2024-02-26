@@ -32,7 +32,7 @@ using UnityObject = UnityEngine.Object;
 /// JIRA link should be included above the relevant lines of code). If missing, please add a JIRA or reach out to the
 /// PolySpatial QA and/or PolySpatial Core team.
 /// </summary>
-public class PolySpatialStateValidator
+internal class PolySpatialStateValidator
 {
     // collection of all properties a GameObjectNode may have
     private const string k_ActiveProperty = "active";
@@ -154,7 +154,7 @@ public class PolySpatialStateValidator
     /// Captures a GameObject's state as well as linking clientSim and hostPlatform GameObjects and their respective parents.
     /// GameObject properties define its state, capturing simple (string, int, etc) or complex (Mesh, Material) types.
     /// </summary>
-    public class GameObjectNode
+    internal class GameObjectNode
     {
         public string clientSimName;
         public string hostPlatformName;

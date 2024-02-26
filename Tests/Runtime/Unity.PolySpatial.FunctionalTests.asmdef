@@ -12,7 +12,8 @@
         "Unity.InputSystem.TestFramework",
         "Unity.TextMeshPro",
         "Unity.PolySpatial.Core",
-        "Unity.InternalAPIEngineBridge.021"
+        "Unity.InternalAPIEngineBridge.021",
+        "FlatSharp.Runtime.Extensions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

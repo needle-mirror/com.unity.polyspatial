@@ -73,17 +73,19 @@ namespace UnityEditor.PolySpatial.Utilities
         {
             GUILayout.BeginHorizontal(EditorStyles.helpBox);
 
-            GUILayout.Label(styles.GetMessageTypeIcon(messageType), GUILayout.ExpandWidth(false));
+            GUILayout.Label(styles.GetMessageTypeIcon(messageType));
             GUILayout.BeginVertical();
             GUILayout.Label(message, EditorGUIUtils.Styles.WordWrapMiniLabel);
             if (!string.IsNullOrEmpty(helpText) && !string.IsNullOrEmpty(helpLink))
                 EditorGUIUtils.DrawLink(new GUIContent(helpText), helpLink);
             GUILayout.EndVertical();
 
+            GUILayout.FlexibleSpace();
+
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
             var buttonContent = EditorGUIUtility.TrTextContent(buttonLabel, buttonTooltip);
-            var clicked = GUILayout.Button(buttonContent, GUILayout.MinWidth(60));
+            var clicked = GUILayout.Button(buttonContent, GUILayout.MinWidth(60), GUILayout.ExpandWidth(false));
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
 

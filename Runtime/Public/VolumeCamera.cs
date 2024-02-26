@@ -45,8 +45,9 @@ namespace Unity.PolySpatial
         [Tooltip("The output Volume Camera Window Configuration object for this volume camera, or None for default. Create new volume camera configurations via the Asset Create menu.")]
         VolumeCameraWindowConfiguration m_OutputConfiguration = null;
 
+        [SerializeField]
         [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
-        public LayerMask CullingMask = ~0x0;
+        LayerMask m_CullingMask = ~0x0;
 
         [SerializeField]
         [Tooltip("If true, a window is automatically opened for this volume camera when loaded. If false, the window must be opened manually via OpenWindow().")]
@@ -91,10 +92,86 @@ namespace Unity.PolySpatial
 #pragma warning restore CS0414
         #endif
 
+        /// <summary>
+        /// Only objects in the selected layers will be visible inside this Volume Camera.
+        /// </summary>
+        public LayerMask CullingMask
+        {
+            get => m_CullingMask;
+            set
+            {
+                m_CullingMask = value;
+                ObjectBridge.MarkDirty(this);
+            }
+        }
+
         public enum PolySpatialVolumeCameraMode : int
         {
             Bounded = 0,
             Unbounded = 1,
+        }
+
+        public enum WindowEvent : int
+        {
+            /// <summary>
+            ///  The volume camera window was opened.
+            /// </summary>
+            Opened,
+
+            /// <summary>
+            /// The volume camera window was resized. See the OutputDimensions and ContentDimensions to
+            /// figure out what the volume camera window was resized to.
+            /// </summary>
+            Resized,
+
+            /// <summary>
+            /// The volume camera window either received focus or lost focus.
+            /// </summary>
+            Focused,
+
+            /// <summary>
+            ///  The volume camera window was closed due to being backgrounded.
+            /// </summary>
+            Backgrounded,
+
+            /// <summary>
+            ///  The volume camera window was closed due to being dismissed.
+            /// </summary>
+            Closed,
+        }
+
+
+        /// <summary>
+        ///  Struct to encapsulate a change in window state.
+        /// </summary>
+        public struct WindowState
+        {
+            /// <summary>
+            /// The change in state that just occurred for this window. Change of states can mean actions such as the window
+            /// was opened or the window was backgrounded.
+            /// </summary>
+            public WindowEvent WindowEvent;
+
+            /// <summary>
+            /// The actual dimensions of the window in world space, or `Vector3.zero` if the volume is unbounded.
+            /// </summary>
+            public Vector3 OutputDimensions;
+
+            /// <summary>
+            /// The dimensions that your Volume Camera's dimensions are mapped to, in Unity's coordinate units.
+            /// (On visionOS, these will typically be the same, but they may not be on other platforms.)
+            /// </summary>
+            public Vector3 ContentDimensions;
+
+            /// <summary>
+            /// The mode this volume camera will display its content in, Bounded or Unbounded.
+            /// </summary>
+            public PolySpatialVolumeCameraMode Mode;
+
+            /// <summary>
+            /// When windowEvent is set to WindowEvent.Focused, this will indicate whether it has received focus or lost it.
+            /// </summary>
+            public bool IsFocused;
         }
 
         public VolumeCameraWindowConfiguration WindowConfiguration
@@ -199,6 +276,14 @@ namespace Unity.PolySpatial
         public bool WindowFocused => m_WindowFocused;
 
         /// <summary>
+        /// An event that is triggered when this volume camera's window changes state. Changing states can mean window actions such as
+        /// the window opening or the window becoming unfocused.
+        /// </summary>
+        [SerializeField]
+        [Tooltip("An event that is triggered when this volume camera's window changes state.")]
+        public UnityEvent<WindowState> OnWindowEvent = new();
+
+        /// <summary>
         /// An event that is triggered when this volume camera's window is opened.
         ///
         /// The first argument is the actual dimensions of the window in world space, or Vector3.zero if the volume is unbounded.
@@ -210,6 +295,7 @@ namespace Unity.PolySpatial
         /// decisions.
         /// </summary>
         [SerializeField]
+        [Obsolete("Replaced by OnWindowEvent. Will eventually be removed.", false)]
         [Tooltip("An event that is triggered when this volume camera's window is opened.")]
         public UnityEvent<Vector3, Vector3, PolySpatialVolumeCameraMode> OnWindowOpened = new();
 
@@ -217,6 +303,7 @@ namespace Unity.PolySpatial
         /// An event that is triggered when a window that is showing this volume camera is closed (by the user or via code).
         /// </summary>
         [SerializeField]
+        [Obsolete("Replaced by OnWindowEvent. Will eventually be removed.", false)]
         [Tooltip("An event that is triggered when this volume camera's window is closed.")]
         public UnityEvent OnWindowClosed = new();
 
@@ -230,6 +317,7 @@ namespace Unity.PolySpatial
         ///
         /// </summary>
         [SerializeField]
+        [Obsolete("Replaced by OnWindowEvent. Will eventually be removed.", false)]
         [Tooltip("An event that is triggered when this volume camera's window's size changes.")]
         public UnityEvent<Vector3, Vector3, PolySpatialVolumeCameraMode> OnWindowResized = new();
 
@@ -239,6 +327,7 @@ namespace Unity.PolySpatial
         /// The first argument is a boolean indicating if the window has focus or not.
         /// </summary>
         [SerializeField]
+        [Obsolete("Replaced by OnWindowEvent. Will eventually be removed.", false)]
         [Tooltip("An event that is triggered when this volume camera's window's gains or loses focus.")]
         public UnityEvent<bool> OnWindowFocused = new();
 
@@ -329,11 +418,7 @@ namespace Unity.PolySpatial
             m_BackingCameraGO = new GameObject("Culling Camera");
             m_BackingCameraGO.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
             m_BackingCameraGO.transform.SetParent(transform);
-
-            if (m_PolySpatialLayerIndex != -1)
-            {
-                m_BackingCameraGO.layer = m_PolySpatialLayerIndex;
-            }
+            m_BackingCameraGO.layer = transform.gameObject.layer;
 
             m_BackingCamera = m_BackingCameraGO.AddComponent<Camera>();
 #if ENABLE_MULTIPLE_DISPLAYS
@@ -445,6 +530,9 @@ namespace Unity.PolySpatial
         // Keep the HostCamera in sync with the "main camera" of the host app
         internal void UpdateUnboundedCullingCamera(PolySpatialCameraDataExternal hostData)
         {
+            if (WindowMode != PolySpatialVolumeCameraMode.Unbounded)
+                return;
+
             // hostData's TRS should be in world coordinates
             var camx = m_BackingCameraGO.transform;
             var cam = m_BackingCamera;
@@ -478,34 +566,51 @@ namespace Unity.PolySpatial
         Vector3 m_LastOutputDimensions;
         Vector3 m_LastContentDimensions;
 
-        internal void UpdateWindowState(Vector3 outputDimensions, Vector3 contentDimensions,
-            PolySpatialVolumeCameraMode mode, bool isOpen, bool isFocused)
+        internal void UpdateWindowState(WindowState state)
         {
-            if (m_WindowOpen != isOpen)
+            var windowEvent = state.WindowEvent;
+            var outputDimensions = state.OutputDimensions;
+            var contentDimensions = state.ContentDimensions;
+            var mode = state.Mode;
+            var isFocused = state.IsFocused;
+
+            OnWindowEvent.Invoke(state);
+
+            switch (windowEvent)
             {
-                m_WindowOpen = isOpen;
-                if (isOpen)
+                case WindowEvent.Opened:
                 {
                     m_LastOutputDimensions = outputDimensions;
                     m_LastContentDimensions = contentDimensions;
+
                     OnWindowOpened.Invoke(outputDimensions, contentDimensions, mode);
+                    break;
                 }
-                else
+                case WindowEvent.Closed:
                 {
                     OnWindowClosed.Invoke();
+                    break;
                 }
-            }
-            else if (m_LastOutputDimensions != outputDimensions || m_LastContentDimensions != contentDimensions)
-            {
-                m_LastOutputDimensions = outputDimensions;
-                m_LastContentDimensions = contentDimensions;
-                OnWindowResized.Invoke(outputDimensions, contentDimensions, mode);
-            }
-
-            if (m_WindowFocused != isFocused)
-            {
-                m_WindowFocused = isFocused;
-                OnWindowFocused.Invoke(isFocused);
+                case WindowEvent.Backgrounded:
+                {
+                    OnWindowClosed.Invoke();
+                    break;
+                }
+                case WindowEvent.Focused:
+                {
+                    OnWindowFocused.Invoke(isFocused);
+                    break;
+                }
+                case WindowEvent.Resized:
+                {
+                    if (m_LastOutputDimensions != outputDimensions || m_LastContentDimensions != contentDimensions)
+                    {
+                        m_LastOutputDimensions = outputDimensions;
+                        m_LastContentDimensions = contentDimensions;
+                        OnWindowResized.Invoke(outputDimensions, contentDimensions, mode);
+                    }
+                    break;
+                }
             }
         }
 

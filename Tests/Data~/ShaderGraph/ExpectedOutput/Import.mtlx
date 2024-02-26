@@ -1,0 +1,13 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <GeometryModification name = "SR_ImportVertex" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "SR_Import" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" value = "0.2140411,0.2140411,0.2140411" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Import" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "SR_ImportVertex" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "SR_Import" />
+    </surfacematerial>
+</materialx>

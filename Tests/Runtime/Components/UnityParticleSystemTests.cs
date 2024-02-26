@@ -549,6 +549,14 @@ namespace Tests.Runtime.Functional.Components
             var particleRenderer = m_ParticleSystem.GetComponent<ParticleSystemRenderer>();
             particleRenderer.trailMaterial = material;
             yield return null;
+            particleRenderer.renderMode = ParticleSystemRenderMode.None;
+            yield return null;
+            particleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
+            yield return null;
+            particleRenderer.enabled = false;
+            yield return null;
+            particleRenderer.enabled = true;
+            yield return null;
         }
 
         /// <summary>
@@ -590,22 +598,32 @@ namespace Tests.Runtime.Functional.Components
         public IEnumerator Test_UnityParticleSystem_Check_BiRPUnlitMaterialParticleSystem()
         {
             PolySpatialSettings.instance.ParticleMode = PolySpatialSettings.ParticleReplicationMode.BakeToMesh;
-            var material = PolySpatialComponentUtils.CreateUnlitParticleBIRPMaterial(Color.white, "Textures/" + k_TestParticleTextureName);
+            var baseColor = Color.red;
+            var material = PolySpatialComponentUtils.CreateUnlitParticleBIRPMaterial(baseColor, "Textures/" + k_TestParticleTextureName);
 
             if (material == null)
                 yield break;
 
+            var renderType = material.GetTag(MaterialTags.k_RenderType, true);
+            var isTransparent = renderType == MaterialRenderTypes.k_Transparent;
             var materialBaseMap = material.GetTexture("_MainTex");
             CreateTestParticleSystem(material);
 
             yield return null;
 
             var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            if (backingGO == null)
+                yield break;
+
             var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
             var backingMaterialBaseMap = backingMaterial.GetTexture("_BaseMap");
+            var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
 
             // Check dimensions are equal as texture name doesn't seem to be transmitted.
             Assert.IsTrue(backingMaterialBaseMap.width == materialBaseMap.width && backingMaterialBaseMap.height == materialBaseMap.height);
+            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface) == isTransparent);
+
+            Assert.AreEqual(backingBaseColor, baseColor);
             yield return null;
         }
 
@@ -620,6 +638,9 @@ namespace Tests.Runtime.Functional.Components
             if (material == null)
                 yield break;
 
+            var transparencyKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_TransparentSurface);
+            material.SetKeyword(transparencyKeyword, true);
+
             CreateTestParticleSystem(material);
 
             yield return null;
@@ -631,7 +652,7 @@ namespace Tests.Runtime.Functional.Components
 
             var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
             var backingBaseColor = backingMaterial.GetColor(MaterialProperties.k_BaseColor);
-
+            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface));
             Assert.AreEqual(backingBaseColor, baseColor);
         }
 
@@ -665,6 +686,9 @@ namespace Tests.Runtime.Functional.Components
             if (material == null)
                 yield break;
 
+            var renderType = material.GetTag(MaterialTags.k_RenderType, true);
+            var isTransparent = renderType == MaterialRenderTypes.k_Transparent;
+
             material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
             // Glossiness is the smoothness property of birp lit.
             material.SetFloat(MaterialProperties.k_Glossiness, k_Smoothness);
@@ -683,6 +707,7 @@ namespace Tests.Runtime.Functional.Components
             var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
             var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
 
+            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface) == isTransparent);
             Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
             Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
         }
@@ -701,6 +726,8 @@ namespace Tests.Runtime.Functional.Components
             if (material == null)
                 yield break;
 
+            var transparencyKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_TransparentSurface);
+            material.SetKeyword(transparencyKeyword, true);
             material.SetFloat(MaterialProperties.k_Metallic, k_Metallic);
             material.SetFloat(MaterialProperties.k_Smoothness, k_Smoothness);
             var emissionKeyword = new LocalKeyword(material.shader, MaterialKeywords.k_Emission);
@@ -711,6 +738,9 @@ namespace Tests.Runtime.Functional.Components
             yield return null;
 
             var backingGO = GetBackingGameObjectForParticleSystem(m_ParticleSystem);
+            if (backingGO == null)
+                yield break;
+
             var backingMaterial = backingGO.GetComponent<MeshRenderer>().material;
             var backingMaterialMetallic = backingMaterial.GetFloat(MaterialProperties.k_Metallic);
             var backingMaterialSmoothness = backingMaterial.GetFloat(MaterialProperties.k_Smoothness);
@@ -720,6 +750,7 @@ namespace Tests.Runtime.Functional.Components
             Assert.IsTrue(Mathf.Approximately(backingMaterialMetallic, k_Metallic));
             Assert.IsTrue(Mathf.Approximately(backingMaterialSmoothness, k_Smoothness));
             Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_Emission));
+            Assert.IsTrue(backingMaterial.IsKeywordEnabled(MaterialKeywords.k_TransparentSurface));
             Assert.AreEqual(backingBaseColor, baseColor);
             Assert.AreEqual(backingEmissionColor, emissionColor);
         }

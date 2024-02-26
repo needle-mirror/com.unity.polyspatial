@@ -9,6 +9,10 @@ using UnityEngine.UIElements;
 using Connection = Unity.PolySpatial.PolySpatialUserSettings.Connection;
 using ConnectionCandidate = Unity.PolySpatial.PolySpatialUserSettings.ConnectionCandidate;
 
+#if UNITY_HAS_XR_VISIONOS
+using UnityEditor.XR.VisionOS;
+#endif
+
 namespace UnityEditor.PolySpatial.PlayToDevice
 {
     class PlayToDeviceWindow : EditorWindow
@@ -18,8 +22,8 @@ namespace UnityEditor.PolySpatial.PlayToDevice
         const string k_DiscussionsURL = "https://discussions.unity.com/t/play-to-device/309359";
         const string k_PlayToDeviceDocsURL = "https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/index.html?subfolder=/manual/PlayToDevice.html";
 
-        const string k_MismatchedVersionHelpBoxTextFormat = "The device(s) name {0} have an app version that is not compatible with the current PolySpatial version " +
-                                                     "(v{1}).";
+        const string k_MismatchedVersionHelpBoxTextFormat = "The device(s) named {0} have an app version that is not compatible with the installed version of " +
+                                                            "PolySpatial v{1} ({2}).";
 
         const string k_ConnectOnPlayToggleTooltip = "When enabled, your content will be synced to the Play to Device Host each time you enter Play mode. The Play To Device Host must be installed and running within the visionOS or your Vision Pro device.";
         const string k_ConnectionTimeoutFieldTooltip = "How long (in seconds) to try connecting to a remote host before timing out.";
@@ -53,6 +57,18 @@ namespace UnityEditor.PolySpatial.PlayToDevice
         const string k_InvalidPortHelpBox = "InvalidPortHelpBox";
         const string K_AddConnectionButton = "AddConnectionButton";
         const string K_DuplicateConnectionHelpBox = "DuplicateConnectionHelpBox";
+
+        const string k_NoConnectionsSelectedMessage = "<b>Connect on Play</b> is enabled, but no connections have been selected. For Play To Device to work, please select a connection from the list below or add a new connection.";
+        const string k_PlayToDeviceNotEnabled = "<b>Connect on Play</b> is disabled. Play To Device will not work.";
+        const string k_BuildNotVisionOSMessage = "The build target is set to <b>{0}</b>. For Play To Device to work you must set the build target to <b>visionOS</b>.";
+        const string k_AppModeNotMRMessage = "The current app mode is not compatible with Play To Device. For Play To Device to work go to <b>Project Settings</b> > <b>XR Plug-in Management</b> > <b>Apple visionOS</b> and change the App Mode to <b>Mixed Reality</b>.";
+
+        const string k_SetupErrorsHelpBoxName = "SetupErrors";
+#if UNITY_HAS_XR_VISIONOS
+        VisionOSSettings.AppMode m_PreviousAppMode;
+#endif
+
+        internal const int DirectConnectionMagicCookie = 0;
 
         [MenuItem(k_PlayToDeviceWindowMenuPath)]
         static void LoadPlayToDeviceWindow()
@@ -178,6 +194,8 @@ namespace UnityEditor.PolySpatial.PlayToDevice
         SavedBool m_AdvancedSettingsFoldoutState;
         string m_MismatchedVersionNames;
 
+        HelpBox m_SetupErrorsHelpBox;
+
         void OnEnable()
         {
             minSize = new Vector2(380, 400);
@@ -195,6 +213,10 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             ConnectionDiscoveryManager.instance.OnConnectionsChanges += Refresh;
             if (!ConnectionDiscoveryManager.instance.IsListening)
                 ConnectionDiscoveryManager.instance.StartListening();
+
+#if UNITY_HAS_XR_VISIONOS
+            m_PreviousAppMode = VisionOSSettings.currentSettings == null ? VisionOSSettings.AppMode.MR : VisionOSSettings.currentSettings.appMode;
+#endif
         }
 
         void OnDisable()
@@ -237,7 +259,7 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             else
             {
                 m_MismatchedVersionsHelpBox.text = string.Format(k_MismatchedVersionHelpBoxTextFormat, m_MismatchedVersionNames,
-                    PolySpatialSettings.instance.PackageVersion);
+                    PolySpatialSettings.instance.PackageVersion, ((long)PolySpatialMagicCookie.Value).ToString().Substring(0,5));
                 m_MismatchedVersionsHelpBox.style.display = DisplayStyle.Flex;
             }
 
@@ -245,6 +267,8 @@ namespace UnityEditor.PolySpatial.PlayToDevice
                 c => c != null && c.IP == m_HostIPAddress && c.ServerPort == m_HostPort)
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
+
+            UpdateSetupErrors();
         }
 
         string GetMisMatchedConnectionNames()
@@ -253,11 +277,75 @@ namespace UnityEditor.PolySpatial.PlayToDevice
                 m_ConnectionCandidates
                     .Where(c =>
                         c != null
-                        && !string.IsNullOrEmpty(c.PlayToDeviceHostVersion)
-                        && c.PlayToDeviceHostVersion != PolySpatialSettings.instance.PackageVersion)
+                        && c.PlayToDeviceHostMagicCookie != DirectConnectionMagicCookie
+                        && c.PlayToDeviceHostMagicCookie != (long)PolySpatialMagicCookie.Value)
                     .Select(c => $"\'{c.Name}\'")
                     .Distinct());
         }
+
+#if UNITY_HAS_XR_VISIONOS
+        void Update()
+        {
+            var currentAppMode = VisionOSSettings.currentSettings == null ? m_PreviousAppMode : VisionOSSettings.currentSettings.appMode;
+            if (currentAppMode != m_PreviousAppMode)
+            {
+                m_PreviousAppMode = currentAppMode;
+                UpdateSetupErrors();
+            }
+        }
+#endif
+
+        void UpdateSetupErrors()
+        {
+            var errorMessage = "";
+
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.VisionOS)
+            {
+                errorMessage = String.Format(k_BuildNotVisionOSMessage, EditorUserBuildSettings.activeBuildTarget);
+            }
+#if UNITY_HAS_XR_VISIONOS
+            else if (GetAppMode() != VisionOSSettings.AppMode.MR)
+            {
+                errorMessage = k_AppModeNotMRMessage;
+            }
+#endif
+            else if (PolySpatialUserSettings.instance.ConnectToPlayToDevice)
+            {
+                var connectionIsSelected = false;
+                foreach (var candidate in m_ConnectionCandidates)
+                {
+                    if (candidate != null && candidate.IsSelected)
+                    {
+                        connectionIsSelected = true;
+                        break;
+                    }
+                }
+                if (!connectionIsSelected)
+                    errorMessage = k_NoConnectionsSelectedMessage;
+            }
+            else
+            {
+                errorMessage = k_PlayToDeviceNotEnabled;
+            }
+
+            if (string.IsNullOrEmpty(errorMessage))
+            {
+                m_SetupErrorsHelpBox.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                m_SetupErrorsHelpBox.text = errorMessage;
+                m_SetupErrorsHelpBox.style.display = DisplayStyle.Flex;
+            }
+        }
+
+#if UNITY_HAS_XR_VISIONOS
+        VisionOSSettings.AppMode GetAppMode()
+        {
+            var visionOSSettings = VisionOSSettings.currentSettings;
+            return visionOSSettings != null ? visionOSSettings.appMode : VisionOSSettings.AppMode.MR;
+        }
+#endif
 
         void CreateGUI()
         {
@@ -276,7 +364,10 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             {
                 var isEnabled = evt.newValue == PlayToDeviceConfiguration.Enabled.ToString();
                 PolySpatialUserSettings.instance.ConnectToPlayToDevice = isEnabled;
+                UpdateSetupErrors();
             });
+
+            m_SetupErrorsHelpBox = uxmlElements.Q<HelpBox>(k_SetupErrorsHelpBoxName);
 
             var availableConnectionsFoldout = uxmlElements.Q<Foldout>(k_AvailableConnectionsFoldoutName);
             availableConnectionsFoldout.value = m_AvailableConnectionsFoldoutState.Value;

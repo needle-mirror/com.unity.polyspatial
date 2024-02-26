@@ -10,3 +10,5 @@ using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("Unity.PolySpatial.IsolationTests")]
 [assembly:InternalsVisibleTo("Unity.PolySpatial.RealityKit.Editor")]
 [assembly:InternalsVisibleTo("Unity.PolySpatial.XR")]
+[assembly:InternalsVisibleTo("Unity.PolySpatial.PlayToDevice")]
+[assembly:InternalsVisibleTo("Unity.PolySpatial.PlayToDevice.Editor")]

@@ -10,25 +10,23 @@ namespace UnityEditor.PolySpatial.PlayToDevice
 {
     class ConnectionListEntryController
     {
-        const string k_ReadyIconTooltip = "The PlayToDevice app is ready for connection";
         const string k_ConnectedIconTooltip = "The PlayToDevice app connected";
-        const string k_LostIconTooltip = "The PlayToDevice app has lost connection";
+        const string k_DisconnectedIconTooltip = "The PlayToDevice app is not connected";
         const string k_RemoveIconTooltip = "Remove this connection entry from the list";
 
         const string k_VersionFormat = "v{0}";
+        const string k_MagicCookieFormat = "({0})";
 
         class Content
         {
-            internal readonly Texture2D ReadyIcon;
             internal readonly Texture2D ConnectedIcon;
-            internal readonly Texture2D LostIcon;
+            internal readonly Texture2D DisconnectedIcon;
             internal readonly Texture2D RemoveIcon;
 
             internal Content()
             {
-                ReadyIcon = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_completed_task" : "completed_task").image as Texture2D;
                 ConnectedIcon = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_linked" : "linked").image as Texture2D;
-                LostIcon = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_console.erroricon" : "console.erroricon").image as Texture2D;
+                DisconnectedIcon = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_unlinked" : "unlinked").image as Texture2D;
                 RemoveIcon = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_toolbar minus" : "toolbar minus").image as Texture2D;
             }
         }
@@ -194,17 +192,14 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             var connectionCandidate = connectionCandidates[index];
             switch (connectionCandidate.Status)
             {
-                case ConnectionDiscoveryStatus.Ready:
-                    m_Status.tooltip = k_ReadyIconTooltip;
-                    m_Status.style.backgroundImage = s_Content.Value.ReadyIcon;
-                    break;
                 case ConnectionDiscoveryStatus.Connected:
                     m_Status.tooltip = k_ConnectedIconTooltip;
                     m_Status.style.backgroundImage = s_Content.Value.ConnectedIcon;
                     break;
                 case ConnectionDiscoveryStatus.Lost:
-                    m_Status.tooltip = k_LostIconTooltip;
-                    m_Status.style.backgroundImage = s_Content.Value.LostIcon;
+                case ConnectionDiscoveryStatus.Ready:
+                    m_Status.tooltip = k_DisconnectedIconTooltip;
+                    m_Status.style.backgroundImage = s_Content.Value.DisconnectedIcon;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -213,12 +208,30 @@ namespace UnityEditor.PolySpatial.PlayToDevice
             m_VersionLabel.text = string.IsNullOrEmpty(connectionCandidate.PlayToDeviceHostVersion)
                 ? string.Empty
                 : string.Format(k_VersionFormat, connectionCandidate.PlayToDeviceHostVersion);
+            var magicCookie = connectionCandidate.PlayToDeviceHostMagicCookie.ToString();
+            magicCookie = !string.IsNullOrEmpty(magicCookie) && magicCookie.Length >= 5
+                ? string.Format(k_MagicCookieFormat, connectionCandidate.PlayToDeviceHostMagicCookie.ToString().Substring(0,5))
+                : string.Empty;
+            m_VersionLabel.tooltip = $"{(!string.IsNullOrEmpty(m_VersionLabel.text) ? m_VersionLabel.text + " " : "")}" +
+                                     $"{(!string.IsNullOrEmpty(magicCookie) ? magicCookie : "")}";
             m_IPLabel.text = connectionCandidate.IP;
             m_PortLabel.text = connectionCandidate.ServerPort.ToString();
             m_ConnectToggle.value = connectionCandidate.IsSelected;
             m_ConnectToggle.RegisterValueChangedCallback(evt =>
             {
                 connectionCandidate.IsSelected = evt.newValue;
+
+#if !POLYSPATIAL_INTERNAL
+                if (connectionCandidate.IsSelected)
+                {
+                    foreach (var candidate in connectionCandidates)
+                    {
+                        if (candidate != null && candidate != connectionCandidate)
+                            candidate.IsSelected = false;
+                    }
+                }
+#endif
+
                 EditorApplication.delayCall += playToDeviceWindow.Refresh;
             });
             m_RemoveLabel.RegisterCallback<PointerUpEvent>( _ =>
@@ -227,8 +240,8 @@ namespace UnityEditor.PolySpatial.PlayToDevice
                 EditorApplication.delayCall += playToDeviceWindow.Refresh;
             });
 
-            SetEnabled(string.IsNullOrEmpty(connectionCandidate.PlayToDeviceHostVersion)
-                       || PolySpatialSettings.instance.PackageVersion == connectionCandidate.PlayToDeviceHostVersion);
+            SetEnabled(connectionCandidate.PlayToDeviceHostMagicCookie == PlayToDeviceWindow.DirectConnectionMagicCookie
+                       || connectionCandidate.PlayToDeviceHostMagicCookie == (long)PolySpatialMagicCookie.Value);
             if (m_RemoveLabel.enabledSelf && connectionCandidate.Status != ConnectionDiscoveryStatus.Lost)
                 m_RemoveLabel.SetEnabled(false);
         }

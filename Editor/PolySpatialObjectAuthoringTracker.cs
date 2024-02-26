@@ -21,6 +21,8 @@ namespace UnityEditor.PolySpatial.Internals
                 s_DestroyedList.Add(data.destroyedID[i]);
         });
 
+        internal static event Action OnTrackChanges;
+
         internal static bool IsTracking(Type type) => s_TypeEventMap.ContainsKey(type);
 
         internal static void AddListener(Type type, Action<List<UnityObject>, List<int>> listener)
@@ -100,13 +102,21 @@ namespace UnityEditor.PolySpatial.Internals
 
         static void TrackChanges()
         {
+            var hasTrackedChanges = false;
+
             foreach (var pair in s_TypeEventMap)
             {
                 ClearLists();
                 GetObjectChanges(pair.Key);
                 if (s_ChangedList.Count != 0 || s_DestroyedList.Count != 0)
+                {
+                    hasTrackedChanges = true;
                     pair.Value?.Invoke(s_ChangedList, s_DestroyedList);
+                }
             }
+
+            if (hasTrackedChanges)
+                OnTrackChanges?.Invoke();
         }
 
         static void ClearLists()

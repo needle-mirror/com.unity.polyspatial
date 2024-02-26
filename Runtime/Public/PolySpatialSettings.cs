@@ -216,7 +216,7 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        [Tooltip("Default Volume Camera Window configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed.")]
+        [Tooltip("Default Volume Camera Window configuration, if none is specified on a Volume Camera component. If null, unbounded is assumed. This also determines the start-up scene for the application.")]
         VolumeCameraWindowConfiguration m_DefaultVolumeCameraWindowConfiguration;
 
         /// <summary>
@@ -309,14 +309,14 @@ namespace Unity.PolySpatial
 
         internal const int DefaultServerPort = 9876;
         internal const string DefaultServerAddress = "127.0.0.1";
-        internal const uint DefaultConnectionTimeout = 5;
+        internal const uint DefaultConnectionTimeout = 2;
 
         [SerializeField] int m_ConnectionDiscoveryPort = 9877;
 
         /// <summary>Default port for auto connection discovery</summary>
         internal int ConnectionDiscoveryPort => m_ConnectionDiscoveryPort;
 
-        [SerializeField] float m_ConnectionDiscoverySendInterval = 1.0f;
+        [SerializeField] float m_ConnectionDiscoverySendInterval = 30.0f;
 
         /// <summary>Default interval between UDP broadcast for auto connection discovery app host</summary>
         internal float ConnectionDiscoverySendInterval => m_ConnectionDiscoverySendInterval;

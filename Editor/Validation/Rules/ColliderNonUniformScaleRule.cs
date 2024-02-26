@@ -128,20 +128,6 @@ namespace UnityEditor.PolySpatial.Validation
                 OnClick = () => BuildValidator.SelectObject(instanceID),
                 Error = true,
             };
-
-            switch (component)
-            {
-                case BoxCollider boxCollider:
-                case MeshCollider meshCollider:
-                    createdRules.Add(offsetError);
-                    createdRules.Add(nonUniformChildScaleError);
-                    break;
-                case CapsuleCollider capsuleCollider:
-                case SphereCollider sphereCollider:
-                    createdRules.Add(nonUniformScaleError);
-                    createdRules.Add(nonUniformChildScaleError);
-                    break;
-            }
         }
 
         static bool IsOffsetZero(Collider collider)

@@ -494,6 +494,41 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
     }
 
+    // An input that resolves to the texture transform property associated with a texture.
+    // The texture must be supplied as an input to the original shader graph node.
+    internal class TextureTransformInputDef : InputDef
+    {
+        internal string Source { get; private set; }
+
+        internal TextureTransformInputDef(string source)
+        {
+            Source = source;
+        }
+
+        internal override void AddPortsAndEdges(
+            CompoundOpContext ctx, MtlxNodeData nodeDatum, string nodeKey, string inputKey)
+        {
+            var slot = NodeUtils.GetInputByName(ctx.Node, Source, true);
+            var transformNodeName = SplitTextureTransformAdapter.EnsureTextureTransformProperty(slot, ctx.Graph);
+            ctx.Graph.AddPortAndEdge(transformNodeName, nodeDatum.name, inputKey, MtlxDataTypes.Vector4);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is TextureTransformInputDef other && other.Source == Source;
+        }
+
+        public override int GetHashCode()
+        {
+            return Source.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"TextureTransformInputDef(\"{Source}\")";
+        }
+    }
+
     // An input that resolves to a different result depending on which stage the original shader graph
     // node's outputs are targeting.  Both stages must have the same type.
     internal class PerStageInputDef : InputDef

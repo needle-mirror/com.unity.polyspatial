@@ -5,3 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("Unity.PolySpatial.EditorIntegrationTests")]
 [assembly:InternalsVisibleTo("Unity.PolySpatial.XR.Editor")]
 [assembly:InternalsVisibleTo("Unity.XR.VisionOS.Editor")]
+[assembly:InternalsVisibleTo("Unity.PolySpatial.PlayToDevice.Editor")]

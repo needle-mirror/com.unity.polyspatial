@@ -13,6 +13,7 @@
         "Unity.InputSystem",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.PolySpatial.Core",
+        "Unity.XR.ARFoundation",
         "Unity.XR.Management",
         "Unity.XR.Management.Editor"
     ],
@@ -20,7 +21,7 @@
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
         "Unity.PolySpatial.Core.dll",
@@ -49,6 +50,12 @@
             "expression": "1.0.0",
             "define": "ENABLE_TEXT_MESH_PRO"
         },
+        {
+            "name": "com.unity.xr.arfoundation",
+            "expression": "1.0.0",
+            "define": "ENABLE_AR_FOUNDATION"
+        },
+
         {
             "name": "com.unity.inputsystem",
             "expression": "1.0.0",

@@ -306,7 +306,9 @@ namespace Tests.Runtime.Functional.Components
 
             Assert.IsNotNull(newMesh, "Missing asset for new mesh asset id.");
 
-            if (oldFlipX == data.customData.flipX && oldFlipY == data.customData.flipY)
+            // Non-simple draw modes preserve the mesh reference.
+            if ((oldFlipX == data.customData.flipX && oldFlipY == data.customData.flipY) ||
+                drawMode != SpriteDrawMode.Simple)
             {
                 Assert.AreEqual(oldMesh, newMesh, "Mesh should be the same asset.");
             }

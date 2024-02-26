@@ -171,6 +171,10 @@ namespace UnityEditor.PolySpatial.Utilities
                         {
                             if (GUILayout.Button("Play"))
                                 EditorApplication.delayCall += Play;
+#if POLYSPATIAL_INTERNAL
+                            if (GUILayout.Button("Analyze"))
+                                EditorApplication.delayCall += Analyze;
+#endif
                         }
                     }
 
@@ -325,8 +329,14 @@ namespace UnityEditor.PolySpatial.Utilities
             }
 
             m_RecordingsList.index = Array.IndexOf(m_AvailableRecordings, recordingPath);
-            if (m_RecordingsList.index == -1 )
+            if (m_RecordingsList.index == -1)
                 PolySpatialSettings.EraseSessionRecordingFilePath();
+        }
+
+        void Analyze()
+        {
+            var path = PolySpatialSettings.SessionRecordingFilePath;
+            EditorWindow.GetWindow<RecordingAnalysis>(true, "Recording Analysis").Analyze(path);
         }
     }
 }

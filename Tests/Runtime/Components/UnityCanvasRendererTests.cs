@@ -426,5 +426,95 @@ namespace Tests.Runtime.Functional.Components
 
             yield return null;
         }
+
+
+        GameObject CreateMaskedHierarchy<T>() where T : MonoBehaviour
+        {
+            Assert.IsTrue(typeof(T) == typeof(RectMask2D) || typeof(T) == typeof(Mask));
+
+            CreateTestObjects();
+            var canvas = m_TestGameObject.transform.parent.GetComponent<Canvas>();
+            var canvsRt = canvas.gameObject.GetComponent<RectTransform>();
+            canvsRt.sizeDelta = new Vector2(400, 400);
+
+            var maskObject = new GameObject();
+            maskObject.transform.parent = canvas.transform;
+            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
+            cr.transform.parent = maskObject.transform;
+            var crRt = cr.gameObject.AddComponent<RectTransform>();
+            crRt.sizeDelta = new Vector2(200, 200);
+
+            var maskRt = maskObject.AddComponent<RectTransform>();
+            if (typeof(T) == typeof(Mask))
+            {
+                var image = maskObject.gameObject.AddComponent<Image>();
+                image.sprite = Resources.Load<Sprite>("UISprite");
+            }
+
+            maskObject.gameObject.AddComponent<T>();
+            return maskObject;
+        }
+
+        [UnityTest]
+        public IEnumerator Test_MaskEnable_Disable()
+        {
+            var maskObject = CreateMaskedHierarchy<Mask>();
+            var maskRt = maskObject.GetComponent<RectTransform>();
+            var mask = maskObject.GetComponent<Mask>();
+
+            maskRt.sizeDelta = new Vector2(100, 100);
+
+            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
+
+            yield return null;
+
+            var data = PolySpatialComponentUtils.GetTrackingData(cr);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            // Mask enabled, assert that the masking transform has changed.
+            Assert.IsFalse(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
+
+            mask.enabled = false;
+
+            yield return null;
+
+            data = PolySpatialComponentUtils.GetTrackingData(cr);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            // Mask disabled, assert that the masking transform is back to default and thus no masking is occuring.
+            Assert.IsTrue(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
+
+            Object.Destroy(maskObject);
+        }
+
+        [UnityTest]
+        public IEnumerator Test_RectMask2DEnable_Disable()
+        {
+            var maskObject = CreateMaskedHierarchy<RectMask2D>();
+            var maskRt = maskObject.GetComponent<RectTransform>();
+            var mask = maskObject.GetComponent<RectMask2D>();
+
+            maskRt.sizeDelta = new Vector2(100, 100);
+            mask.padding = new Vector4(10, 10, 10, 10);
+            mask.enabled = true;
+
+            var cr = m_TestGameObject.GetComponent<CanvasRenderer>();
+
+            yield return null;
+
+            var data = PolySpatialComponentUtils.GetTrackingData(cr);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            // Mask enabled, assert that the masking transform has changed.
+            Assert.IsFalse(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
+
+            mask.enabled = false;
+
+            yield return null;
+
+            data = PolySpatialComponentUtils.GetTrackingData(cr);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            // Mask disabled, assert that the masking transform is back to default and thus no masking is occuring.
+            Assert.IsTrue(MathExtensions.ApproximatelyEqual(MaterialConversionHelpers.s_DefaultMaskTransform, data.customData.appliedMaskUVTransform));
+
+            Object.Destroy(maskObject);
+        }
     }
 }

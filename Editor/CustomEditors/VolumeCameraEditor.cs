@@ -35,7 +35,7 @@ namespace UnityEditor.PolySpatial.Internals
         {
             m_IsUniformScaleProperty = serializedObject.FindProperty("m_IsUniformScale");
             m_DimensionsProperty = serializedObject.FindProperty("m_Dimensions");
-            m_CullingMaskProperty = serializedObject.FindProperty("CullingMask");
+            m_CullingMaskProperty = serializedObject.FindProperty("m_CullingMask");
             m_ConfigurationProperty = serializedObject.FindProperty("m_OutputConfiguration");
             m_OpenWindowOnLoadProperty = serializedObject.FindProperty("OpenWindowOnLoad");
 
