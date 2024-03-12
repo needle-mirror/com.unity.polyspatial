@@ -7,6 +7,21 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2024-03-12
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fixed a bug in PlayToDevice where an input offset could occur when volume camera's Dimension property was set to something other than identity.
+
+### Security
+
 ## [1.1.4] - 2024-02-26
 
 ### Added
