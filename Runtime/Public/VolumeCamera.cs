@@ -1,9 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-#if UNITY_EDITOR && ENABLE_MULTIPLE_DISPLAYS
-using Unity.PolySpatial.Internals.InternalBridge;
-#endif
 using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEngine.Events;

@@ -73,7 +73,7 @@ namespace Tests.Runtime.Functional.Components
             yield return null;
 
             // require the default unbounded volume camera for now
-            var vc = GameObject.FindObjectOfType<VolumeCamera>();
+            var vc = GameObject.FindFirstObjectByType<VolumeCamera>();
             Assert.IsNotNull(vc);
             Assert.AreEqual(VolumeCamera.PolySpatialVolumeCameraMode.Unbounded, vc.WindowMode, "This test requires the default unbounded volume camera");
 

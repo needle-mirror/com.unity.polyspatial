@@ -614,6 +614,48 @@ namespace Tests.Runtime.Functional.Components
             AssertNullSkinnedMeshRenderer();
         }
 
+#if UNITY_EDITOR && POLYSPATIAL_EXPERIMENTAL
+        [UnityTest]
+        public IEnumerator Test_UnitySkinnedMeshRenderer_BlendShapes()
+        {
+            CreateTestObjects();
+            m_SkinnedMeshRenderer.sharedMesh = CreateTestSkinnedMesh();
+            var deltaVertices = new[] { new Vector3(1, 0, 0), new Vector3(0, 2, 0), new Vector3(0, 0, 3) };
+            var deltaNormals = new[] { new Vector3(4, 0, 0), new Vector3(0, 5, 0), new Vector3(0, 0, 6) };
+            var deltaTangents = new[] { new Vector3(7, 0, 0), new Vector3(0, 8, 0), new Vector3(0, 0, 9) };
+            m_SkinnedMeshRenderer.sharedMesh.AddBlendShapeFrame(
+                "TestBlend", 100.0f, deltaVertices, deltaNormals, deltaTangents);
+
+            m_SkinnedMeshRenderer.SetBlendShapeWeight(0, 50.0f);
+
+            yield return null;
+
+            var backingGO = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestGameObject));
+            Assert.IsNotNull(backingGO);
+
+            var backingSkinnedMeshRenderer = backingGO.GetComponent<SkinnedMeshRenderer>();
+            Assert.IsNotNull(backingSkinnedMeshRenderer);
+
+            Assert.AreEqual(backingSkinnedMeshRenderer.GetBlendShapeWeight(0), 50.0f);
+
+            var backingMesh = backingSkinnedMeshRenderer.sharedMesh;
+            Assert.IsNotNull(backingMesh);
+
+            Assert.AreEqual(backingMesh.blendShapeCount, 1);
+            Assert.AreEqual(backingMesh.GetBlendShapeName(0), "TestBlend");
+            Assert.AreEqual(backingMesh.GetBlendShapeFrameCount(0), 1);
+            Assert.AreEqual(backingMesh.GetBlendShapeFrameWeight(0, 0), 100.0f);
+            
+            var backingDeltaVertices = new Vector3[3];
+            var backingDeltaNormals = new Vector3[3];
+            var backingDeltaTangents = new Vector3[3];
+            backingMesh.GetBlendShapeFrameVertices(0, 0, backingDeltaVertices, backingDeltaNormals, backingDeltaTangents);
+            Assert.AreEqual(deltaVertices, backingDeltaVertices);
+            Assert.AreEqual(deltaNormals, backingDeltaNormals);
+            Assert.AreEqual(deltaTangents, backingDeltaTangents);
+        }
+#endif
+
         void AssertNullSkinnedMeshRenderer()
         {
 #if UNITY_EDITOR

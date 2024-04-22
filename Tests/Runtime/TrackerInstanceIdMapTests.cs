@@ -9,7 +9,7 @@ namespace Tests.Runtime.Functional
         [Test]
         public void Test_Indexer_Adds_To_Count()
         {
-            TrackerInstanceIdMap<DefaultTrackingData> map = default;
+            TrackerInstanceIdMap<int, DefaultTrackingData> map = default;
             map.Initialize(1);
             try
             {

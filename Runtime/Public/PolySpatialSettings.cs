@@ -73,21 +73,14 @@ namespace Unity.PolySpatial
         }
 
         [Serializable]
-        internal class DisplayProviderParameters
+        internal struct DisplayProviderParameters
         {
-            // Put tooltips in class so you can individually hover on serialized elements to see them.
-            [Tooltip("FramebufferWidth = 1830x1600. Half of the Vision Pro physical screen resolution.")]
-            public Vector2Int dimensions = new(1830, 1600);
-            [Tooltip("EyePoses are an average estimate of a person with 66 mm IPD using the device." +
-                     "EyePoses do not need to be precise for StereoRenderTargets to appear correct and should not be changed.")]
-            public Pose leftEyePose = new(position: new Vector3(-.033f, -.02f, -.01f), rotation: Quaternion.identity);
-            [Tooltip("EyePoses are an average estimate of a person with 66 mm IPD using the device." +
-                     "EyePoses do not need to be precise for StereoRenderTargets to appear correct and should not be changed.")]
-            public Pose rightEyePose = new(position: new Vector3(-.033f, -.02f, -.01f), rotation: Quaternion.identity);
-            [Tooltip("ProjectHalfAngles are values derived from the actual device. These should not need be changed.")]
-            public ProjectionHalfAngles leftProjectionHalfAngles = new(-1.73205f, 1.0f, 1.0f, -1.19175f);
-            [Tooltip("ProjectHalfAngles are values derived from the actual device. These should not need be changed.")]
-            public ProjectionHalfAngles rightProjectionHalfAngles = new(-1.73205f, 1.0f, 1.0f, -1.19175f);
+            public int framebufferWidth;
+            public int framebufferHeight;
+            public Pose leftEyePose;
+            public Pose rightEyePose;
+            public ProjectionHalfAngles leftProjectionHalfAngles;
+            public ProjectionHalfAngles rightProjectionHalfAngles;
         }
 
         const int k_DefaultMaxMipByteSizePerCycle = 128000;
@@ -337,10 +330,32 @@ namespace Unity.PolySpatial
 
         // TODO -- this should not be in settings, it is platform/device specific
 
-        [Tooltip("Default values that get used by the StereoRenderTargets.")]
-        [SerializeField] private DisplayProviderParameters m_DeviceDisplayProviderParameters;
+        // Temporarily defaults to the simulator parameters until HW ship.
+        [SerializeField]
+        DisplayProviderParameters m_DeviceDisplayProviderParameters = new()
+        {
+            framebufferWidth = 1920,
+            framebufferHeight = 1080,
+            leftEyePose = new(position: Vector3.zero, rotation: Quaternion.identity),
+            rightEyePose = new(position: Vector3.zero, rotation: Quaternion.identity),
+            leftProjectionHalfAngles = ProjectionHalfAngles.Default,
+            rightProjectionHalfAngles = ProjectionHalfAngles.Default,
+        };
 
         internal DisplayProviderParameters DeviceDisplayProviderParameters => m_DeviceDisplayProviderParameters;
+
+        [SerializeField]
+        DisplayProviderParameters m_SimulatorDisplayProviderParameters = new()
+        {
+            framebufferWidth = 1920,
+            framebufferHeight = 1080,
+            leftEyePose = new(position: Vector3.zero, rotation: Quaternion.identity),
+            rightEyePose = new(position: Vector3.zero, rotation: Quaternion.identity),
+            leftProjectionHalfAngles = ProjectionHalfAngles.Default,
+            rightProjectionHalfAngles = ProjectionHalfAngles.Default,
+        };
+
+        internal DisplayProviderParameters SimulatorDisplayProviderParameters => m_SimulatorDisplayProviderParameters;
 
         [Tooltip("Define material substitutions that will be used by PolySpatial at runtime. Add any MaterialSwapSet assets you would like to use to this " +
             "list. The material on the left will be replaced with the material on the right as a fallback. For example, you may swap a material which uses a " +

@@ -7,24 +7,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.3] - 2024-04-23
-
-### Fixed
-- Fixed XRI dependency for samples to be optional.
-
-## [1.2.2] - 2024-04-22
+## [2.0.0-pre.3] - 2024-04-22
 
 ### Added
-- Added portal sample.
-
-## [1.2.1] - 2024-04-22
-
-### Added
-- Added sample scenes for uGUI and meshing, updated manipulation to use XRI.
-
-## [1.2.0] - 2024-04-19
-
-### Added
+- Added `PolySpatial Static Batch Element` component to support static batching relative to a root node or the scene root.
 - Added support for WebCamTexture to PSL.
 - Added support for Simple Noise, Parallax Mapping, Fog, and View Vector shader graph nodes.
 - Added `MaterialX` shader graph data extension and `Unlit Tone Mapping` option to enable tone mapping on unlit shader graph targets.
@@ -37,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Regular Unity Cameras (Camera component) are mirrored to cameras in the PolySpatial space. This only affects in-editor preview.
 - Added support for image masking for UGUI components.
 - Added ability to opt-out of PolySpatialRaycaster support if the user wishes to use a different raycaster.
+- Added support for non-`Exposed` shader graph properties (such as matrices, which cannot be exposed). 
 
 ### Changed
 - Changed how the Play To Device window validates new device entries.
@@ -47,6 +34,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Switched the `Reflection Probe` component validation to a message.
 - Removed the `Fix` button from the unsupported components validation. An unsupported component should not have any effect in the scene and can still be enabled.
 - Selectable UI elements (Buttons, Toggles, etc.) that are not Interactable will no longer show the visionOS hover effect when hovered.
+
+### Deprecated
 
 ### Removed
 - Removed obsolete events (OnWindowOpened, OnWindowClosed, OnWindowFocused, OnWindowResized) from VolumeCamera. Please use OnWindowEvent to listen for window state changes.
@@ -74,10 +63,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed animated material properties (currently requires dirtying the renderer via Unity.PolySpatial.PolySpatialObjectUtils.MarkDirty).
 - Fixed shader graph Voronoi node discontinuities and added support for Cells output.
 
-## [1.1.6] - 2024-03-12
-
-### Fixed
-- Fixed a bug in PlayToDevice where an input offset could occur when volume camera's Dimension property was set to something other than identity.
+### Security
 
 ## [1.1.4] - 2024-02-26
 

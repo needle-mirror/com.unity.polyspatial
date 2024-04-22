@@ -1,14 +1,14 @@
 {
   "name": "com.unity.polyspatial",
   "displayName": "PolySpatial",
-  "version": "1.2.3",
-  "unity": "2022.3",
-  "unityRelease": "19f1",
+  "version": "2.0.0-pre.3",
+  "unity": "6000.0",
+  "unityRelease": "0b16",
   "description": "The Unity PolySpatial runtime includes platform-agnostic code required to build and deploy apps for supported platforms.\nUnity PolySpatial and visionOS support is only available to Unity Pro, Unity Enterprise, and Unity Industry users. Learn more about these plans at unity.com/pricing.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.render-pipelines.universal": "14.0.1",
-    "com.unity.collections": "2.1.4",
+    "com.unity.collections": "2.4.0",
     "com.unity.textmeshpro": "3.0.7",
     "com.unity.xr.core-utils": "2.3.0",
     "com.unity.ext.flatsharp": "1.1.1",
@@ -21,16 +21,16 @@
     "changelog": ""
   },
   "_upm": {
-    "changelog": "### Fixed\n- Fixed XRI dependency for samples to be optional."
+    "changelog": "### Added\n- Added `PolySpatial Static Batch Element` component to support static batching relative to a root node or the scene root.\n- Added support for WebCamTexture to PSL.\n- Added support for Simple Noise, Parallax Mapping, Fog, and View Vector shader graph nodes.\n- Added `MaterialX` shader graph data extension and `Unlit Tone Mapping` option to enable tone mapping on unlit shader graph targets.\n- Added `Minify ShaderGraph Node Names` option (enabled by default), which improves load performance on visionOS for large shader graphs.\n- Added `Quit` as an option to the license check dialog to allow users to exit the app.\n- Added limited support for File source to the Custom Function shader graph node. See \"Source Types\" in the PolySpatial documentation for details.\n- Added a new auxiliary menu in Play To Device.\n- Added support for MaterialPropertyBlocks (currently requires dirtying the renderer via Unity.PolySpatial.PolySpatialObjectUtils.MarkDirty).\n- Added support for `Additive` and `Premultiply` blending modes for URP unlit/lit particle shaders with BakeToMesh.\n- Regular Unity Cameras (Camera component) are mirrored to cameras in the PolySpatial space. This only affects in-editor preview.\n- Added support for image masking for UGUI components.\n- Added ability to opt-out of PolySpatialRaycaster support if the user wishes to use a different raycaster.\n- Added support for non-`Exposed` shader graph properties (such as matrices, which cannot be exposed). \n\n### Changed\n- Changed how the Play To Device window validates new device entries.\n- Play to device Window is disabled when in incorrect build target or app mode configurations.\n- Play to device UI will appear in a new bounded volume when exiting play mode from an unbounded scene.\n- If an XROrigin exists \"Auto-Create Volume Camera\" will parent the VolumeCamera it creates to it.\n- Play to device runtime app further clarifies how to get started on the Editor side of Play to device.\n- Switched the `Reflection Probe` component validation to a message.\n- Removed the `Fix` button from the unsupported components validation. An unsupported component should not have any effect in the scene and can still be enabled.\n- Selectable UI elements (Buttons, Toggles, etc.) that are not Interactable will no longer show the visionOS hover effect when hovered.\n\n### Deprecated\n\n### Removed\n- Removed obsolete events (OnWindowOpened, OnWindowClosed, OnWindowFocused, OnWindowResized) from VolumeCamera. Please use OnWindowEvent to listen for window state changes.\n\n### Fixed\n- Fixed validation messages showing in the Inspector view when they are disabled.\n- Fixed UGUI elements being visible when Canvas was disabled.\n- Fixed sign of angles for Rotate About Axis shader graph node.\n- Fixed failure to transfer HDR color properties on shader graph materials on simulator/device.\n- Fixed console error message reporting `sysTypeDispatchData.klass == klass`. \n- Fixed Play to device UI sometimes having incorrect scale when exiting play mode.\n- Fixed implementation of shader graph Object node.\n- Fixed color space of TextMeshPro vertex colors.\n- Fixed colors applied to UGUI images.\n- Fixed crash that may occur when using a Box Collider on something that is also within a RectMask region.\n- Fixed color space of RGB24 images.\n- Fixed accidental application of tone mapping to built-in unlit materials.\n- Fixed visionOS Sorting Group \"Apply to Descendants\" option not applying to descendants created after sorting group initialized.\n- Fixed ArgumentNullException on MaterialPropertyBlock.SetTexture for UI elements.\n- Fixed tangent space output of View Direction shader graph node.\n- Fixed typo on PolySpatial settings on the Project Validation enum.\n- Fixed failure to hide UI elements contained in disjoint nested RectMask2D elements.\n- Fixed warnings for Custom Function shader graph nodes upstream of MaterialX \"Off\" keyword.\n- Fixed inverted textures when using `Replicate Properties` particle system mode.\n- Fixed animated material properties (currently requires dirtying the renderer via Unity.PolySpatial.PolySpatialObjectUtils.MarkDirty).\n- Fixed shader graph Voronoi node discontinuities and added support for Cells output.\n\n### Security"
   },
   "upmCi": {
-    "footprint": "d171ffdecbecc34bcd3aec5171efe04661507055"
+    "footprint": "2fc83c1865ad1367730548e30a98aa71d6b64632"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@1.2/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@2.0/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/quantum.git",
     "type": "git",
-    "revision": "fdfe734f7cdc3f7963f162c5baea59d2ede2e0df"
+    "revision": "e659612b73e657bb1ef826490f54a5d9c996c1dc"
   },
   "samples": [
     {

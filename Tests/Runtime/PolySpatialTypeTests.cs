@@ -41,10 +41,10 @@ namespace Tests.Runtime.Functional
         {
             var id = 1024;
             PolySpatialHostID hostId = new() { connectionId = 0 };
-            uint flags = 0;
+            byte hostVolumeIndex = 0;
 
             // connectionId and flags are zero
-            var psiid = new PolySpatialInstanceID { id = id, hostId = hostId, flags = flags };
+            var psiid = new PolySpatialInstanceID { id = id, hostId = hostId, hostVolumeIndex = hostVolumeIndex };
 
             var expectedString = $"{id}";
 
@@ -59,10 +59,10 @@ namespace Tests.Runtime.Functional
             Assert.AreEqual(psiid.ToString(), expectedString);
 
             // all non-zero
-            flags = 128;
-            psiid.flags = flags;
+            hostVolumeIndex = byte.MaxValue;
+            psiid.hostVolumeIndex = hostVolumeIndex;
 
-            expectedString = $"{id}:{hostId}:{flags}";
+            expectedString = $"{id}:{hostId}:{hostVolumeIndex}";
 
             Assert.AreEqual(psiid.ToString(), expectedString);
 
@@ -70,7 +70,7 @@ namespace Tests.Runtime.Functional
             hostId.connectionId = 0;
             psiid.hostId = hostId;
 
-            expectedString = $"{id}:{hostId}:{flags}";
+            expectedString = $"{id}:{hostId}:{hostVolumeIndex}";
 
             Assert.AreEqual(psiid.ToString(), expectedString);
         }

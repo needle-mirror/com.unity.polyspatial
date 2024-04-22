@@ -86,6 +86,7 @@ namespace Tests.Runtime.Functional
             // helper function that is called for each struct and remove the type from the set as
             // we validate the size. If the set isn't empty at the end of the tests then fail because
             // a new struct was added without updating this test.
+            ValidateStructPadding<PolySpatialAlignmentMarkerData>(pslTypes);
             ValidateStructPadding<PolySpatialAssetID>(pslTypes);
             ValidateStructPadding<PolySpatialCameraData>(pslTypes);
             ValidateStructPadding<PolySpatialHostID>(pslTypes);
