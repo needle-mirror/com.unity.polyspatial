@@ -50,7 +50,7 @@ namespace UnityEditor.ShaderGraph.MaterialX.Tests
                 }
 
                 if (!checkImport)
-                    return;
+                    continue;
 
                 // Compare the generated data against the asset stored in the database
                 var readResult = PolySpatialAssetData.ReadDataForAsset(

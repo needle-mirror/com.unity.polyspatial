@@ -12,8 +12,7 @@
         "Unity.ScriptableBuildPipeline.Editor",
         "Unity.TextMeshPro",
         "Unity.PolySpatial.Core",
-        "Unity.XR.Management",
-        "Unity.XR.Management.Editor"
+        "Unity.PolySpatial.Analytics.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -32,11 +31,6 @@
             "name": "com.unity.scriptablebuildpipeline",
             "expression": "",
             "define": "HAS_SCRIPTABLE_BUILDPIPELINE"
-        },
-        {
-            "name": "com.unity.xr.management",
-            "expression": "",
-            "define": "ENABLE_XR_MANAGEMENT"
         }
     ],
     "noEngineReferences": false

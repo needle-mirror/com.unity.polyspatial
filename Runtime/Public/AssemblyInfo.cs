@@ -14,3 +14,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.PolySpatial.PlayToDevice.Editor")]
 [assembly: InternalsVisibleTo("Unity.PolySpatial.Validation.Editor")]
 [assembly: InternalsVisibleTo("Unity.PolySpatial.Extensions.Runtime")]
+[assembly: InternalsVisibleTo("Unity.PolySpatial.Analytics.Hooks.Editor")]

@@ -8,7 +8,6 @@
         "Unity.PolySpatial.Editor",
         "Unity.XR.CoreUtils",
         "Unity.XR.CoreUtils.Editor",
-        "Unity.RenderPipelines.Universal.Runtime",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
         "Unity.InputSystem",

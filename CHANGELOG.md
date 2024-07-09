@@ -7,6 +7,38 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2024-07-09
+
+## [1.3.0] - 2024-06-26
+
+### Added
+- Added `PolySpatial Static Batch Element` component to support static batching relative to a root node or the scene root.
+- Added support for the Gather Texture 2D, Baked GI, Reflection Probe, and Parallax Occlusion Mapping shader graph nodes.
+
+### Changed
+- Removed com.unity.render-pipelines.universal as dependency for com.unity.polyspatial/com.unity.polyspatial.xr.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fixed input coordinate offsets when using unbounded mode with non-identity volume camera.
+- Fixed issue where size and position updates for Box, Sphere, and Capsule colliders were not being applied.
+- Fixed cameras targeting RenderTextures being rendered to frame buffer in play mode.
+- Fixed usage of default reflection probe in shader graph PolySpatial Lighting node.
+- Fixed KeyNotFoundException when destroying a disabled particle system.
+- Fixed failure to ignore input events on masked-out UGUI components/component regions.
+- Fixed failure to transfer textures with zero dimensions.
+- Fixed positions from shader graph Position node with Space: Tangent.
+- Fixed issue where Play to Device would attempt to connect to a localhost connection even when not selected in the UI.
+- Log a more descriptive error message when attempting to set the parent transform of a GameObject and the parent has not been synced. This error will only be logged when running in Editor Play Mode. The GameObject will be parented to the Volume instead.
+- Fixed P2D network connections timing out after 15 seconds of not receiving a message.
+- Fixed issue where Mask component images wouldn't be used for masking.
+- Fixed issue with shader graph Multiply node with A being a vector and B being a matrix.
+
+### Security
+
 ## [1.2.3] - 2024-04-23
 
 ### Fixed
@@ -37,6 +69,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Regular Unity Cameras (Camera component) are mirrored to cameras in the PolySpatial space. This only affects in-editor preview.
 - Added support for image masking for UGUI components.
 - Added ability to opt-out of PolySpatialRaycaster support if the user wishes to use a different raycaster.
+- Added support for non-`Exposed` shader graph properties (such as matrices, which cannot be exposed). 
+- Added `Apply to Descendants` option to PolySpatial Static Batch Element.
 
 ### Changed
 - Changed how the Play To Device window validates new device entries.
@@ -47,6 +81,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Switched the `Reflection Probe` component validation to a message.
 - Removed the `Fix` button from the unsupported components validation. An unsupported component should not have any effect in the scene and can still be enabled.
 - Selectable UI elements (Buttons, Toggles, etc.) that are not Interactable will no longer show the visionOS hover effect when hovered.
+- `Static Batching` player setting now controls whether GameObjects flagged as static will receive PolySpatialStaticBatchElement components.
 
 ### Removed
 - Removed obsolete events (OnWindowOpened, OnWindowClosed, OnWindowFocused, OnWindowResized) from VolumeCamera. Please use OnWindowEvent to listen for window state changes.
@@ -73,6 +108,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed inverted textures when using `Replicate Properties` particle system mode.
 - Fixed animated material properties (currently requires dirtying the renderer via Unity.PolySpatial.PolySpatialObjectUtils.MarkDirty).
 - Fixed shader graph Voronoi node discontinuities and added support for Cells output.
+- Fixed performance issue with animating certain properties (such as color) of Image/RawImage components.
+- Fixed shader graph import error affecting Triplanar nodes with Normal inputs.
+- Fixed assertion in debug builds with static batches above 256MB.
 
 ## [1.1.6] - 2024-03-12
 

@@ -42,6 +42,11 @@ namespace UnityEditor.ShaderGraph.MaterialX
                                     MtlxDataTypes.Matrix44, new(), "modelToView")),
                         }),
 
+                        // Tangent-space positions are (0, 0, 0) by definition.  For some reason,
+                        // visionOS emits them as... something else.  We filed FB13683686 about the tangent
+                        // space view directions; this seems likely to be related.
+                        CoordinateSpace.Tangent => new FloatInputDef(MtlxDataTypes.Vector3, 0.0f, 0.0f, 0.0f),
+
                         // Flip z coordinate to convert RealityKit space to Unity space.
                         var space => new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector3, new()
                         {

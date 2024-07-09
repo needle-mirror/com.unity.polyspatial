@@ -136,6 +136,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("SAMPLE_TEXTURE3D", Operator.VariantType.FunctionCall)] = SampleTexture3DCompiler,
             [("SAMPLE_TEXTURE3D_LOD", Operator.VariantType.FunctionCall)] = SampleTexture3DLodCompiler,
             [("SAMPLE_TEXTURECUBE_LOD", Operator.VariantType.FunctionCall)] = SampleTextureCubeLodCompiler,
+            [("GATHER_TEXTURE2D", Operator.VariantType.FunctionCall)] = GatherTexture2DCompiler,
         };
 
         static FloatInputDef s_ZFlipMatrix = new(
@@ -168,6 +169,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             ["FOG_EXP"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
             ["FOG_EXP2"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
             ["FOG_LINEAR"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
+            ["LIGHTMAP_ON"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
             [PolySpatialShaderGlobals.Time] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.SinTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
             [PolySpatialShaderGlobals.CosTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
@@ -1113,19 +1115,25 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 ["in"] = node.Children[0].Compile(ctx),
             };
             var matchedType = CoerceToMatchedType(ctx, node, inputDefs, "in");
-            var sharedIn = GetSharedInput(ctx, inputDefs["in"]);
+            
+            return CompileTrunc(ctx, matchedType, inputDefs["in"]);
+        }
+
+        static InputDef CompileTrunc(CompilationContext ctx, string type, InputDef inputDef)
+        {
+            var sharedIn = GetSharedInput(ctx, inputDef);
 
             // trunc(in) = floor(abs(in)) * sign(in)
-            return new InlineInputDef(MtlxNodeTypes.Multiply, matchedType, new()
+            return new InlineInputDef(MtlxNodeTypes.Multiply, type, new()
             {
-                ["in1"] = new InlineInputDef(MtlxNodeTypes.Floor, matchedType, new()
+                ["in1"] = new InlineInputDef(MtlxNodeTypes.Floor, type, new()
                 {
-                    ["in"] = new InlineInputDef(MtlxNodeTypes.Absolute, matchedType, new()
+                    ["in"] = new InlineInputDef(MtlxNodeTypes.Absolute, type, new()
                     {
                         ["in"] = sharedIn,
                     }),
                 }),
-                ["in2"] = new InlineInputDef(MtlxNodeTypes.Sign, matchedType, new()
+                ["in2"] = new InlineInputDef(MtlxNodeTypes.Sign, type, new()
                 {
                     ["in"] = sharedIn,
                 }),
@@ -1732,6 +1740,99 @@ namespace UnityEditor.ShaderGraph.MaterialX
             inputDefs.Add("max_anisotropy", new FloatInputDef(MtlxDataTypes.Integer, GetMaxAnisotropy(samplerState)));
 
             return new InlineInputDef(MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, inputDefs);
+        }
+
+        static InputDef GatherTexture2DCompiler(CompilationContext ctx, SyntaxNode node)
+        {
+            // Accept, but don't require, the pixel offset argument.
+            var hasOffset = (node.Children.Count == 4);
+            if (!hasOffset)
+                node.RequireChildCount(3);
+
+            var fileInputDef = node.Children[0].Compile(ctx);
+            var externalFile = RequireExternalTexture(ctx, node, fileInputDef);
+
+            Dictionary<string, InputDef> inputDefs = new()
+            {
+                ["file"] = fileInputDef,
+                ["texcoord"] = node.Children[2].Compile(ctx),
+            };
+            CoerceToType(ctx, node, inputDefs, "file", MtlxDataTypes.Filename);
+            CoerceToType(ctx, node, inputDefs, "texcoord", MtlxDataTypes.Vector2);
+
+            var samplerInputDef = node.Children[1].Compile(ctx);
+            var samplerState = RequireTextureSampler(ctx, node, samplerInputDef);
+
+            if (hasOffset)
+            {
+                inputDefs["offset"] = node.Children[3].Compile(ctx);
+                CoerceToType(ctx, node, inputDefs, "offset", MtlxDataTypes.Vector2);
+            }
+            else
+            {
+                inputDefs["offset"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.0f, 0.0f);
+            }
+            
+            ApplyTextureTransform(inputDefs, externalFile);
+
+            // Refer to the implementation of GatherTexture2DNode:
+            // https://github.cds.internal.unity3d.com/unity/unity/blob/93a364f095f55c0e7616dc8d1638d6c6c37b5ad5/Packages/com.unity.shadergraph/Editor/Data/Nodes/Input/Texture/GatherTexture2DNode.cs#L91
+            var textureSize = GetSharedInput(
+                ctx, new InlineInputDef(MtlxNodeTypes.Swizzle, MtlxDataTypes.Vector2, new()
+            {
+                ["in"] = new TextureSizeInputDef(externalFile.Source),
+                ["channels"] = new StringInputDef("xy"),
+            }));
+            var pixelTexCoords = GetSharedInput(
+                ctx, new InlineInputDef(MtlxNodeTypes.Multiply, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = inputDefs["texcoord"],
+                ["in2"] = textureSize,
+            }));
+            var offsetPlusHalf = GetSharedInput(ctx, new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+            {
+                ["in1"] = CompileTrunc(ctx, MtlxDataTypes.Vector2, inputDefs["offset"]),
+                ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, 0.5f, 0.5f),
+            }));
+            
+            InlineInputDef CreateQuadrantDef(float quadrantX, float quadrantY)
+            {
+                Dictionary<string, InputDef> textureInputDefs = new()
+                {
+                    ["file"] = inputDefs["file"],
+                    ["texcoord"] = new InlineInputDef(MtlxNodeTypes.Divide, MtlxDataTypes.Vector2, new()
+                    {
+                        ["in1"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                        {
+                            ["in1"] = new InlineInputDef(MtlxNodeTypes.Floor, MtlxDataTypes.Vector2, new()
+                            {
+                                ["in"] = new InlineInputDef(MtlxNodeTypes.Add, MtlxDataTypes.Vector2, new()
+                                {
+                                    ["in1"] = pixelTexCoords,
+                                    ["in2"] = new FloatInputDef(MtlxDataTypes.Vector2, quadrantX, quadrantY),
+                                }),
+                            }),
+                            ["in2"] = offsetPlusHalf,
+                        }),
+                        ["in2"] = textureSize,
+                    }),
+                };
+                AddTexture2DSamplerState(textureInputDefs, samplerState);
+                return new(MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, new()
+                {
+                    ["in"] = new InlineInputDef(
+                        MtlxNodeTypes.RealityKitTexture2DLOD, MtlxDataTypes.Vector4, textureInputDefs),
+                    ["channels"] = new StringInputDef("x"),
+                });
+            }
+
+            return new InlineInputDef(MtlxNodeTypes.Combine4, MtlxDataTypes.Vector4, new()
+            {
+                ["in1"] = CreateQuadrantDef(-0.5f, 0.5f),
+                ["in2"] = CreateQuadrantDef(0.5f, 0.5f),
+                ["in3"] = CreateQuadrantDef(0.5f, -0.5f),
+                ["in4"] = CreateQuadrantDef(-0.5f, -0.5f),
+            });
         }
 
         static InputDef RefractCompiler(CompilationContext ctx, SyntaxNode node)

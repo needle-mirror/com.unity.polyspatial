@@ -89,47 +89,41 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             base.CollectShaderProperties(properties, generationMode);
 
-            void AddProperty(AbstractShaderProperty property, string referenceName, bool exposeAsHidden)
+            void AddProperty(AbstractShaderProperty property, string referenceName)
             {
                 property.overrideReferenceName = referenceName;
-
-                // We expose certain properties as hidden so that they will show up in the Shader.GetProperty APIs
-                // (with the HideInInspector flag), allowing us to tell at runtime which lighting features are used.
-                if (exposeAsHidden)
-                    property.hidden = true;
-                else
-                    property.generatePropertyBlock = false;
+                property.generatePropertyBlock = false;
 
                 properties.AddShaderProperty(property);
             }
 
-            void AddTexture2DProperty(string referenceName, bool exposeAsHidden = false)
+            void AddTexture2DProperty(string referenceName)
             {
                 var property = new Texture2DShaderProperty()
                 {
                     defaultType = Texture2DShaderProperty.DefaultType.Black,
                 };
-                AddProperty(property, referenceName, exposeAsHidden);
+                AddProperty(property, referenceName);
             }
 
-            void AddCubemapProperty(string referenceName, bool exposeAsHidden = false)
+            void AddCubemapProperty(string referenceName)
             {
-                AddProperty(new CubemapShaderProperty(), referenceName, exposeAsHidden);
+                AddProperty(new CubemapShaderProperty(), referenceName);
             }
 
-            void AddFloatProperty(string referenceName, bool exposeAsHidden = false)
+            void AddFloatProperty(string referenceName)
             {
-                AddProperty(new Vector1ShaderProperty(), referenceName, exposeAsHidden);
+                AddProperty(new Vector1ShaderProperty(), referenceName);
             }
 
-            void AddVector4Property(string referenceName, bool exposeAsHidden = false)
+            void AddVector4Property(string referenceName)
             {
-                AddProperty(new Vector4ShaderProperty(), referenceName, exposeAsHidden);
+                AddProperty(new Vector4ShaderProperty(), referenceName);
             }
 
-            void AddMatrix4Property(string referenceName, bool exposeAsHidden = false)
+            void AddMatrix4Property(string referenceName)
             {
-                AddProperty(new Matrix4ShaderProperty(), referenceName, exposeAsHidden);
+                AddProperty(new Matrix4ShaderProperty(), referenceName);
             }
 
             AddMatrix4Property(PolySpatialShaderProperties.VolumeToWorld);
@@ -143,13 +137,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     break;
 
                 case BakedLightingMode.LightProbes:
-                    AddVector4Property(PolySpatialShaderProperties.SHAr, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHAg, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHAb, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHBr, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHBg, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHBb, true);
-                    AddVector4Property(PolySpatialShaderProperties.SHC, true);
+                    AddVector4Property(PolySpatialShaderProperties.SHAr);
+                    AddVector4Property(PolySpatialShaderProperties.SHAg);
+                    AddVector4Property(PolySpatialShaderProperties.SHAb);
+                    AddVector4Property(PolySpatialShaderProperties.SHBr);
+                    AddVector4Property(PolySpatialShaderProperties.SHBg);
+                    AddVector4Property(PolySpatialShaderProperties.SHBb);
+                    AddVector4Property(PolySpatialShaderProperties.SHC);
                     break;
             }
 
@@ -162,14 +156,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         break;
                     
                     case ReflectionProbeMode.Simple:
-                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0", true);
+                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0");
                         break;
                     
                     case ReflectionProbeMode.Blended:
                         for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
                         {
-                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i, true);
-                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i, true);
+                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i);
+                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i);
                         }
                         break;
                 }
@@ -222,39 +216,13 @@ float3 viewDirectionWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorl
             switch (m_BakedLightingMode)
             {
                 case BakedLightingMode.Lightmap:
-                    // https://github.cds.internal.unity3d.com/unity/unity/blob/1ade3ed2dfc1932d8c8427253060d0edaa1663d3/Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl#L251
-                    writer.WriteLine($@"
-float2 uv = LightmapUV * {PolySpatialShaderProperties.LightmapST}.xy + {PolySpatialShaderProperties.LightmapST}.zw;");
-                    writer.WriteLine($@"
-float4 direction = SAMPLE_TEXTURE2D(
-    {PolySpatialShaderProperties.LightmapInd}, sampler{PolySpatialShaderProperties.LightmapInd}, uv);");
-                    writer.WriteLine($@"
-float4 encodedIlluminance = SAMPLE_TEXTURE2D(
-    {PolySpatialShaderProperties.Lightmap}, sampler{PolySpatialShaderProperties.Lightmap}, uv);");
-                    // Note: this only supports the dLDR encoding (which appears to be the default).
-                    const float kLightmapHdrMultiplier = 4.59f;
-                    writer.WriteLine($"float3 illuminance = encodedIlluminance.rgb * {kLightmapHdrMultiplier};");
-                    writer.WriteLine("float halfLambert = dot(normalWS, direction.xyz - 0.5) + 0.5;");
-                    writer.WriteLine("float3 bakedGI = illuminance * halfLambert / max(1e-4, direction.w);");
+                    writer.WriteLine(
+                        BakedGIAdapter.GetLightmapContributionExpr("LightmapUV", true, "normalWS", "bakedGI"));
                     break;
                 
                 case BakedLightingMode.LightProbes:
-                    // https://github.cds.internal.unity3d.com/unity/unity/blob/f5741f9e623093a5514dc13a534a4044e0d7e0ec/Packages/com.unity.render-pipelines.core/ShaderLibrary/SphericalHarmonics.hlsl#L116
-                    writer.WriteLine("float4 vA = float4(normalWS, 1.0);");
-                    writer.WriteLine("float4 vB = normalWS.xyzz * normalWS.yzzx;");
-                    writer.WriteLine("float vC = normalWS.x * normalWS.x - normalWS.y * normalWS.y;");
-                    writer.WriteLine($@"
-float3 x1 = float3(
-    dot({PolySpatialShaderProperties.SHAr}, vA),
-    dot({PolySpatialShaderProperties.SHAg}, vA),
-    dot({PolySpatialShaderProperties.SHAb}, vA));");
-                    writer.WriteLine($@"
-float3 x2 = float3(
-    dot({PolySpatialShaderProperties.SHBr}, vB),
-    dot({PolySpatialShaderProperties.SHBg}, vB),
-    dot({PolySpatialShaderProperties.SHBb}, vB));");
-                    writer.WriteLine($"float3 x3 = {PolySpatialShaderProperties.SHC}.rgb * vC;");
-                    writer.WriteLine("float3 bakedGI = max(float3(0, 0, 0), x1 + x2 + x3);");
+                    writer.WriteLine(
+                        BakedGIAdapter.GetLightProbeContributionExpr("normalWS", "bakedGI"));
                     break;
             }
             if (m_BakedLightingMode != BakedLightingMode.None || m_ReflectionProbeMode != ReflectionProbeMode.None)
@@ -277,12 +245,7 @@ float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / 
                     
                     string GetReflectionProbeContribution(int index)
                     {
-                        // Note: this only supports the dLDR encoding (which appears to be the default).
-                        const float kReflectionProbeHdrMultiplier = 4.59f;
-                        var textureProperty = PolySpatialShaderProperties.ReflectionProbeTexturePrefix + index;
-                        return $@"
-SAMPLE_TEXTURECUBE_LOD({textureProperty}, sampler{textureProperty}, reflectVector, mip).rgb *
-    {kReflectionProbeHdrMultiplier}";
+                        return ReflectionProbeAdapter.GetProbeContributionExpr(index, "reflectVector", "mip");
                     }
 
                     writer.Write("float3 environmentColor = ");

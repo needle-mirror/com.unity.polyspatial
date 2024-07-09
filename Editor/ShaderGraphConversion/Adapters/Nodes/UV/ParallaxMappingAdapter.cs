@@ -4,6 +4,19 @@ namespace UnityEditor.ShaderGraph.MaterialX
 {
     class ParallaxMappingAdapter : ANodeAdapter<ParallaxMappingNode>
     {
+        // Returns the swizzle component corresponding to the specified color channel.
+        public static char GetSwizzleComponent(Channel channel)
+        {
+            return channel switch
+            {
+                Channel.Red => 'r',
+                Channel.Green => 'g',
+                Channel.Blue => 'b',
+                Channel.Alpha => 'a',
+                _ => throw new NotSupportedException($"Unknown color channel: {channel}"),
+            };
+        }
+
         public override string SupportDetails(AbstractMaterialNode node)
         {
             return QuickNode.GetUVSupportDetails((UVMaterialSlot)NodeUtils.GetSlotByName(node, "UVs"));
@@ -12,14 +25,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override void BuildInstance(
             AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals, SubGraphContext sgContext)
         {
-            var component = ((ParallaxMappingNode)node).channel switch
-            {
-                Channel.Red => 'r',
-                Channel.Green => 'g',
-                Channel.Blue => 'b',
-                Channel.Alpha => 'a',
-                var channel => throw new NotSupportedException($"Unknown color channel: {channel}"),
-            };
+            var component = GetSwizzleComponent(((ParallaxMappingNode)node).channel);
 
             // Reference implementation:
             // https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/Parallax-Mapping-Node.html

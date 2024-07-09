@@ -200,11 +200,6 @@ namespace Unity.PolySpatial
             }
 #endif
 
-            if (results.Count == 0)
-            {
-                results.Add(new SocketAddress() { Host = DefaultServerAddress, Port = DefaultServerPort });
-            }
-
             return results;
         });
 

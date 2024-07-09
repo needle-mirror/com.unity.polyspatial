@@ -54,7 +54,7 @@ namespace UnityEditor.PolySpatial.Internals
         }
 #endif
 
-        static bool ShouldProcessBuild(BuildTarget target)
+        internal static bool ShouldProcessBuild(BuildTarget target)
         {
             // While caching is a lovely idea, it won't work if you don't trigger
             // a domain reload (thus clearing out the cache) in between changing settings.

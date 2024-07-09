@@ -394,11 +394,10 @@ namespace Tests.Runtime.Functional.Components
             Assert.IsFalse(data4.customData.meshRendererTrackingData.materials.hasExternalMaterials);
         }
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         [UnityTest]
         public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenEnableDisable()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-
             bool shouldUpdateSkeleton = true;
 
             void AssertUpdateSkeleton(bool actualValue)
@@ -439,14 +438,11 @@ namespace Tests.Runtime.Functional.Components
             yield return null;
 
             SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
-#endif
         }
 
         [UnityTest]
         public IEnumerator Test_UnitySkinnedMeshRenderer_ShouldUpdateSkeletonWhenChangeMesh()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-
             bool shouldUpdateSkeleton = false;
 
             void AssertUpdateSkeleton(bool actualValue)
@@ -478,8 +474,8 @@ namespace Tests.Runtime.Functional.Components
             yield return null;
 
             SkinnedMeshRendererTracker.OnShouldUpdateSkeleton -= AssertUpdateSkeleton;
-#endif
         }
+#endif
 
 #if UNITY_EDITOR
         [UnityTest]

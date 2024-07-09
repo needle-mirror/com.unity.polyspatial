@@ -50,6 +50,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             if (normalSlot.isConnected)
             {
                 normalNode = graph.AddNode(NodeUtils.GetNodeName(node, "TriplanarNormal"), MtlxNodeTypes.Dot, MtlxDataTypes.Vector3);
+                normalNode.AddPortValue("in", MtlxDataTypes.Vector3, new[] { 0.0f, 0.0f, 1.0f });
                 externals.AddExternalPortAndEdge(normalSlot, normalNode.name, "in");
             }
             else

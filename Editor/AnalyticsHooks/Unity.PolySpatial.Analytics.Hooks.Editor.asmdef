@@ -1,0 +1,35 @@
+{
+    "name": "Unity.PolySpatial.Analytics.Hooks.Editor",
+    "rootNamespace": "UnityEditor.PolySpatial.Analytics",
+    "references": [
+        "Unity.XR.CoreUtils.Editor",
+        "Unity.PolySpatial",
+        "Unity.PolySpatial.Core",
+        "Unity.PolySpatial.Analytics.Editor",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor",
+        "Unity.XR.VisionOS.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.management",
+            "expression": "",
+            "define": "UNITY_HAS_XR_MANAGEMENT"
+        },
+        {
+            "name": "com.unity.xr.visionos",
+            "expression": "",
+            "define": "UNITY_HAS_XR_VISIONOS"
+        }
+    ],
+    "noEngineReferences": false
+}

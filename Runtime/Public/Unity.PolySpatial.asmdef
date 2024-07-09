@@ -3,7 +3,9 @@
     "rootNamespace": "Unity.PolySpatial",
     "references": [
         "Unity.Collections",
-        "Unity.InternalAPIEngineBridge.021"
+        "Unity.InternalAPIEngineBridge.021",
+        "Unity.PolySpatial.Analytics.Editor",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -15,6 +17,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "14",
+            "define": "HAS_URP_14_OR_NEWER"
+        }
+    ],
     "noEngineReferences": false
 }

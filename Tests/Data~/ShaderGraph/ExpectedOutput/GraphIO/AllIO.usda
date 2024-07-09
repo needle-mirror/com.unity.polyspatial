@@ -25,15 +25,15 @@ def "MaterialX"
             def Shader "realitykit_pbr"
             {
                 uniform token info:id = "ND_realitykit_pbr_surfaceshader"
-                float3 inputs:normal.connect = <../_18.outputs:out>
-                float inputs:metallic.connect = <../_27.outputs:out>
-                color3f inputs:emissiveColor.connect = <../_29.outputs:out>
-                float inputs:ambientOcclusion.connect = <../_30.outputs:out>
-                float inputs:clearcoat.connect = <../_31.outputs:out>
-                color3f inputs:baseColor.connect = <../_33.outputs:out>
-                float inputs:specular.connect = <../_22.outputs:out>
-                float inputs:roughness.connect = <../_21.outputs:out>
-                float inputs:clearcoatRoughness.connect = <../_23.outputs:out>
+                float3 inputs:normal.connect = <../_29.outputs:out>
+                float inputs:metallic.connect = <../_38.outputs:out>
+                color3f inputs:emissiveColor.connect = <../_40.outputs:out>
+                float inputs:ambientOcclusion.connect = <../_41.outputs:out>
+                float inputs:clearcoat.connect = <../_42.outputs:out>
+                color3f inputs:baseColor.connect = <../_44.outputs:out>
+                float inputs:specular.connect = <../_33.outputs:out>
+                float inputs:roughness.connect = <../_32.outputs:out>
+                float inputs:clearcoatRoughness.connect = <../_34.outputs:out>
                 token outputs:out
             }
 
@@ -43,143 +43,171 @@ def "MaterialX"
                 token outputs:out
             }
 
-            def Shader "_18"
+            def Shader "_29"
             {
                 uniform token info:id = "ND_multiply_vector3"
-                float3 inputs:in1.connect = <../_9.outputs:out>
-                float3 inputs:in2.connect = <../_17.outputs:out>
+                float3 inputs:in1.connect = <../_16.outputs:out>
+                float3 inputs:in2.connect = <../_28.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "_9"
+            def Shader "_16"
             {
                 uniform token info:id = "ND_dot_vector3"
-                float3 inputs:in.connect = <../_10.outputs:out>
+                float3 inputs:in.connect = <../_17.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "_10"
+            def Shader "_17"
             {
                 uniform token info:id = "ND_combine3_vector3"
-                float inputs:in1.connect = <../_5.outputs:out>
-                float inputs:in2.connect = <../_6.outputs:out>
-                float inputs:in3.connect = <../_7.outputs:out>
+                float inputs:in1.connect = <../_12.outputs:out>
+                float inputs:in2.connect = <../_13.outputs:out>
+                float inputs:in3.connect = <../_14.outputs:out>
                 float3 outputs:out
             }
 
-            def Shader "_5"
+            def Shader "_12"
             {
                 uniform token info:id = "ND_dot_float"
                 float inputs:in.connect = <../.inputs:_Float>
                 float outputs:out
             }
 
-            def Shader "_27"
+            def Shader "_38"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = <../_18.outputs:out>
+                float3 inputs:in.connect = <../_29.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
-            def Shader "_29"
+            def Shader "_40"
             {
                 uniform token info:id = "ND_swizzle_vector3_color3"
-                float3 inputs:in.connect = <../_18.outputs:out>
+                float3 inputs:in.connect = <../_29.outputs:out>
                 string inputs:channels = "xyz"
                 color3f outputs:out
             }
 
-            def Shader "_30"
+            def Shader "_41"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = <../_18.outputs:out>
+                float3 inputs:in.connect = <../_29.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
-            def Shader "_31"
+            def Shader "_42"
             {
                 uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = <../_18.outputs:out>
+                float3 inputs:in.connect = <../_29.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
+            }
+
+            def Shader "_44"
+            {
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = <../_29.outputs:out>
+                string inputs:channels = "xyz"
+                color3f outputs:out
             }
 
             def Shader "_33"
             {
-                uniform token info:id = "ND_swizzle_vector3_color3"
-                float3 inputs:in.connect = <../_18.outputs:out>
-                string inputs:channels = "xyz"
-                color3f outputs:out
-            }
-
-            def Shader "_22"
-            {
                 uniform token info:id = "ND_dotproduct_vector3"
                 float3 inputs:in1 = (0.299, 0.587, 0.114)
-                float3 inputs:in2.connect = <../_18.outputs:out>
+                float3 inputs:in2.connect = <../_29.outputs:out>
                 float outputs:out
             }
 
-            def Shader "_21"
+            def Shader "_32"
             {
                 uniform token info:id = "ND_subtract_float"
                 float inputs:in1 = 1
-                float inputs:in2.connect = <../_28.outputs:out>
+                float inputs:in2.connect = <../_39.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "_39"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = <../_29.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "_34"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2.connect = <../_43.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "_43"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                float3 inputs:in.connect = <../_29.outputs:out>
+                string inputs:channels = "x"
                 float outputs:out
             }
 
             def Shader "_28"
             {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = <../_18.outputs:out>
+                uniform token info:id = "ND_mix_vector3"
+                float3 inputs:bg.connect = <../_6.outputs:out>
+                float3 inputs:fg.connect = <../_36.outputs:out>
+                float inputs:mix.connect = <../_37.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_37"
+            {
+                uniform token info:id = "ND_swizzle_vector4_float"
+                float4 inputs:in.connect = <../_23.outputs:out>
                 string inputs:channels = "x"
                 float outputs:out
             }
 
             def Shader "_23"
             {
-                uniform token info:id = "ND_subtract_float"
-                float inputs:in1 = 1
-                float inputs:in2.connect = <../_32.outputs:out>
-                float outputs:out
-            }
-
-            def Shader "_32"
-            {
-                uniform token info:id = "ND_swizzle_vector3_float"
-                float3 inputs:in.connect = <../_18.outputs:out>
-                string inputs:channels = "x"
-                float outputs:out
-            }
-
-            def Shader "_17"
-            {
-                uniform token info:id = "ND_mix_vector3"
-                float3 inputs:bg.connect = <../_2.outputs:out>
-                float3 inputs:fg.connect = <../_25.outputs:out>
-                float inputs:mix.connect = <../_26.outputs:out>
-                float3 outputs:out
-            }
-
-            def Shader "_26"
-            {
-                uniform token info:id = "ND_swizzle_vector4_float"
-                float4 inputs:in.connect = <../_16.outputs:out>
-                string inputs:channels = "x"
-                float outputs:out
-            }
-
-            def Shader "_16"
-            {
-                uniform token info:id = "ND_transformmatrix_vector4"
+                uniform token info:id = "ND_dot_vector4"
                 float4 inputs:in.connect = <../_24.outputs:out>
-                matrix4d inputs:mat.connect = <../.inputs:_Matrix4x4>
                 float4 outputs:out
             }
 
             def Shader "_24"
+            {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                float4 inputs:in.connect = <../_25.outputs:out>
+                matrix4d inputs:mat.connect = <../_26.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_26"
+            {
+                uniform token info:id = "ND_transpose_matrix44"
+                matrix4d inputs:in.connect = <../_27.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_27"
+            {
+                uniform token info:id = "ND_dot_matrix44"
+                matrix4d inputs:in.connect = <../.inputs:_Matrix4x4>
+                matrix4d outputs:out
+            }
+
+            def Shader "_25"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = <../_35.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_35"
             {
                 uniform token info:id = "ND_swizzle_color4_vector4"
                 color4f inputs:in.connect = <../.inputs:_Color>
@@ -187,7 +215,7 @@ def "MaterialX"
                 float4 outputs:out
             }
 
-            def Shader "_25"
+            def Shader "_36"
             {
                 uniform token info:id = "ND_swizzle_vector4_vector3"
                 float4 inputs:in.connect = <../_1.outputs:out>
@@ -197,43 +225,92 @@ def "MaterialX"
 
             def Shader "_1"
             {
-                uniform token info:id = "ND_transformmatrix_vector4"
-                float4 inputs:in.connect = <../.inputs:_Vector4>
-                matrix4d inputs:mat.connect = <../.inputs:_Matrix4x4>
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = <../_2.outputs:out>
                 float4 outputs:out
             }
 
             def Shader "_2"
             {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                float4 inputs:in.connect = <../_3.outputs:out>
+                matrix4d inputs:mat.connect = <../_4.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_4"
+            {
+                uniform token info:id = "ND_transpose_matrix44"
+                matrix4d inputs:in.connect = <../_5.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_5"
+            {
+                uniform token info:id = "ND_dot_matrix44"
+                matrix4d inputs:in.connect = <../.inputs:_Matrix4x4>
+                matrix4d outputs:out
+            }
+
+            def Shader "_3"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = <../.inputs:_Vector4>
+                float4 outputs:out
+            }
+
+            def Shader "_6"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = <../_7.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_7"
+            {
                 uniform token info:id = "ND_transformmatrix_vector3"
-                matrix3d inputs:mat.connect = <../.inputs:_Matrix3x3>
+                float3 inputs:in.connect = <../_8.outputs:out>
+                matrix3d inputs:mat.connect = <../_9.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_9"
+            {
+                uniform token info:id = "ND_dot_matrix33"
+                matrix3d inputs:in.connect = <../.inputs:_Matrix3x3>
+                matrix3d outputs:out
+            }
+
+            def Shader "_8"
+            {
+                uniform token info:id = "ND_dot_vector3"
                 float3 inputs:in.connect = <../.inputs:_Vector3>
                 float3 outputs:out
             }
 
-            def Shader "_6"
+            def Shader "_13"
             {
                 uniform token info:id = "ND_dot_float"
                 float inputs:in.connect = <../.inputs:_Boolean>
                 float outputs:out
             }
 
-            def Shader "_7"
+            def Shader "_14"
             {
                 uniform token info:id = "ND_dot_float"
-                float inputs:in.connect = <../_14.outputs:out>
+                float inputs:in.connect = <../_21.outputs:out>
                 float outputs:out
             }
 
-            def Shader "_14"
+            def Shader "_21"
             {
                 uniform token info:id = "ND_extract_vector2"
-                float2 inputs:in.connect = <../_13.outputs:out>
+                float2 inputs:in.connect = <../_20.outputs:out>
                 int inputs:index = 0
                 float outputs:out
             }
 
-            def Shader "_13"
+            def Shader "_20"
             {
                 uniform token info:id = "ND_dot_vector2"
                 float2 inputs:in.connect = <../.inputs:_Vector2>

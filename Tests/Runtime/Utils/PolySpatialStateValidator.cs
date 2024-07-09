@@ -7,7 +7,6 @@ using Unity.PolySpatial.Internals;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using Object = System.Object;
 using UnityObject = UnityEngine.Object;
 

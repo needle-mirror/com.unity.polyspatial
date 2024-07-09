@@ -55,6 +55,19 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
+        public IEnumerator Test_Camera_TargetTexture()
+        {
+            var camera = CreateCamera("TestCamera1");
+            camera.targetTexture = new RenderTexture(8, 8, 24);
+
+            yield return null;
+
+            var data = PolySpatialComponentUtils.GetTrackingData(camera);
+            Assert.IsTrue(data.ValidateTrackingFlags());
+            Assert.IsFalse(data.IsEnabled());
+        }
+
+        [UnityTest]
         public IEnumerator Test_Camera_UnitySceneGraph_WithVolumeCamera()
         {
             var u = PolySpatialCore.LocalBackend as PolySpatialUnityBackend;

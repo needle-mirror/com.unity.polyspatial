@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using Tests.Runtime.PolySpatialTest.Utils;
 using Unity.PolySpatial;
@@ -481,6 +483,45 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_UnexposedMaterialProperties()
+        {
+            CreateTestObjects();
+
+            var material1 = PolySpatialComponentUtils.CreateMaterial(
+                MaterialConversionHelpers.s_MaskingShader, Color.red);
+            m_TestMeshRenderer.sharedMaterial = material1;
+
+            yield return null;
+
+            // Before setting _UVTransform, we should have a false value in hasProperties.
+            var data1 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
+            Assert.IsTrue(data1.ValidateTrackingFlags());
+            Assert.AreEqual(1, data1.customData.materials.materialIds.Length);
+            Assert.IsTrue(data1.customData.materials.materialIds[0].IsValid());
+
+            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data1.customData.materials.materialIds[0], out var materialData1);
+            Assert.AreEqual(1, materialData1.matrix4x4Properties.Value.Length);
+            Assert.IsTrue(materialData1.hasProperties.Value.Contains(false));
+
+            var matrix1 = Matrix4x4.Scale(new Vector3(1.0f, 2.0f, 3.0f));
+            m_TestMeshRenderer.sharedMaterial.SetMatrix("_UVTransform", matrix1);
+
+            // Merely setting the matrix property doesn't dirty the material.
+            // TODO (LXR-3649): Remove this once we fix it in trunk.
+            m_TestMeshRenderer.sharedMaterial.SetColor("_Color", Color.green);
+
+            yield return null;
+
+            // After setting _UVTransform, we should have all properties and the correct matrix value.
+            var data2 = PolySpatialComponentUtils.GetTrackingData(m_TestMeshRenderer);
+            Assert.AreEqual(data1.customData.materials.materialIds[0], data2.customData.materials.materialIds[0]);
+            PolySpatialCore.LocalAssetManager.GetPolySpatialMaterialDataForRegisteredMaterial(data2.customData.materials.materialIds[0], out var materialData2);
+            Assert.AreEqual(1, materialData2.matrix4x4Properties.Value.Length);
+            Assert.IsFalse(materialData2.hasProperties.Value.Contains(false));
+            Assert.AreEqual(materialData2.matrix4x4Properties.Value[0], matrix1);
+        }
+
+        [UnityTest]
         public IEnumerator Test_UnityMeshRenderer_SupportedShader([ValueSource(nameof(k_ShadersToTest))] string shaderName)
         {
             if (shaderName.Equals(String.Empty))
@@ -518,6 +559,30 @@ namespace Tests.Runtime.Functional.Components
         }
 
         [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_EmptyTexture()
+        {
+            CreateTestObjects();
+            
+            m_TestMeshFilter.sharedMesh = CreateTestMesh();
+            m_TestMeshRenderer.sharedMaterial = PolySpatialComponentUtils.CreateUnlitMaterial(Color.blue);
+            m_TestMeshRenderer.sharedMaterial.mainTexture = new Texture2D(0, 0);
+
+            yield return null;
+
+#if UNITY_EDITOR
+            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(PolySpatialInstanceID.For(m_TestMeshRenderer.gameObject));
+            Assert.NotNull(backingGameObject);
+            var meshRenderer = backingGameObject.GetComponent<MeshRenderer>();
+            Assert.NotNull(meshRenderer);
+            var material = meshRenderer.sharedMaterial;
+            Assert.NotNull(material);
+            var texture = material.mainTexture as Texture2D;
+            Assert.NotNull(texture);
+            Assert.AreEqual(texture.GetPixels(), Texture2D.grayTexture.GetPixels());
+#endif
+        }
+
+        [UnityTest]
         public IEnumerator Test_UnityMeshRenderer_ShadowsOnly()
         {
             CreateTestObjects();
@@ -528,6 +593,56 @@ namespace Tests.Runtime.Functional.Components
 
             AssertNullMeshRenderer();
         }
+
+#if UNITY_EDITOR
+        [UnityTest]
+        public IEnumerator Test_UnityMeshRenderer_StaticBatching()
+        {
+            // Create two sets of test objects so that we can merge them.
+            var (otherGameObject, otherMeshRenderer, otherMeshFilter) = CreateTestObjects();
+            CreateTestObjects();
+
+            otherGameObject.transform.parent = m_TestGameObject.transform;
+
+            m_TestMeshFilter.sharedMesh = CreateTestMesh();
+            otherMeshFilter.sharedMesh = CreateTestMesh();
+
+            var staticBatchElement = m_TestGameObject.AddComponent<PolySpatialStaticBatchElement>();
+            staticBatchElement.ApplyToDescendants = true;
+
+            yield return null;
+
+            var backingGameObject = BackingComponentUtils.GetBackingGameObjectFor(
+                PolySpatialInstanceID.For(m_TestGameObject));
+            var otherBackingGameObject = BackingComponentUtils.GetBackingGameObjectFor(
+                PolySpatialInstanceID.For(otherGameObject));
+
+            var backingMeshRenderer = backingGameObject.GetComponent<MeshRenderer>();
+            var otherBackingMeshRenderer = otherBackingGameObject.GetComponent<MeshRenderer>();
+
+            Assert.IsTrue(backingMeshRenderer.isPartOfStaticBatch);
+            Assert.IsTrue(otherBackingMeshRenderer.isPartOfStaticBatch);
+
+            var backingMeshFilter = backingGameObject.GetComponent<MeshFilter>();
+            var otherBackingMeshFilter = otherBackingGameObject.GetComponent<MeshFilter>();
+
+            Assert.AreEqual(backingMeshFilter.sharedMesh, otherBackingMeshFilter.sharedMesh);
+
+            staticBatchElement.DestroyAppropriately();
+
+            yield return null;
+
+            // With only one element in the "batch," StaticBatchingUtility.Combine doesn't bother.
+            Assert.IsFalse(backingMeshRenderer.isPartOfStaticBatch);
+            Assert.IsFalse(otherBackingMeshRenderer.isPartOfStaticBatch);
+
+            Assert.AreNotEqual(backingMeshFilter.sharedMesh, otherBackingMeshFilter.sharedMesh);
+
+            otherMeshRenderer.DestroyAppropriately();
+            otherMeshFilter.DestroyAppropriately();
+            otherGameObject.DestroyAppropriately();
+        }
+#endif
 
         void AssertNullMeshRenderer()
         {

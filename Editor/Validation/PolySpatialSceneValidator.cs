@@ -15,7 +15,6 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 using UnityEngine.Tilemaps;
@@ -23,8 +22,6 @@ using UnityEngine.Video;
 using UnityEngine.InputSystem.OnScreen;
 using UIDocument = UnityEngine.UIElements.UIDocument;
 using UnityObject = UnityEngine.Object;
-
-
 
 namespace UnityEditor.PolySpatial.Validation
 {
@@ -270,7 +267,7 @@ namespace UnityEditor.PolySpatial.Validation
             AddRuleCreator(typeof(OcclusionArea), unsupportedRuleCreator);
             AddRuleCreator(typeof(OcclusionPortal), unsupportedRuleCreator);
 
-            AddRuleCreator(typeof(DecalProjector), unsupportedRuleCreator);
+            UniversalRenderPipelineUtils.ApplyToUnsupportedURPTypes(type => AddRuleCreator(type, unsupportedRuleCreator));
 
             AddRuleCreator(typeof(VisualEffect), unsupportedRuleCreator);
             AddRuleCreator(typeof(LODGroup), unsupportedRuleCreator);
