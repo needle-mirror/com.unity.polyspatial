@@ -1,0 +1,97 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <dot name = "_1" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_2" />
+    </dot>
+    <mix name = "_2" type = "vector3">
+        <input name = "bg" type = "vector3" nodename = "_3" />
+        <input name = "fg" type = "vector3" nodename = "_5" />
+        <input name = "mix" type = "float" nodename = "_7" />
+    </mix>
+    <convert name = "_3" type = "vector3">
+        <input name = "in" type = "color3" nodename = "_4" />
+    </convert>
+    <dot name = "_4" type = "color3">
+        <input name = "in" type = "color3" value = "0.4479884,0.4479884,0.4479884" />
+    </dot>
+    <convert name = "_5" type = "vector3">
+        <input name = "in" type = "color3" nodename = "_6" />
+    </convert>
+    <dot name = "_6" type = "color3">
+        <input name = "in" type = "color3" value = "0.03310476,0.03310476,0.03310476" />
+    </dot>
+    <subtract name = "_7" type = "float">
+        <input name = "in1" type = "float" nodename = "_8" />
+        <input name = "in2" type = "float" nodename = "_20" />
+    </subtract>
+    <add name = "_8" type = "float">
+        <input name = "in1" type = "float" nodename = "_9" />
+        <input name = "in2" type = "float" nodename = "_18" />
+    </add>
+    <splitlr name = "_9" type = "float">
+        <input name = "valuel" type = "float" value = "0" />
+        <input name = "valuer" type = "float" value = "1" />
+        <input name = "center" type = "float" value = "0.5" />
+        <input name = "texcoord" type = "vector2" nodename = "_10" />
+    </splitlr>
+    <realitykit_fractional name = "_10" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "_11" />
+    </realitykit_fractional>
+    <multiply name = "_11" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "_12" />
+        <input name = "in2" type = "vector2" nodename = "_17" />
+    </multiply>
+    <add name = "_12" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "_13" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </add>
+    <dot name = "_13" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "_16" />
+    </dot>
+    <texcoord name = "_14" type = "vector2">
+        <input name = "index" type = "integer" value = "0" />
+    </texcoord>
+    <multiply name = "_15" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "_14" />
+        <input name = "in2" type = "vector2" value = "1,-1" />
+    </multiply>
+    <add name = "_16" type = "vector2">
+        <input name = "in1" type = "vector2" nodename = "_15" />
+        <input name = "in2" type = "vector2" value = "0,1" />
+    </add>
+    <dot name = "_17" type = "vector2">
+        <input name = "in" type = "vector2" value = "1,1" />
+    </dot>
+    <splitlr name = "_18" type = "float">
+        <input name = "valuel" type = "float" value = "0" />
+        <input name = "valuer" type = "float" value = "1" />
+        <input name = "center" type = "float" value = "0.5" />
+        <input name = "texcoord" type = "vector2" nodename = "_19" />
+    </splitlr>
+    <swizzle name = "_19" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "_10" />
+        <input name = "channels" type = "string" value = "yx" />
+    </swizzle>
+    <multiply name = "_20" type = "float">
+        <input name = "in1" type = "float" nodename = "_21" />
+        <input name = "in2" type = "float" nodename = "_18" />
+    </multiply>
+    <multiply name = "_21" type = "float">
+        <input name = "in1" type = "float" value = "2" />
+        <input name = "in2" type = "float" nodename = "_9" />
+    </multiply>
+    <GeometryModification name = "_22" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "_23" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "_24" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Procedural" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_22" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_23" />
+    </surfacematerial>
+    <swizzle name = "_24" type = "color3">
+        <input name = "in" type = "vector3" nodename = "_1" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

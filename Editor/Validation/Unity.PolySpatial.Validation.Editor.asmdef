@@ -1,0 +1,36 @@
+{
+    "name": "Unity.PolySpatial.Validation.Editor",
+    "rootNamespace": "UnityEditor.PolySpatial.Validation",
+    "references": [
+        "Unity.InternalAPIEditorBridge.021",
+        "Unity.PolySpatial",
+        "Unity.PolySpatial.Core",
+        "Unity.PolySpatial.Editor",
+        "Unity.XR.CoreUtils",
+        "Unity.XR.CoreUtils.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "Unity.XR.ARFoundation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Unity.PolySpatial.Core.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.arfoundation",
+            "expression": "1.0.0",
+            "define": "ENABLE_AR_FOUNDATION"
+        }
+    ],
+    "noEngineReferences": false
+}

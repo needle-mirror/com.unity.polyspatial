@@ -1,0 +1,93 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <dot name = "_1" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_2" />
+    </dot>
+    <divide name = "_2" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_3" />
+        <input name = "in2" type = "vector3" nodename = "_6" />
+    </divide>
+    <subtract name = "_3" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_4" />
+        <input name = "in2" type = "vector3" nodename = "_5" />
+    </subtract>
+    <dot name = "_4" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_16" />
+    </dot>
+    <dot name = "_5" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_17" />
+    </dot>
+    <subtract name = "_6" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_7" />
+        <input name = "in2" type = "vector3" nodename = "_5" />
+    </subtract>
+    <dot name = "_7" type = "vector3">
+        <input name = "in" type = "vector3" value = "1,1,1" />
+    </dot>
+    <dot name = "_8" type = "float">
+        <input name = "in" type = "float" nodename = "_9" />
+    </dot>
+    <divide name = "_9" type = "float">
+        <input name = "in1" type = "float" nodename = "_10" />
+        <input name = "in2" type = "float" nodename = "_13" />
+    </divide>
+    <subtract name = "_10" type = "float">
+        <input name = "in1" type = "float" nodename = "_11" />
+        <input name = "in2" type = "float" nodename = "_12" />
+    </subtract>
+    <dot name = "_11" type = "float">
+        <input name = "in" type = "float" nodename = "_15" />
+    </dot>
+    <dot name = "_12" type = "float">
+        <input name = "in" type = "float" nodename = "_18" />
+    </dot>
+    <subtract name = "_13" type = "float">
+        <input name = "in1" type = "float" nodename = "_14" />
+        <input name = "in2" type = "float" nodename = "_12" />
+    </subtract>
+    <dot name = "_14" type = "float">
+        <input name = "in" type = "float" value = "1" />
+    </dot>
+    <mix name = "_15" type = "float">
+        <input name = "bg" type = "float" nodename = "_18" />
+        <input name = "fg" type = "float" value = "1" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </mix>
+    <mix name = "_16" type = "vector3">
+        <input name = "bg" type = "vector3" nodename = "_17" />
+        <input name = "fg" type = "vector3" value = "1,1,1" />
+        <input name = "mix" type = "float" value = "0.5" />
+    </mix>
+    <combine3 name = "_17" type = "vector3">
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "in3" type = "float" value = "0" />
+    </combine3>
+    <constant name = "_18" type = "float">
+        <input name = "value" type = "float" value = "0" />
+    </constant>
+    <GeometryModification name = "_19" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_pbr name = "_20" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "_22" />
+        <input name = "metallic" type = "float" nodename = "_8" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
+        <input name = "roughness" type = "float" nodename = "_21" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+    </realitykit_pbr>
+    <surfacematerial name = "USD_Interpolation" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_19" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_20" />
+    </surfacematerial>
+    <subtract name = "_21" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "_22" type = "color3">
+        <input name = "in" type = "vector3" nodename = "_1" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

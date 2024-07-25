@@ -1,0 +1,198 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_geometry_modifier_vertex_id name = "_1" type = "integer">
+    </realitykit_geometry_modifier_vertex_id>
+    <divide name = "_2" type = "float">
+        <input name = "in1" type = "float" nodename = "_50" />
+        <input name = "in2" type = "float" value = "24" />
+    </divide>
+    <geomcolor name = "_3" type = "color4">
+    </geomcolor>
+    <dot name = "_4" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_5" />
+    </dot>
+    <swizzle name = "_5" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "_6" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <transformmatrix name = "_6" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_7" />
+        <input name = "mat" type = "matrix44" nodename = "_19" />
+    </transformmatrix>
+    <transformmatrix name = "_7" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_8" />
+        <input name = "mat" type = "matrix44" nodename = "_16" />
+    </transformmatrix>
+    <combine4 name = "_8" type = "vector4">
+        <input name = "in1" type = "float" nodename = "_9" />
+        <input name = "in2" type = "float" nodename = "_14" />
+        <input name = "in3" type = "float" nodename = "_15" />
+        <input name = "in4" type = "float" value = "0" />
+    </combine4>
+    <swizzle name = "_9" type = "float">
+        <input name = "in" type = "vector3" nodename = "_10" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <multiply name = "_10" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_11" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <subtract name = "_11" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_12" />
+        <input name = "in2" type = "vector3" nodename = "_13" />
+    </subtract>
+    <realitykit_cameraposition name = "_12" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </realitykit_cameraposition>
+    <position name = "_13" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <swizzle name = "_14" type = "float">
+        <input name = "in" type = "vector3" nodename = "_10" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "_15" type = "float">
+        <input name = "in" type = "vector3" nodename = "_10" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <multiply name = "_16" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "_17" />
+        <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+    </multiply>
+    <multiply name = "_17" type = "matrix44">
+        <input name = "in1" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+        <input name = "in2" type = "matrix44" nodename = "_18" />
+    </multiply>
+    <realitykit_surface_model_to_world name = "_18" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <invertmatrix name = "_19" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "_20" />
+    </invertmatrix>
+    <realitykit_combine4 name = "_20" type = "matrix44">
+        <input name = "in1" type = "vector4" nodename = "_21" />
+        <input name = "in2" type = "vector4" nodename = "_28" />
+        <input name = "in3" type = "vector4" nodename = "_35" />
+        <input name = "in4" type = "vector4" nodename = "_42" />
+    </realitykit_combine4>
+    <normalize name = "_21" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_22" />
+    </normalize>
+    <multiply name = "_22" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_23" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "_23" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_24" />
+        <input name = "mat" type = "matrix44" nodename = "_27" />
+    </transformmatrix>
+    <multiply name = "_24" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_25" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "_25" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_26" />
+    </convert>
+    <tangent name = "_26" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </tangent>
+    <realitykit_surface_model_to_world name = "_27" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <normalize name = "_28" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_29" />
+    </normalize>
+    <multiply name = "_29" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_30" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "_30" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_31" />
+        <input name = "mat" type = "matrix44" nodename = "_34" />
+    </transformmatrix>
+    <multiply name = "_31" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_32" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "_32" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_33" />
+    </convert>
+    <bitangent name = "_33" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </bitangent>
+    <realitykit_surface_model_to_world name = "_34" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <normalize name = "_35" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_36" />
+    </normalize>
+    <multiply name = "_36" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_37" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "_37" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_38" />
+        <input name = "mat" type = "matrix44" nodename = "_41" />
+    </transformmatrix>
+    <multiply name = "_38" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_39" />
+        <input name = "in2" type = "vector4" value = "1,1,1,0" />
+    </multiply>
+    <convert name = "_39" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_40" />
+    </convert>
+    <normal name = "_40" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </normal>
+    <realitykit_surface_model_to_world name = "_41" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <multiply name = "_42" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_43" />
+        <input name = "in2" type = "vector4" value = "1,1,-1,1" />
+    </multiply>
+    <transformmatrix name = "_43" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_44" />
+        <input name = "mat" type = "matrix44" nodename = "_46" />
+    </transformmatrix>
+    <convert name = "_44" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_45" />
+    </convert>
+    <position name = "_45" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <realitykit_surface_model_to_world name = "_46" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <GeometryModification name = "_47" type = "vertexshader">
+        <input name = "color" type = "color4" nodename = "_53" />
+    </GeometryModification>
+    <realitykit_pbr name = "_48" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "_51" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" nodename = "_52" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
+        <input name = "roughness" type = "float" nodename = "_49" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+    </realitykit_pbr>
+    <surfacematerial name = "USD_Geometry" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_47" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_48" />
+    </surfacematerial>
+    <subtract name = "_49" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <convert name = "_50" type = "float">
+        <input name = "in" type = "integer" nodename = "_1" />
+    </convert>
+    <swizzle name = "_51" type = "color3">
+        <input name = "in" type = "color4" nodename = "_3" />
+        <input name = "channels" type = "string" value = "rgb" />
+    </swizzle>
+    <swizzle name = "_52" type = "color3">
+        <input name = "in" type = "vector3" nodename = "_4" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <swizzle name = "_53" type = "color4">
+        <input name = "in" type = "float" nodename = "_2" />
+        <input name = "channels" type = "string" value = "xxxx" />
+    </swizzle>
+</materialx>

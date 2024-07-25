@@ -1,0 +1,268 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_Matrix"
+        {
+
+            token outputs:mtlx:surface.connect = <realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = <GeometryModifier.outputs:out>
+
+            def Shader "realitykit_pbr"
+            {
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor = (0.2140411, 0.2140411, 0.2140411)
+                float inputs:metallic = 0
+                color3f inputs:emissiveColor.connect = <../_30.outputs:out>
+                float inputs:ambientOcclusion = 1
+                float inputs:specular = 0.5
+                float inputs:roughness.connect = <../_25.outputs:out>
+                float inputs:clearcoat = 0
+                float inputs:clearcoatRoughness = 0.01
+                token outputs:out
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                float3 inputs:modelPositionOffset.connect = <../_23.outputs:out>
+                token outputs:out
+            }
+
+            def Shader "_30"
+            {
+                uniform token info:id = "ND_combine3_color3"
+                float inputs:in1.connect = <../_31.outputs:out>
+                float inputs:in2.connect = <../_32.outputs:out>
+                float inputs:in3 = 0
+                color3f outputs:out
+            }
+
+            def Shader "_31"
+            {
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = <../_29.outputs:out>
+                string inputs:channels = "x"
+                float outputs:out
+            }
+
+            def Shader "_29"
+            {
+                uniform token info:id = "ND_dot_vector2"
+                float2 inputs:in.connect = <../_19.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "_19"
+            {
+                uniform token info:id = "ND_add_vector2"
+                float2 inputs:in1.connect = <../_15.outputs:out>
+                float2 inputs:in2.connect = <../_27.outputs:out>
+                float2 outputs:out
+            }
+
+            def Shader "_15"
+            {
+                uniform token info:id = "ND_transformmatrix_vector2"
+                matrix2d inputs:mat.connect = <../_12.outputs:out>
+                float2 inputs:in = (2, 2)
+                float2 outputs:out
+            }
+
+            def Shader "_12"
+            {
+                uniform token info:id = "ND_constant_matrix22"
+                matrix2d inputs:value = ((1, 0), (0, 1))
+                matrix2d outputs:out
+            }
+
+            def Shader "_25"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1
+                float inputs:in2 = 0.5
+                float outputs:out
+            }
+
+            def Shader "_23"
+            {
+                uniform token info:id = "ND_subtract_vector3"
+                float3 inputs:in1.connect = <../_22.outputs:out>
+                float3 inputs:in2.connect = <../_24.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_24"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "object"
+                float3 outputs:out
+            }
+
+            def Shader "_22"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in2 = (1, 1, -1)
+                float3 inputs:in1.connect = <../_28.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_28"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = <../_10.outputs:out>
+                string inputs:channels = "xyz"
+                float3 outputs:out
+            }
+
+            def Shader "_10"
+            {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                matrix4d inputs:mat.connect = <../_1.outputs:out>
+                float4 inputs:in.connect = <../_11.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_11"
+            {
+                uniform token info:id = "ND_combine4_vector4"
+                float inputs:in1 = 0
+                float inputs:in2 = 0
+                float inputs:in3 = 0
+                float inputs:in4 = 1
+                float4 outputs:out
+            }
+
+            def Shader "_1"
+            {
+                uniform token info:id = "ND_dot_matrix44"
+                matrix4d inputs:in.connect = <../_2.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_2"
+            {
+                uniform token info:id = "ND_dot_matrix44"
+                matrix4d inputs:in.connect = <../_3.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_3"
+            {
+                uniform token info:id = "ND_invertmatrix_matrix44"
+                matrix4d inputs:in.connect = <../_4.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_4"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = <../_5.outputs:out>
+                matrix4d inputs:in2.connect = <../_8.outputs:out>
+                matrix4d outputs:out
+            }
+
+            def Shader "_8"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = <../_9.outputs:worldToModel>
+                matrix4d inputs:in2 = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, 1))
+                matrix4d outputs:out
+            }
+
+            def Shader "_9"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_world_to_model"
+                matrix4d outputs:worldToModel
+            }
+
+            def Shader "_5"
+            {
+                uniform token info:id = "ND_multiply_matrix44"
+                matrix4d inputs:in1.connect = <../_6.outputs:viewToProjection>
+                matrix4d inputs:in2.connect = <../_7.outputs:modelToView>
+                matrix4d outputs:out
+            }
+
+            def Shader "_7"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_model_to_view"
+                matrix4d outputs:modelToView
+            }
+
+            def Shader "_6"
+            {
+                uniform token info:id = "ND_realitykit_geometry_modifier_view_to_projection"
+                matrix4d outputs:viewToProjection
+            }
+
+            def Shader "_32"
+            {
+                uniform token info:id = "ND_swizzle_vector2_float"
+                float2 inputs:in.connect = <../_29.outputs:out>
+                string inputs:channels = "y"
+                float outputs:out
+            }
+
+            def Shader "_27"
+            {
+                uniform token info:id = "ND_swizzle_vector3_vector2"
+                float3 inputs:in.connect = <../_18.outputs:out>
+                string inputs:channels = "xy"
+                float2 outputs:out
+            }
+
+            def Shader "_18"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = <../_16.outputs:out>
+                float3 inputs:in2.connect = <../_26.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_16"
+            {
+                uniform token info:id = "ND_transformmatrix_vector3"
+                matrix3d inputs:mat.connect = <../_13.outputs:out>
+                float3 inputs:in = (2, 2, 2)
+                float3 outputs:out
+            }
+
+            def Shader "_13"
+            {
+                uniform token info:id = "ND_constant_matrix33"
+                matrix3d inputs:value = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+                matrix3d outputs:out
+            }
+
+            def Shader "_26"
+            {
+                uniform token info:id = "ND_swizzle_vector4_vector3"
+                float4 inputs:in.connect = <../_17.outputs:out>
+                string inputs:channels = "xyz"
+                float3 outputs:out
+            }
+
+            def Shader "_17"
+            {
+                uniform token info:id = "ND_transformmatrix_vector4"
+                matrix4d inputs:mat.connect = <../_14.outputs:out>
+                float4 inputs:in = (2, 2, 2, 2)
+                float4 outputs:out
+            }
+
+            def Shader "_14"
+            {
+                uniform token info:id = "ND_constant_matrix44"
+                matrix4d inputs:value = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1))
+                matrix4d outputs:out
+            }
+        }
+    }
+}

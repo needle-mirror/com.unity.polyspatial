@@ -1,0 +1,145 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <dot name = "_1" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_2" />
+    </dot>
+    <swizzle name = "_2" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "_3" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <transformmatrix name = "_3" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_4" />
+        <input name = "mat" type = "matrix44" nodename = "_9" />
+    </transformmatrix>
+    <combine4 name = "_4" type = "vector4">
+        <input name = "in1" type = "float" nodename = "_5" />
+        <input name = "in2" type = "float" nodename = "_7" />
+        <input name = "in3" type = "float" nodename = "_8" />
+        <input name = "in4" type = "float" value = "1" />
+    </combine4>
+    <swizzle name = "_5" type = "float">
+        <input name = "in" type = "vector3" nodename = "_6" />
+        <input name = "channels" type = "string" value = "x" />
+    </swizzle>
+    <dot name = "_6" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_35" />
+    </dot>
+    <swizzle name = "_7" type = "float">
+        <input name = "in" type = "vector3" nodename = "_6" />
+        <input name = "channels" type = "string" value = "y" />
+    </swizzle>
+    <swizzle name = "_8" type = "float">
+        <input name = "in" type = "vector3" nodename = "_6" />
+        <input name = "channels" type = "string" value = "z" />
+    </swizzle>
+    <invertmatrix name = "_9" type = "matrix44">
+        <input name = "in" type = "matrix44" nodename = "_10" />
+    </invertmatrix>
+    <multiply name = "_10" type = "matrix44">
+        <input name = "in1" type = "matrix44" nodename = "_11" />
+        <input name = "in2" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+    </multiply>
+    <multiply name = "_11" type = "matrix44">
+        <input name = "in1" type = "matrix44" value = "1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1" />
+        <input name = "in2" type = "matrix44" nodename = "_12" />
+    </multiply>
+    <realitykit_surface_model_to_world name = "_12" type = "matrix44">
+    </realitykit_surface_model_to_world>
+    <convert name = "_13" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_14" />
+    </convert>
+    <multiply name = "_14" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_15" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <position name = "_15" type = "vector3">
+        <input name = "space" type = "string" value = "world" />
+    </position>
+    <subtract name = "_16" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_1" />
+        <input name = "in2" type = "vector3" nodename = "_36" />
+    </subtract>
+    <convert name = "_17" type = "vector4">
+        <input name = "in" type = "vector3" nodename = "_18" />
+    </convert>
+    <multiply name = "_18" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_19" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <position name = "_19" type = "vector3">
+        <input name = "space" type = "string" value = "object" />
+    </position>
+    <magnitude name = "_20" type = "float">
+        <input name = "in" type = "vector3" nodename = "_16" />
+    </magnitude>
+    <ifgreater name = "_21" type = "float">
+        <input name = "value1" type = "float" nodename = "_20" />
+        <input name = "value2" type = "float" value = "0.1" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+    </ifgreater>
+    <dot name = "_22" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_23" />
+    </dot>
+    <combine4 name = "_23" type = "vector4">
+        <input name = "in1" type = "float" nodename = "_24" />
+        <input name = "in2" type = "float" nodename = "_25" />
+        <input name = "in3" type = "float" nodename = "_26" />
+        <input name = "in4" type = "float" nodename = "_27" />
+    </combine4>
+    <dot name = "_24" type = "float">
+        <input name = "in" type = "float" nodename = "_32" />
+    </dot>
+    <dot name = "_25" type = "float">
+        <input name = "in" type = "float" nodename = "_21" />
+    </dot>
+    <dot name = "_26" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "_27" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "_28" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_29" />
+    </dot>
+    <combine3 name = "_29" type = "vector3">
+        <input name = "in1" type = "float" nodename = "_24" />
+        <input name = "in2" type = "float" nodename = "_25" />
+        <input name = "in3" type = "float" nodename = "_26" />
+    </combine3>
+    <dot name = "_30" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "_31" />
+    </dot>
+    <combine2 name = "_31" type = "vector2">
+        <input name = "in1" type = "float" nodename = "_24" />
+        <input name = "in2" type = "float" nodename = "_25" />
+    </combine2>
+    <ifgreater name = "_32" type = "float">
+        <input name = "value1" type = "float" nodename = "_20" />
+        <input name = "value2" type = "float" value = "0.1" />
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+    </ifgreater>
+    <GeometryModification name = "_33" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "_34" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "_37" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_GeomPosition" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_33" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_34" />
+    </surfacematerial>
+    <swizzle name = "_35" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "_13" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <swizzle name = "_36" type = "vector3">
+        <input name = "in" type = "vector4" nodename = "_17" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+    <swizzle name = "_37" type = "color3">
+        <input name = "in" type = "vector3" nodename = "_28" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

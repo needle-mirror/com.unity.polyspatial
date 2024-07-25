@@ -1,0 +1,138 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <ifequal name = "_1" type = "float">
+        <input name = "value1" type = "boolean" nodename = "_ENUM_A" />
+        <input name = "value2" type = "boolean" value = "true" />
+        <input name = "in1" type = "float" nodename = "_2" />
+        <input name = "in2" type = "float" nodename = "_3" />
+    </ifequal>
+    <constant name = "_ENUM_A" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <dot name = "_2" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <ifequal name = "_3" type = "float">
+        <input name = "value1" type = "boolean" nodename = "_ENUM_B" />
+        <input name = "value2" type = "boolean" value = "true" />
+        <input name = "in1" type = "float" nodename = "_4" />
+        <input name = "in2" type = "float" nodename = "_5" />
+    </ifequal>
+    <constant name = "_ENUM_B" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <dot name = "_4" type = "float">
+        <input name = "in" type = "float" value = "1" />
+    </dot>
+    <dot name = "_5" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <constant name = "_BOOLEAN" type = "boolean">
+        <input name = "value" type = "boolean" value = "false" />
+    </constant>
+    <ifequal name = "_6" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0" />
+        <input name = "value1" type = "boolean" nodename = "_BOOLEAN" />
+        <input name = "value2" type = "boolean" value = "true" />
+    </ifequal>
+    <subtract name = "_7" type = "float">
+        <input name = "in1" type = "float" nodename = "_1" />
+        <input name = "in2" type = "float" nodename = "_6" />
+    </subtract>
+    <dot name = "_8" type = "float">
+        <input name = "in" type = "float" nodename = "_9" />
+    </dot>
+    <ifequal name = "_9" type = "float">
+        <input name = "value1" type = "float" nodename = "_10" />
+        <input name = "value2" type = "float" value = "0" />
+        <input name = "in1" type = "float" value = "0" />
+        <input name = "in2" type = "float" value = "1" />
+    </ifequal>
+    <add name = "_10" type = "float">
+        <input name = "in1" type = "float" nodename = "_11" />
+        <input name = "in2" type = "float" nodename = "_13" />
+    </add>
+    <absval name = "_11" type = "float">
+        <input name = "in" type = "float" nodename = "_12" />
+    </absval>
+    <dot name = "_12" type = "float">
+        <input name = "in" type = "float" nodename = "_1" />
+    </dot>
+    <absval name = "_13" type = "float">
+        <input name = "in" type = "float" nodename = "_14" />
+    </absval>
+    <dot name = "_14" type = "float">
+        <input name = "in" type = "float" nodename = "_6" />
+    </dot>
+    <ifgreater name = "_15" type = "float">
+        <input name = "in1" type = "float" nodename = "_7" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "value1" type = "float" nodename = "_16" />
+    </ifgreater>
+    <absval name = "_16" type = "float">
+        <input name = "in" type = "float" nodename = "_8" />
+    </absval>
+    <dot name = "_17" type = "vector4">
+        <input name = "in" type = "vector4" nodename = "_18" />
+    </dot>
+    <combine4 name = "_18" type = "vector4">
+        <input name = "in1" type = "float" nodename = "_19" />
+        <input name = "in2" type = "float" nodename = "_20" />
+        <input name = "in3" type = "float" nodename = "_21" />
+        <input name = "in4" type = "float" nodename = "_22" />
+    </combine4>
+    <dot name = "_19" type = "float">
+        <input name = "in" type = "float" nodename = "_28" />
+    </dot>
+    <dot name = "_20" type = "float">
+        <input name = "in" type = "float" nodename = "_27" />
+    </dot>
+    <dot name = "_21" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "_22" type = "float">
+        <input name = "in" type = "float" value = "0" />
+    </dot>
+    <dot name = "_23" type = "vector3">
+        <input name = "in" type = "vector3" nodename = "_24" />
+    </dot>
+    <combine3 name = "_24" type = "vector3">
+        <input name = "in1" type = "float" nodename = "_19" />
+        <input name = "in2" type = "float" nodename = "_20" />
+        <input name = "in3" type = "float" nodename = "_21" />
+    </combine3>
+    <dot name = "_25" type = "vector2">
+        <input name = "in" type = "vector2" nodename = "_26" />
+    </dot>
+    <combine2 name = "_26" type = "vector2">
+        <input name = "in1" type = "float" nodename = "_19" />
+        <input name = "in2" type = "float" nodename = "_20" />
+    </combine2>
+    <subtract name = "_27" type = "float">
+        <input name = "in2" type = "float" nodename = "_15" />
+        <input name = "in1" type = "float" value = "1" />
+    </subtract>
+    <ifgreater name = "_28" type = "float">
+        <input name = "in1" type = "float" nodename = "_7" />
+        <input name = "in2" type = "float" value = "1" />
+        <input name = "value1" type = "float" nodename = "_29" />
+    </ifgreater>
+    <absval name = "_29" type = "float">
+        <input name = "in" type = "float" nodename = "_8" />
+    </absval>
+    <GeometryModification name = "_30" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "_31" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "_32" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_Keywords" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_30" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_31" />
+    </surfacematerial>
+    <swizzle name = "_32" type = "color3">
+        <input name = "in" type = "vector3" nodename = "_23" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>
