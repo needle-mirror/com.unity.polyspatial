@@ -24,10 +24,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                 if (graph.GetOrAddNode("ViewProjection", MtlxNodeTypes.Multiply, MtlxDataTypes.Matrix44, out var viewProj))
                 {
-                    QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.ViewMatrix, MtlxDataTypes.Matrix44, graph);
-                    QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.ProjectionMatrix, MtlxDataTypes.Matrix44, graph);
-                    graph.AddPortAndEdge(PolySpatialShaderGlobals.ViewMatrix, viewProj.name, "in1", MtlxDataTypes.Matrix44);
-                    graph.AddPortAndEdge(PolySpatialShaderGlobals.ProjectionMatrix, viewProj.name, "in2", MtlxDataTypes.Matrix44);
+                    QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.k_ViewMatrix, MtlxDataTypes.Matrix44, graph);
+                    QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.k_ProjectionMatrix, MtlxDataTypes.Matrix44, graph);
+                    graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ViewMatrix, viewProj.name, "in1", MtlxDataTypes.Matrix44);
+                    graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ProjectionMatrix, viewProj.name, "in2", MtlxDataTypes.Matrix44);
                 }
 
                 graph.AddPortAndEdge(wPos4.name, clipPos.name, "in", MtlxDataTypes.Vector4);
@@ -88,16 +88,16 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 return raw;
             }
 
-            QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.ScreenParams, MtlxDataTypes.Vector4, graph);
+            QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.k_ScreenParams, MtlxDataTypes.Vector4, graph);
             if (graph.GetOrAddNode("ScreenWidth", MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, out var screenWidth))
             {
                 screenWidth.AddPortString("channels", MtlxDataTypes.String, "x");
-                graph.AddPortAndEdge(PolySpatialShaderGlobals.ScreenParams, screenWidth.name, "in", MtlxDataTypes.Vector4);
+                graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ScreenParams, screenWidth.name, "in", MtlxDataTypes.Vector4);
             }
             if (graph.GetOrAddNode("ScreenHeight", MtlxNodeTypes.Swizzle, MtlxDataTypes.Float, out var screenHeight))
             {
                 screenHeight.AddPortString("channels", MtlxDataTypes.String, "y");
-                graph.AddPortAndEdge(PolySpatialShaderGlobals.ScreenParams, screenHeight.name, "in", MtlxDataTypes.Vector4);
+                graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ScreenParams, screenHeight.name, "in", MtlxDataTypes.Vector4);
             }
 
             if (graph.GetOrAddNode("NDCPosition", MtlxNodeTypes.Divide, MtlxDataTypes.Vector4, out var NDCPos)) // clip / screenDim

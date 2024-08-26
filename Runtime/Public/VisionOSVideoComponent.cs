@@ -5,13 +5,16 @@ using UnityEngine.Video;
 namespace Unity.PolySpatial
 {
     /// <summary>
-    /// A custom component to provide video capabilities to a target platform.
+    /// The mesh renderer on which the video should render. Overwrites the current material on the renderer.
     /// </summary>
     public class VisionOSVideoComponent : MonoBehaviour
     {
         [SerializeField]
         [Tooltip("The mesh renderer that this video clip will be applied to.")]
         MeshRenderer m_TargetMaterialRenderer;
+        /// <summary>
+        /// The mesh renderer on which the video should render. Overwrites the current material on the renderer.
+        /// </summary>
         public MeshRenderer targetMaterialRenderer
         {
             get => m_TargetMaterialRenderer;
@@ -23,8 +26,11 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        [Tooltip("Video clip to be used.")]
+        [Tooltip("The video asset to play.")]
         VideoClip m_Clip;
+        /// <summary>
+        /// The video asset to play.
+        /// </summary>
         public VideoClip clip
         {
             get => m_Clip;
@@ -36,8 +42,11 @@ namespace Unity.PolySpatial
         }
 
         [SerializeField]
-        [Tooltip("Whether video player should loop this clip.")]
+        [Tooltip("Whether the video should repeat when playback reaches the end of the clip.")]
         bool m_IsLooping = true;
+        /// <summary>
+        /// Whether the video should repeat when playback reaches the end of the clip.
+        /// </summary>
         public bool isLooping
         {
             get => m_IsLooping;
@@ -51,6 +60,9 @@ namespace Unity.PolySpatial
         [SerializeField]
         [Tooltip("Whether video clip should play on awake.")]
         bool m_PlayOnAwake = true;
+        /// <summary>
+        /// Whether video clip should play on awake.
+        /// </summary>
         public bool playOnAwake
         {
             get => m_PlayOnAwake;
@@ -71,8 +83,8 @@ namespace Unity.PolySpatial
         float m_Volume = 1.0f;
 
         /// <summary>
-        /// Enum defining the current playing state of the
-        /// video player.
+        /// Enumerates to possible playing states of the video player. Use <see cref="GetState"/>
+        /// to access the current state of a visionOS video component.
         /// </summary>
         public enum PlayerState: int
         {
@@ -100,11 +112,18 @@ namespace Unity.PolySpatial
                 m_State = PlayerState.IsPlaying;
         }
 
+        /// <summary>
+        /// Obtain the current play state of the video player.
+        /// </summary>
+        /// <returns>The player state.</returns>
         public PlayerState GetState()
         {
             return m_State;
         }
 
+        /// <summary>
+        /// Starts playback of the video.
+        /// </summary>
         public void Play()
         {
             if (m_State != PlayerState.IsPlaying)
@@ -114,6 +133,9 @@ namespace Unity.PolySpatial
             }
         }
 
+        /// <summary>
+        /// Stops the playback of the video.
+        /// </summary>
         public void Stop()
         {
             if (m_State != PlayerState.IsStopped)
@@ -124,6 +146,9 @@ namespace Unity.PolySpatial
 
         }
 
+        /// <summary>
+        /// Pauses the playback of the video.
+        /// </summary>
         public void Pause()
         {
             if (m_State != PlayerState.IsPaused)
@@ -133,6 +158,11 @@ namespace Unity.PolySpatial
             }
         }
 
+        /// <summary>
+        /// Gets the mute status of first track on the video clip.
+        /// </summary>
+        /// <param name="trackIndex">The track index (indices greater than 0 not supported).</param>
+        /// <returns>The mute status of first track on the video clip.</returns>
         public bool GetDirectAudioMute(ushort trackIndex)
         {
             if (trackIndex > 0)
@@ -141,6 +171,11 @@ namespace Unity.PolySpatial
             return m_Mute;
         }
 
+        /// <summary>
+        /// Sets the mute state of the first track on the video clip.
+        /// </summary>
+        /// <param name="trackIndex">The track index (indices greater than 0 not supported).</param>
+        /// <param name="mute">The mute state to set.</param>
         public void SetDirectAudioMute(ushort trackIndex, bool mute)
         {
             if (trackIndex > 0)
@@ -150,6 +185,11 @@ namespace Unity.PolySpatial
             this.MarkDirty();
         }
 
+        /// <summary>
+        /// Gets the volume of the first track on the video clip.
+        /// </summary>
+        /// <param name="trackIndex">The track index (indices greater than 0 not supported).</param>
+        /// <returns>The volume between 0.0 and 1.0</returns>
         public float GetDirectAudioVolume(ushort trackIndex)
         {
             if (trackIndex > 0)
@@ -158,6 +198,11 @@ namespace Unity.PolySpatial
             return m_Volume;
         }
 
+        /// <summary>
+        /// Sets the volume of the first track on the video clip.
+        /// </summary>
+        /// <param name="trackIndex">The track index (indices greater than 0 not supported).</param>
+        /// <param name="volume">The volume to set between 0.0 and 1.0.</param>
         public void SetDirectAudioVolume(ushort trackIndex, float volume)
         {
             if (trackIndex > 0)

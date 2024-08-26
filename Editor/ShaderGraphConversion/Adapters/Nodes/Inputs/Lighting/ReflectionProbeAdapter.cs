@@ -8,7 +8,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         {
             // Note: this only supports the dLDR encoding (which appears to be the default).
             const float kReflectionProbeHdrMultiplier = 4.59f;
-            var textureProperty = PolySpatialShaderProperties.ReflectionProbeTexturePrefix + probeIndex;
+            var textureProperty = PolySpatialShaderPropertiesInternal.ReflectionProbeTexturePrefix + probeIndex;
             return $@"
 SAMPLE_TEXTURECUBE_LOD({textureProperty}, sampler{textureProperty}, {reflectVector}, {lod}).rgb *
 {kReflectionProbeHdrMultiplier}";

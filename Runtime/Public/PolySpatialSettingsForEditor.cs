@@ -72,6 +72,15 @@ namespace Unity.PolySpatial
                 // Dispatch asset creation on main thread in case instance is created on worker thread
                 EditorApplication.delayCall += () =>
                 {
+                    PolySpatialSettings firstInstance = s_Instance;
+
+                    // It can fail the first time around if the database isn't ready yet, try again in the delayCall.
+                    s_Instance = AssetDatabase.LoadAssetAtPath<PolySpatialSettings>(k_DefaultAssetPath);
+                    if (s_Instance != null)
+                    {
+                        return;
+                    }
+
                     // Don't overwrite an existing asset if one already exists
                     if (File.Exists(k_DefaultAssetPath))
                     {
@@ -82,9 +91,9 @@ namespace Unity.PolySpatial
                     }
 
                     Directory.CreateDirectory(Path.GetDirectoryName(k_DefaultAssetPath));
-                    AssetDatabase.CreateAsset(s_Instance, k_DefaultAssetPath);
-                    EditorUtility.SetDirty(s_Instance);
-                    AssetDatabase.SaveAssetIfDirty(s_Instance);
+                    AssetDatabase.CreateAsset(firstInstance, k_DefaultAssetPath);
+                    EditorUtility.SetDirty(firstInstance);
+                    AssetDatabase.SaveAssetIfDirty(firstInstance);
                 };
             }
 #endif

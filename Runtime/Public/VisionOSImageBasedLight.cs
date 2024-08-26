@@ -3,6 +3,15 @@ using Unity.PolySpatial.Internals;
 
 namespace Unity.PolySpatial
 {
+    /// <summary>
+    /// Creates an image-based lighting source, which uses textures to illuminate one or more receiver GameObjects.
+    /// </summary>
+    /// <remarks>
+    /// A `VisionOSImageBasedLight` object maps directly to a [RealityKit ImageBasedLightComponent](https://developer.apple.com/documentation/realitykit/imagebasedlightcomponent).
+    ///
+    /// Refer to [Image Based Lighting](xref:psl-vos-image-based-light) for additional information about
+    /// how to set up and use image based lights.
+    /// </remarks>
     public class VisionOSImageBasedLight : MonoBehaviour
     {
         [SerializeField]

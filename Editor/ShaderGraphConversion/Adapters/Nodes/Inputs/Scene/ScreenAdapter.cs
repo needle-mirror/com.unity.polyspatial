@@ -10,10 +10,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
         public override void BuildInstance(AbstractMaterialNode node, MtlxGraphData graph, ExternalEdgeMap externals)
         {
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.ScreenParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_ScreenParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Width", MtlxDataTypes.Float, "x");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.ScreenParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_ScreenParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Height", MtlxDataTypes.Float, "y");
         }
     }

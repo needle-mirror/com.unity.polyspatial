@@ -47,7 +47,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             properties.AddShaderProperty(new Matrix4ShaderProperty()
             {
-                overrideReferenceName = PolySpatialShaderProperties.VolumeToWorld,
+                overrideReferenceName = PolySpatialShaderPropertiesInternal.VolumeToWorld,
                 generatePropertyBlock = false,
             });
         }
@@ -57,14 +57,14 @@ namespace UnityEditor.ShaderGraph.MaterialX
             return m_TransformMode switch
             {
                 TransformMode.Position =>
-                    $"Out = mul({PolySpatialShaderProperties.VolumeToWorld}, float4(In, 1)).xyz;",
-                TransformMode.Direction => 
-                    $"Out = normalize(mul({PolySpatialShaderProperties.VolumeToWorld}, float4(In, 0)).xyz);",
-                TransformMode.Vector => $"Out = mul({PolySpatialShaderProperties.VolumeToWorld}, float4(In, 0)).xyz;",
+                    $"Out = mul({PolySpatialShaderPropertiesInternal.VolumeToWorld}, float4(In, 1)).xyz;",
+                TransformMode.Direction =>
+                    $"Out = normalize(mul({PolySpatialShaderPropertiesInternal.VolumeToWorld}, float4(In, 0)).xyz);",
+                TransformMode.Vector => $"Out = mul({PolySpatialShaderPropertiesInternal.VolumeToWorld}, float4(In, 0)).xyz;",
                 _ => throw new NotSupportedException($"Unsupported transform mode {m_TransformMode}"),
             };
         }
-        
+
         protected override MethodInfo GetFunctionToConvert()
         {
             return GetType().GetMethod("PolySpatial_VolumeToWorld", BindingFlags.Instance | BindingFlags.NonPublic);

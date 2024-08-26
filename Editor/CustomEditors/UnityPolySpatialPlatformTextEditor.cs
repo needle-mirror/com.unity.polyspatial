@@ -1,6 +1,4 @@
 using System;
-using System.Security.Permissions;
-using TMPro;
 using Unity.PolySpatial;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -11,8 +9,9 @@ namespace UnityEditor.PolySpatial.Internals
     [CustomEditor(typeof(VisionOSNativeText))]
     public class UnityPolySpatialPlatformTextEditor : Editor
     {
-        static string s_Uxml = "EditorUI/psl-platform-text";
-        static string s_Uss = "EditorUI/psl-platform-text-style";
+        // These guids come from the files under com.unity.polyspatial/Editor/EditorUI/
+        const string k_UxmlGUID = "edb5c083071c947e798de07fdd657621";
+        const string k_UssGUID = "bc5f45cb6f5dc4ea8b9d9603a486e55d";
 
         RectIntField m_Insets;
         Vector2Field m_CanvasSize;
@@ -20,10 +19,15 @@ namespace UnityEditor.PolySpatial.Internals
 
         public override VisualElement CreateInspectorGUI()
         {
+            var uxmlPath = AssetDatabase.GUIDToAssetPath(k_UxmlGUID);
+            var ussPath = AssetDatabase.GUIDToAssetPath(k_UssGUID);
+
             VisualElement customInspector = new VisualElement();
-            var visualTree = Resources.Load(s_Uxml) as VisualTreeAsset;
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(uxmlPath);
             visualTree.CloneTree(customInspector);
-            customInspector.styleSheets.Add(Resources.Load(s_Uss) as StyleSheet);
+
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(ussPath);
+            customInspector.styleSheets.Add(styleSheet);
 
             m_Insets = customInspector.Q<RectIntField>(name: "Insets");
             if (m_Insets != null)

@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace Unity.PolySpatial
 {
+    /// <summary>
+    /// Contains the configurable properties for a Volume Camera Window.
+    /// </summary>
     [CreateAssetMenu(fileName = "VolumeCameraWindowConfiguration", menuName = "PolySpatial/Volume Camera Window Configuration")]
     public class VolumeCameraWindowConfiguration : ScriptableObject
     {

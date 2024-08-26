@@ -13,15 +13,15 @@ namespace UnityEditor.ShaderGraph.MaterialX
             {
                 ["Color/Sky"] = new(MtlxNodeTypes.Dot, MtlxDataTypes.Vector4, new()
                 {
-                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.AmbientSkyColor, MtlxDataTypes.Vector4),
+                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.k_AmbientSkyColor, MtlxDataTypes.Vector4),
                 }),
                 ["Equator"] = new(MtlxNodeTypes.Dot, MtlxDataTypes.Vector4, new()
                 {
-                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.AmbientEquatorColor, MtlxDataTypes.Vector4),
+                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.k_AmbientEquatorColor, MtlxDataTypes.Vector4),
                 }),
                 ["Ground"] = new(MtlxNodeTypes.Dot, MtlxDataTypes.Vector4, new()
                 {
-                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.AmbientGroundColor, MtlxDataTypes.Vector4),
+                    ["in"] = new ImplicitInputDef(PolySpatialShaderGlobals.k_AmbientGroundColor, MtlxDataTypes.Vector4),
                 }),
             });
         }

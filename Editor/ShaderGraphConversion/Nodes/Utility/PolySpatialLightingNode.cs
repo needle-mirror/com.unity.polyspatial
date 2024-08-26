@@ -84,7 +84,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         }
 
         public override bool hasPreview => false;
-        
+
         public override void CollectShaderProperties(PropertyCollector properties, GenerationMode generationMode)
         {
             base.CollectShaderProperties(properties, generationMode);
@@ -126,24 +126,24 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 AddProperty(new Matrix4ShaderProperty(), referenceName);
             }
 
-            AddMatrix4Property(PolySpatialShaderProperties.VolumeToWorld);
+            AddMatrix4Property(PolySpatialShaderPropertiesInternal.VolumeToWorld);
 
             switch (m_BakedLightingMode)
             {
                 case BakedLightingMode.Lightmap:
-                    AddTexture2DProperty(PolySpatialShaderProperties.Lightmap);
-                    AddTexture2DProperty(PolySpatialShaderProperties.LightmapInd);
-                    AddVector4Property(PolySpatialShaderProperties.LightmapST);
+                    AddTexture2DProperty(PolySpatialShaderPropertiesInternal.Lightmap);
+                    AddTexture2DProperty(PolySpatialShaderPropertiesInternal.LightmapInd);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.LightmapST);
                     break;
 
                 case BakedLightingMode.LightProbes:
-                    AddVector4Property(PolySpatialShaderProperties.SHAr);
-                    AddVector4Property(PolySpatialShaderProperties.SHAg);
-                    AddVector4Property(PolySpatialShaderProperties.SHAb);
-                    AddVector4Property(PolySpatialShaderProperties.SHBr);
-                    AddVector4Property(PolySpatialShaderProperties.SHBg);
-                    AddVector4Property(PolySpatialShaderProperties.SHBb);
-                    AddVector4Property(PolySpatialShaderProperties.SHC);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHAr);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHAg);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHAb);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHBr);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHBg);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHBb);
+                    AddVector4Property(PolySpatialShaderPropertiesInternal.SHC);
                     break;
             }
 
@@ -152,18 +152,18 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 switch (m_ReflectionProbeMode)
                 {
                     case ReflectionProbeMode.None:
-                        AddVector4Property(PolySpatialShaderGlobals.GlossyEnvironmentColor);
+                        AddVector4Property(PolySpatialShaderGlobals.k_GlossyEnvironmentColor);
                         break;
-                    
+
                     case ReflectionProbeMode.Simple:
-                        AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + "0");
+                        AddCubemapProperty(PolySpatialShaderPropertiesInternal.ReflectionProbeTexturePrefix + "0");
                         break;
-                    
+
                     case ReflectionProbeMode.Blended:
-                        for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+                        for (var i = 0; i < PolySpatialShaderPropertiesInternal.ReflectionProbeCount; ++i)
                         {
-                            AddCubemapProperty(PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i);
-                            AddFloatProperty(PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i);
+                            AddCubemapProperty(PolySpatialShaderPropertiesInternal.ReflectionProbeTexturePrefix + i);
+                            AddFloatProperty(PolySpatialShaderPropertiesInternal.ReflectionProbeWeightPrefix + i);
                         }
                         break;
                 }
@@ -171,12 +171,12 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
             if (m_DynamicLighting)
             {
-                for (var i = 0; i < PolySpatialShaderGlobals.LightCount; ++i)
+                for (var i = 0; i < PolySpatialShaderGlobals.k_LightCount; ++i)
                 {
-                    AddVector4Property(PolySpatialShaderGlobals.LightColorPrefix + i);
-                    AddVector4Property(PolySpatialShaderGlobals.LightPositionPrefix + i);
-                    AddVector4Property(PolySpatialShaderGlobals.SpotDirectionPrefix + i);
-                    AddVector4Property(PolySpatialShaderGlobals.LightAttenPrefix + i);
+                    AddVector4Property(PolySpatialShaderGlobals.k_LightColorPrefix + i);
+                    AddVector4Property(PolySpatialShaderGlobals.k_LightPositionPrefix + i);
+                    AddVector4Property(PolySpatialShaderGlobals.k_SpotDirectionPrefix + i);
+                    AddVector4Property(PolySpatialShaderGlobals.k_LightAttenPrefix + i);
                 }
             }
         }
@@ -188,8 +188,8 @@ namespace UnityEditor.ShaderGraph.MaterialX
             // Compute the world space normal from the tangent space input normal and tangent frame vectors.
             writer.WriteLine($@"
 float3 normalVS = mul(Normal, float3x3(TangentFrameX, TangentFrameY, TangentFrameZ));
-float3 normalWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorld}, float4(normalVS, 0.0)).xyz);");
-            
+float3 normalWS = normalize(mul({PolySpatialShaderPropertiesInternal.VolumeToWorld}, float4(normalVS, 0.0)).xyz);");
+
             // https://github.cds.internal.unity3d.com/unity/unity/blob/918aac026438f350a9716ff831b1e309f2483743/Packages/com.unity.render-pipelines.universal/ShaderLibrary/BRDF.hlsl#L82
             Color kDialectricSpec = new(0.04f, 0.04f, 0.04f, 1.0f - 0.04f);
             writer.WriteLine($"float oneMinusReflectivity = {kDialectricSpec.a} * (1.0 - Metallic);");
@@ -208,7 +208,7 @@ float3 brdfSpecular = lerp(
             writer.WriteLine("float normalizationTerm = roughness * 4.0 + 2.0;");
             writer.WriteLine("float grazingTerm = saturate(Smoothness + reflectivity);");
             writer.WriteLine($@"
-float3 viewDirectionWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorld},
+float3 viewDirectionWS = normalize(mul({PolySpatialShaderPropertiesInternal.VolumeToWorld},
     float4(ViewDirectionVS, 0.0)).xyz);");
 
             StringBuilder finalSumExpr = new("Emission");
@@ -219,7 +219,7 @@ float3 viewDirectionWS = normalize(mul({PolySpatialShaderProperties.VolumeToWorl
                     writer.WriteLine(
                         BakedGIAdapter.GetLightmapContributionExpr("LightmapUV", true, "normalWS", "bakedGI"));
                     break;
-                
+
                 case BakedLightingMode.LightProbes:
                     writer.WriteLine(
                         BakedGIAdapter.GetLightProbeContributionExpr("normalWS", "bakedGI"));
@@ -236,13 +236,13 @@ float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / 
                 if (m_ReflectionProbeMode == ReflectionProbeMode.None)
                 {
                     writer.WriteLine(
-                        $"float3 environmentColor = {PolySpatialShaderGlobals.GlossyEnvironmentColor}.rgb;");
+                        $"float3 environmentColor = {PolySpatialShaderGlobals.k_GlossyEnvironmentColor}.rgb;");
                 }
                 else
                 {
                     // https://github.cds.internal.unity3d.com/unity/unity/blob/5d88a17c0c2ef08e18187e62c5d6b08fa4463ab1/Packages/com.unity.render-pipelines.core/ShaderLibrary/ImageBasedLighting.hlsl#L27
                     writer.WriteLine("float mip = perceptualRoughness * (10.2 - 4.2 * perceptualRoughness);");
-                    
+
                     string GetReflectionProbeContribution(int index)
                     {
                         return ReflectionProbeAdapter.GetProbeContributionExpr(index, "reflectVector", "mip");
@@ -255,13 +255,13 @@ float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / 
                     }
                     else
                     {
-                        for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+                        for (var i = 0; i < PolySpatialShaderPropertiesInternal.ReflectionProbeCount; ++i)
                         {
                             if (i > 0)
                                 writer.Write(" + ");
-                            
+
                             writer.Write($@"
-{GetReflectionProbeContribution(i)} * {PolySpatialShaderProperties.ReflectionProbeWeightPrefix}{i}");
+{GetReflectionProbeContribution(i)} * {PolySpatialShaderPropertiesInternal.ReflectionProbeWeightPrefix}{i}");
                         }
                     }
                     writer.WriteLine(";");
@@ -272,19 +272,19 @@ float3 environmentBrdfSpecular = lerp(brdfSpecular, grazingTerm, fresnelTerm) / 
                 writer.WriteLine("environmentColor * environmentBrdfSpecular;");
                 finalSumExpr.Append(" + bakedContribution * AmbientOcclusion");
             }
-            
+
             if (m_DynamicLighting)
             {
                 writer.WriteLine($@"
-float3 positionWS = mul({PolySpatialShaderProperties.VolumeToWorld}, float4(PositionVS, 1)).xyz;");
+float3 positionWS = mul({PolySpatialShaderPropertiesInternal.VolumeToWorld}, float4(PositionVS, 1)).xyz;");
 
-                for (var i = 0; i < PolySpatialShaderGlobals.LightCount; ++i)
+                for (var i = 0; i < PolySpatialShaderGlobals.k_LightCount; ++i)
                 {
                     // https://github.cds.internal.unity3d.com/unity/unity/blob/918aac026438f350a9716ff831b1e309f2483743/Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl#L154
-                    var lightColor = PolySpatialShaderGlobals.LightColorPrefix + i;
-                    var lightPosition = PolySpatialShaderGlobals.LightPositionPrefix + i;
-                    var lightAtten = PolySpatialShaderGlobals.LightAttenPrefix + i;
-                    var spotDirection = PolySpatialShaderGlobals.SpotDirectionPrefix + i;
+                    var lightColor = PolySpatialShaderGlobals.k_LightColorPrefix + i;
+                    var lightPosition = PolySpatialShaderGlobals.k_LightPositionPrefix + i;
+                    var lightAtten = PolySpatialShaderGlobals.k_LightAttenPrefix + i;
+                    var spotDirection = PolySpatialShaderGlobals.k_SpotDirectionPrefix + i;
 
                     writer.WriteLine($@"
 float3 lightVector{i} = {lightPosition}.xyz - positionWS * {lightPosition}.w;");

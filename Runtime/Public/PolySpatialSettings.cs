@@ -235,6 +235,9 @@ namespace Unity.PolySpatial
             set => m_DefaultVolumeCameraWindowConfiguration = value;
         }
 
+        /// <summary>
+        /// Renamed to DefaultVolumeCameraWindowConfiguration -> DefaultVolumeCameraWindowConfiguration
+        /// </summary>
         [Obsolete("Renamed to DefaultVolumeCameraWindowConfiguration (UnityUpgradable) -> DefaultVolumeCameraWindowConfiguration")]
         public VolumeCameraWindowConfiguration DefaultVolumeCameraConfiguration
         {
@@ -246,6 +249,9 @@ namespace Unity.PolySpatial
         [Tooltip("When enabled, if there is no Volume Camera after scene load, one will be automatically created using the default settings. Disable this to be able to create the initial Volume Camera from script.")]
         bool m_AutoCreateVolumeCamera = true;
 
+        /// <summary>
+        /// When enabled, if there is no Volume Camera after scene load, one will be automatically created using the default settings. Disable this to be able to create the initial Volume Camera from script.
+        /// </summary>
         public bool AutoCreateVolumeCamera
         {
             get => m_AutoCreateVolumeCamera;

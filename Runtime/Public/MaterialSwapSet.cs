@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Unity.PolySpatial
 {
+    /// <summary>
+    /// Defines a list of materials and their replacements.
+    /// </summary>
     [CreateAssetMenu(menuName = "PolySpatial/Material Swap Set")]
     public class MaterialSwapSet : ScriptableObject
     {

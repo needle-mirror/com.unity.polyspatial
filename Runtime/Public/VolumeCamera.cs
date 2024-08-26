@@ -21,6 +21,20 @@ namespace Unity.PolySpatial
     //
     // In unbounded mode, everything works similar, except that the volume camera and volume renderer each define an
     // unbounded 3-space rather than a bounded 3-space volume.
+
+    /// <summary>
+    /// Specifies the portion of the scene to render in a volume window. A volume window is
+    /// similar to a standard computer window with the addition of a third dimension.
+    /// Every volume camera has an associated volume window.
+    /// </summary>
+    /// <remarks>
+    /// In metal mode, most of the properties of the VolumeCamera are not used. Instead,
+    /// the scene is rendered by the main scene camera (in stereo).
+    ///
+    /// You can only have one volume camera in unbounded or metal mode at the same time.
+    /// You can have multiple bounded volume cameras in addition to a volume camera in
+    /// unbounded or metal mode.
+    /// </remarks>
     [Icon("Camera Gizmo")]
     public class VolumeCamera : MonoBehaviour
     {
@@ -49,6 +63,9 @@ namespace Unity.PolySpatial
         [Tooltip("Only objects in the selected layers will be visible inside this Volume Camera.")]
         LayerMask m_CullingMask = ~0x0;
 
+        /// <summary>
+        /// If true, a window is automatically opened for this volume camera when loaded. If false, the window must be opened manually via OpenWindow().
+        /// </summary>
         [SerializeField]
         [Tooltip("If true, a window is automatically opened for this volume camera when loaded. If false, the window must be opened manually via OpenWindow().")]
         public bool OpenWindowOnLoad = true;
@@ -98,12 +115,24 @@ namespace Unity.PolySpatial
             }
         }
 
+        /// <summary>
+        /// Enum to define the mode of the volume camera, Bounded or Unbounded.
+        /// </summary>
         public enum PolySpatialVolumeCameraMode : int
         {
+            /// <summary>
+            /// Mode where only content contained within the camera's bounding box appears inside your Volume Window.
+            /// </summary>
             Bounded = 0,
+            /// <summary>
+            /// Mode where the entire Unity scene is shown in a visionOS Immersive Space.
+            /// </summary>
             Unbounded = 1,
         }
 
+        /// <summary>
+        /// Enum for all possible window events that can occur on a volume camera.
+        /// </summary>
         public enum WindowEvent : int
         {
             /// <summary>
@@ -135,7 +164,7 @@ namespace Unity.PolySpatial
 
 
         /// <summary>
-        ///  Struct to encapsulate a change in window state.
+        /// Struct to encapsulate a change in window state.
         /// </summary>
         public struct WindowState
         {
@@ -167,6 +196,10 @@ namespace Unity.PolySpatial
             public bool IsFocused;
         }
 
+        /// <summary>
+        /// The output Volume Camera Window Configuration object for this volume camera, or None for default.
+        /// Create new volume camera configurations via the Asset Create menu.
+        /// </summary>
         public VolumeCameraWindowConfiguration WindowConfiguration
         {
             get => m_OutputConfiguration;
@@ -232,8 +265,9 @@ namespace Unity.PolySpatial
             }
         }
 
-        // A matrix that translates from the unit cube at origin canonical volume space
-        // back into the world space of the volume camera.
+        /// <summary>
+        /// A matrix that translates from the unit cube at origin canonical volume space back into the world space of the volume camera.
+        /// </summary>
         public Matrix4x4 VolumeSpaceToWorldSpaceMatrix
         {
             get
@@ -243,7 +277,9 @@ namespace Unity.PolySpatial
             }
         }
 
-        // A matrix that translates from world space into the unit cube at origin canonical volume space.
+        /// <summary>
+        /// A matrix that translates from world space into the unit cube at origin canonical volume space.
+        /// </summary>
         public Matrix4x4 WorldSpaceToVolumeSpaceMatrix
         {
             get

@@ -99,15 +99,10 @@ namespace Unity.PolySpatial.Internals
             Object.Destroy(obj);
         }
 
-        internal unsafe void SetPolySpatialColliderData(PolySpatialTrackingFlags trackingFlags, UnityColliderInfo colliderInfo)
-        {
-            if (trackingFlags.HasFlag(PolySpatialTrackingFlags.Destroyed) &&
-                TryGetBackingCollider(colliderInfo.colliderId, out var destroyedComponent))
-            {
-                DestroyAppropriately(colliderInfo.colliderId, destroyedComponent);
-                return;
-            }
+        internal bool IsEmpty => m_ColliderMap.Count == 0;
 
+        internal unsafe void CreateOrUpdateCollider(PolySpatialTrackingFlags trackingFlags, UnityColliderInfo colliderInfo)
+        {
             if (trackingFlags.HasFlag(PolySpatialTrackingFlags.Disabled) &&
                 TryGetBackingCollider(colliderInfo.colliderId, out var disabledComponent))
             {
@@ -149,6 +144,14 @@ namespace Unity.PolySpatial.Internals
                 default:
                     Debug.Log($"ColliderShape {colliderInfo.shape} not implemented.");
                     break;
+            }
+        }
+
+        internal void DestroyCollider(int colliderId)
+        {
+            if (TryGetBackingCollider(colliderId, out var destroyedComponent))
+            {
+                DestroyAppropriately(colliderId, destroyedComponent);
             }
         }
 

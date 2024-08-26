@@ -7,6 +7,37 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.9] - 2024-08-26
+
+### Added
+- Persona feed on visionOS is now accessible via WebCamTexture after fixing a KeyNotFoundException (will require Unity 2022.3.41f1+).
+
+### Changed
+- Accept "Sprite Unlit" as a material type in URP targets for shader graph conversion.
+- VisionOS Sorting Group, VisionOS Image Based Light Receiver, and VisionOS Grounding Shadow components will now apply to particle systems.
+- Cleaned up some uses of "Resource" folders within the package, which will slightly decrease your build size.
+- Downgraded our com.unity.collections package dependencey from 2.1.4 to 1.2.3 so our packages could be a discoverable package in Unity version 2022.3.x.
+
+### Removed
+- Most of our test assemblies for this package have been moved out of the package.  Only the isolation tests will remain that can run from a blank project.
+
+### Fixed
+- Wrap all MonoPInvokeCallback methods in try/catch to avoid potential crashes in player builds.
+- Fixed MaterialSwapSet not being applied to materials that utilize material property blocks or particle systems.
+- Fixed "Failed to upload NativeTexture" error when transferring RenderTextures over Play to Device.
+- Fixed incorrect input name in Baked GI shader graph node for Unity 2022.3.24f1+.
+- Fixed failure to transfer RenderTextures in their native formats (e.g., RGBAHalf) over Play to Device.
+- Fixed issue where VisionOSVideoComponents would stop playing after switching from a bounded to an unbounded window configuration (or app would crash if a video was playing when switching window configurations).
+- Fixed issue with RenderTexture mipmaps being auto-generated when autoGenerateMips was false.
+- Fix for running unit tests without URP installed.
+- Fixed "Unsupported target type" warning for shader graph conversion for HDRP/when URP not installed.
+- Added built-in targets to particle bake-to-texture shader graphs.
+- Fixed error logged on import: `A new PolySpatialSettings asset was initialized when its asset already exists. Was PolySpatialSettings.instance used by an asset importer?`
+- Disabling a camera component will result in the camera being deleted in the Unity backend, matching the behavior for disabling other component types.
+- Fixed "Assertion failed on expression: '!GetMainEditorWindow()'" that shows up in batchmode.
+- Disabling a collider component will result in the collider being disabled in the Unity backend.
+- Fixed issues with synchronizing entities with multiple colliders.
+
 ## [1.3.1] - 2024-07-09
 
 ## [1.3.0] - 2024-06-26

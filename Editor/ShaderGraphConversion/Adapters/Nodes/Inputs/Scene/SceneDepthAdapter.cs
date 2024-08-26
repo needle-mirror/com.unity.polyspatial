@@ -22,10 +22,10 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
                     if (graph.GetOrAddNode("ViewProjection", MtlxNodeTypes.Multiply, MtlxDataTypes.Matrix44, out var viewProj))
                     {
-                        QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.ViewMatrix, MtlxDataTypes.Matrix44, graph);
-                        QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.ProjectionMatrix, MtlxDataTypes.Matrix44, graph);
-                        graph.AddPortAndEdge(PolySpatialShaderGlobals.ViewMatrix, viewProj.name, "in1", MtlxDataTypes.Matrix44);
-                        graph.AddPortAndEdge(PolySpatialShaderGlobals.ProjectionMatrix, viewProj.name, "in2", MtlxDataTypes.Matrix44);
+                        QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.k_ViewMatrix, MtlxDataTypes.Matrix44, graph);
+                        QuickNode.EnsureImplicitProperty(PolySpatialShaderGlobals.k_ProjectionMatrix, MtlxDataTypes.Matrix44, graph);
+                        graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ViewMatrix, viewProj.name, "in1", MtlxDataTypes.Matrix44);
+                        graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ProjectionMatrix, viewProj.name, "in2", MtlxDataTypes.Matrix44);
                     }
 
                     graph.AddPortAndEdge(wPos4.name, clipPos.name, "in", MtlxDataTypes.Vector4);
@@ -35,7 +35,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                 if (graph.GetOrAddNode("ViewPosition", MtlxNodeTypes.TransformMatrix, MtlxDataTypes.Vector4, out var viewPos))
                 {
                     graph.AddPortAndEdge("WorldSpacePosition4", viewPos.name, "in", MtlxDataTypes.Vector4);
-                    graph.AddPortAndEdge(PolySpatialShaderGlobals.ViewMatrix, viewPos.name, "mat", MtlxDataTypes.Matrix44);
+                    graph.AddPortAndEdge(PolySpatialShaderGlobals.k_ViewMatrix, viewPos.name, "mat", MtlxDataTypes.Matrix44);
                 }
 
                 var sourceNodeName = "";

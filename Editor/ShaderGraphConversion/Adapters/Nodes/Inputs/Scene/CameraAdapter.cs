@@ -50,22 +50,22 @@ namespace UnityEditor.ShaderGraph.MaterialX
 #endif
 
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.OrthoParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_OrthoParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Orthographic", MtlxDataTypes.Float, "w");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.ProjectionParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_ProjectionParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Near Plane", MtlxDataTypes.Float, "y");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.ProjectionParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_ProjectionParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Far Plane", MtlxDataTypes.Float, "z");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.ProjectionParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_ProjectionParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Z Buffer Sign", MtlxDataTypes.Float, "x");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.OrthoParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_OrthoParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Width", MtlxDataTypes.Float, "x");
             QuickNode.AddImplicitPropertyFromNode(
-                PolySpatialShaderGlobals.OrthoParams, MtlxDataTypes.Vector4, node,
+                PolySpatialShaderGlobals.k_OrthoParams, MtlxDataTypes.Vector4, node,
                 graph, externals, "Height", MtlxDataTypes.Float, "y");
         }
     }

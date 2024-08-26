@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor.Rendering.BuiltIn.ShaderGraph;
+using UnityEditor.ShaderGraph.Serialization;
 using Unity.PolySpatial;
 
 namespace UnityEditor.ShaderGraph.MaterialX
@@ -55,6 +56,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
         static TargetInfo GetTargetInfo(GraphData graphData)
         {
             TargetInfo targetInfo = default;
+            var foundValidTarget = false;
             foreach (var target in graphData.activeTargets)
             {
                 var surfaceType = "Opaque";
@@ -67,8 +69,13 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         alphaMode = builtInTarget.alphaMode.ToString();
                         targetInfo.alphaClipEnabled = builtInTarget.alphaClip;
                         subTargetName = builtInTarget.activeSubTarget.displayName;
+                        foundValidTarget = true;
                         break;
                     
+                    case MultiJsonInternal.UnknownTargetType:
+                        // This is generated when we don't have the target pipeline (URP/HDRP) installed.  Ignore.
+                        break;
+
                     // UniversalTarget cannot be accessed directly due to its protection level.  Instead, we use
                     // reflection to access its properties (identical to those in BuiltInTarget).
                     default:
@@ -80,6 +87,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                             targetInfo.alphaClipEnabled = (bool)type.GetProperty("alphaClip").GetValue(target);
                             var subTarget = (SubTarget)type.GetProperty("activeSubTarget").GetValue(target);
                             subTargetName = subTarget.displayName;
+                            foundValidTarget = true;
                         }
                         else
                         {
@@ -126,7 +134,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
                     case "Lit":
                         break;
 
-                    case "Unlit":
+                    case "Unlit" or "Sprite Unlit":
                         targetInfo.isUnlit = true;
                         break;
                     
@@ -135,6 +143,9 @@ namespace UnityEditor.ShaderGraph.MaterialX
                         break;
                 }
             }
+            if (!foundValidTarget)
+                MtlxPostProcessor.LogWarningForGraph(graphData, "No supported (built-in/URP) target found.");
+
             foreach (var subData in graphData.SubDatas)
             {
                 if (subData is MtlxDataExtension mtlxData)

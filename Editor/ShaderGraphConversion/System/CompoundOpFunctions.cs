@@ -94,7 +94,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             [("float3", Operator.VariantType.DefinitionType)] = CreateDefinitionCompiler(MtlxDataTypes.Vector3),
             [("float3x3", Operator.VariantType.DefinitionType)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix33),
             [("float4", Operator.VariantType.DefinitionType)] = CreateDefinitionCompiler(MtlxDataTypes.Vector4),
-            [("float4x4", Operator.VariantType.DefinitionType)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix44),            
+            [("float4x4", Operator.VariantType.DefinitionType)] = CreateDefinitionCompiler(MtlxDataTypes.Matrix44),
             [("floor", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.Floor),
             [("fmod", Operator.VariantType.FunctionCall)] = CreateBinaryOpCompiler(MtlxNodeTypes.Modulo, true),
             [("frac", Operator.VariantType.FunctionCall)] = CreateUnaryOpCompiler(MtlxNodeTypes.RealityKitFractional),
@@ -170,30 +170,30 @@ namespace UnityEditor.ShaderGraph.MaterialX
             ["FOG_EXP2"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
             ["FOG_LINEAR"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
             ["LIGHTMAP_ON"] = CreateImplicitCompiler(MtlxDataTypes.Boolean),
-            [PolySpatialShaderGlobals.Time] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.SinTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.CosTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.DeltaTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.FogColor] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.FogParams] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderGlobals.GlossyEnvironmentColor] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.VolumeToWorld] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
-            [PolySpatialShaderProperties.ObjectBoundsCenter] = CreateImplicitCompiler(MtlxDataTypes.Vector3),
-            [PolySpatialShaderProperties.ObjectBoundsExtents] = CreateImplicitCompiler(MtlxDataTypes.Vector3),
-            [PolySpatialShaderProperties.Lightmap] = CreateImplicitCompiler(MtlxDataTypes.Filename),
-            [$"sampler{PolySpatialShaderProperties.Lightmap}"] = CreateSamplerCompiler(
+            [PolySpatialShaderGlobals.k_Time] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_SinTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_CosTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_DeltaTime] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_FogColor] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_FogParams] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderGlobals.k_GlossyEnvironmentColor] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.VolumeToWorld] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
+            [PolySpatialShaderPropertiesInternal.ObjectBoundsCenter] = CreateImplicitCompiler(MtlxDataTypes.Vector3),
+            [PolySpatialShaderPropertiesInternal.ObjectBoundsExtents] = CreateImplicitCompiler(MtlxDataTypes.Vector3),
+            [PolySpatialShaderPropertiesInternal.Lightmap] = CreateImplicitCompiler(MtlxDataTypes.Filename),
+            [$"sampler{PolySpatialShaderPropertiesInternal.Lightmap}"] = CreateSamplerCompiler(
                 new() { wrap = TextureSamplerState.WrapMode.Clamp }),
-            [PolySpatialShaderProperties.LightmapInd] = CreateImplicitCompiler(MtlxDataTypes.Filename),
-            [$"sampler{PolySpatialShaderProperties.LightmapInd}"] = CreateSamplerCompiler(
+            [PolySpatialShaderPropertiesInternal.LightmapInd] = CreateImplicitCompiler(MtlxDataTypes.Filename),
+            [$"sampler{PolySpatialShaderPropertiesInternal.LightmapInd}"] = CreateSamplerCompiler(
                 new() { wrap = TextureSamplerState.WrapMode.Clamp }),
-            [PolySpatialShaderProperties.LightmapST] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHAr] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHAg] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHAb] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHBr] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHBg] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHBb] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
-            [PolySpatialShaderProperties.SHC] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.LightmapST] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHAr] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHAg] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHAb] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHBr] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHBg] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHBb] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
+            [PolySpatialShaderPropertiesInternal.SHC] = CreateImplicitCompiler(MtlxDataTypes.Vector4),
 
 #if DISABLE_MATERIALX_EXTENSIONS
             ["unity_ObjectToWorld"] = CreateImplicitCompiler(MtlxDataTypes.Matrix44),
@@ -258,26 +258,26 @@ namespace UnityEditor.ShaderGraph.MaterialX
 
         static CompoundOpFunctions()
         {
-            for (var i = 0; i < PolySpatialShaderGlobals.LightCount; ++i)
+            for (var i = 0; i < PolySpatialShaderGlobals.k_LightCount; ++i)
             {
                 s_SymbolCompilers.Add(
-                    PolySpatialShaderGlobals.LightColorPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
+                    PolySpatialShaderGlobals.k_LightColorPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
                 s_SymbolCompilers.Add(
-                    PolySpatialShaderGlobals.LightPositionPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
+                    PolySpatialShaderGlobals.k_LightPositionPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
                 s_SymbolCompilers.Add(
-                    PolySpatialShaderGlobals.SpotDirectionPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
+                    PolySpatialShaderGlobals.k_SpotDirectionPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
                 s_SymbolCompilers.Add(
-                    PolySpatialShaderGlobals.LightAttenPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
+                    PolySpatialShaderGlobals.k_LightAttenPrefix + i, CreateImplicitCompiler(MtlxDataTypes.Vector4));
             }
-            for (var i = 0; i < PolySpatialShaderProperties.ReflectionProbeCount; ++i)
+            for (var i = 0; i < PolySpatialShaderPropertiesInternal.ReflectionProbeCount; ++i)
             {
-                var reflectionProbeTextureProperty = PolySpatialShaderProperties.ReflectionProbeTexturePrefix + i;
+                var reflectionProbeTextureProperty = PolySpatialShaderPropertiesInternal.ReflectionProbeTexturePrefix + i;
                 s_SymbolCompilers.Add(reflectionProbeTextureProperty, CreateImplicitCompiler(MtlxDataTypes.Filename));
                 s_SymbolCompilers.Add(
                     $"sampler{reflectionProbeTextureProperty}",
                     CreateSamplerCompiler(new() { wrap = TextureSamplerState.WrapMode.Clamp }));
                 s_SymbolCompilers.Add(
-                    PolySpatialShaderProperties.ReflectionProbeWeightPrefix + i,
+                    PolySpatialShaderPropertiesInternal.ReflectionProbeWeightPrefix + i,
                     CreateImplicitCompiler(MtlxDataTypes.Float));
             }
         }

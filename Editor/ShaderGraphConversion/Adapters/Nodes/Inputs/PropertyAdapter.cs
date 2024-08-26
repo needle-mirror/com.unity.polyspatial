@@ -53,20 +53,7 @@ namespace UnityEditor.ShaderGraph.MaterialX
             // TODO: abstract the value container to just have both.
             if (dataType == MtlxDataTypes.Filename)
             {
-                try
-                {
-                    // TODO: Support other texture types.
-                    var tprop = (Texture2DShaderProperty)property;
-                    var root = $"{Application.streamingAssetsPath}/{slot.owner.owner.path}";
-                    var filename = System.IO.Path.GetRelativePath(root, UnityEditor.AssetDatabase.GetAssetPath(tprop.value.texture));
-
-                    nodeData.AddPortString("value", dataType, filename);
-                }
-                catch
-                {
-                    // FNF or no texture file was referenced.
-                    nodeData.AddPortString("value", dataType, "placeholder.png");
-                }
+                nodeData.AddPortString("value", dataType, "placeholder.png");
             }
             else
             {

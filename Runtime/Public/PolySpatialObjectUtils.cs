@@ -5,6 +5,9 @@ using Unity.PolySpatial.Internals;
 
 namespace Unity.PolySpatial
 {
+    /// <summary>
+    /// Utility methods for working with PolySpatial objects.
+    /// </summary>
     public static class PolySpatialObjectUtils
     {
         /// <summary>
@@ -16,11 +19,11 @@ namespace Unity.PolySpatial
             ObjectBridge.MarkDirty(renderTexture);
         }
 
+#if POLYSPATIAL_ENABLE_WEBCAM
         /// <summary>
         /// Marks the specified web cam texture as changed so that it will be updated over PolySpatial.
         /// </summary>
         /// <param name="webCamTexture">The web cam texture to mark as changed.</param>
-#if POLYSPATIAL_ENABLE_WEBCAM
         public static void MarkDirty(WebCamTexture renderTexture)
         {
             ObjectBridge.MarkDirty(renderTexture);
@@ -40,7 +43,7 @@ namespace Unity.PolySpatial
         /// <summary>
         /// Return an identifier usable by PolySpatial backends to obtain platform-specific resources.
         /// </summary>
-        /// <param name="obj">The GameObject to get the identifier for.</param>
+        /// <param name="go">The GameObject to get the identifier for.</param>
         /// <returns>The identifier for the object.</returns>
         public static ulong GetPolySpatialIdentifier(GameObject go)
         {

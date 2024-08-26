@@ -13,15 +13,20 @@ namespace UnityEditor.PolySpatial.Internals.InternalBridge
         const string k_LoadedKey = "PolySpatial/LayoutLoaded";
         static bool Loaded => EditorPrefs.GetBool(k_LoadedKey, false);
 
-        const string k_PathToResources = "Packages/com.unity.polyspatial/Editor/Resources/";
-        static string widgetsWorkspace => Path.Combine(k_PathToResources,"widgets-workspace.wlt");
-        static string xrWorkspace => Path.Combine(k_PathToResources+"xr-workspace.wlt");
+        const string k_PathToLayouts = "Packages/com.unity.polyspatial/Editor/Layouts/";
+
+        static readonly string k_WidgetsWorkspace = Path.Combine(k_PathToLayouts, "widgets-workspace.wlt");
+        static readonly string k_XrWorkspace = Path.Combine(k_PathToLayouts, "xr-workspace.wlt");
 
         const string k_WidgetsLayoutName = "Widget Workspace.wlt";
         const string k_XrWorkspaceLayoutName = "XR Workspace.wlt";
 
         static PolySpatialLayoutUtils()
         {
+            // Necessary to prevent: Assertion failed on expression: '!GetMainEditorWindow()'
+            if (Application.isBatchMode)
+                return;
+
             if (!Loaded)
                 LoadInitialLayout();
         }
@@ -54,7 +59,7 @@ namespace UnityEditor.PolySpatial.Internals.InternalBridge
                 newLayout = false;
                 File.Delete(path);
             }
-            File.Copy(Path.GetFullPath(widgetsWorkspace), path);
+            File.Copy(Path.GetFullPath(k_WidgetsWorkspace), path);
 
             path = FileUtil.CombinePaths(layoutsModePreferencesPath, k_XrWorkspaceLayoutName);
             if (File.Exists(path))
@@ -62,7 +67,7 @@ namespace UnityEditor.PolySpatial.Internals.InternalBridge
                 newLayout = false;
                 File.Delete(path);
             }
-            File.Copy(Path.GetFullPath(xrWorkspace), path);
+            File.Copy(Path.GetFullPath(k_XrWorkspace), path);
 
             if(newLayout)
                 WindowLayout.ReloadWindowLayoutMenu();

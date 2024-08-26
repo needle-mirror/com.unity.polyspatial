@@ -1,14 +1,14 @@
 {
   "name": "com.unity.polyspatial",
   "displayName": "PolySpatial",
-  "version": "1.3.1",
+  "version": "1.3.9",
   "unity": "2022.3",
   "unityRelease": "19f1",
   "description": "The Unity PolySpatial runtime includes platform-agnostic code required to build and deploy apps for supported platforms.\nUnity PolySpatial and visionOS support is only available to Unity Pro, Unity Enterprise, and Unity Industry users. Learn more about these plans at unity.com/pricing.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.shadergraph": "14.0.1",
-    "com.unity.collections": "2.1.4",
+    "com.unity.collections": "1.2.3",
     "com.unity.textmeshpro": "3.0.7",
     "com.unity.xr.core-utils": "2.3.0",
     "com.unity.ext.flatsharp": "1.1.1",
@@ -21,16 +21,16 @@
     "changelog": ""
   },
   "_upm": {
-    "changelog": ""
+    "changelog": "### Added\n- Persona feed on visionOS is now accessible via WebCamTexture after fixing a KeyNotFoundException (will require Unity 2022.3.41f1+).\n\n### Changed\n- Accept \"Sprite Unlit\" as a material type in URP targets for shader graph conversion.\n- VisionOS Sorting Group, VisionOS Image Based Light Receiver, and VisionOS Grounding Shadow components will now apply to particle systems.\n- Cleaned up some uses of \"Resource\" folders within the package, which will slightly decrease your build size.\n- Downgraded our com.unity.collections package dependencey from 2.1.4 to 1.2.3 so our packages could be a discoverable package in Unity version 2022.3.x.\n\n### Removed\n- Most of our test assemblies for this package have been moved out of the package.  Only the isolation tests will remain that can run from a blank project.\n\n### Fixed\n- Wrap all MonoPInvokeCallback methods in try/catch to avoid potential crashes in player builds.\n- Fixed MaterialSwapSet not being applied to materials that utilize material property blocks or particle systems.\n- Fixed \"Failed to upload NativeTexture\" error when transferring RenderTextures over Play to Device.\n- Fixed incorrect input name in Baked GI shader graph node for Unity 2022.3.24f1+.\n- Fixed failure to transfer RenderTextures in their native formats (e.g., RGBAHalf) over Play to Device.\n- Fixed issue where VisionOSVideoComponents would stop playing after switching from a bounded to an unbounded window configuration (or app would crash if a video was playing when switching window configurations).\n- Fixed issue with RenderTexture mipmaps being auto-generated when autoGenerateMips was false.\n- Fix for running unit tests without URP installed.\n- Fixed \"Unsupported target type\" warning for shader graph conversion for HDRP/when URP not installed.\n- Added built-in targets to particle bake-to-texture shader graphs.\n- Fixed error logged on import: `A new PolySpatialSettings asset was initialized when its asset already exists. Was PolySpatialSettings.instance used by an asset importer?`\n- Disabling a camera component will result in the camera being deleted in the Unity backend, matching the behavior for disabling other component types.\n- Fixed \"Assertion failed on expression: '!GetMainEditorWindow()'\" that shows up in batchmode.\n- Disabling a collider component will result in the collider being disabled in the Unity backend.\n- Fixed issues with synchronizing entities with multiple colliders."
   },
   "upmCi": {
-    "footprint": "657b3f13a241d5dd2ce0ca3dfcfe6667ba1723a8"
+    "footprint": "da55f0b11335ba24f863c7e59a7b0b0dc4b5ce65"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.polyspatial@1.3/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/quantum.git",
     "type": "git",
-    "revision": "ecfc5177dca7c6ffc2537b7650af64f5c15b547d"
+    "revision": "579174d8372e8ecc686cf4b8bc30cebdeaa335e0"
   },
   "samples": [
     {
